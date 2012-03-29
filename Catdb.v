@@ -1,6 +1,8 @@
-Require Import List Omega Program Eqdep_dec.
+Require Import Bool List Omega Program Eqdep_dec.
 
 Set Implicit Arguments.
+
+Axiom cheat : forall T, T.
 
 Section path'.
   Variable V : Type.
@@ -11,9 +13,15 @@ Section path'.
   | AddEdge : forall d d', path' s d -> E d d' -> path' s d'.
 
   Fixpoint prepend s d (p : path' s d) : forall s', E s' s -> path' s' d :=
-    match p in path' _ d return forall s', E s' s -> path' s' d with
+    match p with
       | OneEdge _ E => fun _ E' => AddEdge (OneEdge E') E
       | AddEdge _ _ p' E => fun _ E' => AddEdge (prepend p' E') E
+    end.
+
+  Fixpoint concatenate s d (p : path' s d) : forall d', path' d d' -> path' s d' :=
+    match p with
+      | OneEdge _ E => fun _ p' => prepend p' E
+      | AddEdge _ _ p E => fun _ p' => concatenate p (prepend p' E)
     end.
 
   Variable typeOf : V -> Type.
@@ -60,6 +68,29 @@ Section Category.
   }.
 End Category.
 
+Section Categories.
+  Variables C D : Category.
+
+  Section transferPath.
+    Variable vertexOf : C.(Vertex) -> D.(Vertex).
+    Variable pathOf : forall s d, C.(Edge) s d -> path D (vertexOf s) (vertexOf d).
+
+    Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
+      match p with
+        | OneEdge _ E => pathOf _ _ E
+        | AddEdge _ _ p' E => concatenate (transferPath p') (pathOf _ _ E)
+      end.
+  End transferPath.
+
+  Record Functor := {
+    VertexOf :> C.(Vertex) -> D.(Vertex);
+    PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
+    FEquivalenceOf : forall s d (p1 p2 : path C s d),
+      PathsEquivalent C p1 p2
+      -> PathsEquivalent D (transferPath VertexOf PathOf p1) (transferPath VertexOf PathOf p2)
+  }.
+End Categories.
+
 
 (** * The empty category *)
 
@@ -77,6 +108,16 @@ Definition emptyI : Instance empty.
 Defined.
 
 
+(** * The Booleans with "implies" edges *)
+
+Definition booleans : Category.
+  refine {| Vertex := bool;
+    Edge := (fun b1 b2 => b2 = false \/ b1 = true);
+    PathsEquivalent := (fun _ _ _ _ => True) |};
+  abstract auto.
+Defined.
+
+
 (** * The naturals with >= edges *)
 
 Definition naturals : Category.
@@ -85,6 +126,23 @@ Definition naturals : Category.
     PathsEquivalent := (fun _ _ _ _ => True) |};
   abstract auto.
 Defined.
+
+
+(** * Silly functor from Booleans to naturals *)
+
+Definition boolToNat (b : bool) := if b then 1 else 0.
+
+Theorem boolToNat_ge : forall b1 b2, (b2 = false \/ b1 = true)
+  -> boolToNat b1 >= boolToNat b2.
+  destruct b1; destruct b2; simpl; intuition.
+Qed.
+
+Definition booleans_to_naturals : Functor booleans naturals.
+  refine {| VertexOf := (boolToNat : booleans -> naturals);
+    PathOf := fun _ _ E => OneEdge _ _ _ (boolToNat_ge E) |};
+  abstract auto.
+Defined.
+
 
 (** Give an instance by interpreting naturals as bitvectors and edges as forgetting of initial bits. *)
 
