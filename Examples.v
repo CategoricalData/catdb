@@ -1,95 +1,7 @@
-Require Import Bool List Omega Program Eqdep_dec.
+Require Import Arith List Eqdep_dec Program.
+Require Import Definitions.
 
 Set Implicit Arguments.
-
-Axiom cheat : forall T, T.
-
-Section path'.
-  Variable V : Type.
-  Variable E : V -> V -> Type.
-
-  Inductive path' (s : V) : V -> Type :=
-  | OneEdge : forall d, E s d -> path' s d
-  | AddEdge : forall d d', path' s d -> E d d' -> path' s d'.
-
-  Fixpoint prepend s d (p : path' s d) : forall s', E s' s -> path' s' d :=
-    match p with
-      | OneEdge _ E => fun _ E' => AddEdge (OneEdge E') E
-      | AddEdge _ _ p' E => fun _ E' => AddEdge (prepend p' E') E
-    end.
-
-  Fixpoint concatenate s d (p : path' s d) : forall d', path' d d' -> path' s d' :=
-    match p with
-      | OneEdge _ E => fun _ p' => prepend p' E
-      | AddEdge _ _ p E => fun _ p' => concatenate p (prepend p' E)
-    end.
-
-  Variable typeOf : V -> Type.
-  Variable functionOf : forall s d, E s d -> typeOf s -> typeOf d.
-
-  Fixpoint compose s d (p : path' s d) : typeOf s -> typeOf d :=
-    match p with
-      | OneEdge _ E => functionOf E
-      | AddEdge _ _ p' E => fun x => functionOf E (compose p' x)
-    end.
-End path'.
-
-Implicit Arguments AddEdge [V E s d d'].
-Implicit Arguments prepend [V E s d s'].
-
-Record Category := {
-  Vertex :> Type;
-  Edge : Vertex -> Vertex -> Type;
-
-  PathsEquivalent : forall s d, path' Edge s d -> path' Edge s d -> Prop;
-  Reflexive : forall s d (p : path' _ s d),
-    PathsEquivalent p p;
-  Symmetric : forall s d (p1 p2 : path' _ s d),
-    PathsEquivalent p1 p2 -> PathsEquivalent p2 p1;
-  Transitive : forall s d (p1 p2 p3 : path' _ s d),
-    PathsEquivalent p1 p2 -> PathsEquivalent p2 p3 -> PathsEquivalent p1 p3;
-
-  PreCompose : forall s d (E : Edge s d) d' (p1 p2 : path' _ d d'),
-    PathsEquivalent p1 p2 -> PathsEquivalent (prepend p1 E) (prepend p2 E);
-  PostCompose : forall s d (p1 p2 : path' _ s d) d' (E : Edge d d'),
-    PathsEquivalent p1 p2 -> PathsEquivalent (AddEdge p1 E) (AddEdge p2 E)
-}.
-
-Section Category.
-  Variable C : Category.
-
-  Definition path := path' C.(Edge).
-
-  Record Instance := {
-    TypeOf :> C.(Vertex) -> Type;
-    FunctionOf : forall s d (E : C.(Edge) s d), TypeOf s -> TypeOf d;
-    EquivalenceOf : forall s d (p1 p2 : path s d), C.(PathsEquivalent) p1 p2
-      -> forall x, compose TypeOf FunctionOf p1 x = compose TypeOf FunctionOf p2 x
-  }.
-End Category.
-
-Section Categories.
-  Variables C D : Category.
-
-  Section transferPath.
-    Variable vertexOf : C.(Vertex) -> D.(Vertex).
-    Variable pathOf : forall s d, C.(Edge) s d -> path D (vertexOf s) (vertexOf d).
-
-    Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
-      match p with
-        | OneEdge _ E => pathOf _ _ E
-        | AddEdge _ _ p' E => concatenate (transferPath p') (pathOf _ _ E)
-      end.
-  End transferPath.
-
-  Record Functor := {
-    VertexOf :> C.(Vertex) -> D.(Vertex);
-    PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
-    FEquivalenceOf : forall s d (p1 p2 : path C s d),
-      PathsEquivalent C p1 p2
-      -> PathsEquivalent D (transferPath VertexOf PathOf p1) (transferPath VertexOf PathOf p2)
-  }.
-End Categories.
 
 
 (** * The empty category *)
@@ -102,7 +14,7 @@ Definition empty : Category.
 Defined.
 
 Definition emptyI : Instance empty.
-  refine {| TypeOf := fun x : Vertex empty => match x with end;
+  refine {| TypeOf := fun x : empty => match x with end;
     FunctionOf := fun _ _ (x : Empty_set) _ => match x with end |};
   abstract destruct s.
 Defined.
@@ -139,7 +51,7 @@ Qed.
 
 Definition booleans_to_naturals : Functor booleans naturals.
   refine {| VertexOf := (boolToNat : booleans -> naturals);
-    PathOf := fun _ _ E => OneEdge _ _ _ (boolToNat_ge E) |};
+    PathOf := fun _ _ E => AddEdge NoEdges (boolToNat_ge E) |};
   abstract auto.
 Defined.
 
@@ -232,8 +144,8 @@ Lemma compose_unique' : forall n1 n2 (p : path' ge n1 n2) bv,
   = erase (forget (n1 - n2) bv).
   induction p; simpl; intuition.
 
-  rewrite push_app.
-  apply push_erase.
+  rewrite minus_diag.
+  destruct bv; reflexivity.
   
   rewrite push_app.
   rewrite push_erase.
@@ -270,4 +182,79 @@ Definition bitvectors : Instance naturals.
                                    end) |}.
   abstract (intros; assert (Heq : s - (s - d) = d) by (specialize (path_ge p1); omega);
     repeat rewrite (compose_unique Heq); reflexivity).
+Defined.
+
+
+(** * A sample schema and database *)
+
+Inductive emailsV :=
+| SelfEmails
+| Emails
+| People.
+
+Inductive emailsE : emailsV -> emailsV -> Type :=
+| SelfEmails_Emails : emailsE SelfEmails Emails
+| Sender : emailsE Emails People
+| Receiver : emailsE Emails People.
+
+Inductive emailsEq : forall s d, path' emailsE s d -> path' emailsE s d -> Prop :=
+| Refl : forall s d (p : path' emailsE s d), emailsEq p p
+| Law : emailsEq (AddEdge (AddEdge NoEdges SelfEmails_Emails) Sender)
+  (AddEdge (AddEdge NoEdges SelfEmails_Emails) Receiver)
+| LawSymm : emailsEq (AddEdge (AddEdge NoEdges SelfEmails_Emails) Receiver)
+  (AddEdge (AddEdge NoEdges SelfEmails_Emails) Sender).
+
+Hint Constructors emailsEq.
+
+Inductive selfEmailId := S181.
+Inductive emailId := E180 | E181.
+Inductive person := Bob | Sue | David.
+
+Ltac dep_destruct H := generalize H; intro H'; dependent destruction H'.
+
+Ltac destructor := simpl; intros;
+  repeat (match goal with
+            | [ H : emailsEq ?X ?Y |- _ ] =>
+              match goal with
+                | [ x : _ |- _ ] =>
+                  match x with
+                    | X => dep_destruct H
+                    | Y => dep_destruct H
+                  end
+              end
+            | [ E : emailsE _ _ |- _ ] => dep_destruct E
+            | [ x : selfEmailId |- _ ] => destruct x
+          end; simpl in *); auto.
+
+Definition emailsSchema : Category.
+  refine {| Vertex := emailsV;
+    Edge := emailsE;
+    PathsEquivalent := emailsEq
+    |}; abstract destructor.
+Defined.
+
+Definition emailsTypeof (v : emailsSchema) : Set :=
+  match v with
+    | SelfEmails => selfEmailId
+    | Emails => emailId
+    | People => person
+  end.
+
+Definition emailsInstance : Instance emailsSchema.
+  refine {| TypeOf := emailsTypeof;
+    FunctionOf := (fun s d (E : Edge emailsSchema s d) =>
+      match E in emailsE s d return emailsTypeof s -> emailsTypeof d with
+        | SelfEmails_Emails => fun id => match id with
+                                           | S181 => E181
+                                         end
+        | Sender => fun id => match id with
+                                | E180 => Bob
+                                | E181 => David
+                              end
+        | Receiver => fun id => match id with
+                                  | E180 => Sue
+                                  | E181 => David
+                                end
+      end)
+   |}; abstract destructor.
 Defined.
