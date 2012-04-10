@@ -65,6 +65,14 @@ Section Category.
     EquivalenceOf : forall s d (p1 p2 : path s d), C.(PathsEquivalent) p1 p2
       -> forall x, compose TypeOf FunctionOf p1 x = compose TypeOf FunctionOf p2 x
   }.
+(*
+  Record NaturalTransformation I J : Instance C := {
+    FunctionOf :> c: C.(Vertex) -> I.(TypeOf) c -> J.(TypeOf) c
+    EquivalenceOf : forall s d (p : path s d) 
+      -> C.(PathsEquivalent) compose( FunctionOf(t), I(p) ) compose ( J(p), FunctionOf(s))
+}
+*)
+
 End Category.
 
 Section Categories.
