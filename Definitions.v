@@ -60,26 +60,25 @@ Section Category.
   Definition path := path' C.(Edge).
 
   Record Instance := {
-    TypeOf :> C.(Vertex) -> Type;
+    TypeOf :> C -> Type;
     FunctionOf : forall s d (E : C.(Edge) s d), TypeOf s -> TypeOf d;
     EquivalenceOf : forall s d (p1 p2 : path s d), C.(PathsEquivalent) p1 p2
       -> forall x, compose TypeOf FunctionOf p1 x = compose TypeOf FunctionOf p2 x
   }.
-(*
-  Record NaturalTransformation I J : Instance C := {
-    FunctionOf :> c: C.(Vertex) -> I.(TypeOf) c -> J.(TypeOf) c
-    EquivalenceOf : forall s d (p : path s d) 
-      -> C.(PathsEquivalent) compose( FunctionOf(t), I(p) ) compose ( J(p), FunctionOf(s))
-}
-*)
 
+  Record NaturalTransformation (I J : Instance) := {
+    CatamorphismOf :> forall c : C, I c -> J c;
+    Commutes : forall s d (p : path s d),
+      forall x, CatamorphismOf d (compose I I.(FunctionOf) p x)
+        = compose J J.(FunctionOf) p (CatamorphismOf s x)
+  }.
 End Category.
 
 Section Categories.
   Variables C D : Category.
 
   Section transferPath.
-    Variable vertexOf : C.(Vertex) -> D.(Vertex).
+    Variable vertexOf : C -> D.
     Variable pathOf : forall s d, C.(Edge) s d -> path D (vertexOf s) (vertexOf d).
 
     Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
@@ -90,7 +89,7 @@ Section Categories.
   End transferPath.
 
   Record Functor := {
-    VertexOf :> C.(Vertex) -> D.(Vertex);
+    VertexOf :> C -> D;
     PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
     FEquivalenceOf : forall s d (p1 p2 : path C s d),
       PathsEquivalent C p1 p2

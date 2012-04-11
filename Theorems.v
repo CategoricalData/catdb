@@ -44,7 +44,7 @@ Section Functor_Instance.
   Hint Resolve EquivalenceOf FEquivalenceOf.
 
   Definition Functor_Instance : Instance C.
-    refine {| TypeOf := (fun x => I.(TypeOf) (F.(VertexOf) x));
+    refine {| TypeOf := (fun x => I (F.(VertexOf) x));
       FunctionOf := (fun _ _ E => compose _ (I.(FunctionOf)) (F.(PathOf) _ _ E)) |};
     abstract t.
   Defined.
