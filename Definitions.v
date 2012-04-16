@@ -67,10 +67,10 @@ Section Category.
   }.
 
   Record NaturalTransformation (I J : Instance) := {
-    CatamorphismOf :> forall c : C, I c -> J c;
+    ComponentsOf :> forall c : C, I c -> J c;
     Commutes : forall s d (p : path s d),
-      forall x, CatamorphismOf d (compose I I.(FunctionOf) p x)
-        = compose J J.(FunctionOf) p (CatamorphismOf s x)
+      forall x, ComponentsOf d (compose I I.(FunctionOf) p x)
+        = compose J J.(FunctionOf) p (ComponentsOf s x)
   }.
 End Category.
 
