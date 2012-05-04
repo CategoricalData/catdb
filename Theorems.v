@@ -21,12 +21,21 @@ Section Functor_Instance.
     induction p; t.
   Qed.
 
+  Lemma compose_append : forall s d (p : path D s d) d' (E : D.(Edge) d d') x,
+    compose I (FunctionOf I) (AddEdge p E) x
+    = I.(FunctionOf) _ _ E (compose I (FunctionOf I) p x).
+    induction p; t.
+  Qed.
+
   Hint Rewrite compose_prepend.
+  Hint Rewrite compose_append.
+  Hint Rewrite concatenate_noedges_p.
+  Hint Rewrite concatenate_p_noedges.
 
   Lemma compose_concatenate : forall s d (p : path D s d) d' (p' : path D d d') x,
     compose I (FunctionOf I) (concatenate p p') x
     = compose I (FunctionOf I) p' (compose I (FunctionOf I) p x).
-    induction p; t.
+    induction p'; t.
   Qed.
 
   Hint Rewrite compose_concatenate.
@@ -49,3 +58,23 @@ Section Functor_Instance.
     abstract t.
   Defined.
 End Functor_Instance.
+
+Section SaturatedCategories.
+  Variable C : SaturatedCategory.
+
+  Definition Ob := C.(Object).
+  Definition Mor := C.(Morphism).
+
+  Theorem identity_unique : forall a (id' : Mor a a),
+    (forall (f : Mor a a), (MorphismsEquivalent (Compose id' f) f)) ->
+    (MorphismsEquivalent id' (Identity a)).
+    intros.
+    assert (MorphismsEquivalent (Compose id' (Identity a)) id').
+    apply IdentityAxiom.
+    assert (MorphismsEquivalent (Compose id' (Identity a)) (Identity a)). auto.
+    assert (MorphismsEquivalent id' (Compose id' (Identity a))).
+    apply (MorphismsEquivalence C).(Symmetric). intuition.
+    apply ((MorphismsEquivalence C).(Transitive) id' (Compose id' (Identity a)) (Identity a)); intuition.
+  Qed.
+    
+End SaturatedCategories.
