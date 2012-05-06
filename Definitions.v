@@ -205,6 +205,128 @@ Hint Resolve PostCompose PreCompose PathsEquivalence.
 Hint Extern 1 (PathsEquivalent _ _ _) => apply Reflexive.
 
 Section SaturatedCategories.
+  Variable C D : SaturatedCategory.
+  
+  (**
+     Quoting from the lecture notes for 18.705, Commutative Algebra:
+
+     A map of categories is known as a functor. Namely, given 
+     categories [C] and [C'], a (covariant) functor [F : C -> C'] is a rule that assigns to
+     each object [A] of [C] an object [F A] of [C'] and to each map [m : A -> B] of [C] a map
+     [F m : F A -> F B] of [C'] preserving composition and identity; that is,
+     (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
+     (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
+
+     Since we are using [MorhpismsEquivalent] rather than [=], we must additionally require
+     that [F] preserves [MorphismsEquivalent].
+     **)
+  Record SaturatedFunctor := {
+    ObjectOf :> C -> D;
+    MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
+    SFEquivalenceOf : forall s d (m1 m2 : C.(Morphism) s d),
+      MorphismsEquivalent m1 m2
+      -> MorphismsEquivalent (MorphismOf _ _ m1) (MorphismOf _ _ m2);
+    SFCompositionOf : forall s d d' (m1 : C.(Morphism) s d) (m2: C.(Morphism) d d'),
+      MorphismsEquivalent (MorphismOf _ _ (Compose m2 m1))
+      (Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1));
+    SFIdentityOf : forall o, MorphismsEquivalent (MorphismOf _ _ (Identity o)) (Identity (ObjectOf o))
+  }.
+  
+End SaturatedCategories.
+
+Implicit Arguments MorphismOf [C D s0 d].
+
+Section SaturatedCategory.
+  Variable C : SaturatedCategory.
+
+  (* There is an identity functor.  It does the obvious thing. *)
+  Definition IdentitySaturatedFunctor : SaturatedFunctor C C.
+    refine {| ObjectOf := (fun x => x);
+      MorphismOf := (fun _ _ x => x)
+    |};
+    intuition; apply Reflexive; apply MorphismsEquivalence.
+  Defined.
+
+  (* [m'] is the inverse of [m] if both compositions are
+     equivalent to the relevant identity morphisms. *)
+  Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
+    MorphismsEquivalent (Identity s) (Compose m' m) /\
+    MorphismsEquivalent (Identity d) (Compose m m').
+
+  (* A morphism is an isomorphism if it has an inverse *)
+  Definition SaturatedCategoryIsomorphism s d (m : C.(Morphism) s d) : Prop :=
+    exists m', InverseOf _ _ m m'.
+
+  Theorem SaturatedCategoryIdentityInverse (o : C.(Object)) : InverseOf _ _ (Identity o) (Identity o).
+    unfold InverseOf; intuition;
+      apply C.(MorphismsEquivalence).(Symmetric). apply LeftIdentity. apply RightIdentity.
+  Qed.
+
+  Theorem SaturatedCategoryIdentityIsomorphism (o : C.(Object)) : SaturatedCategoryIsomorphism _ _ (Identity o).
+    exists (Identity o); intuition; apply SaturatedCategoryIdentityInverse.
+  Qed.
+End SaturatedCategory.
+
+Implicit Arguments SaturatedCategoryIsomorphism [C s d].
+
+Section SaturatedCategories_NaturalTransformation.
+  Variable C D : SaturatedCategory.
+  Variable F G : SaturatedFunctor C D.
+
+  (**
+     Quoting from the lecture notes for 18.705, Commutative Algebra:
+     
+     A map of functors is known as a natural transformation. Namely, given two functors
+     [F : C -> C'], [F' : C -> C'], a natural transformation [T: F -> F'] is a collection of maps
+     [T A : F A -> F' A], one for each object [A] of [C], such that [(T B) ○ (F m) = (F' m) ○ (T A)]
+     for every map [m : A -> B] of [C]; that is, the following diagram is commutative:
+     
+           F m
+     F A -------> F B
+      |            |
+      |            |
+      | T A        | T B
+      |            |
+      V    F' m    V
+     F' A ------> F' B
+     **)
+  Record SaturatedNaturalTransformation := {
+    SComponentsOf :> forall c : C.(Object), Morphism _ (F c) (G c);
+    SCommutes : forall s d (m : Morphism C s d),
+      MorphismsEquivalent
+      (Compose (SComponentsOf d) (F.(MorphismOf) m))
+      (Compose (G.(MorphismOf) m) (SComponentsOf s))
+  }.
+
+
+  Definition SaturatedNaturalEquivalence (S : SaturatedNaturalTransformation) : Prop :=
+    forall x : C.(Object), SaturatedCategoryIsomorphism (S.(SComponentsOf) x).
+End SaturatedCategories_NaturalTransformation.
+
+Section IdentitySaturatedNaturalTransformation.
+  Variable C : SaturatedCategory.
+  Variable F : SaturatedFunctor C C.
+
+  (* There is an identity natrual transformation. *)
+(*
+  Definition IdentitySaturatedNaturalTransformation : SaturatedNaturalTransformation F F.
+    refine {| SComponentsOf := (fun c => Identity (F c))
+      |}.
+    intros; intuition.
+    assert (H0 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent (Compose (Identity d) m) (Compose m (Identity s)))).
+    assert (H1 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent (Compose (Identity d) m) m)).
+    apply IdentityAxiom.
+    assert (H2 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent m (Compose m (Identity s)))).
+    intuition; apply C.(MorphismsEquivalence).(Symmetric).
+    apply IdentityAxiom.
+    intuition.
+    
+    assert C.(MorphismsEquivalence).(Transitive).
+   Qed.*)
+
+End IdentitySaturatedNaturalTransformation.
+
+Section Category_SaturatedCategory_Equivalence.
   Variable C : Category.
   Variable S : SaturatedCategory.
 
@@ -262,4 +384,4 @@ Section SaturatedCategories.
       |}
     |}; abstract (t; eauto).
   Defined.
-End SaturatedCategories.
+End Category_SaturatedCategory_Equivalence.
