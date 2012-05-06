@@ -42,61 +42,56 @@ Implicit Arguments NoEdges [V E s].
 Implicit Arguments AddEdge [V E s d d'].
 Implicit Arguments prepend [V E s d s'].
 
+Ltac t' := simpl; intuition.
+
+Ltac t := t';
+  repeat (match goal with
+            | [ H : _ |- _ ] => rewrite H
+            | _ => progress autorewrite with core in *
+          end; t').
+
 Section path'_Theorems.
   Variable V : Type.
   Variable E : V -> V -> Type.
 
-  Lemma concatenate_noedges_p : forall s d (p : path' E s d), (concatenate NoEdges p) = p.
-    intros.
-    induction p; trivial; simpl.
-    rewrite IHp; trivial.
+  Lemma concatenate_noedges_p : forall s d (p : path' E s d), concatenate NoEdges p = p.
+    induction p; t.
   Qed.
 
-  Lemma concatenate_p_noedges : forall s d (p : path' E s d), (concatenate p NoEdges) = p.
-    simpl; trivial.
+  Lemma concatenate_p_noedges : forall s d (p : path' E s d), concatenate p NoEdges = p.
+    t.
   Qed.
 
-  Lemma concatenate'_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''), concatenate' p (AddEdge p' e) = AddEdge (concatenate' p p') e.
-    intros; intuition.
-    induction p; simpl; trivial.
+  Lemma concatenate'_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
+    concatenate' p (AddEdge p' e) = AddEdge (concatenate' p p') e.
+    induction p; t.
   Qed.
 
-
-  Lemma addedge_equal : forall s d d' (p p' : path' E s d), (p = p') -> (forall (e : E d d'), (AddEdge p e = AddEdge p' e)).
-    intros; intuition.
-    congruence.
+  Lemma addedge_equal : forall s d d' (p p' : path' E s d), p = p' -> forall e : E d d', AddEdge p e = AddEdge p' e.
+    t.
   Qed.
+
+  Hint Rewrite concatenate'_addedge.
 
   Lemma concatenate'_p_noedges : forall s d (p : path' E s d), concatenate' p NoEdges = p.
-    intros; intuition.
-    induction p; intuition; simpl.
-    rewrite concatenate'_addedge.
-    rewrite (addedge_equal IHp).
-    trivial.
+    induction p; t.
   Qed.
 
   Lemma concatenate'_noedges_p : forall s d (p : path' E s d), concatenate' NoEdges p = p.
-    intros; intuition.
+    t.
   Qed.
+
+  Hint Rewrite concatenate'_p_noedges.
   
-  
-  Lemma concatenate_prepend_equivalent : forall s d d' (p : path' E s d) (p' : path' E d d'), (concatenate p p') = (concatenate' p p').
-    intuition.
-    induction p; simpl; intuition.
-    rewrite concatenate_noedges_p; trivial.
-    assert (H : (forall s d d' (p : path' E s d)  (e : E _ d'), AddEdge p e = concatenate p (AddEdge NoEdges e))).
-    simpl; trivial.
-    induction p'; simpl; intuition.
-    rewrite concatenate'_addedge.
-    rewrite concatenate'_p_noedges; trivial.
-    rewrite concatenate'_addedge.
-    assert (H0 : (forall s d d' d'' (p : path' E s d) (p' : path' E d' d'') (e : E d d'),
-      (concatenate (AddEdge p e) p') = (concatenate' p (prepend p' e)))).
-    intros; simpl; intuition.
-    induction p'0; simpl; intuition; trivial.
-    rewrite concatenate'_addedge. rewrite concatenate'_p_noedges. trivial.
-    rewrite concatenate'_addedge; simpl. rewrite (addedge_equal IHp'0); trivial.
-    rewrite H0; trivial.
+  Lemma concatenate_addedge : forall s d d'0 d' (p : path' E s d) (e : E d d'0) (p' : path' E d'0 d'),
+    concatenate (AddEdge p e) p' = concatenate' p (prepend p' e).
+    induction p'; t.
+  Qed.
+
+  Hint Resolve concatenate_noedges_p concatenate_addedge.
+
+  Lemma concatenate_prepend_equivalent : forall s d d' (p : path' E s d) (p' : path' E d d'), concatenate p p' = concatenate' p p'.
+    induction p; t.
   Qed.
 End path'_Theorems.
 
@@ -185,7 +180,7 @@ Record SaturatedCategory := {
   Object :> Type;
   Morphism : Object -> Object -> Type;
 
-  MorphismsEquivalent : forall o1 o2, (Morphism o1 o2) -> (Morphism o1 o2) -> Prop;
+  MorphismsEquivalent : forall o1 o2, Morphism o1 o2 -> Morphism o1 o2 -> Prop;
   MorphismsEquivalence : EquivalenceRelation MorphismsEquivalent;
 
   Identity : forall o, Morphism o o;
@@ -198,82 +193,73 @@ Record SaturatedCategory := {
 
   Associativity : forall o1 o2 o3 o4 (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
     MorphismsEquivalent (Compose (Compose m3 m2) m1) (Compose m3 (Compose m2 m1));
-  IdentityAxiom : forall a b (f : Morphism a b),
-    MorphismsEquivalent (Compose (Identity b) f) f /\
-    MorphismsEquivalent (Compose f (Identity a)) f
+  LeftIdentity : forall a b (f : Morphism a b), MorphismsEquivalent (Compose (Identity b) f) f;
+  RightIdentity : forall a b (f : Morphism a b), MorphismsEquivalent (Compose f (Identity a)) f
 }.
 
 Implicit Arguments Compose [s s0 d d'].
 Implicit Arguments Identity [s].
 Implicit Arguments MorphismsEquivalent [s o1 o2].
 
+Hint Resolve PostCompose PreCompose PathsEquivalence.
+Hint Extern 1 (PathsEquivalent _ _ _) => apply Reflexive.
+
 Section SaturatedCategories.
   Variable C : Category.
   Variable S : SaturatedCategory.
+
+  Hint Rewrite concatenate_noedges_p concatenate_addedge.
+  Hint Rewrite <- concatenate_prepend_equivalent.
+
   Definition saturate : SaturatedCategory.
-    refine {| Object := C.(Vertex);
+    refine {| Object := C;
       Morphism := path C;
       MorphismsEquivalence := C.(PathsEquivalence);
       Identity := (fun _ => NoEdges);
       Compose := (fun _ _ _ m1 m2 => concatenate m2 m1)
-      |}.
-    induction m; intuition; apply C.(PostCompose); intuition.
-    induction m; intuition. rewrite concatenate_noedges_p. rewrite concatenate_noedges_p. intuition.
-    rewrite concatenate_prepend_equivalent. rewrite concatenate_prepend_equivalent. simpl.
-    rewrite <- concatenate_prepend_equivalent. rewrite <- concatenate_prepend_equivalent.
-    assert (forall s (e : Edge C s _), PathsEquivalent _ (prepend m1 e) (prepend m2 e)).
-    intros; intuition; simpl.
-    apply (C.(PreCompose) _ _ m1 m2 H).
-    apply (IHm _ _ (H0 _ _)).
-
-    induction m3; simpl; intuition.
-    simpl. apply C.(PathsEquivalence).(Reflexive).
-    apply C.(PostCompose); assumption.
-
-    intuition; simpl. apply (C.(PathsEquivalence).(Reflexive)).
-    rewrite concatenate_noedges_p. apply C.(PathsEquivalence).(Reflexive).
+      |}; abstract (intros; solve [ t | match goal with
+                                          | [ p : path _ _ _ |- _ ] => solve [ induction p; t ]
+                                        end ]).
   Defined.
 
-  Fixpoint compose_morphism_path s d (p : path' S.(Morphism) s d) : (Morphism _ s d) :=
+  Fixpoint compose_morphism_path s d (p : path' S.(Morphism) s d) : Morphism _ s d :=
     match p with
       | NoEdges => Identity s
       | AddEdge _ _ p' E => Compose E (compose_morphism_path p')
     end.
 
-  Definition unsaturate : Category.
-    Hint Rewrite compose_morphism_path.
-    refine {| Vertex := S.(Object);
-      Edge := S.(Morphism);
-      PathsEquivalent := (fun _ _ p p' => MorphismsEquivalent (compose_morphism_path p) (compose_morphism_path p'))
-    |}.
-    refine {| Reflexive := (fun s d (p : path' S.(Morphism) s d)  => S.(MorphismsEquivalence).(Reflexive) (compose_morphism_path p));
-      Symmetric := (fun _ _ p p' => S.(MorphismsEquivalence).(Symmetric) (compose_morphism_path p) (compose_morphism_path p'));
-      Transitive := (fun _ _ p1 p2 p3 => S.(MorphismsEquivalence).(Transitive) (compose_morphism_path p1) (compose_morphism_path p2) (compose_morphism_path p3))
-      |}.
-    assert (H0 : (forall s d d' (E : Morphism S s d) (p : path' _ d d'),
-      MorphismsEquivalent (compose_morphism_path (prepend p E)) (Compose (compose_morphism_path p) E))).
-    intros; simpl; intuition.
-    induction p; simpl.
-    assert (H : (MorphismsEquivalent (Compose E (Identity s)) E)).
-    apply (IdentityAxiom _ _ _ E).
-    apply (S.(MorphismsEquivalence).(Transitive) _ _ _ H).
-    apply (S.(MorphismsEquivalence).(Symmetric)).
-    apply (IdentityAxiom _ _ _ E).
-    assert (H1 : (MorphismsEquivalent (Compose e (compose_morphism_path (prepend p E))) (Compose e (Compose (compose_morphism_path p) E)))).
-    apply (S.(PreComposeMorphisms)).
-    assumption.
-    apply (S.(MorphismsEquivalence).(Transitive) _ _ _ H1).
-    apply (S.(MorphismsEquivalence).(Symmetric)).
-    apply S.(Associativity).
-    intros; intuition; simpl.
-    apply (S.(MorphismsEquivalence).(Transitive) _ _ _ (H0 _ _ _ _ _)).
-    apply (S.(MorphismsEquivalence).(Symmetric)).
-    apply (S.(MorphismsEquivalence).(Transitive) _ _ _ (H0 _ _ _ _ _)).
-    apply (S.(PostComposeMorphisms)).
-    apply (S.(MorphismsEquivalence).(Symmetric)).
-    assumption.
+  Lemma MorphismsEquivalent_symm : forall s o1 o2 x y,
+    MorphismsEquivalent y x
+    -> MorphismsEquivalent (s := s) (o1 := o1) (o2 := o2) x y.
+    intros; eapply (Symmetric (MorphismsEquivalence s)); eassumption.
+  Qed.
 
-    intros; intuition.
-    apply (S.(PreComposeMorphisms)); intuition; simpl.
+  Lemma MorphismsEquivalent_trans : forall s o1 o2 x y z,
+    MorphismsEquivalent x z
+    -> MorphismsEquivalent z y
+    -> MorphismsEquivalent (s := s) (o1 := o1) (o2 := o2) x y.
+    intros; eapply (Transitive (MorphismsEquivalence s)); eassumption.
+  Qed.
+
+  Hint Resolve MorphismsEquivalent_symm MorphismsEquivalent_trans.
+  Hint Resolve Associativity LeftIdentity RightIdentity PreComposeMorphisms PostComposeMorphisms.
+
+  Lemma compose_morphism_path_alt : forall s d d' (E : Morphism S s d) (p : path' _ d d'),
+    MorphismsEquivalent (compose_morphism_path (prepend p E)) (Compose (compose_morphism_path p) E).
+    induction p; t; eauto.
+  Qed.    
+
+  Hint Resolve compose_morphism_path_alt.
+
+  Definition unsaturate : Category.
+    refine {| Vertex := S;
+      Edge := S.(Morphism);
+      PathsEquivalent := (fun _ _ p p' => MorphismsEquivalent (compose_morphism_path p) (compose_morphism_path p'));
+      PathsEquivalence := {|
+        Reflexive := (fun s d (p : path' S.(Morphism) s d)  => S.(MorphismsEquivalence).(Reflexive) (compose_morphism_path p));
+        Symmetric := (fun _ _ p p' => S.(MorphismsEquivalence).(Symmetric) (compose_morphism_path p) (compose_morphism_path p'));
+        Transitive := (fun _ _ p1 p2 p3 => S.(MorphismsEquivalence).(Transitive) (compose_morphism_path p1) (compose_morphism_path p2) (compose_morphism_path p3))
+      |}
+    |}; abstract (t; eauto).
   Defined.
 End SaturatedCategories.

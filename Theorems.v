@@ -62,19 +62,11 @@ End Functor_Instance.
 Section SaturatedCategories.
   Variable C : SaturatedCategory.
 
-  Definition Ob := C.(Object).
-  Definition Mor := C.(Morphism).
+  Hint Resolve MorphismsEquivalent_trans MorphismsEquivalent_symm RightIdentity.
 
-  Theorem identity_unique : forall a (id' : Mor a a),
-    (forall (f : Mor a a), (MorphismsEquivalent (Compose id' f) f)) ->
-    (MorphismsEquivalent id' (Identity a)).
-    intros.
-    assert (MorphismsEquivalent (Compose id' (Identity a)) id').
-    apply IdentityAxiom.
-    assert (MorphismsEquivalent (Compose id' (Identity a)) (Identity a)). auto.
-    assert (MorphismsEquivalent id' (Compose id' (Identity a))).
-    apply (MorphismsEquivalence C).(Symmetric). intuition.
-    apply ((MorphismsEquivalence C).(Transitive) id' (Compose id' (Identity a)) (Identity a)); intuition.
+  Theorem identity_unique : forall a (id' : C.(Morphism) a a),
+    (forall f : C.(Morphism) a a, MorphismsEquivalent (Compose id' f) f) ->
+    MorphismsEquivalent id' (Identity a).
+    eauto.
   Qed.
-    
 End SaturatedCategories.

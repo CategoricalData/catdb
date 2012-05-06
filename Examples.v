@@ -10,7 +10,7 @@ Definition empty : Category.
   refine {| Vertex := Empty_set;
     Edge := fun _ _ => Empty_set;
     PathsEquivalent := (fun _ _ _ _ => True) |};
-  intuition; abstract auto.
+  abstract (repeat intuition).
 Defined.
 
 Definition emptyI : Instance empty.
@@ -26,7 +26,7 @@ Definition booleans : Category.
   refine {| Vertex := bool;
     Edge := (fun b1 b2 => b2 = false \/ b1 = true);
     PathsEquivalent := (fun _ _ _ _ => True) |};
-  intuition; abstract auto.
+  abstract (repeat intuition).
 Defined.
 
 
@@ -36,7 +36,7 @@ Definition naturals : Category.
   refine {| Vertex := nat;
     Edge := ge;
     PathsEquivalent := (fun _ _ _ _ => True) |};
-  intuition; abstract auto.
+  abstract (repeat intuition).
 Defined.
 
 
@@ -212,7 +212,7 @@ Inductive person := Bob | Sue | David.
 
 Ltac dep_destruct H := generalize H; intro H'; dependent destruction H'.
 
-Ltac destructor := simpl; intros;
+Ltac destructor := simpl; intuition;
   repeat (match goal with
             | [ H : emailsEq ?X ?Y |- _ ] =>
               match goal with
@@ -230,7 +230,7 @@ Definition emailsSchema : Category.
   refine {| Vertex := emailsV;
     Edge := emailsE;
     PathsEquivalent := emailsEq
-    |}; intuition; abstract destructor.
+    |}; abstract (repeat destructor).
 Defined.
 
 Definition emailsTypeof (v : emailsSchema) : Set :=
