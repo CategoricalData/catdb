@@ -376,12 +376,7 @@ Section Category_SaturatedCategory_Equivalence.
   Definition unsaturate : Category.
     refine {| Vertex := S;
       Edge := S.(Morphism);
-      PathsEquivalent := (fun _ _ p p' => MorphismsEquivalent (compose_morphism_path p) (compose_morphism_path p'));
-      PathsEquivalence := {|
-        Reflexive := (fun s d (p : path' S.(Morphism) s d)  => S.(MorphismsEquivalence).(Reflexive) (compose_morphism_path p));
-        Symmetric := (fun _ _ p p' => S.(MorphismsEquivalence).(Symmetric) (compose_morphism_path p) (compose_morphism_path p'));
-        Transitive := (fun _ _ p1 p2 p3 => S.(MorphismsEquivalence).(Transitive) (compose_morphism_path p1) (compose_morphism_path p2) (compose_morphism_path p3))
-      |}
+      PathsEquivalent := (fun _ _ p p' => MorphismsEquivalent (compose_morphism_path p) (compose_morphism_path p'))
     |}; abstract (t; eauto).
   Defined.
 End Category_SaturatedCategory_Equivalence.
