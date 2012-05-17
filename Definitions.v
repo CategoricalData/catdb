@@ -1,4 +1,4 @@
-Require Import Bool Omega.
+Require Import Bool Omega Setoid.
 
 Set Implicit Arguments.
 
@@ -93,6 +93,21 @@ Section path'_Theorems.
   Lemma concatenate_prepend_equivalent : forall s d d' (p : path' E s d) (p' : path' E d d'), concatenate p p' = concatenate' p p'.
     induction p; t.
   Qed.
+
+  Hint Rewrite concatenate_noedges_p concatenate_addedge.
+  Hint Rewrite <- concatenate_prepend_equivalent.
+
+  Lemma concatenate_prepend : forall s s' d d' (p1 : path' E s' d) (p2 : path' E d d') (e : E s s'),
+    (prepend (concatenate p1 p2) e) = (concatenate (prepend p1 e) p2).
+    induction p1; t.
+  Qed.
+
+  Hint Rewrite concatenate_prepend.
+
+  Lemma concatenate_associative o1 o2 o3 o4 : forall (p1 : path' E o1 o2) (p2 : path' E o2 o3) (p3 : path' E o3 o4),
+    (concatenate (concatenate p1 p2) p3) = (concatenate p1 (concatenate p2 p3)).
+    induction p1; t.
+  Qed.
 End path'_Theorems.
 
 
@@ -101,10 +116,8 @@ Section EquivalenceRelation.
   Variable Relation : Object -> Object -> Type.
   Variable RelationsEquivalent' : forall o1 o2, Relation o1 o2 -> Relation o1 o2 -> Prop.
 
-  Implicit Arguments RelationsEquivalent' [o1 o2].
-
   Record EquivalenceRelation := {
-    RelationsEquivalent :> forall o1 o2, Relation o1 o2 -> Relation o1 o2 -> Prop := RelationsEquivalent';
+    RelationsEquivalent :> forall o1 o2, Relation_Definitions.relation (Relation o1 o2) := RelationsEquivalent';
     Reflexive : forall o1 o2 (r : Relation o1 o2),
       RelationsEquivalent r r;
     Symmetric : forall o1 o2 (r1 r2 : Relation o1 o2),
@@ -112,13 +125,19 @@ Section EquivalenceRelation.
     Transitive : forall o1 o2 (r1 r2 r3 : Relation o1 o2),
       RelationsEquivalent r1 r2 -> RelationsEquivalent r2 r3 -> RelationsEquivalent r1 r3
   }.
+
+  Implicit Arguments RelationsEquivalent' [].
+  Implicit Arguments RelationsEquivalent [].
+
+  Definition relations_equivalence_equivalent (R : EquivalenceRelation) : Prop :=
+    forall o1 o2, RelationsEquivalent' o1 o2 = R.(RelationsEquivalent) o1 o2.
 End EquivalenceRelation.
 
 Implicit Arguments EquivalenceRelation [Object Relation].
-Implicit Arguments RelationsEquivalent [Object Relation o1 o2].
-Implicit Arguments Reflexive [Object Relation RelationsEquivalent' o1 o2].
-Implicit Arguments Symmetric [Object Relation RelationsEquivalent' o1 o2].
-Implicit Arguments Transitive [Object Relation RelationsEquivalent' o1 o2].
+Implicit Arguments RelationsEquivalent [Object Relation].
+Implicit Arguments Reflexive [Object Relation RelationsEquivalent'].
+Implicit Arguments Symmetric [Object Relation RelationsEquivalent'].
+Implicit Arguments Transitive [Object Relation RelationsEquivalent'].
 
 Record Category := {
   Vertex :> Type;
@@ -132,6 +151,32 @@ Record Category := {
   PostCompose : forall s d (p1 p2 : path' _ s d) d' (E : Edge d d'),
     PathsEquivalent p1 p2 -> PathsEquivalent (AddEdge p1 E) (AddEdge p2 E)
 }.
+
+(* I'm not sure why (PathsEquivalent _ s d) doesn't work here... *)
+Add Parametric Relation C s d : _ (PathsEquivalence C s d)
+  reflexivity proved by (Reflexive _ s d)
+  symmetry proved by (Symmetric _ s d)
+  transitivity proved by (Transitive _ s d)
+    as paths_eq.
+
+Lemma paths_equivalence_equivalent C : relations_equivalence_equivalent C.(PathsEquivalence).
+  unfold relations_equivalence_equivalent; trivial.
+Qed.
+
+Hint Rewrite paths_equivalence_equivalent.
+
+(* It's not true that [(p1 = p2 -> p3 = p4) -> (PathsEquivalent p1 p2 -> PathsEquivalent p3 p4)]
+   Consider a case where p1 = NoEdges and p2 is a path containing an edge and its inverse,
+   and p3 and p4 are not equivalent paths. 
+   
+   So, let's do the relevant theorems again... *)
+Section path'_Equivalence_Theorems.
+  Variable C : Category.
+
+  Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent C p p' -> forall e : Edge _ d d', PathsEquivalent C (AddEdge p e) (AddEdge p' e).
+    t. apply PostCompose. assumption.
+  Qed.
+End path'_Equivalence_Theorems.
 
 Section Category.
   Variable C : Category.
@@ -201,8 +246,20 @@ Implicit Arguments Compose [s s0 d d'].
 Implicit Arguments Identity [s].
 Implicit Arguments MorphismsEquivalent [s o1 o2].
 
-Hint Resolve PostCompose PreCompose PathsEquivalence.
-Hint Extern 1 (PathsEquivalent _ _ _) => apply Reflexive.
+Hint Resolve PostCompose PreCompose PathsEquivalence MorphismsEquivalence.
+Hint Rewrite LeftIdentity RightIdentity.
+
+Add Parametric Relation C s d: _ (MorphismsEquivalence C s d)
+  reflexivity proved by (Reflexive _ s d)
+  symmetry proved by (Symmetric _ s d)
+  transitivity proved by (Transitive _ s d)
+    as morphisms_eq.
+
+Lemma morphisms_equivalence_equivalent C : relations_equivalence_equivalent C.(MorphismsEquivalence).
+  unfold relations_equivalence_equivalent; trivial.
+Qed.
+
+Hint Rewrite morphisms_equivalence_equivalent.
 
 Section SaturatedCategories.
   Variable C D : SaturatedCategory.
@@ -239,12 +296,14 @@ Implicit Arguments MorphismOf [C D s0 d].
 Section SaturatedCategory.
   Variable C : SaturatedCategory.
 
+  Hint Rewrite morphisms_equivalence_equivalent.
+  
   (* There is an identity functor.  It does the obvious thing. *)
   Definition IdentitySaturatedFunctor : SaturatedFunctor C C.
     refine {| ObjectOf := (fun x => x);
       MorphismOf := (fun _ _ x => x)
     |};
-    intuition; apply Reflexive; apply MorphismsEquivalence.
+    t.
   Defined.
 
   (* [m'] is the inverse of [m] if both compositions are
@@ -258,8 +317,7 @@ Section SaturatedCategory.
     exists m', InverseOf _ _ m m'.
 
   Theorem SaturatedCategoryIdentityInverse (o : C.(Object)) : InverseOf _ _ (Identity o) (Identity o).
-    unfold InverseOf; intuition;
-      apply C.(MorphismsEquivalence).(Symmetric). apply LeftIdentity. apply RightIdentity.
+    unfold InverseOf; t.
   Qed.
 
   Theorem SaturatedCategoryIdentityIsomorphism (o : C.(Object)) : SaturatedCategoryIsomorphism _ _ (Identity o).
@@ -298,7 +356,6 @@ Section SaturatedCategories_NaturalTransformation.
       (Compose (G.(MorphismOf) m) (SComponentsOf s))
   }.
 
-
   Definition SaturatedNaturalEquivalence (S : SaturatedNaturalTransformation) : Prop :=
     forall x : C.(Object), SaturatedCategoryIsomorphism (S.(SComponentsOf) x).
 End SaturatedCategories_NaturalTransformation.
@@ -308,20 +365,20 @@ Section IdentitySaturatedNaturalTransformation.
   Variable F : SaturatedFunctor C C.
 
   (* There is an identity natrual transformation. *)
-(*
   Definition IdentitySaturatedNaturalTransformation : SaturatedNaturalTransformation F F.
     refine {| SComponentsOf := (fun c => Identity (F c))
-      |}.
-    intros; intuition.
-    assert (H0 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent (Compose (Identity d) m) (Compose m (Identity s)))).
-    assert (H1 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent (Compose (Identity d) m) m)).
-    apply IdentityAxiom.
-    assert (H2 : (forall (s d : C) (m : C.(Morphism) s d), MorphismsEquivalent m (Compose m (Identity s)))).
-    intuition; apply C.(MorphismsEquivalence).(Symmetric).
-    apply IdentityAxiom.
-    intuition.
-    
-    assert C.(MorphismsEquivalence).(Transitive).
+      |};
+    t.
+   Qed.
+
+(*
+   Theorem IdentitySaturatedNaturalEquivalence : SaturatedNaturalEquivalence IdentitySaturatedNaturalTransformation.
+     unfold SaturatedNaturalEquivalence. intros.
+     unfold SaturatedCategoryIsomorphism.
+     exists (Identity _).
+     unfold InverseOf.
+     t.
+     assert (Identity (F x) = IdentitySaturatedNaturalTransformation.(SComponentsOf) x).
    Qed.*)
 
 End IdentitySaturatedNaturalTransformation.
@@ -330,8 +387,9 @@ Section Category_SaturatedCategory_Equivalence.
   Variable C : Category.
   Variable S : SaturatedCategory.
 
-  Hint Rewrite concatenate_noedges_p concatenate_addedge.
+  Hint Rewrite concatenate_noedges_p concatenate_p_noedges concatenate_addedge.
   Hint Rewrite <- concatenate_prepend_equivalent.
+  Hint Rewrite concatenate_associative.
 
   Definition saturate : SaturatedCategory.
     refine {| Object := C;
@@ -339,9 +397,13 @@ Section Category_SaturatedCategory_Equivalence.
       MorphismsEquivalence := C.(PathsEquivalence);
       Identity := (fun _ => NoEdges);
       Compose := (fun _ _ _ m1 m2 => concatenate m2 m1)
-      |}; abstract (intros; solve [ t | match goal with
+      |}. abstract (intros; solve [ t | match goal with
                                           | [ p : path _ _ _ |- _ ] => solve [ induction p; t ]
                                         end ]).
+      intros; t. induction m. t. autorewrite with core in *.
+      assert (H0 : forall s d d' (m1 m2 : path' _ d d') (e : Edge C s d), PathsEquivalence _ _ _ m1 m2 -> PathsEquivalence _ _ _ (prepend m1 e) (prepend m2 e)).
+      t. apply PreCompose. t. apply (IHm (prepend m1 _) (prepend m2 _)); t.
+      t. t. t.
   Defined.
 
   Fixpoint compose_morphism_path s d (p : path' S.(Morphism) s d) : Morphism _ s d :=
@@ -353,14 +415,14 @@ Section Category_SaturatedCategory_Equivalence.
   Lemma MorphismsEquivalent_symm : forall s o1 o2 x y,
     MorphismsEquivalent y x
     -> MorphismsEquivalent (s := s) (o1 := o1) (o2 := o2) x y.
-    intros; eapply (Symmetric (MorphismsEquivalence s)); eassumption.
+    intros; symmetry; eassumption.
   Qed.
 
   Lemma MorphismsEquivalent_trans : forall s o1 o2 x y z,
     MorphismsEquivalent x z
     -> MorphismsEquivalent z y
     -> MorphismsEquivalent (s := s) (o1 := o1) (o2 := o2) x y.
-    intros; eapply (Transitive (MorphismsEquivalence s)); eassumption.
+    intros; transitivity z; eassumption.
   Qed.
 
   Hint Resolve MorphismsEquivalent_symm MorphismsEquivalent_trans.
@@ -369,6 +431,8 @@ Section Category_SaturatedCategory_Equivalence.
   Lemma compose_morphism_path_alt : forall s d d' (E : Morphism S s d) (p : path' _ d d'),
     MorphismsEquivalent (compose_morphism_path (prepend p E)) (Compose (compose_morphism_path p) E).
     induction p; t; eauto.
+    rewrite Associativity; t.
+    apply PreComposeMorphisms; t.
   Qed.    
 
   Hint Resolve compose_morphism_path_alt.
@@ -377,6 +441,9 @@ Section Category_SaturatedCategory_Equivalence.
     refine {| Vertex := S;
       Edge := S.(Morphism);
       PathsEquivalent := (fun _ _ p p' => MorphismsEquivalent (compose_morphism_path p) (compose_morphism_path p'))
-    |}; abstract (t; eauto).
+    |};
+    t; t.
+    repeat (rewrite compose_morphism_path_alt).
+    apply PostComposeMorphisms. assumption.
   Defined.
 End Category_SaturatedCategory_Equivalence.
