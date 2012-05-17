@@ -214,16 +214,19 @@ Ltac dep_destruct H := generalize H; intro H'; dependent destruction H'.
 
 Ltac destructor := simpl; intuition;
   repeat (match goal with
-            | [ H : emailsEq ?X ?Y |- _ ] =>
-              match goal with
-                | [ x : _ |- _ ] =>
-                  match x with
-                    | X => dep_destruct H
-                    | Y => dep_destruct H
+            | [ H : ?T |- _ ] =>
+              match eval hnf in T with
+                | emailsEq ?X ?Y =>
+                  match goal with
+                    | [ x : _ |- _ ] =>
+                      match x with
+                        | X => hnf in H; dep_destruct H
+                        | Y => hnf in H; dep_destruct H
+                      end
                   end
+                | emailsE _ _ => dep_destruct H
+                | selfEmailId => destruct H
               end
-            | [ E : emailsE _ _ |- _ ] => dep_destruct E
-            | [ x : selfEmailId |- _ ] => destruct x
           end; simpl in *); auto.
 
 Definition emailsSchema : Category.

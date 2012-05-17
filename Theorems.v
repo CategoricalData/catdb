@@ -65,8 +65,8 @@ Section SaturatedCategories.
   Hint Resolve MorphismsEquivalent_trans MorphismsEquivalent_symm RightIdentity.
 
   Theorem identity_unique : forall a (id' : C.(Morphism) a a),
-    (forall f : C.(Morphism) a a, MorphismsEquivalent (Compose id' f) f) ->
-    MorphismsEquivalent id' (Identity a).
+    (forall f : C.(Morphism) a a, MorphismsEquivalence _ _ _ (Compose id' f) f) ->
+    MorphismsEquivalence _ _ _ id' (Identity a).
     eauto.
   Qed.
 End SaturatedCategories.
