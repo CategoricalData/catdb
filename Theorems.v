@@ -1,5 +1,5 @@
 Require Import Program.
-Require Import Definitions.
+Require Import EquivalenceRelation Schema Category Definitions.
 
 Set Implicit Arguments.
 
@@ -10,9 +10,9 @@ Ltac t := simpl; intuition;
             | _ => progress autorewrite with core in *
           end; auto).
 
-Section Functor_Instance.
-  Variables C D : Category.
-  Variable F : Functor C D.
+Section Translation_Instance.
+  Variables C D : Schema.
+  Variable F : Translation C D.
   Variable I : Instance D.
 
   Lemma compose_prepend : forall s d (p : path D s d) s' (E : D.(Edge) s' s) x,
@@ -50,23 +50,23 @@ Section Functor_Instance.
 
   Hint Rewrite <- compose_transferPath.
 
-  Hint Resolve EquivalenceOf FEquivalenceOf.
+  Hint Resolve EquivalenceOf TEquivalenceOf.
 
-  Definition Functor_Instance : Instance C.
+  Definition Translation_Instance : Instance C.
     refine {| TypeOf := (fun x => I (F x));
       FunctionOf := (fun _ _ E => compose _ (I.(FunctionOf)) (F.(PathOf) _ _ E)) |};
     abstract t.
   Defined.
-End Functor_Instance.
+End Translation_Instance.
 
-Section SaturatedCategories.
-  Variable C : SaturatedCategory.
+Section Categories.
+  Variable C : Category.
 
   Hint Resolve MorphismsEquivalent_trans MorphismsEquivalent_symm RightIdentity.
 
   Theorem identity_unique : forall a (id' : C.(Morphism) a a),
-    (forall f : C.(Morphism) a a, MorphismsEquivalence _ _ _ (Compose id' f) f) ->
-    MorphismsEquivalence _ _ _ id' (Identity a).
+    (forall f : C.(Morphism) a a, MorphismsEquivalent _ _ _ (Compose id' f) f) ->
+    MorphismsEquivalent _ _ _ id' (Identity a).
     eauto.
   Qed.
-End SaturatedCategories.
+End Categories.

@@ -1,4 +1,4 @@
-MODULES    := Definitions Examples Theorems
+MODULES    := EquivalenceRelation Schema Category Definitions Examples Theorems
 VS         := $(MODULES:%=%.v)
 
 .PHONY: coq clean

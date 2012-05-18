@@ -1,15 +1,15 @@
 Require Import Arith List Eqdep_dec Program.
-Require Import Definitions.
+Require Import Schema Category Definitions.
 
 Set Implicit Arguments.
 
 
 (** * The empty category *)
 
-Definition empty : Category.
+Definition empty : Schema.
   refine {| Vertex := Empty_set;
     Edge := fun _ _ => Empty_set;
-    PathsEquivalent := (fun _ _ _ _ => True) |};
+    PathsEquivalent' := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
@@ -22,20 +22,20 @@ Defined.
 
 (** * The Booleans with "implies" edges *)
 
-Definition booleans : Category.
+Definition booleans : Schema.
   refine {| Vertex := bool;
     Edge := (fun b1 b2 => b2 = false \/ b1 = true);
-    PathsEquivalent := (fun _ _ _ _ => True) |};
+    PathsEquivalent' := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
 
 (** * The naturals with >= edges *)
 
-Definition naturals : Category.
+Definition naturals : Schema.
   refine {| Vertex := nat;
     Edge := ge;
-    PathsEquivalent := (fun _ _ _ _ => True) |};
+    PathsEquivalent' := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
@@ -49,7 +49,7 @@ Theorem boolToNat_ge : forall b1 b2, (b2 = false \/ b1 = true)
   destruct b1; destruct b2; simpl; intuition.
 Qed.
 
-Definition booleans_to_naturals : Functor booleans naturals.
+Definition booleans_to_naturals : Translation booleans naturals.
   refine {| VertexOf := (boolToNat : booleans -> naturals);
     PathOf := fun _ _ E => AddEdge NoEdges (boolToNat_ge E) |};
   abstract auto.
@@ -229,10 +229,10 @@ Ltac destructor := simpl; intuition;
               end
           end; simpl in *); auto.
 
-Definition emailsSchema : Category.
+Definition emailsSchema : Schema.
   refine {| Vertex := emailsV;
     Edge := emailsE;
-    PathsEquivalent := emailsEq
+    PathsEquivalent' := emailsEq
     |}; abstract (repeat destructor).
 Defined.
 
