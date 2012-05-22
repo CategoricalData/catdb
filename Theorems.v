@@ -1,14 +1,7 @@
 Require Import Program.
-Require Import EquivalenceRelation Schema Category Definitions.
+Require Import Common EquivalenceRelation Schema Category Definitions.
 
 Set Implicit Arguments.
-
-
-Ltac t := simpl; intuition;
-  repeat (match goal with
-            | [ H : _ |- _ ] => rewrite H
-            | _ => progress autorewrite with core in *
-          end; auto).
 
 Section Translation_Instance.
   Variables C D : Schema.

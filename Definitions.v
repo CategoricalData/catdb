@@ -1,5 +1,5 @@
 Require Import Bool Omega Setoid.
-Require Import EquivalenceRelation Schema Category.
+Require Import Common EquivalenceRelation Schema Category.
 
 Set Implicit Arguments.
 

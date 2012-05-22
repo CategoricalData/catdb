@@ -1,5 +1,5 @@
 Require Import Bool Omega Setoid.
-Require Import EquivalenceRelation.
+Require Import Common EquivalenceRelation.
 
 Set Implicit Arguments.
 
@@ -42,14 +42,6 @@ End path'.
 Implicit Arguments NoEdges [V E s].
 Implicit Arguments AddEdge [V E s d d'].
 Implicit Arguments prepend [V E s d s'].
-
-Ltac t' := simpl; intuition.
-
-Ltac t := t';
-  repeat (match goal with
-            | [ H : context[@eq] |- _ ] => rewrite H
-            | _ => progress autorewrite with core in *
-          end; t').
 
 Section path'_Theorems.
   Variable V : Type.

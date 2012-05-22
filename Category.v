@@ -1,15 +1,7 @@
-Require Import Bool Omega Setoid.
-Require Import EquivalenceRelation.
+Require Import Bool Omega Setoid Datatypes.
+Require Import Common EquivalenceRelation.
 
 Set Implicit Arguments.
-
-Ltac t' := simpl; intuition.
-
-Ltac t := t';
-  repeat (match goal with
-            | [ H : context[@eq] |- _ ] => rewrite H
-            | _ => progress autorewrite with core in *
-          end; t').
 
 Record Category := {
   Object :> Type;
@@ -90,60 +82,84 @@ Add Parametric Morphism C s d d' :
   t; apply compose_morphisms_equivalent; t.
 Qed.
 
-Section Categories.
-  Variable C D : Category.
-  
-  (**
-     Quoting from the lecture notes for 18.705, Commutative Algebra:
-
-     A map of categories is known as a functor. Namely, given 
-     categories [C] and [C'], a (covariant) functor [F : C -> C'] is a rule that assigns to
-     each object [A] of [C] an object [F A] of [C'] and to each map [m : A -> B] of [C] a map
-     [F m : F A -> F B] of [C'] preserving composition and identity; that is,
-     (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
-     (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
-
-     Since we are using [MorhpismsEquivalent] rather than [=], we must additionally require
-     that [F] preserves [MorphismsEquivalent].
-     **)
-  Record Functor := {
-    ObjectOf :> C -> D;
-    MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
-    FEquivalenceOf : forall s d (m1 m2 : C.(Morphism) s d),
-      MorphismsEquivalent _ _ _ m1 m2
-      -> MorphismsEquivalent _ _ _ (MorphismOf _ _ m1) (MorphismOf _ _ m2);
-    FCompositionOf : forall s d d' (m1 : C.(Morphism) s d) (m2: C.(Morphism) d d'),
-      MorphismsEquivalent _ _ _ (MorphismOf _ _ (Compose m2 m1))
-      (Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1));
-    FIdentityOf : forall o, MorphismsEquivalent _ _ _ (MorphismOf _ _ (Identity o)) (Identity (ObjectOf o))
-  }.
-  
-End Categories.
-
-Implicit Arguments MorphismOf [C D s d].
+Ltac identity_transitvity :=
+  match goal with
+    | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M _) ?M) ] => transitivity (Compose M (Identity _));
+      match goal with
+        | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M (Identity _)) ?M) ] => apply RightIdentity
+        | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M _) (Compose ?M (Identity _))) ] => apply PreComposeMorphisms
+      end
+    | [ |- (RelationsEquivalent _ _ _ _ (Compose _ ?M) ?M) ] => transitivity (Compose (Identity _) M);
+      match goal with
+        | [ |- (RelationsEquivalent _ _ _ _ (Compose (Identity _) ?M) ?M) ] => apply LeftIdentity
+        | [ |- (RelationsEquivalent _ _ _ _ (Compose _ ?M) (Compose (Identity _) ?M)) ] => apply PostComposeMorphisms
+      end
+    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose ?M _)) ] => symmetry; intuition
+    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose _ ?M)) ] => symmetry; intuition
+  end.
 
 Section Category.
   Variable C : Category.
 
-  (* There is an identity functor.  It does the obvious thing. *)
-  Definition IdentityFunctor : Functor C C.
-    refine {| ObjectOf := (fun x => x);
-      MorphismOf := (fun _ _ x => x)
-    |};
-    t.
-  Defined.
+  Hint Extern 1 (RelationsEquivalent _ _ _ _ ?M1 ?M2) => identity_transitvity.
+
+  (* Quoting Wikipedia,
+    In category theory, an epimorphism (also called an epic
+    morphism or, colloquially, an epi) is a morphism [f : X → Y]
+    which is right-cancellative in the sense that, for all
+    morphisms [g, g' : Y → Z],
+    [g ○ f = g' ○ f -> g = g']
+
+    Epimorphisms are analogues of surjective functions, but they
+    are not exactly the same. The dual of an epimorphism is a
+    monomorphism (i.e. an epimorphism in a category [C] is a
+    monomorphism in the dual category [OppositeCategory C]).
+    *)
+  Definition Epimorphism x y (m : C.(Morphism) x y) : Prop :=
+    forall z (m1 m2 : C.(Morphism) y z), MorphismsEquivalent _ _ _ (Compose m1 m) (Compose m2 m) ->
+      MorphismsEquivalent _ _ _ m1 m2.
+  Definition Monomorphism x y (m : C.(Morphism) x y) : Prop :=
+    forall z (m1 m2 : C.(Morphism) z x), MorphismsEquivalent _ _ _ (Compose m m1) (Compose m m2) ->
+      MorphismsEquivalent _ _ _ m1 m2.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
     MorphismsEquivalent _ _ _ (Identity s) (Compose m' m) /\
     MorphismsEquivalent _ _ _ (Identity d) (Compose m m').
+  
+  Implicit Arguments InverseOf [s d].
 
   (* A morphism is an isomorphism if it has an inverse *)
-  Definition CategoryIsomorphism s d (m : C.(Morphism) s d) : Prop :=
-    exists m', InverseOf _ _ m m'.
+  Definition CategoryIsomorphism' s d (m : C.(Morphism) s d) : Prop :=
+    exists m', InverseOf m m'.
 
-  Theorem CategoryIdentityInverse (o : C.(Object)) : InverseOf _ _ (Identity o) (Identity o).
+  (* As per David's comment, everything is better when we supply a witness rather
+     than an assertion.  (In particular the [exists m' -> m'] transformation requires
+     the axiom of choice.) *)
+  Definition CategoryIsomorphism s d (m : C.(Morphism) s d) := { m' | InverseOf m m' }.
+
+  Lemma CategoryIsomorphism2Isomorphism' s d m : CategoryIsomorphism s d m -> CategoryIsomorphism' _ _ m.
+    unfold CategoryIsomorphism; unfold CategoryIsomorphism'; auto.
+  Qed.
+
+  Hint Resolve PreComposeMorphisms PostComposeMorphisms.
+
+  Lemma iso_is_epi s d m : CategoryIsomorphism s d m -> Epimorphism s d m.
+    unfold CategoryIsomorphism; unfold Epimorphism; unfold InverseOf; repeat (destruct 1); intros.
+    transitivity (Compose m1 (Compose m x)); t.
+    transitivity (Compose m2 (Compose m x)); t.
+    repeat (rewrite <- Associativity); t.
+  Qed.
+
+  Lemma iso_is_mono s d m : CategoryIsomorphism s d m -> Monomorphism s d m.
+    unfold CategoryIsomorphism; unfold Monomorphism; unfold InverseOf; repeat (destruct 1); intros.
+    transitivity (Compose (Compose x m) m1); t.
+    transitivity (Compose (Compose x m) m2); t.
+    repeat (rewrite Associativity); t.
+  Qed.
+
+  Theorem CategoryIdentityInverse (o : C.(Object)) : InverseOf (Identity o) (Identity o).
     unfold InverseOf; t.
   Qed.
 
@@ -152,57 +168,23 @@ Section Category.
   Qed.
 End Category.
 
+Implicit Arguments CategoryIsomorphism' [C s d].
 Implicit Arguments CategoryIsomorphism [C s d].
+Implicit Arguments InverseOf [C s d].
 
-Section Categories_NaturalTransformation.
-  Variable C D : Category.
-  Variable F G : Functor C D.
+Hint Resolve CategoryIsomorphism2Isomorphism'.
 
-  (**
-     Quoting from the lecture notes for 18.705, Commutative Algebra:
-     
-     A map of functors is known as a natural transformation. Namely, given two functors
-     [F : C -> C'], [F' : C -> C'], a natural transformation [T: F -> F'] is a collection of maps
-     [T A : F A -> F' A], one for each object [A] of [C], such that [(T B) ○ (F m) = (F' m) ○ (T A)]
-     for every map [m : A -> B] of [C]; that is, the following diagram is commutative:
-     
-           F m
-     F A -------> F B
-      |            |
-      |            |
-      | T A        | T B
-      |            |
-      V    F' m    V
-     F' A ------> F' B
-     **)
-  Record NaturalTransformation := {
-    ComponentsOf :> forall c : C.(Object), Morphism _ (F c) (G c);
-    Commutes : forall s d (m : Morphism C s d),
-      MorphismsEquivalent _ _ _
-      (Compose (ComponentsOf d) (F.(MorphismOf) m))
-      (Compose (G.(MorphismOf) m) (ComponentsOf s))
-  }.
-
-  Definition NaturalEquivalence (T : NaturalTransformation) : Prop :=
-    forall x : C.(Object), CategoryIsomorphism (T.(ComponentsOf) x).
-End Categories_NaturalTransformation.
-
-Section IdentityNaturalTransformation.
-  Variable C : Category.
-  Variable F : Functor C C.
-
-  (* There is an identity natrual transformation. *)
-  Definition IdentityNaturalTransformation : NaturalTransformation F F.
-    refine {| ComponentsOf := (fun c => Identity (F c))
-      |};
-    abstract t.
-  Defined.
-
-
-   Theorem IdentityNaturalEquivalence : NaturalEquivalence IdentityNaturalTransformation.
-     unfold NaturalEquivalence. intros.
-     exists (Identity _).
-     unfold InverseOf.
-     t.
-   Qed.
-End IdentityNaturalTransformation.
+Ltac post_compose_epi e := match goal with
+                             | [ |- (RelationsEquivalent _ _ _ _ (?M1 : Morphism _ _ _) (?M2 : Morphism _ _ _)) ] =>
+                               cut (MorphismsEquivalent _ _ _ (Compose M1 e) (Compose M2 e)); 
+                                 try match goal with
+                                       | [ |- _ -> _ ] => cut (Epimorphism _ _ _ e); intuition
+                                     end
+                           end.
+Ltac pre_compose_mono m := match goal with
+                             | [ |- (RelationsEquivalent _ _ _ _ (?M1 : Morphism _ _ _) (?M2 : Morphism _ _ _)) ] =>
+                               cut (MorphismsEquivalent _ _ _ (Compose m M1) (Compose m M2)); 
+                                 try match goal with
+                                       | [ |- _ -> _ ] => cut (Monomorphism _ _ _ m); intuition
+                                     end
+                           end.
