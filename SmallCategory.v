@@ -1,5 +1,5 @@
 Require Import Bool Omega Setoid.
-Require Import EquivalenceRelation Category Functor NaturalTransformation.
+Require Import EquivalenceRelation Category Functor NaturalTransformation NaturalEquivalence.
 
 Set Implicit Arguments.
 
@@ -48,8 +48,6 @@ Section SmallCat2Cat.
 End SmallCat2Cat.
 
 Coercion smallcat2cat : SmallCategory >-> Category.
-
-Check NaturalEquivalence.
 
 Section SmallCat.
 (*  Definition SmallCat : Category.

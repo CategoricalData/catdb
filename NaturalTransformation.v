@@ -29,53 +29,11 @@ Section Categories_NaturalTransformation.
       (Compose (ComponentsOf d) (F.(MorphismOf) m))
       (Compose (G.(MorphismOf) m) (ComponentsOf s))
   }.
-
-  Definition NaturalEquivalence (T : NaturalTransformation) :=
-    forall x : C.(Object), CategoryIsomorphism (T.(ComponentsOf) x).
-
 End Categories_NaturalTransformation.
 
 Implicit Arguments NaturalTransformation [C D].
-Implicit Arguments NaturalEquivalence [C D F G].
 Implicit Arguments ComponentsOf [C D F G].
 Implicit Arguments Commutes [C D F G].
-
-Section NaturalTransformationInverse.
-  Variable C D : Category.
-  Variable F G : Functor C D.
-  Variable T : NaturalTransformation F G.
-
-  Hint Unfold InverseOf Morphism.
-  Hint Extern 1 (RelationsEquivalent _ _ _ _ ?M1 ?M2) => identity_transitvity.
-  Hint Resolve PostComposeMorphisms PreComposeMorphisms.
-
-  (* XXX TODO: Figure out a way to better automate this proof *)
-  Definition NaturalEquivalenceInverse : (NaturalEquivalence T) -> (NaturalTransformation G F).
-    unfold NaturalEquivalence; unfold CategoryIsomorphism; intros.
-    refine {| ComponentsOf := (fun c => proj1_sig (X c))
-    |}.
-    intros.
-    assert (InverseOf (T d) (proj1_sig (X d))). apply proj2_sig.
-    assert (InverseOf (T s) (proj1_sig (X s))). apply proj2_sig.
-    unfold InverseOf in *; t.
-
-    pre_compose_mono (T d).
-    unfold Monomorphism.
-    intros.
-    pre_compose_to_identity.
-
-    rewrite_to_identity.
-
-    post_compose_epi (T s).
-    unfold Epimorphism.
-    intros.
-    post_compose_to_identity.
-
-    rewrite_to_identity.
-    symmetry.
-    apply Commutes.
-  Defined.
-End NaturalTransformationInverse.
 
 Section NaturalTransformationComposition.
   Variable C D E : Category.
@@ -149,13 +107,11 @@ Section NaturalTransformationComposition.
     refine {| ComponentsOf := (fun c => (Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c))))
       |}.*)
 
-
-
 End NaturalTransformationComposition.
 
 Section IdentityNaturalTransformation.
-  Variable C : Category.
-  Variable F : Functor C C.
+  Variable C D : Category.
+  Variable F : Functor C D.
 
   (* There is an identity natrual transformation. *)
   Definition IdentityNaturalTransformation : NaturalTransformation F F.
@@ -163,11 +119,6 @@ Section IdentityNaturalTransformation.
       |};
     abstract t.
   Defined.
-
-  Theorem IdentityNaturalEquivalence : NaturalEquivalence IdentityNaturalTransformation.
-    unfold NaturalEquivalence. intros.
-    exists (Identity _).
-    unfold InverseOf.
-    t.
-  Qed.
 End IdentityNaturalTransformation.
+
+Implicit Arguments IdentityNaturalTransformation [C D].
