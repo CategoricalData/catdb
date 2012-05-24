@@ -51,7 +51,9 @@ Implicit Arguments Compose [c s d d'].
 Implicit Arguments Identity [c].
 Implicit Arguments MorphismsEquivalent' [c o1 o2].
 
+(* XXX TODO: I should look at what hints exist for @eq, and make relavent hints for MorphismsEquivalent *)
 Hint Rewrite LeftIdentity' RightIdentity'.
+Hint Resolve PreComposeMorphisms' PostComposeMorphisms'.
 
 Add Parametric Relation C s d : _ (MorphismsEquivalent C s d)
   reflexivity proved by (Reflexive _ _ _)
@@ -67,35 +69,29 @@ Hint Rewrite morphisms_equivalence_equivalent.
 
 Section Morphism_Equivalence_Theorems.
   Variable C : Category.
-  
-  Hint Resolve PreComposeMorphisms' PostComposeMorphisms'.
 
   Lemma compose_morphisms_equivalent o1 o2 o3 : forall (m1 m1' : Morphism C o1 o2) (m2 m2' : Morphism C o2 o3),
     MorphismsEquivalent _ _ _ m1 m1' -> MorphismsEquivalent _ _ _ m2 m2' -> MorphismsEquivalent _ _ _ (Compose m2 m1) (Compose m2' m1').
     intros; transitivity (Compose m2' m1); t.
   Qed.
 End Morphism_Equivalence_Theorems.
-  
+
 Add Parametric Morphism C s d d' :
   (@Compose C s d d')
   with signature (MorphismsEquivalent C _ _) ==> (MorphismsEquivalent C _ _) ==> (MorphismsEquivalent C _ _) as morphism_eq_mor.
   t; apply compose_morphisms_equivalent; t.
 Qed.
 
+(* XXX Can we make this a Hint?  If so, I think we want to specify that it can't be nested
+   because otherwise it make the identity_unique proof run forever *)
 Ltac identity_transitvity :=
   match goal with
     | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M _) ?M) ] => transitivity (Compose M (Identity _));
-      match goal with
-        | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M (Identity _)) ?M) ] => apply RightIdentity
-        | [ |- (RelationsEquivalent _ _ _ _ (Compose ?M _) (Compose ?M (Identity _))) ] => apply PreComposeMorphisms
-      end
+      apply PreComposeMorphisms' || apply RightIdentity; trivial
     | [ |- (RelationsEquivalent _ _ _ _ (Compose _ ?M) ?M) ] => transitivity (Compose (Identity _) M);
-      match goal with
-        | [ |- (RelationsEquivalent _ _ _ _ (Compose (Identity _) ?M) ?M) ] => apply LeftIdentity
-        | [ |- (RelationsEquivalent _ _ _ _ (Compose _ ?M) (Compose (Identity _) ?M)) ] => apply PostComposeMorphisms
-      end
-    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose ?M _)) ] => symmetry; intuition
-    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose _ ?M)) ] => symmetry; intuition
+      apply PostComposeMorphisms' || apply LeftIdentity; trivial
+    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose ?M _)) ] => symmetry; identity_transitvity
+    | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose _ ?M)) ] => symmetry; identity_transitvity
   end.
 
 Section Category.
@@ -127,7 +123,7 @@ Section Category.
   Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
     MorphismsEquivalent _ _ _ (Identity s) (Compose m' m) /\
     MorphismsEquivalent _ _ _ (Identity d) (Compose m m').
-  
+
   Implicit Arguments InverseOf [s d].
 
   (* A morphism is an isomorphism if it has an inverse *)
@@ -139,14 +135,15 @@ Section Category.
      the axiom of choice.) *)
   Definition CategoryIsomorphism s d (m : C.(Morphism) s d) := { m' | InverseOf m m' }.
 
-  Lemma CategoryIsomorphism2Isomorphism' s d m : CategoryIsomorphism s d m -> CategoryIsomorphism' _ _ m.
-    unfold CategoryIsomorphism; unfold CategoryIsomorphism'; auto.
-  Qed.
+  Hint Unfold InverseOf CategoryIsomorphism' CategoryIsomorphism.
 
-  Hint Resolve PreComposeMorphisms PostComposeMorphisms.
+  Lemma CategoryIsomorphism2Isomorphism' s d m : CategoryIsomorphism s d m -> CategoryIsomorphism' _ _ m.
+    autounfold with *; firstorder.
+  Qed.
 
   Lemma iso_is_epi s d m : CategoryIsomorphism s d m -> Epimorphism s d m.
     unfold CategoryIsomorphism; unfold Epimorphism; unfold InverseOf; repeat (destruct 1); intros.
+    (* XXX TODO: I should find a way to not use [m1], [m2], or [x], because they're automatically introduced *)
     transitivity (Compose m1 (Compose m x)); t.
     transitivity (Compose m2 (Compose m x)); t.
     repeat (rewrite <- Associativity); t.
@@ -154,6 +151,7 @@ Section Category.
 
   Lemma iso_is_mono s d m : CategoryIsomorphism s d m -> Monomorphism s d m.
     unfold CategoryIsomorphism; unfold Monomorphism; unfold InverseOf; repeat (destruct 1); intros.
+    (* XXX TODO: I should find a way to not use [m1], [m2], or [x], because they're automatically introduced *)
     transitivity (Compose (Compose x m) m1); t.
     transitivity (Compose (Compose x m) m2); t.
     repeat (rewrite Associativity); t.
@@ -174,16 +172,17 @@ Implicit Arguments InverseOf [C s d].
 
 Hint Resolve CategoryIsomorphism2Isomorphism'.
 
+(* XXX TODO: Figure out if I can replace the nested [cut]s with [lapply] *)
 Ltac post_compose_epi e := match goal with
-                             | [ |- (RelationsEquivalent _ _ _ _ (?M1 : Morphism _ _ _) (?M2 : Morphism _ _ _)) ] =>
-                               cut (MorphismsEquivalent _ _ _ (Compose M1 e) (Compose M2 e)); 
+                             | [ |- (RelationsEquivalent _ _ _ _ ?M1 ?M2) ] =>
+                               cut (MorphismsEquivalent _ _ _ (Compose M1 e) (Compose M2 e));
                                  try match goal with
                                        | [ |- _ -> _ ] => cut (Epimorphism _ _ _ e); intuition
                                      end
                            end.
 Ltac pre_compose_mono m := match goal with
-                             | [ |- (RelationsEquivalent _ _ _ _ (?M1 : Morphism _ _ _) (?M2 : Morphism _ _ _)) ] =>
-                               cut (MorphismsEquivalent _ _ _ (Compose m M1) (Compose m M2)); 
+                             | [ |- (RelationsEquivalent _ _ _ _ ?M1 ?M2) ] =>
+                               cut (MorphismsEquivalent _ _ _ (Compose m M1) (Compose m M2));
                                  try match goal with
                                        | [ |- _ -> _ ] => cut (Monomorphism _ _ _ m); intuition
                                      end

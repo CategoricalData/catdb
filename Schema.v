@@ -75,7 +75,7 @@ Section path'_Theorems.
   Qed.
 
   Hint Rewrite concatenate'_p_noedges.
-  
+
   Lemma concatenate_addedge : forall s d d'0 d' (p : path' E s d) (e : E d d'0) (p' : path' E d'0 d'),
     concatenate (AddEdge p e) p' = concatenate' p (prepend p' e).
     induction p'; t.
@@ -141,8 +141,8 @@ Hint Rewrite paths_equivalence_equivalent.
 
 (* It's not true that [(p1 = p2 -> p3 = p4) -> (PathsEquivalent p1 p2 -> PathsEquivalent p3 p4)]
    Consider a case where p1 = NoEdges and p2 is a path containing an edge and its inverse,
-   and p3 and p4 are not equivalent paths. 
-   
+   and p3 and p4 are not equivalent paths.
+
    So, let's do the relevant theorems again... *)
 Section path'_Equivalence_Theorems.
   Variable S : Schema.
@@ -151,12 +151,12 @@ Section path'_Equivalence_Theorems.
     -> forall e : Edge _ d d', PathsEquivalent S _ _ (AddEdge p e) (AddEdge p' e).
     t. apply PostCompose. assumption.
   Qed.
-  
+
   Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S _ _ p p'
     -> forall e : Edge _ s' s, PathsEquivalent S _ _ (prepend p e) (prepend p' e).
     t. apply PreCompose. assumption.
   Qed.
-  
+
   Hint Rewrite concatenate_noedges_p concatenate_addedge.
   Hint Rewrite <- concatenate_prepend_equivalent.
   Hint Resolve prepend_equivalent addedge_equivalent.

@@ -3,11 +3,11 @@ Require Import Common EquivalenceRelation Category.
 
 Section Functor.
   Variable C D : Category.
-  
+
   (**
      Quoting from the lecture notes for 18.705, Commutative Algebra:
 
-     A map of categories is known as a functor. Namely, given 
+     A map of categories is known as a functor. Namely, given
      categories [C] and [C'], a (covariant) functor [F : C -> C'] is a rule that assigns to
      each object [A] of [C] an object [F A] of [C'] and to each map [m : A -> B] of [C] a map
      [F m : F A -> F B] of [C'] preserving composition and identity; that is,
@@ -63,6 +63,5 @@ Section Category.
     |};
     t.
   Defined.
-
 
 End Category.

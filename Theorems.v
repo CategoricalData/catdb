@@ -39,7 +39,7 @@ Section Translation_Instance.
     (fun s0 d0 (E : Edge C s0 d0) =>
       compose I (FunctionOf I) (PathOf F s0 d0 E)) p x.
     induction p; t.
-  Qed.    
+  Qed.
 
   Hint Rewrite <- compose_transferPath.
 
