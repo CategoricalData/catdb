@@ -34,7 +34,7 @@ Record SmallCategory := {
 
 Section SmallCat2Cat.
   Variable C : SmallCategory.
-  
+
   Definition smallcat2cat : Category.
     refine {| Object := C.(SObject);
       Morphism := C.(SMorphism);

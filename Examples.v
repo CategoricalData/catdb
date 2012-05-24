@@ -146,7 +146,7 @@ Lemma compose_unique' : forall n1 n2 (p : path' ge n1 n2) bv,
 
   rewrite minus_diag.
   destruct bv; reflexivity.
-  
+
   rewrite push_app.
   rewrite push_erase.
   repeat rewrite forget_forget'.

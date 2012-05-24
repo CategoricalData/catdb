@@ -43,7 +43,7 @@ Section FunctorComposition.
 
   Hint Resolve FEquivalenceOf FCompositionOf FIdentityOf.
 
-  (* this can probably be better automated *)
+  (* XXX TODO: automate theis proof better so that we don't refer to [m1], [m2], or [o] explicitly *)
   Definition ComposeFunctor (F : Functor C D) (G : Functor D E) : Functor C E.
     refine {| ObjectOf := (fun c => G (F c));
       MorphismOf := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
@@ -53,6 +53,8 @@ Section FunctorComposition.
   Defined.
 End FunctorComposition.
 
+Implicit Arguments ComposeFunctor [C D E].
+
 Section Category.
   Variable C : Category.
 
@@ -61,7 +63,7 @@ Section Category.
     refine {| ObjectOf := (fun x => x);
       MorphismOf := (fun _ _ x => x)
     |};
-    t.
+    abstract t.
   Defined.
 
 End Category.

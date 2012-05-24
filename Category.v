@@ -55,6 +55,10 @@ Implicit Arguments MorphismsEquivalent' [c o1 o2].
 Hint Rewrite LeftIdentity' RightIdentity'.
 Hint Resolve PreComposeMorphisms' PostComposeMorphisms'.
 
+Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (Compose (Compose ?M _) _) (Compose ?M _)) => repeat (rewrite Associativity); apply PreComposeMorphisms'.
+Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (Compose (Compose ?M _) _) (Compose (Compose ?M _) _)) => repeat (rewrite Associativity); apply PreComposeMorphisms'.
+Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (Compose _ (Compose _ ?M)) (Compose _ (Compose _ ?M))) => repeat (rewrite <- Associativity); apply PostComposeMorphisms'.
+
 Add Parametric Relation C s d : _ (MorphismsEquivalent C s d)
   reflexivity proved by (Reflexive _ _ _)
   symmetry proved by (Symmetric _ _ _)
@@ -93,6 +97,46 @@ Ltac identity_transitvity :=
     | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose ?M _)) ] => symmetry; identity_transitvity
     | [ |- (RelationsEquivalent _ _ _ _ ?M (Compose _ ?M)) ] => symmetry; identity_transitvity
   end.
+
+(* These [Ltac]s all seem somewhat slow.  I wonder if there's a way to speed them up. *)
+(* I kludge with [?MorphismsEquivalent] because I can't actually match on it, because
+   the patten is complicated and involves lets.  *)
+Ltac pre_compose_to_identity :=
+  match goal with
+    | [
+      H0 : (?MorphismsEquivalent _ _ _ (Identity _) (Compose ?M ?Mi)),
+      H1 : (?MorphismsEquivalent _ _ _ (Compose ?Mi ?m1) (Compose ?Mi ?m2))
+      |- (?MorphismsEquivalent _ _ _ ?m1 ?m2)
+    ] => transitivity (Compose (Compose M Mi) m1);
+    ((rewrite <- H0; rewrite LeftIdentity; reflexivity) ||
+      (transitivity (Compose (Compose M Mi) m2)); (
+        (repeat (rewrite Associativity); apply PreComposeMorphisms; apply H1) ||
+          (rewrite <- H0; rewrite LeftIdentity; reflexivity)))
+  end.
+
+Ltac post_compose_to_identity :=
+  match goal with
+    | [
+      H0 : (?MorphismsEquivalent _ _ _ (Identity _) (Compose ?M ?Mi)),
+      H1 : (?MorphismsEquivalent _ _ _ (Compose ?m1 ?M) (Compose ?m2 ?M))
+      |- (?MorphismsEquivalent _ _ _ ?m1 ?m2)
+    ] => transitivity (Compose m1 (Compose M Mi));
+    ((rewrite <- H0; rewrite RightIdentity; reflexivity) ||
+      (transitivity (Compose m2 (Compose M Mi))); (
+        (repeat (rewrite <- Associativity); apply PostComposeMorphisms; apply H1) ||
+          (rewrite <- H0; rewrite RightIdentity; reflexivity)))
+  end.
+
+Ltac rewrite_to_identity' :=
+  match goal with
+    | [
+      H : (?MorphismsEquivalent _ _ _ (Identity _) (Compose ?M ?Mi))
+      |- (?MorphismsEquivalent _ _ _ ?m1 ?m2)
+    ] => rewrite <- H; (rewrite LeftIdentity || rewrite RightIdentity)
+  end.
+Ltac rewrite_to_identity :=
+  repeat (rewrite Associativity); repeat rewrite_to_identity';
+    repeat (rewrite <- Associativity); repeat rewrite_to_identity'.
 
 Section Category.
   Variable C : Category.
@@ -142,19 +186,15 @@ Section Category.
   Qed.
 
   Lemma iso_is_epi s d m : CategoryIsomorphism s d m -> Epimorphism s d m.
-    unfold CategoryIsomorphism; unfold Epimorphism; unfold InverseOf; repeat (destruct 1); intros.
-    (* XXX TODO: I should find a way to not use [m1], [m2], or [x], because they're automatically introduced *)
-    transitivity (Compose m1 (Compose m x)); t.
-    transitivity (Compose m2 (Compose m x)); t.
-    repeat (rewrite <- Associativity); t.
+    unfold CategoryIsomorphism; unfold Epimorphism; unfold InverseOf;
+    firstorder;
+    post_compose_to_identity.
   Qed.
 
   Lemma iso_is_mono s d m : CategoryIsomorphism s d m -> Monomorphism s d m.
-    unfold CategoryIsomorphism; unfold Monomorphism; unfold InverseOf; repeat (destruct 1); intros.
-    (* XXX TODO: I should find a way to not use [m1], [m2], or [x], because they're automatically introduced *)
-    transitivity (Compose (Compose x m) m1); t.
-    transitivity (Compose (Compose x m) m2); t.
-    repeat (rewrite Associativity); t.
+    unfold CategoryIsomorphism; unfold Monomorphism; unfold InverseOf;
+    firstorder;
+    pre_compose_to_identity.
   Qed.
 
   Theorem CategoryIdentityInverse (o : C.(Object)) : InverseOf (Identity o) (Identity o).

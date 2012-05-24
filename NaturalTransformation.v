@@ -37,6 +37,8 @@ End Categories_NaturalTransformation.
 
 Implicit Arguments NaturalTransformation [C D].
 Implicit Arguments NaturalEquivalence [C D F G].
+Implicit Arguments ComponentsOf [C D F G].
+Implicit Arguments Commutes [C D F G].
 
 Section NaturalTransformationInverse.
   Variable C D : Category.
@@ -46,53 +48,108 @@ Section NaturalTransformationInverse.
   Hint Unfold InverseOf Morphism.
   Hint Extern 1 (RelationsEquivalent _ _ _ _ ?M1 ?M2) => identity_transitvity.
   Hint Resolve PostComposeMorphisms PreComposeMorphisms.
-(*
+
+  (* XXX TODO: Figure out a way to better automate this proof *)
   Definition NaturalEquivalenceInverse : (NaturalEquivalence T) -> (NaturalTransformation G F).
     unfold NaturalEquivalence; unfold CategoryIsomorphism; intros.
-    refine {| ComponentsOf := (fun c => match (X c) with
-                                          | _ => _
-                                            end)
+    refine {| ComponentsOf := (fun c => proj1_sig (X c))
     |}.
     intros.
-    Check Commutes.
-    assert (H : forall s d m m' m'', InverseOf (T d) m' -> InverseOf (T s) m'' -> MorphismsEquivalent _ (G s) (F d) (Compose m' (MorphismOf G m)) (Compose (MorphismOf F m) m'')).
-    unfold InverseOf.
-    repeat (destruct 1).
-    pre_compose_mono (T d0).
+    assert (InverseOf (T d) (proj1_sig (X d))). apply proj2_sig.
+    assert (InverseOf (T s) (proj1_sig (X s))). apply proj2_sig.
+    unfold InverseOf in *; t.
+
+    pre_compose_mono (T d).
     unfold Monomorphism.
     intros.
-    transitivity (Compose (Compose m' (T d0)) m1); t.
-    transitivity (Compose (Compose m' (T d0)) m2); t.
-    repeat (rewrite Associativity); t.
+    pre_compose_to_identity.
 
-    repeat (rewrite <- Associativity).
-    transitivity (Compose (Identity (G d0)) (G.(MorphismOf) m0)); t.
+    rewrite_to_identity.
 
-    post_compose_epi (T s0).
+    post_compose_epi (T s).
     unfold Epimorphism.
-    repeat (destruct 1); intros.
-    transitivity (Compose m1 (Compose (T s0) m'')); t.
-    transitivity (Compose m2 (Compose (T s0) m'')); t.
-    repeat (rewrite <- Associativity); t.
+    intros.
+    post_compose_to_identity.
 
-    repeat (rewrite Associativity).
-    transitivity (Compose (T d0) (Compose (MorphismOf F m0) (Identity (F s0))));
-      try (repeat (rewrite Associativity); repeat (apply PreComposeMorphisms); t).
+    rewrite_to_identity.
     symmetry.
-    apply (@Commutes C D F G T s0 d0 _).
+    apply Commutes.
   Defined.
-*)
 End NaturalTransformationInverse.
 
 Section NaturalTransformationComposition.
-  Variable C D D' : Category.
-  Variable F F' : Functor C D.
-  Variable G G' : Functor D D'.
-(*
-  Definition NTComposeC (T : NaturalTransformation F F') (T' : NaturalTransformation G G') :
-    NaturalTransformation (Compose .
+  Variable C D E : Category.
+  Variable F F' F'' : Functor C D.
+  Variable G G' : Functor D E.
 
-*)
+  Hint Resolve Commutes.
+
+  (*
+     We have the diagram
+          F
+     C -------> D
+          |
+          |
+          | T
+          |
+          V
+     C -------> D
+          F'
+          |
+          | T'
+          |
+          V
+     C ------> D
+          F''
+
+     And we want the commutative diagram
+           F m
+     F A -------> F B
+      |            |
+      |            |
+      | T A        | T B
+      |            |
+      V    F' m    V
+     F' A -------> F' B
+      |            |
+      |            |
+      | T' A       | T' B
+      |            |
+      V    F'' m   V
+     F'' A ------> F'' B
+
+  *)
+  Definition NTComposeT (T : NaturalTransformation F F') (T' : NaturalTransformation F' F'') :
+    NaturalTransformation F F''.
+    refine {| ComponentsOf := (fun c => Compose (T'.(ComponentsOf) c) (T.(ComponentsOf) c))
+      |}.
+    (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
+    abstract (t; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _))); t).
+  Defined.
+
+  (*
+     We have the diagram
+          F          G
+     C -------> D -------> E
+          |          |
+          |          |
+          | T        | U
+          |          |
+          V          V
+     C -------> D -------> E
+          F'         G'
+  *)
+  (* XXX FIX: Coq thinks that [Morphism E (G (F c)) (G' (F' c))] is not the same as
+     [Morphism _ ((ComposeFunctor F G) c) ((ComposeFunctor F' G') c)]
+     But it totally is!  Because [ComposeFunctor] is _defined_ like that.  How do I
+     tell Coq that this? *)
+(*
+  Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
+    NaturalTransformation (ComposeFunctor F G) (ComposeFunctor F' G').
+    refine {| ComponentsOf := (fun c => (Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c))))
+      |}.*)
+
+
 
 End NaturalTransformationComposition.
 
