@@ -212,6 +212,35 @@ Implicit Arguments InverseOf [C s d].
 
 Hint Resolve CategoryIsomorphism2Isomorphism'.
 
+Section CategoryIsomorphismEquivalenceRelation.
+  Variable C : Category.
+  Variable s d d' : C.
+
+  Ltac remove_middle_identity :=
+    match goal with
+      | [
+        H : (?MorphismsEquivalent _ _ _ _ (Identity _) (Compose ?b ?c))
+        |- ?MorphismsEquivalent _ _ _ _ _ (Compose (Compose ?a ?b) (Compose ?c ?d))
+      ] => transitivity (Compose (Compose a (Compose b c)) d); (
+          (repeat (rewrite Associativity); reflexivity) ||
+            rewrite <- H; rewrite RightIdentity; try assumption
+      )
+    end.
+
+  Theorem CategoryIsomorphismComposition (m : C.(Morphism) s d) (m' : C.(Morphism) d d') :
+    CategoryIsomorphism m -> CategoryIsomorphism m' -> CategoryIsomorphism (Compose m' m).
+    unfold CategoryIsomorphism. firstorder.
+    match goal with
+      | [
+        mi : C.(Morphism) d s,
+        m'i : C.(Morphism) d' d
+        |- _
+        ] => exists (Compose mi m'i)
+    end.
+    firstorder; remove_middle_identity.
+  Qed.
+End CategoryIsomorphismEquivalenceRelation.
+
 (* XXX TODO: Figure out if I can replace the nested [cut]s with [lapply] *)
 Ltac post_compose_epi e := match goal with
                              | [ |- (RelationsEquivalent _ _ _ _ ?M1 ?M2) ] =>

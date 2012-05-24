@@ -109,6 +109,8 @@ Section NaturalTransformationComposition.
 
 End NaturalTransformationComposition.
 
+Implicit Arguments NTComposeT [C D F F' F''].
+
 Section IdentityNaturalTransformation.
   Variable C D : Category.
   Variable F : Functor C D.
