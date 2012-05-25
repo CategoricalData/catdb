@@ -256,3 +256,110 @@ Ltac pre_compose_mono m := match goal with
                                        | [ |- _ -> _ ] => cut (Monomorphism _ _ _ m); intuition
                                      end
                            end.
+
+Section OppositeCategory.
+  Variable C : Category.
+
+  Definition OppositeCategory : Category.
+    refine {| Object := C.(Object);
+      Morphism := (fun s d => C.(Morphism) d s);
+      MorphismsEquivalent' := (fun _ _ m m' => @MorphismsEquivalent' C _ _ m m');
+      Identity := @Identity C;
+      Compose := (fun s d d' m1 m2 => @Compose C d' d s m2 m1)
+      |}; abstract (t; t;
+        simpl_transitivity || (rewrite Associativity; t)).
+  Defined.
+
+End OppositeCategory.
+
+Section CategoryObjects1.
+  Variable C : Category.
+
+  Definition MorphismUnique s d (m : C.(Morphism) s d) : Prop :=
+    forall m', MorphismsEquivalent _ _ _ m m'.
+
+  Implicit Arguments MorphismUnique [s d].
+
+  (* A terminal object is an object with a unique morphism from every other object *)
+  Definition TerminalObject' (o : C) : Prop :=
+    forall o', exists m : C.(Morphism) o' o, MorphismUnique m.
+
+  Definition TerminalObject (o : C) :=
+    forall o', { m : C.(Morphism) o' o | MorphismUnique m }.
+
+  (* An initial object is an object with a unique morphism from every other object *)
+  Definition InitialObject' (o : C) : Prop :=
+    forall o', exists m : C.(Morphism) o o', MorphismUnique m.
+
+  Definition InitialObject (o : C) :=
+    forall o', { m : C.(Morphism) o o' | MorphismUnique m }.
+End CategoryObjects1.
+
+Implicit Arguments MorphismUnique [C s d].
+Implicit Arguments InitialObject' [C].
+Implicit Arguments InitialObject [C].
+Implicit Arguments TerminalObject' [C].
+Implicit Arguments TerminalObject [C].
+
+Section CategoryObjects2.
+  Variable C : Category.
+
+  Ltac solve_uniqueness :=
+    match goal with
+      | [ X : forall o, { _ : Morphism ?C o ?o' | MorphismUnique _ } |- ?MorphismsEquivalent _ ?o' ?o' _ _ ] =>
+        transitivity (proj1_sig (X o'));
+          apply (proj2_sig (X o')) ||
+            (symmetry; apply (proj2_sig (X o')))
+      | [ X : forall o, { _ : Morphism ?C ?o' o | MorphismUnique _ } |- ?MorphismsEquivalent _ ?o' ?o' _ _ ] =>
+        transitivity (proj1_sig (X o'));
+          apply (proj2_sig (X o')) ||
+            (symmetry; apply (proj2_sig (X o')))
+    end.
+
+  Ltac uniqueness_exists_sig :=
+    match goal with
+      | [ X : forall o', { _ : Morphism ?C o' ?o | _ } |- (@sig (Morphism ?C ?o' ?o) _) ] =>
+        exists (proj1_sig (X o')); try apply (proj2_sig (X o'))
+      | [ X : forall o', { _ : Morphism ?C o' ?o | _ } |- (@sig2 (Morphism ?C ?o' ?o) _ _) ] =>
+        exists (proj1_sig (X o')); try apply (proj2_sig (X o'))
+      | [ X : forall o', { _ : Morphism ?C ?o o' | _ } |- (@sig (Morphism ?C ?o ?o') _) ] =>
+        exists (proj1_sig (X o')); try apply (proj2_sig (X o'))
+      | [ X : forall o', { _ : Morphism ?C ?o o' | _ } |- (@sig2 (Morphism ?C ?o ?o') _ _) ] =>
+        exists (proj1_sig (X o')); try apply (proj2_sig (X o'))
+      | [ X : forall o', { _ : Morphism ?C o' ?o | _ } |- exists _ : Morphism ?C ?o' ?o, _ ] =>
+        exists (proj1_sig (X o'))
+      | [ X : forall o', { _ : Morphism ?C ?o o' | _ } |- exists _ : Morphism ?C ?o ?o', _ ] =>
+        exists (proj1_sig (X o'))
+    end.
+
+  Lemma initial_opposite_terminal (o : C) :
+    InitialObject o -> @TerminalObject (OppositeCategory C) o.
+    t.
+  Qed.
+
+  Lemma terminal_opposite_initial (o : C) :
+    TerminalObject o -> @InitialObject (OppositeCategory C) o.
+    t.
+  Qed.
+
+  (* The terminal object is unique up to unique isomorphism *)
+  Theorem TerminalObjectUnique o : TerminalObject o ->
+    forall o', TerminalObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
+    unfold TerminalObject; intros.
+    uniqueness_exists_sig.
+    unfold CategoryIsomorphism'.
+    uniqueness_exists_sig.
+    unfold InverseOf; intuition; solve_uniqueness.
+  Qed.
+
+  (* The initial object is unique up to unique isomorphism *)
+  Theorem InitialObjectUnique o : InitialObject o ->
+    forall o', InitialObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
+    unfold InitialObject; intros.
+    uniqueness_exists_sig.
+    unfold CategoryIsomorphism'.
+    uniqueness_exists_sig.
+    unfold InverseOf; intuition; solve_uniqueness.
+  Qed.
+
+End CategoryObjects.
