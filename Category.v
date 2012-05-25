@@ -342,24 +342,22 @@ Section CategoryObjects2.
     t.
   Qed.
 
+  Hint Unfold TerminalObject InitialObject CategoryIsomorphism' InverseOf.
+
   (* The terminal object is unique up to unique isomorphism *)
   Theorem TerminalObjectUnique o : TerminalObject o ->
     forall o', TerminalObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
-    unfold TerminalObject; intros.
-    uniqueness_exists_sig.
-    unfold CategoryIsomorphism'.
-    uniqueness_exists_sig.
-    unfold InverseOf; intuition; solve_uniqueness.
+    repeat autounfold; intros;
+    repeat uniqueness_exists_sig;
+    intuition; solve_uniqueness.
   Qed.
 
   (* The initial object is unique up to unique isomorphism *)
   Theorem InitialObjectUnique o : InitialObject o ->
     forall o', InitialObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
-    unfold InitialObject; intros.
-    uniqueness_exists_sig.
-    unfold CategoryIsomorphism'.
-    uniqueness_exists_sig.
-    unfold InverseOf; intuition; solve_uniqueness.
+    repeat autounfold; intros;
+    repeat uniqueness_exists_sig;
+    intuition; solve_uniqueness.
   Qed.
 
 End CategoryObjects.
