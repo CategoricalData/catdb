@@ -360,4 +360,4 @@ Section CategoryObjects2.
     intuition; solve_uniqueness.
   Qed.
 
-End CategoryObjects.
+End CategoryObjects2.
