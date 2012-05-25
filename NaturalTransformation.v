@@ -96,20 +96,43 @@ Section NaturalTransformationComposition.
           V          V
      C -------> D -------> E
           F'         G'
+
+     And we want the commutative diagram
+             G (F m)
+     G (F A) -------> G (F B)
+        |                |
+        |                |
+        | U (T A)        | U (T B)
+        |                |
+        V     G' (F' m)  V
+     G' (F' A) -----> G' (F' B)
+
   *)
-  (* XXX FIX: Coq thinks that [Morphism E (G (F c)) (G' (F' c))] is not the same as
-     [Morphism _ ((ComposeFunctor F G) c) ((ComposeFunctor F' G') c)]
-     But it totally is!  Because [ComposeFunctor] is _defined_ like that.  How do I
-     tell Coq that this? *)
-(*
+  (* Coq is silly about types *)
+  Definition nt_compose_f_components_of (T : NaturalTransformation F F') (U : NaturalTransformation G G') c : Morphism _ ((ComposeFunctor F G) c) ((ComposeFunctor F' G') c) :=
+    (Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c))).
+  (* XXX TODO: Automate this better *)
   Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
     NaturalTransformation (ComposeFunctor F G) (ComposeFunctor F' G').
-    refine {| ComponentsOf := (fun c => (Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c))))
-      |}.*)
+    refine {| ComponentsOf := (nt_compose_f_components_of T U)
+      |}; unfold nt_compose_f_components_of.
+    t.
+    repeat (rewrite <- U.(Commutes)).
+    repeat (rewrite Associativity).
+    repeat (rewrite <- FCompositionOf).
+    transitivity (Compose (U (F' d)) (G.(MorphismOf) (Compose (F'.(MorphismOf) m) (T s)))).
+    apply PreComposeMorphisms.
+    apply FEquivalenceOf. apply Commutes.
 
+    repeat (rewrite FCompositionOf).
+    repeat (rewrite <- Associativity).
+    apply PostComposeMorphisms.
+    apply Commutes.
+  Defined.
 End NaturalTransformationComposition.
 
 Implicit Arguments NTComposeT [C D F F' F''].
+Implicit Arguments NTComposeF [C D E F F' G G'].
 
 Section IdentityNaturalTransformation.
   Variable C D : Category.
