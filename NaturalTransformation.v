@@ -77,12 +77,12 @@ Section NaturalTransformationComposition.
      F'' A ------> F'' B
 
   *)
+
   Definition NTComposeT (T : NaturalTransformation F F') (T' : NaturalTransformation F' F'') :
     NaturalTransformation F F''.
-    refine {| ComponentsOf := (fun c => Compose (T'.(ComponentsOf) c) (T.(ComponentsOf) c))
-      |}.
-    (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
-    abstract (t; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _))); t).
+    refine {| ComponentsOf := (fun c => Compose (T' c) (T c)) |};
+      (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
+      abstract (intros; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _))); eauto).
   Defined.
 
   (*
@@ -108,29 +108,25 @@ Section NaturalTransformationComposition.
      G' (F' A) -----> G' (F' B)
 
   *)
-  (* Coq is silly about types *)
-  Definition nt_compose_f_components_of (T : NaturalTransformation F F') (U : NaturalTransformation G G') c : Morphism _ ((ComposeFunctor F G) c) ((ComposeFunctor F' G') c) :=
-    (Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c))).
   (* XXX TODO: Automate this better *)
+
+  Hint Rewrite Commutes.
+  Hint Rewrite <- FCompositionOf.
+  Hint Resolve FEquivalenceOf.
+
+  Lemma FCompositionOf2 : forall C D (F : Functor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
+    MorphismsEquivalent _ _ _ (Compose (MorphismOf F m1) (Compose (MorphismOf F m2) m3)) (Compose (MorphismOf F (Compose m1 m2)) m3).
+    intros; repeat rewrite <- Associative; rewrite FCompositionOf; t.
+  Qed.
+
+  Hint Rewrite FCompositionOf2.
+
   Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
     NaturalTransformation (ComposeFunctor F G) (ComposeFunctor F' G').
-    refine {| ComponentsOf := (nt_compose_f_components_of T U)
-      |}; unfold nt_compose_f_components_of.
-    t.
-    repeat (rewrite <- U.(Commutes)).
-    repeat (rewrite Associativity).
-    repeat (rewrite <- FCompositionOf).
-    transitivity (Compose (U (F' d)) (G.(MorphismOf) (Compose (F'.(MorphismOf) m) (T s)))).
-  Admitted.
-  (* Broke this stuff with changes to [Category]; will revisit.
-    apply PreComposeMorphisms.
-    apply FEquivalenceOf. apply Commutes.
-
-    repeat (rewrite FCompositionOf).
-    repeat (rewrite <- Associativity).
-    apply PostComposeMorphisms.
-    apply Commutes.
-  Defined.*)
+    refine (Build_NaturalTransformation _ _ (ComposeFunctor F G) (ComposeFunctor F' G') 
+      (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
+      _); abstract t.
+  Defined.
 End NaturalTransformationComposition.
 
 Implicit Arguments NTComposeT [C D F F' F''].

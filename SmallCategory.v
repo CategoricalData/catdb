@@ -1,15 +1,7 @@
-Require Import Bool Omega Setoid.
+Require Import Common Bool Omega Setoid.
 Require Import EquivalenceRelation Category Functor NaturalTransformation NaturalEquivalence.
 
 Set Implicit Arguments.
-
-Ltac t' := simpl; intuition.
-
-Ltac t := t';
-  repeat (match goal with
-            | [ H : context[@eq] |- _ ] => rewrite H
-            | _ => progress autorewrite with core in *
-          end; t').
 
 Record SmallCategory := {
   SObject :> Type;
@@ -32,6 +24,8 @@ Record SmallCategory := {
   SRightIdentity : forall a b (f : SMorphism a b), SMorphismsEquivalent' (SCompose f (SIdentity a)) f
 }.
 
+Hint Resolve SPreComposeMorphisms SPostComposeMorphisms SAssociativity SLeftIdentity SRightIdentity.
+
 Section SmallCat2Cat.
   Variable C : SmallCategory.
 
@@ -41,9 +35,7 @@ Section SmallCat2Cat.
       MorphismsEquivalent' := C.(SMorphismsEquivalent');
       MorphismsEquivalent := C.(SMorphismsEquivalent);
       Compose := C.(SCompose)
-    |}.
-    apply SPreComposeMorphisms. apply SPostComposeMorphisms.
-    apply SAssociativity. apply SLeftIdentity. apply SRightIdentity.
+    |}; auto.
   Defined.
 End SmallCat2Cat.
 

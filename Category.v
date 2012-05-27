@@ -91,7 +91,11 @@ Add Parametric Morphism C s d d' :
   t.
 Qed.
 
-(* Add all one-step equivalences applied by congruence of [Compose]. *)
+
+(** * The saturation prover: up to some bound on number of steps, consider all ways to extend equivalences with pre- or post-composition. *)
+
+(** The main tactic, which tries a single round of making deductions from hypotheses that exist at the start of the round.
+    Only variables in the goal are chosen to compose. *)
 
 Ltac saturate := repeat match goal with
                           | [ H : RelationsEquivalent _ _ _ _ ?M ?N |- _ ] =>
@@ -109,7 +113,49 @@ Ltac saturate := repeat match goal with
                                      end; generalize dependent H
                         end; intros; autorewrite with core in *.
 
-Tactic Notation "morphisms" integer(numSaturations) := t; do numSaturations saturate; eauto.
+(** To be sure that all relevant terms are represented as variables, we use this tactic to create variables for
+    all non-[Compose] subterms of a morphism expression. *)
+
+Ltac extractMorphisms G :=
+  match G with
+    | Compose ?G1 ?G2 =>
+      extractMorphisms G1;
+      extractMorphisms G2
+    | _ =>
+      match goal with
+        | [ x := G |- _ ] => idtac
+        | [ x : _ |- _ ] =>
+          match x with
+            | G => idtac
+          end
+        | _ => pose G
+      end
+  end.
+
+(** This tactic calls the above on two morphisms being compared for equivalence in the goal. *)
+
+Ltac createVariables :=
+  match goal with
+    | [ |- RelationsEquivalent _ _ _ _ ?X ?Y ] =>
+      extractMorphisms X;
+      extractMorphisms Y
+  end.
+
+(** After we are done with our variable-related hijinks, we can clean up by removing the new variables,
+    replacing them by their definitions. *)
+
+Ltac removeVariables :=
+  repeat match goal with
+           | [ x := _ |- _ ] => subst x
+         end.
+
+(** This notation ties it all together, taking as argument the number of [saturate] rounds to run. *)
+
+Tactic Notation "morphisms" integer(numSaturations) :=
+  t; createVariables; do numSaturations saturate; removeVariables; eauto 3.
+
+
+(** * Version of [Associativity] that avoids going off into the weeds in the presence of unification variables *)
 
 Definition NoEvar T (_ : T) := True.
 
@@ -125,6 +171,9 @@ Ltac noEvar := match goal with
                end.
 
 Hint Rewrite AssociativityNoEvar using noEvar.
+
+
+(** * Back to the main content.... *)
 
 Section Category.
   Variable C : Category.
