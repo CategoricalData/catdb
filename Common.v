@@ -1,6 +1,6 @@
 Set Implicit Arguments.
 
-Ltac t' := simpl; intuition.
+Ltac t' := repeat progress (simpl; intuition).
 
 Ltac t := t';
   repeat (match goal with

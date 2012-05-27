@@ -116,6 +116,8 @@ Record Schema := {
     PathsEquivalent' p1 p2 -> PathsEquivalent' (AddEdge p1 E) (AddEdge p2 E)
 }.
 
+Hint Resolve PostCompose.
+
 Theorem PreCompose' : forall S s d (E : S.(Edge) s d) d' (p1 p2 : path' _ d d'),
   PathsEquivalent _ _ _ p1 p2 -> PathsEquivalent _ _ _ (prepend p1 E) (prepend p2 E).
   intros; apply PreCompose; auto.
@@ -127,6 +129,8 @@ Theorem PostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(Edge) d d')
   intros; apply PostCompose; auto.
 Qed.
 
+Hint Resolve PreCompose' PostCompose'.
+
 Add Parametric Relation S s d : _ (PathsEquivalent S s d)
   reflexivity proved by (Reflexive _ _ _)
   symmetry proved by (Symmetric _ _ _)
@@ -134,7 +138,7 @@ Add Parametric Relation S s d : _ (PathsEquivalent S s d)
     as paths_eq.
 
 Lemma paths_equivalence_equivalent S : relations_equivalence_equivalent S.(PathsEquivalent).
-  unfold relations_equivalence_equivalent; trivial.
+  hnf; trivial.
 Qed.
 
 Hint Rewrite paths_equivalence_equivalent.
@@ -149,12 +153,12 @@ Section path'_Equivalence_Theorems.
 
   Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent S _ _ p p'
     -> forall e : Edge _ d d', PathsEquivalent S _ _ (AddEdge p e) (AddEdge p' e).
-    t. apply PostCompose. assumption.
+    t.
   Qed.
 
   Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S _ _ p p'
     -> forall e : Edge _ s' s, PathsEquivalent S _ _ (prepend p e) (prepend p' e).
-    t. apply PreCompose. assumption.
+    t.
   Qed.
 
   Hint Rewrite concatenate_noedges_p concatenate_addedge.
@@ -171,31 +175,34 @@ Section path'_Equivalence_Theorems.
     induction p2; t.
   Qed.
 
+  Hint Resolve pre_concatenate_equivalent post_concatenate_equivalent.
+
   Add Parametric Morphism s d d' p:
     (@concatenate _ S.(Edge) s d d' p)
     with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_pre_mor.
-    t; apply pre_concatenate_equivalent; assumption.
+    t.
   Qed.
 
   Add Parametric Morphism s d d' p:
     (fun p' => (@concatenate _ S.(Edge) s d d' p' p))
     with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_post_mor.
-    t; apply post_concatenate_equivalent; assumption.
+    t.
   Qed.
 
-  Hint Rewrite concatenate_prepend_equivalent.
-  Hint Resolve post_concatenate_equivalent pre_concatenate_equivalent.
+  Hint Resolve Transitive.
 
   Lemma concatenate_equivalent : forall s d d' (p1 p1' : path' _ s d) (p2 p2' : path' _ d d'),
     PathsEquivalent S _ _ p1 p1' -> PathsEquivalent S _ _ p2 p2' -> PathsEquivalent S _ _ (concatenate p1 p2) (concatenate p1' p2').
-    intros; transitivity (concatenate p1 p2'); t.
+    t; eauto.
   Qed.
 End path'_Equivalence_Theorems.
+
+Hint Resolve concatenate_equivalent.
 
 Add Parametric Morphism S s d d' :
   (@concatenate _ S.(Edge) s d d')
   with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_mor.
-  t; apply concatenate_equivalent; assumption.
+  t.
 Qed.
 
 Section Schema.
