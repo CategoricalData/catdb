@@ -122,8 +122,8 @@ Section NaturalTransformationComposition.
   Hint Rewrite FCompositionOf2.
 
   Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
-    NaturalTransformation (ComposeFunctor F G) (ComposeFunctor F' G').
-    refine (Build_NaturalTransformation _ _ (ComposeFunctor F G) (ComposeFunctor F' G') 
+    NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
+    refine (Build_NaturalTransformation _ _ (ComposeFunctors G F) (ComposeFunctors G' F') 
       (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
       _); abstract t.
   Defined.

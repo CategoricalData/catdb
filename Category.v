@@ -9,6 +9,7 @@ Record Category := {
 
   MorphismsEquivalent' : forall o1 o2, Morphism o1 o2 -> Morphism o1 o2 -> Prop;
   MorphismsEquivalent : EquivalenceRelation MorphismsEquivalent';
+  GeneralizedMorphismsEquivalent := GeneralizedRelationsEquivalent MorphismsEquivalent;
 
   Identity : forall o, Morphism o o;
   Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d';
@@ -50,6 +51,7 @@ Qed.
 Implicit Arguments Compose [c s d d'].
 Implicit Arguments Identity [c].
 Implicit Arguments MorphismsEquivalent' [c o1 o2].
+Implicit Arguments GeneralizedMorphismsEquivalent [c o1 o2 o1' o2'].
 
 (* XXX TODO: I should look at what hints exist for @eq, and make relevant hints for MorphismsEquivalent *)
 Hint Rewrite LeftIdentity' RightIdentity'.
@@ -216,12 +218,12 @@ Section Category.
 
   Hint Unfold InverseOf CategoryIsomorphism' CategoryIsomorphism.
 
-  Lemma InverseOf1 : forall s d (m : _ s d) m', InverseOf m m'
+  Lemma InverseOf1 : forall (s d : C) (m : _ s d) m', InverseOf m m'
     -> MorphismsEquivalent _ _ _ (Identity s) (Compose m' m).
     firstorder.
   Qed.
 
-  Lemma InverseOf2 : forall s d (m : _ s d) m', InverseOf m m'
+  Lemma InverseOf2 : forall (s d : C) (m : _ s d) m', InverseOf m m'
     -> MorphismsEquivalent _ _ _ (Identity d) (Compose m m').
     firstorder.
   Qed.
@@ -273,10 +275,16 @@ Section CategoryIsomorphismEquivalenceRelation.
 
   Theorem CategoryIsomorphismComposition (m : C.(Morphism) s d) (m' : C.(Morphism) d d') :
     CategoryIsomorphism m -> CategoryIsomorphism m' -> CategoryIsomorphism (Compose m' m).
-    firstorder;
+    repeat (destruct 1);
       match goal with
         | [ m : Morphism _ _ _, m' : Morphism _ _ _ |- _ ] => exists (Compose m m')
-      end; firstorder; morphisms 2.
+      end; unfold InverseOf in *; intuition;
+    match goal with
+      | [ |- ?Equiv _ (Compose (Compose ?a ?b) (Compose ?c ?d)) ] => transitivity (Compose (Compose a (Compose b c)) d); try solve [ t ]
+    end.
+    rewrite <- H1; t.
+    rewrite <- H0; t.
+    (*firstorder; morphisms 2.*)
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
 
