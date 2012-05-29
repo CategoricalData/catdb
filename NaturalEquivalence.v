@@ -85,7 +85,7 @@ Section FunctorNaturalEquivalenceRelation.
   Lemma functors_naturally_equivalent_trans (F G H : Functor C D) :
     FunctorsNaturallyEquivalent F G -> FunctorsNaturallyEquivalent G H -> FunctorsNaturallyEquivalent F H.
     destruct 1 as [ T [ ] ]; destruct 1 as [ U [ ] ];
-      exists (NTComposeT T U); eexists; hnf; simpl; eauto.
+      exists (NTComposeT U T); eexists; hnf; simpl; eauto.
   Qed.
 
   Definition FunctorsNaturallyEquivalentRelation : Relation_Definitions.relation (Functor C D) := (@FunctorsNaturallyEquivalent C D).

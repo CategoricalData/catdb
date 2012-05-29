@@ -107,7 +107,7 @@ Section NaturalTransformationComposition.
 
   *)
 
-  Definition NTComposeT (T : NaturalTransformation F F') (T' : NaturalTransformation F' F'') :
+  Definition NTComposeT (T' : NaturalTransformation F' F'') (T : NaturalTransformation F F') :
     NaturalTransformation F F''.
     refine {| ComponentsOf := (fun c => Compose (T' c) (T c)) |};
       (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
@@ -150,7 +150,7 @@ Section NaturalTransformationComposition.
 
   Hint Rewrite FCompositionOf2.
 
-  Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
+  Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F'):
     NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
     refine (Build_NaturalTransformation _ _ (ComposeFunctors G F) (ComposeFunctors G' F')
       (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
