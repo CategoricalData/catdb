@@ -29,11 +29,40 @@ Section Categories_NaturalTransformation.
       (Compose (ComponentsOf d) (F.(MorphismOf) m))
       (Compose (G.(MorphismOf) m) (ComponentsOf s))
   }.
+
+  Definition NaturalTransformationsEquivalent (T U : NaturalTransformation) :=
+    forall o, MorphismsEquivalent _ _ _ (T.(ComponentsOf) o) (U.(ComponentsOf) o).
 End Categories_NaturalTransformation.
 
 Implicit Arguments NaturalTransformation [C D].
 Implicit Arguments ComponentsOf [C D F G].
 Implicit Arguments Commutes [C D F G].
+Implicit Arguments NaturalTransformationsEquivalent [C D F G].
+
+Section NaturalTransformationsEquivalenceRelation.
+  Variable C D : Category.
+  Variable F G H : Functor C D.
+
+  Lemma NTeq_refl (T : NaturalTransformation F G) : NaturalTransformationsEquivalent T T.
+    unfold NaturalTransformationsEquivalent; t.
+  Qed.
+
+  Lemma NTeq_sym (T U : NaturalTransformation F G) :
+    NaturalTransformationsEquivalent T U -> NaturalTransformationsEquivalent U T.
+    unfold NaturalTransformationsEquivalent; intros; symmetry; t.
+  Qed.
+
+  Lemma NTeq_trans (T U V: NaturalTransformation F G) :
+    NaturalTransformationsEquivalent T U -> NaturalTransformationsEquivalent U V -> NaturalTransformationsEquivalent T V.
+    unfold NaturalTransformationsEquivalent; intros H0 H1 o; specialize (H0 o); specialize (H1 o); simpl_transitivity.
+  Qed.
+End NaturalTransformationsEquivalenceRelation.
+
+Add Parametric Relation C D F G : _ (@NaturalTransformationsEquivalent C D F G)
+  reflexivity proved by (NTeq_refl _ _ _ _)
+  symmetry proved by (NTeq_sym _ _ _ _)
+  transitivity proved by (NTeq_trans _ _ _ _)
+    as natural_transformation_eq.
 
 Section NaturalTransformationComposition.
   Variable C D E : Category.
@@ -131,6 +160,21 @@ End NaturalTransformationComposition.
 
 Implicit Arguments NTComposeT [C D F F' F''].
 Implicit Arguments NTComposeF [C D E F F' G G'].
+
+Add Parametric Morphism C D F F' F'' :
+  (@NTComposeT C D F F' F'')
+  with signature (@NaturalTransformationsEquivalent _ _ _ _) ==> (@NaturalTransformationsEquivalent _ _ _ _) ==> (@NaturalTransformationsEquivalent _ _ _ _)
+    as nt_compose_t_eq_mor.
+  unfold NTComposeT; unfold NaturalTransformationsEquivalent; t.
+Qed.
+
+Add Parametric Morphism C D E F F' G G' :
+  (@NTComposeF C D E F F' G G')
+  with signature (@NaturalTransformationsEquivalent _ _ _ _) ==> (@NaturalTransformationsEquivalent _ _ _ _) ==> (@NaturalTransformationsEquivalent _ _ _ _)
+    as nt_compose_f_eq_mor.
+  Hint Resolve FEquivalenceOf.
+  unfold NTComposeF; unfold NaturalTransformationsEquivalent; t.
+Qed.
 
 Section IdentityNaturalTransformation.
   Variable C D : Category.
