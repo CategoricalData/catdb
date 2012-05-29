@@ -56,7 +56,7 @@ Section FunctorsEquivalenceReltation.
   Variable C D : Category.
 
   Hint Unfold FunctorsEquivalent GeneralizedMorphismsEquivalent.
-  
+
   Lemma functors_equivalent_refl (F : Functor C D) : FunctorsEquivalent F F.
     repeat (autounfold with core in *); t.
   Qed.
@@ -123,7 +123,7 @@ Add Parametric Morphism C D E :
   cbv delta.
   rewrite FCompositionOf.
   unfold ComposeFunctors MorphismOf.
-  apply 
+  apply
   t.
   t. transitivity (ComposeFunctors x y0).
   unfold FunctorsNaturallyEquivalent in *.
@@ -152,7 +152,7 @@ End Category.
 
 Section FunctorCompositionLemmas.
   Variable B C D E : Category.
-  
+
   Hint Unfold FunctorsEquivalent GeneralizedMorphismsEquivalent.
   Hint Resolve FEquivalenceOf FCompositionOf FIdentityOf.
 
@@ -190,7 +190,7 @@ end.
     match goal with
       [ H : ?a ~= ?b |- _ ] => cut (a = b)
     end.
-      
+
     rewrite <- x.
     generalize (FEquivalenceOf G H).
     Check @JMeq_eq.
@@ -208,7 +208,7 @@ end.
     FunctorsEquivalent G1 G2 -> FunctorsEquivalent (ComposeFunctors G1 F) (ComposeFunctors G2 F).
     admit.
   Qed.
-  
+
   Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     FunctorsEquivalent (ComposeFunctors (ComposeFunctors H G) F) (ComposeFunctors H (ComposeFunctors G F)).
     admit.

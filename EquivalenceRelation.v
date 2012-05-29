@@ -36,7 +36,7 @@ Section EquivalenceRelation.
     GeneralizedRelationsEquivalent R r r' -> GeneralizedRelationsEquivalent R r' r'' -> GeneralizedRelationsEquivalent R r r''.
     repeat (destruct 1); constructor.
     match goal with
-      [ 
+      [
         H : @RelationsEquivalent _ _ _ ?r ?r',
         H' : @RelationsEquivalent _ _ _ ?r' ?r''
         |- @RelationsEquivalent _ _ _ ?r ?r''

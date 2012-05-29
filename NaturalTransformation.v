@@ -123,7 +123,7 @@ Section NaturalTransformationComposition.
 
   Definition NTComposeF (T : NaturalTransformation F F') (U : NaturalTransformation G G') :
     NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    refine (Build_NaturalTransformation _ _ (ComposeFunctors G F) (ComposeFunctors G' F') 
+    refine (Build_NaturalTransformation _ _ (ComposeFunctors G F) (ComposeFunctors G' F')
       (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
       _); abstract t.
   Defined.
