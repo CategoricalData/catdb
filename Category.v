@@ -9,7 +9,6 @@ Record Category := {
 
   MorphismsEquivalent' : forall o1 o2, Morphism o1 o2 -> Morphism o1 o2 -> Prop;
   MorphismsEquivalent : EquivalenceRelation MorphismsEquivalent';
-  GeneralizedMorphismsEquivalent := GeneralizedRelationsEquivalent MorphismsEquivalent;
 
   Identity : forall o, Morphism o o;
   Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d';
@@ -51,7 +50,6 @@ Qed.
 Implicit Arguments Compose [c s d d'].
 Implicit Arguments Identity [c].
 Implicit Arguments MorphismsEquivalent' [c o1 o2].
-Implicit Arguments GeneralizedMorphismsEquivalent [c o1 o2 o1' o2'].
 
 (* XXX TODO: I should look at what hints exist for @eq, and make relevant hints for MorphismsEquivalent *)
 Hint Rewrite LeftIdentity' RightIdentity'.

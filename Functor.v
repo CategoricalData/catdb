@@ -182,7 +182,7 @@ End Category.
 Section FunctorCompositionLemmas.
   Variable B C D E : Category.
 
-  Hint Unfold FunctorsEquivalent GeneralizedMorphismsEquivalent.
+  Hint Unfold FunctorsEquivalent.
   Hint Resolve FEquivalenceOf FCompositionOf FIdentityOf.
 
   Hint Extern 1 (MorphismsEquivalent' _ _) => apply FEquivalenceOf.
