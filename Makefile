@@ -1,4 +1,4 @@
-MODULES    := Common EquivalenceRelation Schema Category Functor ComputableCategory NaturalTransformation NaturalEquivalence FunctorCategory SmallCategory CategorySchemaEquivalence Examples Theorems
+MODULES    := Common EquivalenceRelation Schema Category Functor ComputableCategory NaturalTransformation NaturalEquivalence FunctorCategory SmallCategory Limits CategorySchemaEquivalence Examples Theorems
 VS         := $(MODULES:%=%.v)
 
 .PHONY: coq clean
