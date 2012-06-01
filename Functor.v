@@ -153,12 +153,29 @@ Section Category.
     abstract t.
   Defined.
 
+  Hint Extern 1 (_ = _) => apply functional_extensionality_dep.
+
+  (* XXX TODO: Automate these better *)
   Lemma LeftIdentityFunctor (F : Functor D C) : FunctorsEquivalent (ComposeFunctors IdentityFunctor F) F.
-    destruct F; unfold FunctorsEquivalent, ComposeFunctors; feq; eauto 15.
+    destruct F. unfold FunctorsEquivalent, ComposeFunctors; feq.
+    assert (H0 : (fun c => ObjectOf0 c) = ObjectOf0) by t.
+    assert (H1 : (fun s d m => MorphismOf0 s d m) = MorphismOf0) by t.
+    generalize FIdentityOf0; generalize FCompositionOf0; generalize FEquivalenceOf0.
+    rewrite <- H1.
+    generalize MorphismOf0.
+    rewrite <- H0.
+    eauto 15.
   Qed.
 
   Lemma RightIdentityFunctor (F : Functor C D) : FunctorsEquivalent (ComposeFunctors F IdentityFunctor) F.
-    destruct F; unfold FunctorsEquivalent, ComposeFunctors; feq; eauto 15.
+    destruct F. unfold FunctorsEquivalent, ComposeFunctors; feq.
+    assert (H0 : (fun c => ObjectOf0 c) = ObjectOf0) by t.
+    assert (H1 : (fun s d m => MorphismOf0 s d m) = MorphismOf0) by t.
+    generalize FIdentityOf0; generalize FCompositionOf0; generalize FEquivalenceOf0.
+    rewrite <- H1.
+    generalize MorphismOf0.
+    rewrite <- H0.
+    eauto 15.
   Qed.
 End Category.
 
