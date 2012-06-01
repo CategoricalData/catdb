@@ -1,5 +1,5 @@
 Require Import Program.
-Require Import Common EquivalenceRelation Schema Category Definitions.
+Require Import Common EquivalenceRelation Schema Category CategorySchemaEquivalence.
 
 Set Implicit Arguments.
 
