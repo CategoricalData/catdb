@@ -1,4 +1,4 @@
-Require Import Setoid.
+Require Import Setoid Program.
 Require Import Common EquivalenceRelation Category Functor.
 
 Section Categories_NaturalTransformation.
@@ -189,3 +189,95 @@ Section IdentityNaturalTransformation.
 End IdentityNaturalTransformation.
 
 Implicit Arguments IdentityNaturalTransformation [C D].
+
+Section FunctorEquivalence.
+  Variable C D : Category.
+
+  Definition equiv_natural_trans_components_of (F F' G G' : Functor C D) (FeF : @ObjectOf _ _ F' = @ObjectOf _ _ F) (FeG : @ObjectOf _ _ G' = @ObjectOf _ _ G) :
+    NaturalTransformation F G -> (forall c : C, Morphism D (F' c) (G' c)).
+    firstorder; t.
+  Defined.
+
+  Hint Unfold equiv_natural_trans_components_of.
+  Hint Resolve @functional_extensionality_dep.
+  Ltac do_proof_irrelevance := apply proof_irrelevance.
+  Ltac eq2eq_refl :=
+    repeat match goal with
+             | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by do_proof_irrelevance; subst
+           end.
+
+  Lemma equiv_natural_trans_components_of_id (F G : Functor C D) (FeF : @ObjectOf _ _ F = @ObjectOf _ _ F) (FeG : @ObjectOf _ _ G = @ObjectOf _ _ G)
+    (T : NaturalTransformation F G) :
+    equiv_natural_trans_components_of _ _ _ _ FeF FeG T = T.(ComponentsOf).
+    eq2eq_refl; destruct T; t.
+  Qed.
+
+  Hint Unfold equiv_natural_trans_components_of.
+
+  Definition Build_EquivalentNaturalTransformation' (F F' G G' : Functor C D) (FeF : @ObjectOf _ _ F' = @ObjectOf _ _ F) (FeG : @ObjectOf _ _ G' = @ObjectOf _ _ G) :
+    FunctorsEquivalent F F' -> FunctorsEquivalent G G' -> NaturalTransformation F G -> NaturalTransformation F' G'.
+    intros FeF' FeG' T.
+    refine {| ComponentsOf := equiv_natural_trans_components_of _ _ _ _ FeF FeG T |}.
+    abstract (
+      unfold FunctorsEquivalent in *;
+        repeat match goal with
+                 | [ H : exists _ : _, _ |- _ ] => destruct H
+                 | [ H : _ /\ _ |- _ ] => destruct H
+               end;
+        unfold ObjectOf, MorphismOf in *;
+          destruct T; subst;
+            unfold ObjectOf, MorphismOf in *; simpl;
+              eq2eq_refl;
+              unfold eq_rect_r, eq_sym; repeat (rewrite <- eq_rect_eq);
+                t;
+                repeat match goal with
+                         | [ H : _ |- _ ] => rewrite <- H; t
+                       end
+    ).
+  Defined.
+
+  Definition Build_EquivalentNaturalTransformation (F F' G G' : Functor C D) : FunctorsEquivalent F F' -> FunctorsEquivalent G G' ->
+    NaturalTransformation F G -> NaturalTransformation F' G'.
+    intros FeF FeG T.
+    unfold FunctorsEquivalent in *.
+    assert (@ObjectOf _ _ F' = @ObjectOf _ _ F /\ @ObjectOf _ _ G' = @ObjectOf _ _ G);
+      repeat match goal with
+               | [ H : exists _ : _, _ |- _ ] => destruct H
+             end; t.
+    match goal with
+      | [ H0 : _, H1 : _ |- _ ] =>
+        exact (Build_EquivalentNaturalTransformation' _ _ _ _ H0 H1 FeF FeG T)
+    end.
+  Defined.
+
+  Definition Build_EquivalentNaturalTransformation_id' (F G : Functor C D) (FeF : FunctorsEquivalent F F) (FeG : FunctorsEquivalent G G)
+    (T : NaturalTransformation F G) : (Build_EquivalentNaturalTransformation F F G G FeF FeG T).(ComponentsOf) = T.(ComponentsOf).
+    apply functional_extensionality_dep; intros.
+    destruct T, FeF, FeG.
+    repeat (match goal with
+              | [ H : exists _ : _, _ |- _ ] => destruct H
+              | [ H : _ /\ _ |- _ ] => destruct H
+            end).
+    subst; simpl;
+      unfold eq_rect_r;
+        repeat (rewrite <- eq_rect_eq); reflexivity.
+  Qed.
+
+  Hint Resolve f_equal Build_EquivalentNaturalTransformation_id'.
+
+  Definition Build_EquivalentNaturalTransformation_id (F G : Functor C D) (FeF : FunctorsEquivalent F F) (FeG : FunctorsEquivalent G G)
+    (T : NaturalTransformation F G) : Build_EquivalentNaturalTransformation F F G G FeF FeG T = T.
+    match goal with
+      | [ |- ?a = ?b ] =>
+        assert (ComponentsOf a = ComponentsOf b) by t;
+        destruct a; destruct b
+    end;
+    unfold ComponentsOf in *; subst; apply f_equal; apply proof_irrelevance.
+  Qed.
+
+End FunctorEquivalence.
+
+Implicit Arguments Build_EquivalentNaturalTransformation [C D F F' G G'].
+Implicit Arguments Build_EquivalentNaturalTransformation_id [C D F G].
+
+Hint Rewrite Build_EquivalentNaturalTransformation_id.
