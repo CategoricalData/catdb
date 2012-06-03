@@ -18,7 +18,7 @@ Section EquivalenceRelation.
   }.
 
   Definition relations_equivalence_equivalent (R : EquivalenceRelation) : Prop :=
-    forall o1 o2, @RelationsEquivalent' o1 o2 = @RelationsEquivalent R o1 o2.
+    @RelationsEquivalent' = @RelationsEquivalent R.
 End EquivalenceRelation.
 
 Implicit Arguments EquivalenceRelation [Object Relation].

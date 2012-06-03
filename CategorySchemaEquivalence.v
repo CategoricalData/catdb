@@ -32,20 +32,6 @@ Section Schema_Category_Equivalence.
       | AddEdge _ _ p' E => Compose E (compose_morphism_path p')
     end.
 
-  Lemma MorphismsEquivalent_symm : forall s o1 o2 x y,
-    MorphismsEquivalent _ _ _ y x
-    -> MorphismsEquivalent s o1 o2 x y.
-    intros; symmetry; eassumption.
-  Qed.
-
-  Lemma MorphismsEquivalent_trans : forall s o1 o2 x y z,
-    MorphismsEquivalent _ _ _ x z
-    -> MorphismsEquivalent _ _ _ z y
-    -> MorphismsEquivalent s o1 o2 x y.
-    intros; transitivity z; eassumption.
-  Qed.
-
-  Hint Resolve MorphismsEquivalent_symm MorphismsEquivalent_trans.
   Hint Resolve Associativity' LeftIdentity' RightIdentity' PreComposeMorphisms' PostComposeMorphisms'.
 
   Hint Rewrite Associativity.
@@ -61,6 +47,6 @@ Section Schema_Category_Equivalence.
     refine {| Vertex := C;
       Edge := C.(Morphism);
       PathsEquivalent' := (fun s d (p p' : _ s d) => MorphismsEquivalent _ _ _ (compose_morphism_path p) (compose_morphism_path p'))
-    |}; abstract (t; eauto).
+    |}; abstract (t; etransitivity; eauto).
   Defined.
 End Schema_Category_Equivalence.

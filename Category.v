@@ -66,11 +66,13 @@ Add Parametric Relation C s d : _ (MorphismsEquivalent C s d)
   transitivity proved by (Transitive _ _ _)
     as morphisms_eq.
 
-Lemma morphisms_equivalence_equivalent C : relations_equivalence_equivalent C.(MorphismsEquivalent).
+Lemma morphisms_equivalence_equivalent : MorphismsEquivalent' = MorphismsEquivalent.
   hnf; trivial.
 Qed.
 
 Hint Rewrite morphisms_equivalence_equivalent.
+Hint Extern 1 (MorphismsEquivalent' _ _) => reflexivity.
+Hint Extern 1 (MorphismsEquivalent _ _) => reflexivity.
 
 Section Morphism_Equivalence_Theorems.
   Variable C : Category.
@@ -205,13 +207,28 @@ Section Category.
 
   Implicit Arguments InverseOf [s d].
 
+  Lemma InverseOf_sym s d m m' : @InverseOf s d m m' -> @InverseOf d s m' m.
+    firstorder.
+  Qed.
+
   (* A morphism is an isomorphism if it has an inverse *)
   Definition CategoryIsomorphism' s d (m : C.(Morphism) s d) : Prop :=
     exists m', InverseOf m m'.
 
   (* As per David's comment, everything is better when we supply a witness rather
-     than an assertion.  (In particular the [exists m' -> m'] transformation requires
-     the axiom of choice.) *)
+     than an assertion.  (In particular the [exists m' -> m'] transformation is only
+     permissible for [m' : Prop].  Trying it on other with
+       refine match H with
+                | ex_intro x x0 => _ x x0
+              end
+     gives
+       Error:
+       Incorrect elimination of "H" in the inductive type "ex":
+       the return type has sort "Type" while it should be "Prop".
+       Elimination of an inductive object of sort Prop
+       is not allowed on a predicate in sort Type
+       because proofs can be eliminated only to build proofs.
+     ) *)
   Definition CategoryIsomorphism s d (m : C.(Morphism) s d) := { m' | InverseOf m m' }.
 
   Hint Unfold InverseOf CategoryIsomorphism' CategoryIsomorphism.
@@ -276,13 +293,8 @@ Section CategoryIsomorphismEquivalenceRelation.
     repeat (destruct 1);
       match goal with
         | [ m : Morphism _ _ _, m' : Morphism _ _ _ |- _ ] => exists (Compose m m')
-      end; unfold InverseOf in *; intuition;
-    match goal with
-      | [ |- ?Equiv _ (Compose (Compose ?a ?b) (Compose ?c ?d)) ] => transitivity (Compose (Compose a (Compose b c)) d); try solve [ t ]
-    end.
-    rewrite <- H1; t.
-    rewrite <- H0; t.
-    (*firstorder; morphisms 2.*)
+      end;
+      firstorder; morphisms 1.
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
 
@@ -344,7 +356,7 @@ Section CategoryObjects2.
     t.
   Qed.
 
-  Hint Unfold TerminalObject InitialObject CategoryIsomorphism' InverseOf.
+  Hint Unfold TerminalObject InitialObject InverseOf.
 
   Hint Resolve Transitive.
   Hint Immediate Symmetric.

@@ -106,7 +106,7 @@ Section FunctorsEquivalenceReltation.
 
   Lemma functors_equivalent_trans (F G H : Functor C D) :
     FunctorsEquivalent F G -> FunctorsEquivalent G H -> FunctorsEquivalent F H.
-    start_functors_equivalent; feq; eauto 15.
+    feq; eauto 15.
   Qed.
 End FunctorsEquivalenceReltation.
 
