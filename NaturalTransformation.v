@@ -200,11 +200,6 @@ Section FunctorEquivalence.
 
   Hint Unfold equiv_natural_trans_components_of.
   Hint Resolve @functional_extensionality_dep.
-  Ltac do_proof_irrelevance := apply proof_irrelevance.
-  Ltac eq2eq_refl :=
-    repeat match goal with
-             | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by do_proof_irrelevance; subst
-           end.
 
   Lemma equiv_natural_trans_components_of_id (F G : Functor C D) (FeF : @ObjectOf _ _ F = @ObjectOf _ _ F) (FeG : @ObjectOf _ _ G = @ObjectOf _ _ G)
     (T : NaturalTransformation F G) :
@@ -220,10 +215,7 @@ Section FunctorEquivalence.
     refine {| ComponentsOf := equiv_natural_trans_components_of _ _ _ _ FeF FeG T |}.
     abstract (
       unfold FunctorsEquivalent in *;
-        repeat match goal with
-                 | [ H : exists _ : _, _ |- _ ] => destruct H
-                 | [ H : _ /\ _ |- _ ] => destruct H
-               end;
+        destruct_hypotheses;
         unfold ObjectOf, MorphismOf in *;
           destruct T; subst;
             unfold ObjectOf, MorphismOf in *; simpl;
@@ -241,9 +233,7 @@ Section FunctorEquivalence.
     intros FeF FeG T.
     unfold FunctorsEquivalent in *.
     assert (@ObjectOf _ _ F' = @ObjectOf _ _ F /\ @ObjectOf _ _ G' = @ObjectOf _ _ G);
-      repeat match goal with
-               | [ H : exists _ : _, _ |- _ ] => destruct H
-             end; t.
+      destruct_hypotheses; t.
     match goal with
       | [ H0 : _, H1 : _ |- _ ] =>
         exact (Build_EquivalentNaturalTransformation' _ _ _ _ H0 H1 FeF FeG T)
@@ -254,10 +244,7 @@ Section FunctorEquivalence.
     (T : NaturalTransformation F G) : (Build_EquivalentNaturalTransformation F F G G FeF FeG T).(ComponentsOf) = T.(ComponentsOf).
     apply functional_extensionality_dep; intros.
     destruct T, FeF, FeG.
-    repeat (match goal with
-              | [ H : exists _ : _, _ |- _ ] => destruct H
-              | [ H : _ /\ _ |- _ ] => destruct H
-            end).
+    destruct_hypotheses.
     subst; simpl;
       unfold eq_rect_r;
         repeat (rewrite <- eq_rect_eq); reflexivity.
@@ -278,6 +265,7 @@ Section FunctorEquivalence.
 End FunctorEquivalence.
 
 Implicit Arguments Build_EquivalentNaturalTransformation [C D F F' G G'].
+Implicit Arguments Build_EquivalentNaturalTransformation' [C D F F' G G'].
 Implicit Arguments Build_EquivalentNaturalTransformation_id [C D F G].
 
 Hint Rewrite Build_EquivalentNaturalTransformation_id.
