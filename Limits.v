@@ -48,3 +48,36 @@ Section DiagonalFunctor.
 End DiagonalFunctor.
 
 Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of_components_of diagonal_functor_morphism_of.
+
+Section Limit.
+  Variable C D : Category.
+  Variable F : Functor D C.
+
+  (**
+     Quoting Dwyer and Spalinski:
+
+     Let [D] be a small category and [F : D -> C] a functor. A limit
+     for [F] is an object [L] of [C] together with a natural transformation [t : Δ L -> F]
+     such that for every object [X] of [C] and every natural transformation [s : Δ X -> F],
+     there exists a unique map [s' : X -> L] in [C] such that [t (Δ s') = s].
+     **)
+  Definition Limit := { L : C & { t : NaturalTransformation ((DiagonalFunctor C D) L) F |
+    forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
+      exists s' : C.(Morphism) X L, MorphismUnique s'
+        /\ NaturalTransformationsEquivalent (NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s')) s
+  } }.
+
+  (**
+     Quoting Dwyer and Spalinski:
+
+     Let [D] be a small category and [F : D -> C] a functor. A colimit
+     for [F] is an object [c] of [C] together with a natural transformation [t : F -> Δ c]
+     such that for every object [X] of [C] and every natural transformation [s : F -> Δ X],
+     there exists a unique map [s' : c -> X] in [C] such that [(Δ s') t = s].
+     **)
+  Definition Colimit := { c : C & { t : NaturalTransformation F ((DiagonalFunctor C D) c) |
+    forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
+      exists s' : C.(Morphism) c X, MorphismUnique s'
+        /\ NaturalTransformationsEquivalent (NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t) s
+  } }.
+End Limit.
