@@ -1,5 +1,6 @@
 Require Import Setoid.
-Require Import Common EquivalenceRelation Category Functor NaturalTransformation NaturalEquivalence FunctorCategory ComputableCategory.
+Require Export Category Functor.
+Require Import Common EquivalenceRelation NaturalTransformation NaturalEquivalence FunctorCategory.
 
 Local Notation "C ^ D" := (FunctorCategory D C).
 
@@ -19,25 +20,19 @@ Section DiagonalFunctor.
      **)
 
   (* TODO: Try to combine these definitions into a single definition. *)
-  Definition diagonal_functor_object_of : C -> C ^ D.
-    intro c.
+  Definition diagonal_functor_object_of (c : C) : C ^ D.
     refine {| ObjectOf := fun _ => c;
       MorphismOf := (fun _ _ _ => Identity c)
     |}; abstract t.
   Defined.
 
-  Definition diagonal_functor_morphism_of_components_of o1 o2 (m : C.(Morphism) o1 o2) (d : D) :
-    Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d).
-    simpl; assumption.
-  Defined.
-
-  Definition diagonal_functor_morphism_of s d : C.(Morphism) s d -> (C ^ D).(Morphism) (diagonal_functor_object_of s) (diagonal_functor_object_of d).
-    simpl; unfold diagonal_functor_object_of; intro f.
-    refine {| ComponentsOf := fun _ : D => diagonal_functor_morphism_of_components_of _ _ f _
+  Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
+    simpl; unfold diagonal_functor_object_of; intro m.
+    refine {| ComponentsOf := fun d : D => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
       |}; abstract t.
   Defined.
 
-  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of_components_of diagonal_functor_morphism_of.
+  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
   Hint Unfold NaturalTransformationsEquivalent.
 
   Definition DiagonalFunctor : Functor C (C ^ D).
@@ -47,7 +42,7 @@ Section DiagonalFunctor.
   Defined.
 End DiagonalFunctor.
 
-Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of_components_of diagonal_functor_morphism_of.
+Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
 
 Section Limit.
   Variable C D : Category.
@@ -61,11 +56,13 @@ Section Limit.
      such that for every object [X] of [C] and every natural transformation [s : Δ X -> F],
      there exists a unique map [s' : X -> L] in [C] such that [t (Δ s') = s].
      **)
-  Definition Limit := { L : C & { t : NaturalTransformation ((DiagonalFunctor C D) L) F |
-    forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
-      exists s' : C.(Morphism) X L, MorphismUnique s'
-        /\ NaturalTransformationsEquivalent (NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s')) s
-  } }.
+  Definition Limit (L : C) :=
+    { t : NaturalTransformation ((DiagonalFunctor C D) L) F &
+      forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
+        exists s' : C.(Morphism) X L,
+          MorphismUnique s'
+          /\ NaturalTransformationsEquivalent (NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s')) s
+    }.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -75,9 +72,14 @@ Section Limit.
      such that for every object [X] of [C] and every natural transformation [s : F -> Δ X],
      there exists a unique map [s' : c -> X] in [C] such that [(Δ s') t = s].
      **)
-  Definition Colimit := { c : C & { t : NaturalTransformation F ((DiagonalFunctor C D) c) |
-    forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
-      exists s' : C.(Morphism) c X, MorphismUnique s'
-        /\ NaturalTransformationsEquivalent (NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t) s
-  } }.
+  Definition Colimit (c : C) :=
+    { t : NaturalTransformation F ((DiagonalFunctor C D) c) &
+      forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
+        exists s' : C.(Morphism) c X,
+          MorphismUnique s'
+          /\ NaturalTransformationsEquivalent (NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t) s
+    }.
 End Limit.
+
+Implicit Arguments Limit [C D].
+Implicit Arguments Colimit [C D].

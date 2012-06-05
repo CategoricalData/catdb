@@ -278,6 +278,8 @@ End Category.
 
 Implicit Arguments CategoryIsomorphism' [C s d].
 Implicit Arguments CategoryIsomorphism [C s d].
+Implicit Arguments Epimorphism [C x y].
+Implicit Arguments Monomorphism [C x y].
 Implicit Arguments InverseOf [C s d].
 
 Hint Resolve CategoryIsomorphism2Isomorphism'.
