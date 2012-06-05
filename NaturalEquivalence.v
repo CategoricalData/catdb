@@ -1,5 +1,6 @@
 Require Import Setoid Eqdep.
 Import Eq_rect_eq.
+Require Export NaturalTransformation.
 Require Import Common EquivalenceRelation Category Functor NaturalTransformation.
 
 Section NaturalEquivalence.

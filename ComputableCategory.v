@@ -1,5 +1,6 @@
 Require Import Setoid.
-Require Import Common EquivalenceRelation Category Functor.
+Require Export Category.
+Require Import Common EquivalenceRelation Functor.
 
 Set Implicit Arguments.
 

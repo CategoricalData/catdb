@@ -1,5 +1,6 @@
 Require Import Setoid Program.
-Require Import Common EquivalenceRelation Category Functor.
+Require Export Functor.
+Require Import Common EquivalenceRelation.
 
 Section Categories_NaturalTransformation.
   Variable C D : Category.

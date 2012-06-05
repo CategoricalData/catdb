@@ -1,4 +1,5 @@
-Require Import Common EquivalenceRelation Category Functor.
+Require Export Category Functor.
+Require Import Common EquivalenceRelation.
 
 Section OppositeCategory.
   Variable C : Category.

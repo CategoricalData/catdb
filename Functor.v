@@ -1,5 +1,6 @@
 Require Import Setoid Coq.Program.Basics Program.
-Require Import Common EquivalenceRelation Category.
+Require Export Category.
+Require Import Common EquivalenceRelation.
 
 Section Functor.
   Variable C D : Category.
