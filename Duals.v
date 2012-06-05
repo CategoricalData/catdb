@@ -32,8 +32,8 @@ End DualObjects.
 Section OppositeFunctor.
   Variables C D : Category.
   Variable F : Functor C D.
-  Definition COp := OppositeCategory C.
-  Definition DOp := OppositeCategory D.
+  Let COp := OppositeCategory C.
+  Let DOp := OppositeCategory D.
 
   Definition OppositeFunctor : Functor COp DOp.
     refine {| ObjectOf := (fun c : COp => F c : DOp);
