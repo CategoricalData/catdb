@@ -41,3 +41,5 @@ Section ProductCategory.
     |}; abstract (t; simpl_prod; t; etransitivity; eauto).
   Defined.
 End ProductCategory.
+
+Hint Unfold prod_object prod_morphism prod_equiv prod_identity prod_compose.

@@ -1,5 +1,6 @@
-Require Import Bool Omega Setoid.
-Require Import Common EquivalenceRelation.
+Require Import Bool Omega.
+Require Export Setoid.
+Require Export Common EquivalenceRelation.
 
 Set Implicit Arguments.
 

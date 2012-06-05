@@ -1,5 +1,4 @@
 Require Export Category Functor.
-Require Import Common EquivalenceRelation.
 
 Section OppositeCategory.
   Variable C : Category.
@@ -14,7 +13,6 @@ Section OppositeCategory.
       Compose := (fun s d d' m1 m2 => @Compose C d' d s m2 m1)
       |}; abstract (t; eauto).
   Defined.
-
 End OppositeCategory.
 
 Section DualObjects.
@@ -46,3 +44,5 @@ Section OppositeFunctor.
       |}.
   Defined.
 End OppositeFunctor.
+
+Implicit Arguments OppositeFunctor [C D].
