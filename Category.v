@@ -298,22 +298,6 @@ Section CategoryIsomorphismEquivalenceRelation.
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
 
-Section OppositeCategory.
-  Variable C : Category.
-
-  Hint Resolve Transitive.
-
-  Definition OppositeCategory : Category.
-    refine {| Object := C.(Object);
-      Morphism := (fun s d => C.(Morphism) d s);
-      MorphismsEquivalent' := (fun _ _ m m' => @MorphismsEquivalent' C _ _ m m');
-      Identity := @Identity C;
-      Compose := (fun s d d' m1 m2 => @Compose C d' d s m2 m1)
-      |}; abstract (t; eauto).
-  Defined.
-
-End OppositeCategory.
-
 Section CategoryObjects1.
   Variable C : Category.
 
@@ -321,6 +305,12 @@ Section CategoryObjects1.
     forall m', MorphismsEquivalent _ _ _ m m'.
 
   Implicit Arguments MorphismUnique [s d].
+
+  Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
+    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', CategoryIsomorphism' m /\ MorphismUnique m.
+
+  Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
+    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | CategoryIsomorphism' m & MorphismUnique m }.
 
   (* A terminal object is an object with a unique morphism from every other object. *)
   Definition TerminalObject' (o : C) : Prop :=
@@ -338,6 +328,8 @@ Section CategoryObjects1.
 End CategoryObjects1.
 
 Implicit Arguments MorphismUnique [C s d].
+Implicit Arguments UniqueUpToUniqueIsomorphism' [C].
+Implicit Arguments UniqueUpToUniqueIsomorphism [C].
 Implicit Arguments InitialObject' [C].
 Implicit Arguments InitialObject [C].
 Implicit Arguments TerminalObject' [C].
@@ -345,16 +337,6 @@ Implicit Arguments TerminalObject [C].
 
 Section CategoryObjects2.
   Variable C : Category.
-
-  Lemma initial_opposite_terminal (o : C) :
-    InitialObject o -> @TerminalObject (OppositeCategory C) o.
-    t.
-  Qed.
-
-  Lemma terminal_opposite_initial (o : C) :
-    TerminalObject o -> @InitialObject (OppositeCategory C) o.
-    t.
-  Qed.
 
   Hint Unfold TerminalObject InitialObject InverseOf.
 
@@ -367,15 +349,12 @@ Section CategoryObjects2.
            end; eauto.
 
   (* The terminal object is unique up to unique isomorphism. *)
-  Theorem TerminalObjectUnique : forall o, TerminalObject o ->
-    forall o', TerminalObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject C).
     unique.
   Qed.
 
   (* The initial object is unique up to unique isomorphism. *)
-  Theorem InitialObjectUnique : forall o, InitialObject o ->
-    forall o', InitialObject o' -> { m : C.(Morphism) o' o | CategoryIsomorphism' m & MorphismUnique m }.
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (@InitialObject C).
     unique.
   Qed.
-
 End CategoryObjects2.
