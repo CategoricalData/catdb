@@ -15,7 +15,7 @@ Section Adjunction.
      with the property:
      (o) For any [c : C], [d : D], and [f : C -> G d], there exists a unique
      [g : F c -> d] such that
-     [f = (G g) ○ (T c)
+     [f = (G g) ○ (T c)]
      as indicated in
                 g
      F c ..................> d
