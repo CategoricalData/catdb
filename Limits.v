@@ -60,8 +60,9 @@ Section Limit.
   Definition Limit (L : C) :=
     { t : NaturalTransformation ((DiagonalFunctor C D) L) F &
       forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
-        exists! s' : C.(Morphism) X L,
+        { s' : C.(Morphism) X L | is_unique s' /\
           NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s
+        }
     }.
 
   (**
@@ -75,8 +76,9 @@ Section Limit.
   Definition Colimit (c : C) :=
     { t : NaturalTransformation F ((DiagonalFunctor C D) c) &
       forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
-        exists! s' : C.(Morphism) c X,
+        { s' : C.(Morphism) c X | is_unique s' /\
           NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
+        }
     }.
 End Limit.
 
