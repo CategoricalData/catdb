@@ -1,5 +1,5 @@
 Require Import Bool Omega.
-Require Export Common.
+Require Import Common.
 
 Set Implicit Arguments.
 
@@ -188,7 +188,7 @@ Section Category.
   Lemma InverseOf1' : forall x y z (m : C.(Morphism) x y) (m' : C.(Morphism) y x) (m'' : C.(Morphism) z _),
     InverseOf m m'
     -> Compose m' (Compose m m'') = m''.
-    unfold InverseOf; intros; repeat rewrite <- Associativity; repeat rewrite <- InverseOf1; t.
+    unfold InverseOf; intros; destruct_hypotheses; repeat rewrite <- Associativity; t.
   Qed.
 
   Hint Rewrite InverseOf1' using assumption.
@@ -196,8 +196,8 @@ Section Category.
   (* XXX TODO: Automate this better. *)
   Lemma iso_is_mono s d m : CategoryIsomorphism s d m -> Monomorphism s d m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
-    transitivity (Compose (Compose x m) m1). t.
-    transitivity (Compose (Compose x m) m2); solve [ repeat (rewrite Associativity); t ] || t.
+    transitivity (Compose (Compose x m) m1). t_with t'.
+    transitivity (Compose (Compose x m) m2); solve [ repeat (rewrite Associativity); t_with t' ] || t_with t'.
   Qed.
 
   Theorem CategoryIdentityInverse (o : C.(Object)) : InverseOf (Identity o) (Identity o).

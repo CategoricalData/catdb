@@ -1,13 +1,23 @@
 Require Import Program.
 Set Implicit Arguments.
 
-Ltac t' := repeat progress (simpl; intuition).
+Ltac t' := repeat progress (simpl; intros; try split; trivial).
+Ltac t'_long := repeat progress (simpl; intuition).
 
-Ltac t := t';
+Ltac t_with tac := tac;
   repeat (match goal with
             | [ H : context[@eq] |- _ ] => rewrite H
             | _ => progress autorewrite with core in *
-          end; t').
+          end; tac).
+
+Ltac t_rev_with tac := tac;
+  repeat (match goal with
+            | [ H : context[@eq] |- _ ] => rewrite <- H
+            | _ => progress autorewrite with core in *
+          end; tac).
+
+Ltac t := t_with t'; t_with t'_long.
+Ltac t_rev := t_rev_with t'; t_rev_with t'_long.
 
 Ltac simpl_transitivity :=
   try solve [ match goal with

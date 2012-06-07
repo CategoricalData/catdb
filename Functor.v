@@ -1,5 +1,6 @@
 Require Import Setoid Coq.Program.Basics Program.
 Require Export Category.
+Require Import Common.
 
 Section Functor.
   Variable C D : Category.
@@ -35,7 +36,7 @@ Section FunctorComposition.
   Definition ComposeFunctors (G : Functor D E) (F : Functor C D) : Functor C E.
     refine {| ObjectOf := (fun c => G (F c));
       MorphismOf := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-      |}; abstract (intros; autorewrite with core; reflexivity).
+      |}; abstract t.
   Defined.
 End FunctorComposition.
 

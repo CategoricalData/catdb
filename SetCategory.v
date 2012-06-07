@@ -1,4 +1,5 @@
 Require Export Category.
+Require Import Common.
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.

@@ -1,4 +1,5 @@
 Require Export Category Functor.
+Require Import Common.
 
 Section OppositeCategory.
   Variable C : Category.
