@@ -250,7 +250,7 @@ Section CategoryObjects1.
   Variable C : Category.
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
-    forall o, P o -> forall o', P o' -> exists! m : C.(Morphism) o o', CategoryIsomorphism' m.
+    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', CategoryIsomorphism' m /\ is_unique m.
 
   Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
     forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | CategoryIsomorphism' m & is_unique m }.
