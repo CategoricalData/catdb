@@ -219,10 +219,23 @@ Implicit Arguments InverseOf [C s d].
 
 Hint Resolve CategoryIsomorphism2Isomorphism'.
 
+Section AssociativityComposition.
+  Variable C : Category.
+  Variables o0 o1 o2 o3 o4 : C.
+
+  Lemma compose4associativity_helper
+    (a : Morphism _ o3 o4) (b : Morphism _ o2 o3)
+    (c : Morphism _ o1 o2) (d : Morphism _ o0 o1) :
+    Compose (Compose a b) (Compose c d) = (Compose a (Compose (Compose b c) d)).
+    repeat rewrite Associativity; reflexivity.
+  Qed.
+End AssociativityComposition.
+
+Ltac compose4associativity' a b c d := transitivity (Compose a (Compose (Compose b c) d)); try solve [ apply compose4associativity_helper ].
 Ltac compose4associativity :=
   match goal with
-    | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = _ ] => transitivity (Compose a (Compose (Compose b c) d));
-      try solve [ repeat (rewrite <- Associativity); reflexivity ]
+    | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = _ ] => compose4associativity' a b c d
+    | [ |- _ = Compose (Compose ?a ?b) (Compose ?c ?d) ] => compose4associativity' a b c d
   end.
 
 Section CategoryIsomorphismEquivalenceRelation.
@@ -231,15 +244,12 @@ Section CategoryIsomorphismEquivalenceRelation.
 
   Theorem CategoryIsomorphismComposition (m : C.(Morphism) s d) (m' : C.(Morphism) d d') :
     CategoryIsomorphism m -> CategoryIsomorphism m' -> CategoryIsomorphism (Compose m' m).
-    repeat (destruct 1);
+    repeat destruct 1; unfold InverseOf in *; destruct_hypotheses.
       match goal with
         | [ m : Morphism _ _ _, m' : Morphism _ _ _ |- _ ] => exists (Compose m m')
       end;
-      firstorder;
-        compose4associativity;
-        repeat match goal with
-                 | [ H : _ |- _ ] => rewrite H
-               end; t.
+      split;
+        compose4associativity; t.
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
 
