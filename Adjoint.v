@@ -50,7 +50,7 @@ Section Adjunction.
   Definition Adjunction (F : Functor C D) (G : Functor D C) :=
     { T : NaturalTransformation (IdentityFunctor C) (ComposeFunctors G F) &
       forall (c : C) (d : D) (f : Morphism _ c (G d)),
-        { g : Morphism _ (F c) d | MorphismUnique g /\ MorphismsEquivalent _ _ _ f (Compose (G.(MorphismOf) g) (T c)) }
+        { g : Morphism _ (F c) d | is_unique g /\ f = Compose (G.(MorphismOf) g) (T c) }
     }.
 End Adjunction.
 

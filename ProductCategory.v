@@ -10,10 +10,6 @@ Section ProductCategory.
     let (sc, sd) := s in
       let (dc, dd) := d in
         ((C.(Morphism) sc dc) * (D.(Morphism) sd dd))%type.
-  Definition prod_equiv (s d : prod_object) (m1 m2 : prod_morphism s d) : Prop.
-    destruct s as [sc sd], d as [dc dd], m1 as [m1c m1d], m2 as [m2c m2d].
-    exact (MorphismsEquivalent _ _ _ m1c m2c /\ MorphismsEquivalent _ _ _ m1d m2d).
-  Defined.
   Definition prod_identity (o : prod_object) : prod_morphism o o.
     destruct o as [oc od].
     exact (Identity oc, Identity od).
@@ -25,7 +21,7 @@ Section ProductCategory.
 
   Ltac simpl_prod :=
     repeat (intros;
-      unfold prod_object, prod_morphism, prod_equiv, prod_identity, prod_compose in *;
+      unfold prod_object, prod_morphism, prod_identity, prod_compose in *;
         repeat match goal with
                  | [ H : prod _ _ |- _ ] => destruct H
                end;
@@ -35,11 +31,10 @@ Section ProductCategory.
   Definition ProductCategory : Category.
     refine {| Object := prod_object;
       Morphism := prod_morphism;
-      MorphismsEquivalent' := prod_equiv;
       Identity := prod_identity;
       Compose := prod_compose
     |}; abstract (t; simpl_prod; t; etransitivity; eauto).
   Defined.
 End ProductCategory.
 
-Hint Unfold prod_object prod_morphism prod_equiv prod_identity prod_compose.
+Hint Unfold prod_object prod_morphism prod_identity prod_compose.

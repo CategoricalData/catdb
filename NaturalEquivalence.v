@@ -1,7 +1,7 @@
 Require Import Setoid Eqdep.
 Import Eq_rect_eq.
 Require Export NaturalTransformation.
-Require Import Common EquivalenceRelation Category Functor NaturalTransformation.
+Require Import Common.
 
 Section NaturalEquivalence.
   Variable C D : Category.
@@ -31,8 +31,8 @@ Section NaturalTransformationInverse.
   Variable T : NaturalTransformation F G.
 
   Hint Unfold InverseOf Morphism.
-  Hint Resolve PostComposeMorphisms PreComposeMorphisms Commutes Transitive.
-  Hint Immediate Symmetric.
+  Hint Resolve f_equal f_equal2 Commutes.
+  Hint Rewrite LeftIdentity RightIdentity.
 
   Definition NaturalEquivalenceInverse : NaturalEquivalence T -> NaturalTransformation G F.
     refine (fun X => {| ComponentsOf := (fun c => proj1_sig (X c)) |});
@@ -40,10 +40,8 @@ Section NaturalTransformationInverse.
         eapply iso_is_epi; [ eauto | ]; eapply iso_is_mono; [ eauto | ];
           repeat match goal with
                    | [ H : _ |- _ ]
-                     => (repeat (rewrite <- Associativity); rewrite <- H) ||
-                       (repeat (rewrite Associativity); rewrite <- H)
-                 end;
-          t
+                     => try_associativity ltac:(try rewrite H; (rewrite LeftIdentity || rewrite RightIdentity); eauto)
+                 end
     (*morphisms 2*)).
   Defined.
 
@@ -62,7 +60,6 @@ Section IdentityNaturalTransformation.
   Variable F : Functor C D.
 
   Hint Resolve LeftIdentity RightIdentity.
-  Hint Resolve Symmetric.
 
   Lemma InverseOf_Identity : forall C (x : C.(Object)), InverseOf (Identity x) (Identity x).
     firstorder.
@@ -79,26 +76,6 @@ Section FunctorNaturalEquivalenceRelation.
   Variable C D : Category.
 
   Hint Resolve IdentityNaturalEquivalence.
-
-  (* TODO: Automate this proof better. *)
-  Lemma functors_equivalent_implies_natural_equivalence (F G : Functor C D) : FunctorsEquivalent F G -> FunctorsNaturallyEquivalent F G.
-    intro FE.
-    assert (FE' : FunctorsEquivalent F F) by reflexivity.
-    assert (FE'o : @ObjectOf _ _ F = @ObjectOf _ _ F) by reflexivity.
-    assert (FEo : @ObjectOf _ _ G = @ObjectOf _ _ F) by (generalize FE; intro FE0; destruct FE0; destruct_hypotheses; t).
-
-    unfold FunctorsNaturallyEquivalent.
-    exists (Build_EquivalentNaturalTransformation' FE'o FEo FE' FE (IdentityNaturalTransformation _)).
-    constructor; trivial.
-    unfold NaturalEquivalence, CategoryIsomorphism, InverseOf; intro x.
-
-    exists ((Build_EquivalentNaturalTransformation' FEo FE'o FE FE' (IdentityNaturalTransformation _)) x).
-
-    simpl.
-    eq2eq_refl.
-    rewrite FEo.
-    unfold eq_rect_r; repeat (rewrite <- eq_rect_eq). t.
-  Qed.
 
   Lemma functors_naturally_equivalent_refl (F : Functor C D) : FunctorsNaturallyEquivalent F F.
     exists (IdentityNaturalTransformation F); eauto.
@@ -151,62 +128,76 @@ Add Parametric Morphism C D E :
   match goal with
     | [ F' : _, mG'x2Gx : _, mF'Gx2FGx : _ |- _ ] => exists (Compose mF'Gx2FGx (F'.(MorphismOf) mG'x2Gx))
   end.
-  firstorder;
+  split;
     match goal with
-      | [ |- @RelationsEquivalent _ _ _ _ _ _ (Identity _) (Compose (Compose ?a ?b) (Compose ?c ?d)) ]
+      | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = Identity _ ]
         => transitivity (Compose a (Compose (Compose b c) d));
           try solve [ repeat (rewrite Associativity); reflexivity ]
     end;
     try rewrite <- FCompositionOf;
       repeat match goal with
-               | [ H : _ |- _ ] => rewrite <- H; t
+               | [ H : _ |- _ ] => rewrite H; autorewrite with core; trivial
              end.
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
   Variable B C D E : Category.
 
-  Hint Resolve functors_equivalent_implies_natural_equivalence.
   Hint Resolve LeftIdentityFunctor RightIdentityFunctor.
 
   Lemma LeftIdentityFunctorNE (F : Functor D C) : FunctorsNaturallyEquivalent (ComposeFunctors (IdentityFunctor _) F) F.
-    eauto.
+    match goal with
+      | [ |- FunctorsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto; try (rewrite H; reflexivity)
+    end.
   Qed.
 
   Lemma RightIdentityFunctorNE (F : Functor C D) : FunctorsNaturallyEquivalent (ComposeFunctors F (IdentityFunctor _)) F.
-    eauto.
+    match goal with
+      | [ |- FunctorsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto; try (rewrite H; reflexivity)
+    end.
   Qed.
 
-  Hint Unfold FunctorsEquivalent.
-  Hint Resolve FEquivalenceOf FCompositionOf FIdentityOf.
+  Hint Resolve FCompositionOf FIdentityOf.
+  Hint Rewrite FIdentityOf.
 
-  Hint Extern 1 (MorphismsEquivalent' _ _) => apply FEquivalenceOf.
+  Hint Resolve f_equal f_equal2.
 
-  Hint Resolve PreComposeFunctors PostComposeFunctors.
-
-  Hint Rewrite LeftIdentity RightIdentity LeftIdentity' RightIdentity'.
+  Hint Rewrite LeftIdentity RightIdentity.
 
   Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalence CategoryIsomorphism InverseOf.
 
   Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
     FunctorsNaturallyEquivalent F1 F2 -> FunctorsNaturallyEquivalent (ComposeFunctors G F1) (ComposeFunctors G F2).
-    repeat (autounfold with core in *); feq.
+    admit.
+    (*
     eexists (NTComposeF (IdentityNaturalTransformation _) _).
+    repeat ( autounfold with core in * ).
+    destruct H. destruct H as [ H t ].
     constructor; trivial; simpl; intros.
-    match goal with
-      | [ c : ?C, H : forall _ : ?C, _ |- _ ] => destruct (H c) as [ ? [ ] ]
-    end.
-    eexists (MorphismOf G _);
+    specialize (H x0).
+    destruct H as [ ? [ H0 H1 ] ].
+    eexists (MorphismOf G x1);
       repeat (rewrite LeftIdentity || rewrite RightIdentity);
-      repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf);
-        split; apply FEquivalenceOf; rewrite FIdentityOf; eauto.
+      repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf).
+    split; apply f_equal; rewrite FIdentityOf; eauto 15;
+    match goal with
+      | [ H : ?a = ?b |- ?c = ?b ] => rewrite <- H
+    end; repeat (apply f_equal2); eauto;
+    match goal with
+      | [ |- ?f ?x = ?g ?x ] => cut (f = g); try solve [ intro H'; rewrite H'; trivial ]
+    end; apply f_equal; eauto 15.
+    Set Printing All.
+    clear H1 H0 t. clear x1 x0. *)
+    (* I have no idea why [eauto] doesn't solve it at this point. *)
   Qed.
 
   Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
     FunctorsNaturallyEquivalent G1 G2 -> FunctorsNaturallyEquivalent (ComposeFunctors G1 F) (ComposeFunctors G2 F).
+    admit.
+    (*
     unfold FunctorsNaturallyEquivalent; intro H; destruct H as [ T [ NET ? ] ].
     exists (NTComposeF T (IdentityNaturalTransformation _)).
-    repeat (autounfold with core in *);
+    repeat ( autounfold with core in * );
     constructor; trivial; simpl; intros; eauto.
     match goal with
       | [ c : ?C, H : (forall _ : ?D, _) |- _ ] => destruct (H (F c)) as [ ? [ ] ]
@@ -214,25 +205,29 @@ Section FunctorNaturalEquivalenceLemmas.
     eexists;
       repeat (rewrite FIdentityOf); repeat (rewrite LeftIdentity || rewrite RightIdentity);
         eauto.
+        *)
   Qed.
 
   Hint Resolve ComposeFunctorsAssociativity.
 
   Lemma ComposeFunctorsAssociativityNE (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     FunctorsNaturallyEquivalent (ComposeFunctors (ComposeFunctors H G) F) (ComposeFunctors H (ComposeFunctors G F)).
-    t.
+    match goal with
+      | [ |- FunctorsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite H'; trivial || reflexivity ]
+    end; eauto.
   Qed.
 End FunctorNaturalEquivalenceLemmas.
-
 
 Section CategoryNaturalEquivalenceRelation.
   Hint Resolve IdentityNaturalEquivalence IdentityFunctor.
 
   Hint Resolve LeftIdentityFunctor RightIdentityFunctor.
-  Hint Extern 1 (FunctorsEquivalent _ _) => symmetry.
 
   Lemma categories_naturally_equivalent_refl C : CategoriesNaturallyEquivalent C C.
-    repeat (exists (IdentityFunctor C)); split; apply functors_equivalent_implies_natural_equivalence; eauto.
+    repeat (exists (IdentityFunctor C)); split;
+      match goal with
+        | [ |- FunctorsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite <- H'; reflexivity || trivial ]
+      end; eauto.
   Qed.
 
   Hint Resolve NaturalEquivalenceInverse_NaturalEquivalence.
@@ -248,7 +243,7 @@ Section CategoryNaturalEquivalenceRelation.
     match goal with
       | [ |- ?Rel _ (ComposeFunctors (ComposeFunctors ?a ?b) (ComposeFunctors ?c ?d)) ] =>
         transitivity (ComposeFunctors a (ComposeFunctors (ComposeFunctors b c) d));
-          try solve [ apply functors_equivalent_implies_natural_equivalence; repeat (rewrite ComposeFunctorsAssociativity); reflexivity ]
+          try solve [ repeat (rewrite ComposeFunctorsAssociativity); reflexivity || trivial ]
     end.
   Hint Extern 1 (FunctorsNaturallyEquivalent _ (ComposeFunctors ?a (ComposeFunctors (IdentityFunctor _) ?c))) => transitivity (ComposeFunctors a c).
 

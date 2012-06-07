@@ -1,6 +1,6 @@
 Require Import Setoid.
 Require Export Category.
-Require Import Common EquivalenceRelation Functor.
+Require Import Common Functor.
 
 Set Implicit Arguments.
 
@@ -10,12 +10,11 @@ Section ComputableCategory.
 
   Coercion Object2Cat : O >-> Category.
 
-  Hint Resolve LeftIdentityFunctor RightIdentityFunctor PreComposeFunctors PostComposeFunctors ComposeFunctorsAssociativity.
+  Hint Resolve LeftIdentityFunctor RightIdentityFunctor f_equal2 ComposeFunctorsAssociativity.
 
   Definition ComputableCategory : Category.
     refine {| Object := O;
       Morphism := Functor;
-      MorphismsEquivalent' := (fun _ _ F G => FunctorsEquivalent F G);
       Compose := (fun _ _ _ F G => ComposeFunctors F G);
       Identity := (fun o => IdentityFunctor o)
       |}; abstract (t; simpl_transitivity).

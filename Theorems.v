@@ -55,9 +55,11 @@ End Translation_Instance.
 Section Categories.
   Variable C : Category.
 
+  Hint Resolve LeftIdentity RightIdentity.
+
   Theorem identity_unique : forall a (id' : C.(Morphism) a a),
-    (forall f : C.(Morphism) a a, MorphismsEquivalent _ _ _ (Compose id' f) f) ->
-    MorphismsEquivalent _ _ _ id' (Identity a).
-    t; rewrite <- RightIdentity; t.
+    (forall f : C.(Morphism) a a, Compose id' f = f) ->
+      id' = Identity a.
+    intros; transitivity (Compose id' (Identity a)); eauto.
   Qed.
 End Categories.

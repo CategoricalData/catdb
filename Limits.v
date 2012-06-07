@@ -1,6 +1,6 @@
-Require Import Setoid.
+Require Import Setoid Program.
 Require Export Category Functor.
-Require Import Common EquivalenceRelation NaturalTransformation NaturalEquivalence FunctorCategory.
+Require Import Common NaturalTransformation NaturalEquivalence FunctorCategory.
 
 Local Notation "C ^ D" := (FunctorCategory D C).
 
@@ -32,13 +32,14 @@ Section DiagonalFunctor.
       |}; abstract t.
   Defined.
 
-  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
-  Hint Unfold NaturalTransformationsEquivalent.
+  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of ComponentsOf NTComposeT IdentityNaturalTransformation.
+  Hint Resolve f_equal f_equal2.
+  Hint Extern 1 (_ = _) => apply proof_irrelevance.
 
   Definition DiagonalFunctor : Functor C (C ^ D).
     refine {| ObjectOf := diagonal_functor_object_of;
       MorphismOf := diagonal_functor_morphism_of
-      |}; abstract t.
+      |}; abstract (simpl; autounfold with core in *; eauto).
   Defined.
 End DiagonalFunctor.
 
@@ -59,9 +60,8 @@ Section Limit.
   Definition Limit (L : C) :=
     { t : NaturalTransformation ((DiagonalFunctor C D) L) F &
       forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
-        exists s' : C.(Morphism) X L,
-          MorphismUnique s'
-          /\ NaturalTransformationsEquivalent (NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s')) s
+        exists! s' : C.(Morphism) X L,
+          NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s
     }.
 
   (**
@@ -75,9 +75,8 @@ Section Limit.
   Definition Colimit (c : C) :=
     { t : NaturalTransformation F ((DiagonalFunctor C D) c) &
       forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
-        exists s' : C.(Morphism) c X,
-          MorphismUnique s'
-          /\ NaturalTransformationsEquivalent (NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t) s
+        exists! s' : C.(Morphism) c X,
+          NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
     }.
 End Limit.
 

@@ -1,6 +1,5 @@
 Require Import Bool Omega.
-Require Export Setoid.
-Require Export Common EquivalenceRelation.
+Require Export Common.
 
 Set Implicit Arguments.
 
@@ -8,92 +7,21 @@ Record Category := {
   Object :> Type;
   Morphism : Object -> Object -> Type;
 
-  MorphismsEquivalent' : forall o1 o2, Morphism o1 o2 -> Morphism o1 o2 -> Prop;
-  MorphismsEquivalent : EquivalenceRelation MorphismsEquivalent';
-
   Identity : forall o, Morphism o o;
   Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d';
 
-  PreComposeMorphisms : forall s d d' (m : Morphism d d') (m1 m2 : Morphism s d),
-    MorphismsEquivalent' m1 m2 -> MorphismsEquivalent' (Compose m m1) (Compose m m2);
-  PostComposeMorphisms : forall s d d' (m1 m2 : Morphism d d') (m : Morphism s d),
-    MorphismsEquivalent' m1 m2 -> MorphismsEquivalent' (Compose m1 m) (Compose m2 m);
-
   Associativity : forall o1 o2 o3 o4 (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
-    MorphismsEquivalent' (Compose (Compose m3 m2) m1) (Compose m3 (Compose m2 m1));
-  LeftIdentity : forall a b (f : Morphism a b), MorphismsEquivalent' (Compose (Identity b) f) f;
-  RightIdentity : forall a b (f : Morphism a b), MorphismsEquivalent' (Compose f (Identity a)) f
+    Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1);
+  LeftIdentity : forall a b (f : Morphism a b), (Compose (Identity b) f) = f;
+  RightIdentity : forall a b (f : Morphism a b), (Compose f (Identity a)) = f
 }.
-
-Lemma PreComposeMorphisms' : forall C s d d' (m : C.(Morphism) d d') (m1 m2 : C.(Morphism) s d),
-  MorphismsEquivalent _ _ _ m1 m2 -> MorphismsEquivalent _ _ _ (Compose _ _ _ _ m m1) (Compose _ _ _ _ m m2).
-  intros; apply PreComposeMorphisms; auto.
-Qed.
-
-Lemma PostComposeMorphisms' : forall C s d d' (m1 m2 : C.(Morphism) d d') (m : C.(Morphism) s d),
-  MorphismsEquivalent _ _ _ m1 m2 -> MorphismsEquivalent _ _ _ (Compose _ _ _ _ m1 m) (Compose _ _ _ _ m2 m).
-  intros; apply PostComposeMorphisms; auto.
-Qed.
-
-Lemma Associativity' : forall C o1 o2 o3 o4 (m1 : C.(Morphism) o1 o2) (m2 : C.(Morphism) o2 o3) (m3 : C.(Morphism) o3 o4),
-  MorphismsEquivalent _ _ _ (Compose _ _ _ _ (Compose _ _ _ _ m3 m2) m1) (Compose _ _ _ _ m3 (Compose _ _ _ _ m2 m1)).
-  intros; apply Associativity; auto.
-Qed.
-
-Lemma LeftIdentity' : forall C a b (f : C.(Morphism) a b), MorphismsEquivalent _ _ _ (Compose _ _ _ _ (Identity _ b) f) f.
-  intros; apply LeftIdentity; auto.
-Qed.
-
-Lemma RightIdentity' : forall S a b (f : S.(Morphism) a b), MorphismsEquivalent _ _ _ (Compose _ _ _ _ f (Identity _ a)) f.
-  intros; apply RightIdentity; auto.
-Qed.
 
 Implicit Arguments Compose [c s d d'].
 Implicit Arguments Identity [c].
-Implicit Arguments MorphismsEquivalent' [c o1 o2].
 
-(* XXX TODO: I should look at what hints exist for @eq, and make relevant hints for MorphismsEquivalent *)
-Hint Rewrite LeftIdentity' RightIdentity'.
-Hint Resolve PreComposeMorphisms' PostComposeMorphisms'.
+Hint Rewrite LeftIdentity RightIdentity.
 
-Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (Compose _ _) (Compose _ _)) =>
-  repeat rewrite Associativity; apply PreComposeMorphisms' || apply PreComposeMorphisms' || apply PostComposeMorphisms'.
-Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (Compose _ _) (Compose _ _)) =>
-  repeat rewrite <- Associativity; apply PostComposeMorphisms'.
-
-Add Parametric Relation C s d : _ (MorphismsEquivalent C s d)
-  reflexivity proved by (Reflexive _ _ _)
-  symmetry proved by (Symmetric _ _ _)
-  transitivity proved by (Transitive _ _ _)
-    as morphisms_eq.
-
-Lemma morphisms_equivalence_equivalent : MorphismsEquivalent' = MorphismsEquivalent.
-  hnf; trivial.
-Qed.
-
-Hint Rewrite morphisms_equivalence_equivalent.
-Hint Extern 1 (MorphismsEquivalent' _ _) => reflexivity.
-Hint Extern 1 (MorphismsEquivalent _ _) => reflexivity.
-
-Section Morphism_Equivalence_Theorems.
-  Variable C : Category.
-
-  Hint Resolve Transitive.
-
-  Lemma compose_morphisms_equivalent o1 o2 o3 : forall (m1 m1' : Morphism C o1 o2) (m2 m2' : Morphism C o2 o3),
-    MorphismsEquivalent _ _ _ m1 m1' -> MorphismsEquivalent _ _ _ m2 m2' -> MorphismsEquivalent _ _ _ (Compose m2 m1) (Compose m2' m1').
-    eauto.
-  Qed.
-End Morphism_Equivalence_Theorems.
-
-Hint Resolve compose_morphisms_equivalent.
-
-Add Parametric Morphism C s d d' :
-  (@Compose C s d d')
-  with signature (MorphismsEquivalent C _ _) ==> (MorphismsEquivalent C _ _) ==> (MorphismsEquivalent C _ _) as morphism_eq_mor.
-  t.
-Qed.
-
+Ltac try_associativity tac := try_rewrite Associativity tac.
 
 (** * The saturation prover: up to some bound on number of steps, consider all ways to extend equivalences with pre- or post-composition. *)
 
@@ -101,7 +29,7 @@ Qed.
     Only variables in the goal are chosen to compose. *)
 
 Ltac saturate := repeat match goal with
-                          | [ H : RelationsEquivalent _ _ _ _ ?M ?N |- _ ] =>
+                          | [ H : @eq (Morphism _ _ _) ?M ?N |- _ ] =>
                             let tryIt G :=
                               match goal with
                                 | [ _ : G |- _ ] => fail 1
@@ -110,9 +38,9 @@ Ltac saturate := repeat match goal with
                               end in
                               repeat match goal with
                                        | [ m : Morphism _ _ _ |- _ ] =>
-                                         tryIt (MorphismsEquivalent _ _ _ (Compose M m) (Compose N m))
+                                         tryIt (Compose M m = Compose N m)
                                        | [ m : Morphism _ _ _ |- _ ] =>
-                                         tryIt (MorphismsEquivalent _ _ _ (Compose m M) (Compose m N))
+                                         tryIt (Compose m M = Compose m N)
                                      end; generalize dependent H
                         end; intros; autorewrite with core in *.
 
@@ -139,7 +67,7 @@ Ltac extractMorphisms G :=
 
 Ltac createVariables :=
   match goal with
-    | [ |- RelationsEquivalent _ _ _ _ ?X ?Y ] =>
+    | [ |- @eq (Morphism _ _ _) ?X ?Y ] =>
       extractMorphisms X;
       extractMorphisms Y
   end.
@@ -165,7 +93,7 @@ Definition NoEvar T (_ : T) := True.
 Lemma AssociativityNoEvar : forall (c : Category) (o1 o2 o3 o4 : c) (m1 : Morphism c o1 o2)
   (m2 : Morphism c o2 o3) (m3 : Morphism c o3 o4),
   NoEvar (m1, m2, m3)
-  -> MorphismsEquivalent' (Compose (Compose m3 m2) m1) (Compose m3 (Compose m2 m1)).
+  -> Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1).
   intros; apply Associativity.
 Qed.
 
@@ -194,17 +122,17 @@ Section Category.
     monomorphism in the dual category [OppositeCategory C]).
     *)
   Definition Epimorphism x y (m : C.(Morphism) x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) y z), MorphismsEquivalent _ _ _ (Compose m1 m) (Compose m2 m) ->
-      MorphismsEquivalent _ _ _ m1 m2.
+    forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
+      m1 = m2.
   Definition Monomorphism x y (m : C.(Morphism) x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) z x), MorphismsEquivalent _ _ _ (Compose m m1) (Compose m m2) ->
-      MorphismsEquivalent _ _ _ m1 m2.
+    forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
+      m1 = m2.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    MorphismsEquivalent _ _ _ (Identity s) (Compose m' m) /\
-    MorphismsEquivalent _ _ _ (Identity d) (Compose m m').
+    Compose m' m = Identity s /\
+    Compose m m' = Identity d.
 
   Implicit Arguments InverseOf [s d].
 
@@ -235,12 +163,12 @@ Section Category.
   Hint Unfold InverseOf CategoryIsomorphism' CategoryIsomorphism.
 
   Lemma InverseOf1 : forall (s d : C) (m : _ s d) m', InverseOf m m'
-    -> MorphismsEquivalent _ _ _ (Identity s) (Compose m' m).
+    -> Compose m' m = Identity s.
     firstorder.
   Qed.
 
   Lemma InverseOf2 : forall (s d : C) (m : _ s d) m', InverseOf m m'
-    -> MorphismsEquivalent _ _ _ (Identity d) (Compose m m').
+    -> Compose m m' = Identity d.
     firstorder.
   Qed.
 
@@ -250,20 +178,26 @@ Section Category.
 
   Hint Rewrite <- InverseOf1 InverseOf2 using assumption.
 
+  (* XXX TODO: Automate this better. *)
   Lemma iso_is_epi s d m : CategoryIsomorphism s d m -> Epimorphism s d m.
-    destruct 1; hnf; morphisms 1.
+    destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
+    transitivity (Compose m1 (Compose m x)). t.
+    transitivity (Compose m2 (Compose m x)); repeat (rewrite <- Associativity); t.
   Qed.
 
   Lemma InverseOf1' : forall x y z (m : C.(Morphism) x y) (m' : C.(Morphism) y x) (m'' : C.(Morphism) z _),
     InverseOf m m'
-    -> MorphismsEquivalent _ _ _ (Compose m' (Compose m m'')) m''.
-    intros; repeat rewrite <- Associativity; repeat rewrite <- InverseOf1; t.
+    -> Compose m' (Compose m m'') = m''.
+    unfold InverseOf; intros; repeat rewrite <- Associativity; repeat rewrite <- InverseOf1; t.
   Qed.
 
   Hint Rewrite InverseOf1' using assumption.
 
+  (* XXX TODO: Automate this better. *)
   Lemma iso_is_mono s d m : CategoryIsomorphism s d m -> Monomorphism s d m.
-    destruct 1; hnf; morphisms 1.
+    destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
+    transitivity (Compose (Compose x m) m1). t.
+    transitivity (Compose (Compose x m) m2); solve [ repeat (rewrite Associativity); t ] || t.
   Qed.
 
   Theorem CategoryIdentityInverse (o : C.(Object)) : InverseOf (Identity o) (Identity o).
@@ -285,11 +219,15 @@ Implicit Arguments InverseOf [C s d].
 
 Hint Resolve CategoryIsomorphism2Isomorphism'.
 
+Ltac compose4associativity :=
+  match goal with
+    | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = _ ] => transitivity (Compose a (Compose (Compose b c) d));
+      try solve [ repeat (rewrite <- Associativity); reflexivity ]
+  end.
+
 Section CategoryIsomorphismEquivalenceRelation.
   Variable C : Category.
   Variable s d d' : C.
-
-  Hint Resolve Transitive.
 
   Theorem CategoryIsomorphismComposition (m : C.(Morphism) s d) (m' : C.(Morphism) d d') :
     CategoryIsomorphism m -> CategoryIsomorphism m' -> CategoryIsomorphism (Compose m' m).
@@ -297,40 +235,41 @@ Section CategoryIsomorphismEquivalenceRelation.
       match goal with
         | [ m : Morphism _ _ _, m' : Morphism _ _ _ |- _ ] => exists (Compose m m')
       end;
-      firstorder; morphisms 1.
+      firstorder;
+        compose4associativity;
+        repeat match goal with
+                 | [ H : _ |- _ ] => rewrite H
+               end; t.
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
+
+Definition is_unique (A : Type) (x : A) := forall x' : A, x' = x.
+Implicit Arguments is_unique [A].
 
 Section CategoryObjects1.
   Variable C : Category.
 
-  Definition MorphismUnique s d (m : C.(Morphism) s d) : Prop :=
-    forall m', MorphismsEquivalent _ _ _ m m'.
-
-  Implicit Arguments MorphismUnique [s d].
-
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
-    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', CategoryIsomorphism' m /\ MorphismUnique m.
+    forall o, P o -> forall o', P o' -> exists! m : C.(Morphism) o o', CategoryIsomorphism' m.
 
   Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
-    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | CategoryIsomorphism' m & MorphismUnique m }.
+    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | CategoryIsomorphism' m & is_unique m }.
 
   (* A terminal object is an object with a unique morphism from every other object. *)
   Definition TerminalObject' (o : C) : Prop :=
-    forall o', exists m : C.(Morphism) o' o, MorphismUnique m.
+    forall o', exists! m : C.(Morphism) o' o, True.
 
   Definition TerminalObject (o : C) :=
-    forall o', { m : C.(Morphism) o' o | MorphismUnique m }.
+    forall o', { m : C.(Morphism) o' o | is_unique m }.
 
   (* An initial object is an object with a unique morphism from every other object. *)
   Definition InitialObject' (o : C) : Prop :=
-    forall o', exists m : C.(Morphism) o o', MorphismUnique m.
+    forall o', exists! m : C.(Morphism) o o', True.
 
   Definition InitialObject (o : C) :=
-    forall o', { m : C.(Morphism) o o' | MorphismUnique m }.
+    forall o', { m : C.(Morphism) o o' | is_unique m }.
 End CategoryObjects1.
 
-Implicit Arguments MorphismUnique [C s d].
 Implicit Arguments UniqueUpToUniqueIsomorphism' [C].
 Implicit Arguments UniqueUpToUniqueIsomorphism [C].
 Implicit Arguments InitialObject' [C].
@@ -343,13 +282,12 @@ Section CategoryObjects2.
 
   Hint Unfold TerminalObject InitialObject InverseOf.
 
-  Hint Resolve Transitive.
-  Hint Immediate Symmetric.
-
   Ltac unique := intros o Ho o' Ho'; destruct (Ho o); destruct (Ho o'); destruct (Ho' o); destruct (Ho' o');
-    repeat match goal with
-             | [ x : _ |- _ ] => exists x
-           end; eauto.
+    unfold is_unique, unique, uniqueness in *;
+      repeat (destruct 1);
+      repeat match goal with
+               | [ x : _ |- _ ] => exists x
+             end; eauto; try split; try solve [ etransitivity; eauto ].
 
   (* The terminal object is unique up to unique isomorphism. *)
   Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject C).

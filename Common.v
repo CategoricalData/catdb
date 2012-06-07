@@ -24,3 +24,7 @@ Ltac destruct_hypotheses :=
            | [ H : ex _ |- _ ] => destruct H
            | [ H : and _ _ |- _ ] => destruct H
          end.
+
+Ltac try_rewrite rew_H tac :=
+  (repeat (rewrite rew_H); tac) ||
+    (repeat (rewrite <- rew_H); tac).
