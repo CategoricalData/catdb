@@ -20,9 +20,12 @@ Implicit Arguments FunctorsNaturallyEquivalent [C D].
 Section NaturalEquivalenceOfCategories.
   Variable C D : Category.
 
+  Definition NaturalEquivalenceOfCategories (F : Functor C D) (G : Functor D C) : Prop :=
+    (FunctorsNaturallyEquivalent (IdentityFunctor C) (ComposeFunctors G F)) /\
+    (FunctorsNaturallyEquivalent (IdentityFunctor D) (ComposeFunctors F G)).
+
   Definition CategoriesNaturallyEquivalent : Prop :=
-    exists F : Functor C D, exists G : Functor D C, (FunctorsNaturallyEquivalent (IdentityFunctor C) (ComposeFunctors G F)) /\
-      (FunctorsNaturallyEquivalent (IdentityFunctor D) (ComposeFunctors F G)).
+    exists F : Functor C D, exists G : Functor D C, NaturalEquivalenceOfCategories F G.
 End NaturalEquivalenceOfCategories.
 
 Section NaturalTransformationInverse.
