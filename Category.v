@@ -23,6 +23,14 @@ Hint Rewrite LeftIdentity RightIdentity.
 
 Ltac try_associativity tac := try_rewrite Associativity tac.
 
+Ltac solve_for_identity :=
+  match goal with
+    | [ |- Compose ?a ?b = ?b ] => cut (a = Identity _);
+      try solve [ let H := fresh in intro H; rewrite H; apply LeftIdentity ]
+    | [ |- Compose ?a ?b = ?a ] => cut (b = Identity _);
+      try solve [ let H := fresh in intro H; rewrite H; apply RightIdentity ]
+  end.
+
 (** * The saturation prover: up to some bound on number of steps, consider all ways to extend equivalences with pre- or post-composition. *)
 
 (** The main tactic, which tries a single round of making deductions from hypotheses that exist at the start of the round.

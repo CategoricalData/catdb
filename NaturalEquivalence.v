@@ -111,15 +111,12 @@ Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
 Add Parametric Morphism C D E :
   (@ComposeFunctors C D E)
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
-  Hint Rewrite <- FCompositionOf.
-  Hint Rewrite FIdentityOf LeftIdentity RightIdentity.
-  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent in *;
-    repeat match goal with
-             | [ H : ex _ |- _ ] => destruct H
-           end.
+  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalence, CategoryIsomorphism, InverseOf in *;
+    destruct_hypotheses.
   match goal with
-    | [ T1 : _ , T2 : _ |- _ ] => exists (NTComposeF T1 T2)
-  end. unfold NaturalEquivalence in *; unfold CategoryIsomorphism in *; firstorder; t.
+    | [ T1 : _ , T2 : _ |- _ ] => exists (NTComposeF T1 T2); try (constructor; trivial)
+  end.
+  intros; simpl.
   match goal with
     | [ x : ?C, H : (forall _ : ?C, _) |- _ ] => specialize (H x)
   end.
@@ -127,20 +124,13 @@ Add Parametric Morphism C D E :
     | [ H : (forall _ : ?D, { _ : Morphism _ (?F' _) (?F _) | _ }) |- { _ : Morphism _ (?F' ?x') (?F ?x) | _ } ]
       => generalize (H x); generalize (H x'); intros ? ?; clear H
   end.
-  firstorder.
+  destruct_type sig; destruct_type and.
+  Hint Resolve f_equal f_equal2.
+  Hint Rewrite <- FCompositionOf.
+  Hint Rewrite FIdentityOf.
   match goal with
     | [ F' : _, mG'x2Gx : _, mF'Gx2FGx : _ |- _ ] => exists (Compose mF'Gx2FGx (F'.(MorphismOf) mG'x2Gx))
-  end.
-  split;
-    match goal with
-      | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = Identity _ ]
-        => transitivity (Compose a (Compose (Compose b c) d));
-          try solve [ repeat (rewrite Associativity); reflexivity ]
-    end;
-    try rewrite <- FCompositionOf;
-      repeat match goal with
-               | [ H : _ |- _ ] => rewrite H; autorewrite with core; trivial
-             end.
+  end; split; compose4associativity; t_with t'.
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
@@ -169,46 +159,32 @@ Section FunctorNaturalEquivalenceLemmas.
 
   Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalence CategoryIsomorphism InverseOf.
 
+  (* XXX TODO: Automate this better. *)
   Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
     FunctorsNaturallyEquivalent F1 F2 -> FunctorsNaturallyEquivalent (ComposeFunctors G F1) (ComposeFunctors G F2).
-    admit.
-    (*
+    intro H.
+    destruct H as [ T [ H t ] ]; clear t.
     eexists (NTComposeF (IdentityNaturalTransformation _) _).
-    repeat ( autounfold with core in * ).
-    destruct H. destruct H as [ H t ].
-    constructor; trivial; simpl; intros.
-    specialize (H x0).
-    destruct H as [ ? [ H0 H1 ] ].
-    eexists (MorphismOf G x1);
+    constructor; trivial; simpl.
+    repeat ( autounfold with core in * ); simpl.
+    intro x0; specialize (H x0).
+    destruct_type sig. destruct_type and.
+    eexists (MorphismOf G x);
       repeat (rewrite LeftIdentity || rewrite RightIdentity);
-      repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf).
-    split; apply f_equal; rewrite FIdentityOf; eauto 15;
-    match goal with
-      | [ H : ?a = ?b |- ?c = ?b ] => rewrite <- H
-    end; repeat (apply f_equal2); eauto;
-    match goal with
-      | [ |- ?f ?x = ?g ?x ] => cut (f = g); try solve [ intro H'; rewrite H'; trivial ]
-    end; apply f_equal; eauto 15.
-    Set Printing All.
-    clear H1 H0 t. clear x1 x0. *)
-    (* I have no idea why [eauto] doesn't solve it at this point. *)
+      repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf);
+        split; rewrite FIdentityOf; eauto 15.
   Qed.
 
   Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
     FunctorsNaturallyEquivalent G1 G2 -> FunctorsNaturallyEquivalent (ComposeFunctors G1 F) (ComposeFunctors G2 F).
-    admit.
-    (*
-    unfold FunctorsNaturallyEquivalent; intro H; destruct H as [ T [ NET ? ] ].
-    exists (NTComposeF T (IdentityNaturalTransformation _)).
-    repeat ( autounfold with core in * );
-    constructor; trivial; simpl; intros; eauto.
-    match goal with
-      | [ c : ?C, H : (forall _ : ?D, _) |- _ ] => destruct (H (F c)) as [ ? [ ] ]
-    end.
-    eexists;
-      repeat (rewrite FIdentityOf); repeat (rewrite LeftIdentity || rewrite RightIdentity);
-        eauto.
-        *)
+    intro H.
+    destruct H as [ T [ H t ] ]; clear t.
+    eexists (NTComposeF _ (IdentityNaturalTransformation _)).
+    constructor; trivial; simpl.
+    repeat autounfold with core in *; simpl.
+    intro x0; specialize (H (F x0)).
+    destruct_type sig. destruct_type and.
+    eexists; split; t_rev_with t'.
   Qed.
 
   Hint Resolve ComposeFunctorsAssociativity.
@@ -222,6 +198,8 @@ Section FunctorNaturalEquivalenceLemmas.
 End FunctorNaturalEquivalenceLemmas.
 
 Section CategoryNaturalEquivalenceRelation.
+  Hint Unfold NaturalEquivalenceOfCategories.
+
   Hint Resolve IdentityNaturalEquivalence IdentityFunctor.
 
   Hint Resolve LeftIdentityFunctor RightIdentityFunctor.
