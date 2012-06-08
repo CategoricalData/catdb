@@ -29,11 +29,23 @@ Ltac eq2eq_refl :=
            | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by (apply proof_irrelevance); subst
          end.
 
+Ltac destruct_type T :=
+  repeat match goal with
+           | [ H : context[T] |- _ ] => destruct H
+         end.
+
 Ltac destruct_hypotheses :=
   repeat match goal with
            | [ H : ex _ |- _ ] => destruct H
            | [ H : and _ _ |- _ ] => destruct H
+           | [ H : prod _ _ |- _ ] => destruct H
          end.
+
+Ltac specialized_assumption tac := tac;
+  match goal with
+    | [ x : ?T, H : forall _ : ?T, _ |- _ ] => specialize (H x); specialized_assumption tac
+    | _ => assumption
+  end.
 
 Ltac try_rewrite rew_H tac :=
   (repeat (rewrite rew_H); tac) ||

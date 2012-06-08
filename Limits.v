@@ -84,3 +84,20 @@ End Limit.
 
 Implicit Arguments Limit [C D].
 Implicit Arguments Colimit [C D].
+
+Section LimitMorphisms.
+  Variables C D : Category.
+  Variable F : Functor D C.
+
+
+  Definition MorphismBetweenLimits L L' : Limit F L -> Limit F L' -> Morphism _ L L'.
+    intros; destruct_type Limit; specialized_assumption ltac:(destruct_type sig).
+  Defined.
+
+  Definition MorphismBetweenColimits c c' : Colimit F c -> Colimit F c' -> Morphism _ c c'.
+    intros; destruct_type Colimit; specialized_assumption ltac:(destruct_type sig).
+  Defined.
+End LimitMorphisms.
+
+Implicit Arguments MorphismBetweenLimits [C D F L L'].
+Implicit Arguments MorphismBetweenColimits [C D F c c'].
