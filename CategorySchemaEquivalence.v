@@ -15,9 +15,6 @@ Section Schema_Category_Equivalence.
   Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply addedge_equivalent.
   Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply PreCompose.
 
-  Check EquivalenceClassOf.
-Print path.
-
   Definition path2path' s d (p : path S s d) : path' (Edge S) s d := p.
 (*
   Definition saturate : Category.
