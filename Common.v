@@ -50,3 +50,9 @@ Ltac specialized_assumption tac := tac;
 Ltac try_rewrite rew_H tac :=
   (repeat (rewrite rew_H); tac) ||
     (repeat (rewrite <- rew_H); tac).
+
+Ltac simpl_exist :=
+  match goal with
+    | [ |- exist _ ?x1 ?p1 = exist _ ?x2 ?p2 ] => generalize p1; generalize p2; cut (x1 = x2);
+      try solve [ let H := fresh in intro H; rewrite H; intros ? ?; apply f_equal; apply proof_irrelevance ]
+  end.
