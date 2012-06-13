@@ -38,7 +38,21 @@ Ltac destruct_natural_transformations :=
   repeat match goal with
            | [ T : @NaturalTransformation _ _ _ _ |- _ ] => destruct T
          end.
-Ltac nteq_with_tac tac := autounfold with core in *;
+
+Section nteq.
+  Variables C D : Category.
+  Variables F G : Functor C D.
+
+  Lemma nteq_co_eq co co' com com' : co = co' -> Build_NaturalTransformation C D F G co com = Build_NaturalTransformation C D F G co' com'.
+    intro p.
+    generalize com com'.
+    rewrite <- p.
+    intros; apply f_equal.
+    apply proof_irrelevance.
+  Qed.
+End nteq.
+
+Ltac nteq_with tac := autounfold with core in *;
   destruct_natural_transformations;
   repeat match goal with
            | [ |- Build_NaturalTransformation _ _ _ _ ?co ?com = Build_NaturalTransformation _ _ _ _ ?co ?com' ] =>
@@ -46,9 +60,9 @@ Ltac nteq_with_tac tac := autounfold with core in *;
                assert (H : com = com') by (reflexivity || apply proof_irrelevance);
                  (rewrite H; reflexivity) || (rewrite <- H; reflexivity)
            | [ |- Build_NaturalTransformation _ _ _ _ ?co ?com = Build_NaturalTransformation _ _ _ _ ?co' ?com' ] =>
-             repeat (apply f_equal); tac
+             apply nteq_co_eq; try (apply functional_extensionality_dep; intros); tac
          end.
-Ltac nteq := nteq_with_tac ltac:(try reflexivity).
+Ltac nteq := nteq_with ltac:(try reflexivity).
 
 
 Section NaturalTransformationComposition.
