@@ -1,5 +1,5 @@
 Require Import Arith List Eqdep_dec Program.
-Require Import Schema Category CategorySchemaEquivalence.
+Require Import Schema Category Instance Translation.
 
 Set Implicit Arguments.
 

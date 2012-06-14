@@ -60,10 +60,6 @@ Section path'_Theorems.
     induction p; t.
   Qed.
 
-  Lemma addedge_equal : forall s d d' (p p' : path' E s d), p = p' -> forall e : E d d', AddEdge p e = AddEdge p' e.
-    t.
-  Qed.
-
   Hint Rewrite concatenate'_addedge.
 
   Lemma concatenate'_p_noedges : forall s d (p : path' E s d), concatenate' p NoEdges = p.
@@ -116,17 +112,17 @@ Record Schema := {
     PathsEquivalent' p1 p2 -> PathsEquivalent' (AddEdge p1 E) (AddEdge p2 E)
 }.
 
-Hint Resolve PostCompose.
+Hint Resolve PreCompose PostCompose.
 
 Theorem PreCompose' : forall S s d (E : S.(Edge) s d) d' (p1 p2 : path' _ d d'),
   PathsEquivalent _ _ _ p1 p2 -> PathsEquivalent _ _ _ (prepend p1 E) (prepend p2 E).
-  intros; apply PreCompose; auto.
+  intros; auto.
 Qed.
 
 Theorem PostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(Edge) d d'),
   PathsEquivalent _ _ _ p1 p2
   -> PathsEquivalent _ _ _ (AddEdge p1 E) (AddEdge p2 E).
-  intros; apply PostCompose; auto.
+  intros; auto.
 Qed.
 
 Hint Resolve PreCompose' PostCompose'.
@@ -205,46 +201,22 @@ Add Parametric Morphism S s d d' :
   t.
 Qed.
 
-Section Schema.
-  Variable S : Schema.
+Add Parametric Morphism S s d d' :
+  (@AddEdge S _ s d d')
+  with signature (PathsEquivalent S _ _) ==> (@eq _) ==> (PathsEquivalent S _ _) as AddEdge_mor.
+  t.
+Qed.
 
-  Definition path := path' S.(Edge).
+Add Parametric Morphism S s d d' :
+  (fun p => @concatenate' S _ s d p d')
+  with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate'_mor.
+  intros; repeat rewrite <- concatenate_prepend_equivalent; t.
+Qed.
 
-  Record Instance := {
-    TypeOf :> S -> Type;
-    FunctionOf : forall s d (E : S.(Edge) s d), TypeOf s -> TypeOf d;
-    EquivalenceOf : forall s d (p1 p2 : path s d), S.(PathsEquivalent) _ _ p1 p2
-      -> forall x, compose TypeOf FunctionOf p1 x = compose TypeOf FunctionOf p2 x
-  }.
+Add Parametric Morphism S s' s d :
+  (fun p => @prepend S _ s d p s')
+  with signature (PathsEquivalent S _ _) ==> (@eq _) ==> (PathsEquivalent S _ _) as prepend_mor.
+  t.
+Qed.
 
-  (* XXX We need a better name for this *)
-  Record SNaturalTransformation (I J : Instance) := {
-    SComponentsOf :> forall c, I c -> J c;
-    SCommutes : forall s d (p : path s d),
-      forall x, SComponentsOf d (compose I I.(FunctionOf) p x)
-        = compose J J.(FunctionOf) p (SComponentsOf s x)
-  }.
-End Schema.
-
-Section Schemas.
-  Variables C D : Schema.
-
-  Section transferPath.
-    Variable vertexOf : C -> D.
-    Variable pathOf : forall s d, C.(Edge) s d -> path D (vertexOf s) (vertexOf d).
-
-    Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
-      match p with
-        | NoEdges => NoEdges
-        | AddEdge _ _ p' E => concatenate (transferPath p') (pathOf _ _ E)
-      end.
-  End transferPath.
-
-  Record Translation := {
-    VertexOf :> C -> D;
-    PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
-    TEquivalenceOf : forall s d (p1 p2 : path C s d),
-      PathsEquivalent C _ _ p1 p2
-      -> PathsEquivalent D _ _ (transferPath VertexOf PathOf p1) (transferPath VertexOf PathOf p2)
-  }.
-End Schemas.
+Definition path S := path' S.(Edge).
