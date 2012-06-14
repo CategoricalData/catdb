@@ -1,5 +1,7 @@
-Require Export Category Functor.
-Require Import Common.
+Require Export Category Functor ProductCategory.
+Require Import Common CategoryEquality.
+
+Local Infix "*" := ProductCategory.
 
 Section OppositeCategory.
   Variable C : Category.
@@ -12,6 +14,21 @@ Section OppositeCategory.
       |}; abstract (t; eauto).
   Defined.
 End OppositeCategory.
+
+Section DualCategories.
+  Variables C D : Category.
+
+  Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
+    cat_eq.
+  Qed.
+
+  Require Import JMeq.
+
+  Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
+    cat_eq; unfold prod_identity, prod_compose, prod_morphism, prod_object in *; simpl;
+      cat_eq_with ltac:(destruct_type @prod).
+  Qed.
+End DualCategories.
 
 Section DualObjects.
   Variable C : Category.

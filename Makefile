@@ -1,4 +1,4 @@
-MODULES    := Common Category Functor ComputableCategory NaturalTransformation NaturalEquivalence FunctorCategory SmallCategory Limits Duals ProductCategory SetCategory Adjoint Grothendieck EquivalenceClass EquivalenceRelation Schema Instance Translation CategorySchemaEquivalence Examples Theorems
+MODULES    := Common Category CategoryEquality Functor ComputableCategory NaturalTransformation NaturalEquivalence FunctorCategory SmallCategory Limits Duals ProductCategory SetCategory Adjoint Grothendieck EquivalenceClass EquivalenceRelation Schema Instance Translation CategorySchemaEquivalence Examples Theorems
 VS         := $(MODULES:%=%.v)
 
 .PHONY: coq clean
