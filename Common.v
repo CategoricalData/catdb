@@ -4,17 +4,24 @@ Set Implicit Arguments.
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
 
-Ltac t_with tac := tac;
+Ltac t_con_with con tac := tac;
   repeat (match goal with
-            | [ H : context[@eq] |- _ ] => rewrite H
+            | [ H : context[con] |- _ ] => rewrite H
             | _ => progress autorewrite with core in *
           end; tac).
 
-Ltac t_rev_with tac := tac;
+Ltac t_con_rev_with con tac := tac;
   repeat (match goal with
-            | [ H : context[@eq] |- _ ] => rewrite <- H
+            | [ H : context[con] |- _ ] => rewrite <- H
             | _ => progress autorewrite with core in *
           end; tac).
+
+Ltac t_with tac := t_con_with @eq tac.
+
+Ltac t_rev_with tac := t_con_rev_with @eq tac.
+
+Ltac t_con con := t_con_with con t'; t_con_with con t'_long.
+Ltac t_con_rev con := t_con_rev_with con t'; t_con_rev_with con t'_long.
 
 Ltac t := t_with t'; t_with t'_long.
 Ltac t_rev := t_rev_with t'; t_rev_with t'_long.
