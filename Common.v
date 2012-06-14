@@ -63,3 +63,11 @@ Ltac simpl_exist :=
     | [ |- exist _ ?x1 ?p1 = exist _ ?x2 ?p2 ] => generalize p1; generalize p2; cut (x1 = x2);
       try solve [ let H := fresh in intro H; rewrite H; intros ? ?; apply f_equal; apply proof_irrelevance ]
   end.
+
+Ltac split_iff :=
+  repeat match goal with
+           | [ H : context p [iff] |- _ ] =>
+             let H0 := context p[fun a b => a -> b] in let H0' := eval simpl in H0 in assert H0' by (apply H);
+               let H1 := context p[fun a b => b -> a] in let H1' := eval simpl in H1 in assert H1' by (apply H);
+                 clear H
+         end.
