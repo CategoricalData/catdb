@@ -22,11 +22,10 @@ Section DualCategories.
     cat_eq.
   Qed.
 
-  Require Import JMeq.
+  Hint Unfold OppositeCategory ProductCategory prod_identity prod_compose prod_morphism prod_object.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
-    cat_eq; unfold prod_identity, prod_compose, prod_morphism, prod_object in *; simpl;
-      cat_eq_with ltac:(destruct_type @prod).
+    cat_eq_with ltac:(autounfold with core in *; destruct_type @prod).
   Qed.
 End DualCategories.
 

@@ -1,4 +1,5 @@
 MODULES    := Common \
+	FEqualDep \
 	Category \
 	CategoryEquality \
 	Functor \
