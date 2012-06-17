@@ -1,5 +1,4 @@
 Require Import Bool Omega Setoid Program.
-Require Import ClassicalUniqueChoice.
 Require Export Schema Category.
 Require Import Common EquivalenceRelation EquivalenceClass.
 Require Import NaturalEquivalence FunctorEquality.
@@ -264,6 +263,10 @@ Section CategorySchemaCategory_RoundTrip.
       constructor; intros; repeat subst; trivial.
       exists (compose_morphism_path C x); exists x; split; trivial.
     Qed.
+
+    (* [Require Import] here, because otherwise [sat_unsat_exist_helper2]
+       depends on [classic], because [classic |- proof_irrelevance] *)
+    Require Import ClassicalUniqueChoice.
 
     Lemma dependent_unique_choice_unique : forall (A : Type) (B : A -> Type) (R : forall x, B x -> Prop),
       (forall x : A, exists! y, R x y) ->
