@@ -22,7 +22,7 @@ Section DualCategories.
     cat_eq.
   Qed.
 
-  Hint Unfold OppositeCategory ProductCategory prod_identity prod_compose prod_morphism prod_object.
+  Hint Unfold OppositeCategory ProductCategory.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
     cat_eq_with ltac:(autounfold with core in *; destruct_type @prod).

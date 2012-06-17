@@ -41,11 +41,11 @@ Section HomFunctor.
 
   Definition HomFunctor : Functor (COp * C) TypeCat.
     refine {| ObjectOf := (fun c'c : Object (COp * C) => Morphism C (fst c'c) (snd c'c) : TypeCat);
-      MorphismOf := (fun X Y (hf : Morphism (COp * C) X Y) => hom_functor_morphism_of X Y hf)
+      MorphismOf := (fun X Y (hf : Morphism (COp * C) X Y) => hom_functor_morphism_of hf)
       |};
     abstract (
       unfold hom_functor_morphism_of, hom_functor_object_of in *; simpl in *;
-        unfold prod_object, prod_morphism, prod_compose, prod_identity in *; intros; subst COp; simpl in *; destruct_hypotheses; simpl in *;
+        intros; subst COp; simpl in *; destruct_hypotheses; simpl in *;
           repeat (apply functional_extensionality_dep; intro); t_with t'
     ).
   Defined.
