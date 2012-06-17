@@ -15,6 +15,7 @@ MODULES    := Common \
 	ProductFunctor \
 	SetCategory \
 	Hom \
+	FunctorAttributes \
 	Adjoint \
 	Grothendieck \
 	EquivalenceClass \
