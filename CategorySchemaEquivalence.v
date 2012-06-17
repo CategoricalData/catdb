@@ -1,4 +1,5 @@
 Require Import Bool Omega Setoid Program.
+Require Import ClassicalUniqueChoice.
 Require Export Schema Category.
 Require Import Common EquivalenceRelation EquivalenceClass.
 Require Import NaturalEquivalence FunctorEquality.
@@ -230,7 +231,7 @@ Section CategorySchemaCategory_RoundTrip.
     (* XXX TODO: Automate this better. *)
     Lemma sautrate_unsaturate_functor_from_exists' :
       forall s d, forall cls : EquivalenceClass (PathsEquivalent (unsaturate C) s d),
-        exists! choice : { m : _ | exists v, compose_morphism_path C v = m /\ InClass cls v }, True.
+        exists! choice : { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }, True.
       intros s d cls.
       destruct (ClassInhabited cls) as [ x H ].
       simpl.
@@ -264,11 +265,49 @@ Section CategorySchemaCategory_RoundTrip.
       exists (compose_morphism_path C x); exists x; split; trivial.
     Qed.
 
-    (* XXX TODO: FIX *)
-    Lemma chooser_exists : exists _ : (forall s d
+    Lemma dependent_unique_choice_unique : forall (A : Type) (B : A -> Type) (R : forall x, B x -> Prop),
+      (forall x : A, exists! y, R x y) ->
+      exists! f : (forall x, B x), forall x, R x (f x).
+      intros A B R H.
+      destruct (dependent_unique_choice _ _ _ H) as [ f ].
+      exists f; split; try assumption.
+      intros f' ?.
+      apply functional_extensionality_dep; intro x.
+      repeat match goal with
+               | [ H : forall _ : A, _ |- _ ] => specialize (H x)
+             end.
+      destruct H as [ y [ H'0 H'1 ] ].
+      pose (H'1 (f x)); pose (H'1 (f' x)).
+      intuition.
+      etransitivity; symmetry; eauto.
+    Qed.
+
+    Lemma dependent_unique_choice_unique_true : forall (A : Type) (B : A -> Type),
+      (forall x : A, exists! y : B x, True) ->
+      exists! f : (forall x, B x), True.
+      intros A B H.
+      destruct (dependent_unique_choice _ _ _ H) as [ f ].
+      exists f; split; trivial.
+      intros f' ?.
+      apply functional_extensionality_dep; intro x.
+      repeat match goal with
+               | [ H : forall _ : A, _ |- _ ] => specialize (H x)
+             end.
+      destruct H as [ y [ H'0 H'1 ] ].
+      pose (H'1 (f x)); pose (H'1 (f' x)).
+      intuition.
+      etransitivity; symmetry; eauto.
+    Qed.
+
+    Lemma chooser_exists : exists! _ : (forall s d
       (cls : EquivalenceClass ((PathsEquivalent (unsaturate C)) s d)),
       { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }), True.
-      admit.
+      repeat match goal with
+               | [ |- exists! _ : (forall s : ?T, @?f s), True ] => cut (forall s : T, exists! _ : f s, True);
+                 try solve [ let H := fresh in intro H; exact (@dependent_unique_choice_unique_true _ _ H) ];
+                   intros
+             end.
+      apply sautrate_unsaturate_functor_from_exists'.
     Qed.
   End chooser'.
 
