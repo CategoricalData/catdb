@@ -1,7 +1,7 @@
 Require Import Bool Omega Setoid Program.
 Require Export Schema Category.
 Require Import Common EquivalenceRelation EquivalenceClass.
-Require Import NaturalEquivalence FunctorEquality.
+Require Import NaturalEquivalence FunctorEquality ComputableCategory.
 
 Set Implicit Arguments.
 
@@ -146,6 +146,14 @@ Section CategorySchemaCategory_RoundTrip.
       t_with t'; repeat eexists (AddEdge NoEdges _); eauto; t_with t'; t_rev_with t').
   Defined.
 
+  Definition sautrate_unsaturate_roundtrip_category : Category := ComputableCategory
+    (fun b => match b with
+                | true => C
+                | false => saturate (unsaturate C)
+              end).
+
+  Definition sautrate_unsaturate_functor_to_morphism : Morphism sautrate_unsaturate_roundtrip_category true false := sautrate_unsaturate_functor_to.
+
   Section chooser.
     Variable chooser : forall s d, forall cls : EquivalenceClass (PathsEquivalent (unsaturate C) s d),
       { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }.
@@ -173,7 +181,7 @@ Section CategorySchemaCategory_RoundTrip.
       ).
     Defined.
 
-    Lemma sautrate_unsaturate_roundtrip' : CategoriesNaturallyEquivalent C (saturate (unsaturate C)).
+    Lemma sautrate_unsaturate_roundtrip_natural_equivalence' : CategoriesNaturallyEquivalent C (saturate (unsaturate C)).
       unfold CategoriesNaturallyEquivalent.
       exists sautrate_unsaturate_functor_to.
       exists sautrate_unsaturate_functor_from.
@@ -183,6 +191,15 @@ Section CategorySchemaCategory_RoundTrip.
             try solve [ let H := fresh in intro H; rewrite H; reflexivity ]
         end; functor_eq; simpl_chooser; destruct_hypotheses; try apply forall__eq; repeat split; intros; simpl in *;
         clear_InClass; unfold equiv, RelationsEquivalent in *; simpl in *; t_with t'; t_rev_with t'.
+    Qed.
+
+    Lemma sautrate_unsaturate_roundtrip' : @CategoryIsomorphism sautrate_unsaturate_roundtrip_category _ _
+      (sautrate_unsaturate_functor_to : Morphism sautrate_unsaturate_roundtrip_category true false).
+      simpl; unfold CategoryIsomorphism'.
+      exists sautrate_unsaturate_functor_from.
+      unfold InverseOf; split; simpl; functor_eq; simpl_chooser;
+        destruct_hypotheses; unfold equiv, RelationsEquivalent in *; simpl in *; t_with t';
+        apply forall__eq; intros; split; intros; replace_InClass; unfold equiv, RelationsEquivalent in *; simpl in *; t_with t'.
     Qed.
   End chooser.
 
@@ -314,8 +331,15 @@ Section CategorySchemaCategory_RoundTrip.
     Qed.
   End chooser'.
 
-  Theorem sautrate_unsaturate_roundtrip : CategoriesNaturallyEquivalent (saturate (unsaturate C)) C.
+  Theorem sautrate_unsaturate_roundtrip_natrual_equivalence : CategoriesNaturallyEquivalent (saturate (unsaturate C)) C.
     destruct chooser_exists as [ chooser H ].
-    symmetry. exact (sautrate_unsaturate_roundtrip' chooser).
+    symmetry. exact (sautrate_unsaturate_roundtrip_natural_equivalence' chooser).
+  Qed.
+
+
+  Theorem sautrate_unsaturate_roundtrip : @CategoryIsomorphism' sautrate_unsaturate_roundtrip_category _ _
+    (sautrate_unsaturate_functor_to : Morphism sautrate_unsaturate_roundtrip_category true false).
+    destruct chooser_exists as [ chooser H ].
+    apply CategoryIsomorphism2Isomorphism'. exact (sautrate_unsaturate_roundtrip' chooser).
   Qed.
 End CategorySchemaCategory_RoundTrip.
