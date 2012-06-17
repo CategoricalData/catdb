@@ -12,6 +12,7 @@ MODULES    := Common \
 	Limits \
 	Duals \
 	ProductCategory \
+	ProductFunctor \
 	SetCategory \
 	Hom \
 	Adjoint \
