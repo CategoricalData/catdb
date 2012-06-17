@@ -21,6 +21,7 @@ MODULES    := Common \
 	EquivalenceClass \
 	EquivalenceRelation \
 	Schema \
+	SetSchema \
 	Instance \
 	Translation \
 	CategorySchemaEquivalence \

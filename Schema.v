@@ -97,7 +97,13 @@ Section path'_Theorems.
     (concatenate (concatenate p1 p2) p3) = (concatenate p1 (concatenate p2 p3)).
     induction p1; t.
   Qed.
+
+  Lemma compose_prepend s' s d (p : path' E s d) (e : E s' _) typeOf functionOf : forall x, compose typeOf functionOf (prepend p e) x = (compose typeOf functionOf p (functionOf _ _ e x)).
+    induction p; t_with t'.
+  Qed.
 End path'_Theorems.
+
+Hint Rewrite compose_prepend.
 
 Record Schema := {
   Vertex :> Type;
