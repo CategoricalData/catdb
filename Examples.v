@@ -51,7 +51,7 @@ Qed.
 
 Definition booleans_to_naturals : Translation booleans naturals.
   refine {| VertexOf := (boolToNat : booleans -> naturals);
-    PathOf := fun _ _ E => AddEdge NoEdges (boolToNat_ge E) |};
+    PathOf := fun _ _ e => AddEdge NoEdges (boolToNat_ge e) |};
   abstract auto.
 Defined.
 

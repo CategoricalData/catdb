@@ -104,6 +104,7 @@ Section path'_Theorems.
 End path'_Theorems.
 
 Hint Rewrite compose_prepend.
+Hint Rewrite concatenate_p_noedges concatenate_noedges_p.
 
 Record Schema := {
   Vertex :> Type;

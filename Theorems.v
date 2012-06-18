@@ -33,22 +33,22 @@ Section Translation_Instance.
 
   Hint Rewrite compose_concatenate.
 
-  Lemma compose_transferPath : forall s d (p : path C s d) x,
-    compose I (FunctionOf I) (transferPath F (PathOf F) p) x
+  Lemma compose_PathOf : forall s d (p : path C s d) x,
+    compose I (FunctionOf I) (TransferPath F p) x
     = compose (fun x0 : C => I (F x0))
     (fun s0 d0 (E : Edge C s0 d0) =>
-      compose I (FunctionOf I) (PathOf F s0 d0 E)) p x.
+      compose I (FunctionOf I) (PathOf F _ _ E)) p x.
     induction p; t.
   Qed.
 
-  Hint Rewrite <- compose_transferPath.
+  Hint Rewrite <- compose_transferPath compose_PathOf.
 
   Hint Resolve EquivalenceOf TEquivalenceOf.
 
   Definition Translation_Instance : Instance C.
     refine {| TypeOf := (fun x => I (F x));
       FunctionOf := (fun _ _ E => compose _ (I.(FunctionOf)) (F.(PathOf) _ _ E)) |};
-    abstract t.
+    abstract (t_with t'; auto).
   Defined.
 End Translation_Instance.
 
