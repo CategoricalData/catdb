@@ -3,7 +3,6 @@ MODULES    := Common \
 	Category \
 	CategoryEquality \
 	Functor \
-	FunctorEquality \
 	ComputableCategory \
 	NaturalTransformation \
 	NaturalEquivalence \

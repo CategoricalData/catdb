@@ -1,6 +1,10 @@
-Require Import Setoid Coq.Program.Basics Program.
+Require Import FunctionalExtensionality ProofIrrelevance JMeq.
 Require Export Category.
-Require Import Common.
+Require Import Common FEqualDep.
+
+Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 Section Functor.
   Variable C D : Category.
@@ -25,8 +29,32 @@ Section Functor.
 End Functor.
 
 Implicit Arguments MorphismOf [C D s d].
-Implicit Arguments FCompositionOf [C D s d d' m1 m2].
-Implicit Arguments FIdentityOf [C D].
+
+Section Functors_Equal.
+  Lemma Functors_Equal : forall C D (F G : Functor C D),
+    ObjectOf F = ObjectOf G
+    -> (ObjectOf F = ObjectOf G -> MorphismOf F == MorphismOf G)
+    -> F = G.
+    destruct F, G; simpl; intros; firstorder; repeat subst;
+      f_equal; apply proof_irrelevance.
+  Qed.
+
+End Functors_Equal.
+
+Ltac functor_eq_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- @eq (Functor _ _) _ _ ] => apply Functors_Equal
+    | [ |- (fun _ : ?A => _) = _ ] => apply functional_extensionality_dep; intro
+    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | _ => tac
+  end; repeat simpl; JMeq_eq.
+
+Ltac functor_eq_with tac := repeat functor_eq_step_with tac.
+
+Ltac functor_eq_step := functor_eq_step_with idtac.
+Ltac functor_eq := functor_eq_with idtac.
 
 Section FunctorComposition.
   Variable B C D E : Category.
@@ -39,28 +67,6 @@ Section FunctorComposition.
       |}; abstract t.
   Defined.
 End FunctorComposition.
-
-Implicit Arguments ComposeFunctors [C D E].
-
-Ltac destruct_functors :=
-  repeat match goal with
-           | [ F : Functor _ _ |- _ ] => destruct F
-         end.
-Ltac feq_with_tac tac := autounfold with core in *;
-  destruct_functors;
-  repeat match goal with
-           | [ |- Build_Functor _ _ ?oo ?mo ?co ?io = Build_Functor _ _ ?oo ?mo ?co' ?io' ] =>
-             let H0 := fresh in
-               let H1 := fresh in
-                 assert (H0 : co = co') by (reflexivity || apply proof_irrelevance);
-                   assert (H1 : io = io') by (reflexivity || apply proof_irrelevance);
-                     rewrite H0, H1; reflexivity
-           | [ |- Build_Functor _ _ ?oo ?mo ?co ?io = Build_Functor _ _ ?oo ?mo' ?co' ?io' ] => transitivity (Build_Functor _ _ oo mo co' io');
-             repeat (apply f_equal); tac
-           | [ |- Build_Functor _ _ ?oo ?mo ?co ?io = Build_Functor _ _ ?oo' ?mo' ?co' ?io' ] => transitivity (Build_Functor _ _ oo mo' co' io');
-             repeat (apply f_equal); tac
-         end.
-Ltac feq := feq_with_tac ltac:(try reflexivity).
 
 Section Category.
   Variable C D : Category.
@@ -76,11 +82,11 @@ Section Category.
   Hint Unfold ComposeFunctors IdentityFunctor ObjectOf MorphismOf.
 
   Lemma LeftIdentityFunctor (F : Functor D C) : ComposeFunctors IdentityFunctor F = F.
-    feq.
+    functor_eq.
   Qed.
 
   Lemma RightIdentityFunctor (F : Functor C D) : ComposeFunctors F IdentityFunctor = F.
-    feq.
+    functor_eq.
   Qed.
 End Category.
 
@@ -89,6 +95,6 @@ Section FunctorCompositionLemmas.
 
   Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
-    unfold ComposeFunctors; feq.
+    functor_eq.
   Qed.
 End FunctorCompositionLemmas.

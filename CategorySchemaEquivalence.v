@@ -1,7 +1,7 @@
 Require Import Bool Omega Setoid Program.
 Require Export Schema Category.
 Require Import Common EquivalenceRelation EquivalenceClass.
-Require Import NaturalEquivalence FunctorEquality ComputableCategory.
+Require Import NaturalEquivalence ComputableCategory.
 
 Set Implicit Arguments.
 
