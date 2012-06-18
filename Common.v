@@ -58,6 +58,14 @@ Ltac try_rewrite rew_H tac :=
   (repeat (rewrite rew_H); tac) ||
     (repeat (rewrite <- rew_H); tac).
 
+Ltac try_rewrite_repeat rew_H tac :=
+  (repeat (rewrite rew_H; tac)) ||
+    (repeat (rewrite <- rew_H; tac)).
+
+Ltac solve_repeat_rewrite rew_H tac :=
+  solve [ repeat (rewrite rew_H; tac) ] ||
+    solve [ repeat (rewrite <- rew_H; tac) ].
+
 Ltac simpl_exist :=
   match goal with
     | [ |- exist _ ?x1 ?p1 = exist _ ?x2 ?p2 ] => generalize p1; generalize p2; cut (x1 = x2);

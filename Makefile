@@ -23,6 +23,7 @@ MODULES    := Common \
 	SetSchema \
 	Instance \
 	Translation \
+	MetaTranslation \
 	CategorySchemaEquivalence \
 	Examples \
 	Theorems
