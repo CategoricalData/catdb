@@ -228,3 +228,39 @@ Add Parametric Morphism S s' s d :
 Qed.
 
 Definition path S := path' S.(Edge).
+
+Section Schema.
+  Variable C : Schema.
+
+  (* [m'] is the inverse of [m] if both compositions are
+     equivalent to the relevant identity morphisms. *)
+  Definition SInverseOf s d (p : path C s d) (p' : path C d s) : Prop :=
+    PathsEquivalent _ _ _ (concatenate p p') NoEdges /\
+    PathsEquivalent _ _ _ (concatenate p' p) NoEdges.
+
+  Lemma SInverseOf_sym s d m m' : @SInverseOf s d m m' -> @SInverseOf d s m' m.
+    firstorder.
+  Qed.
+
+  (* A morphism is an isomorphism if it has an inverse *)
+  Definition SchemaIsomorphism' s d (p : path C s d) : Prop :=
+    exists p', SInverseOf p p'.
+
+  Definition SchemaIsomorphism s d (p : path C s d) := { p' | SInverseOf p p' }.
+
+  Hint Unfold SInverseOf SchemaIsomorphism' SchemaIsomorphism.
+
+  Lemma SInverseOf1 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
+    -> PathsEquivalent _ _ _ (concatenate p p') NoEdges.
+    firstorder.
+  Qed.
+
+  Lemma SInverseOf2 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
+    -> PathsEquivalent _ _ _ (concatenate p p') NoEdges.
+    firstorder.
+  Qed.
+
+  Lemma SchemaIsomorphism2Isomorphism' s d (p : path C s d) : SchemaIsomorphism p -> SchemaIsomorphism' p.
+    firstorder.
+  Qed.
+End Schema.
