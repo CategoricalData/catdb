@@ -25,6 +25,7 @@ MODULES    := Common \
 	Translation \
 	MetaTranslation \
 	CategorySchemaEquivalence \
+	ComputableSchemaCategory \
 	Examples \
 	Theorems
 VS         := $(MODULES:%=%.v)
