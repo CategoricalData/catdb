@@ -232,6 +232,25 @@ Definition path S := path' S.(Edge).
 Section Schema.
   Variable C : Schema.
 
+  (* Quoting Wikipedia,
+    In category theory, an epimorphism (also called an epic
+    morphism or, colloquially, an epi) is a morphism [f : X → Y]
+    which is right-cancellative in the sense that, for all
+    morphisms [g, g' : Y → Z],
+    [g ○ f = g' ○ f -> g = g']
+
+    Epimorphisms are analogues of surjective functions, but they
+    are not exactly the same. The dual of an epimorphism is a
+    monomorphism (i.e. an epimorphism in a category [C] is a
+    monomorphism in the dual category [OppositeCategory C]).
+    *)
+  Definition SEpimorphism x y (p : path C x y) : Prop :=
+    forall z (p1 p2 : path C y z), PathsEquivalent _ _ _ (concatenate p p1) (concatenate p p2) ->
+      PathsEquivalent _ _ _ p1 p2.
+  Definition SMonomorphism x y (p : path C x y) : Prop :=
+    forall z (p1 p2 : path C z x), PathsEquivalent _ _ _ (concatenate p1 p) (concatenate p2 p) ->
+      PathsEquivalent _ _ _ p1 p2.
+
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   Definition SInverseOf s d (p : path C s d) (p' : path C d s) : Prop :=
@@ -263,4 +282,121 @@ Section Schema.
   Lemma SchemaIsomorphism2Isomorphism' s d (p : path C s d) : SchemaIsomorphism p -> SchemaIsomorphism' p.
     firstorder.
   Qed.
+
+  Hint Rewrite <- SInverseOf1 SInverseOf2 using assumption.
+
+  (* XXX TODO: Automate this better. *)
+  Lemma s_iso_is_epi s d (p : path C s d) : SchemaIsomorphism p -> SEpimorphism p.
+    destruct 1 as [ x [ i0 i1 ] ]; intros z p1 p2 e.
+    transitivity (concatenate (concatenate x p) p1). t_con @PathsEquivalent.
+    transitivity (concatenate (concatenate x p) p2); repeat rewrite concatenate_associative; t_con @PathsEquivalent;
+      repeat rewrite <- concatenate_associative; t_con @PathsEquivalent.
+  Qed.
+
+  Lemma SInverseOf1' : forall x y z (p : path C x y) (p' : path C y x) (p'' : path C z _),
+    SInverseOf p p'
+    -> PathsEquivalent _ _ _ (concatenate (concatenate p'' p) p') p''.
+    unfold SInverseOf; intros; destruct_hypotheses; repeat rewrite concatenate_associative; t_con @PathsEquivalent.
+  Qed.
+
+  Hint Rewrite SInverseOf1' using assumption.
+
+  (* XXX TODO: Automate this better. *)
+  Lemma s_iso_is_mono s d (p : path C s d) : SchemaIsomorphism p -> SMonomorphism p.
+    destruct 1 as [ x [ i0 i1 ] ]; intros z p1 p2 e.
+    transitivity (concatenate p1 (concatenate p x)). t_con @PathsEquivalent.
+    transitivity (concatenate p2 (concatenate p x)); solve [ repeat rewrite <- concatenate_associative; t_con @PathsEquivalent ] || t_con @PathsEquivalent.
+  Qed.
+
+  Theorem SchemaIdentityInverse (o : C) : SInverseOf (@NoEdges _ _ o) (@NoEdges _ _ o).
+    hnf; t.
+  Qed.
+
+  Hint Resolve SchemaIdentityInverse.
+
+  Theorem SchemaIdentityIsomorphism (o : C) : SchemaIsomorphism (@NoEdges _ _ o).
+    eauto.
+  Qed.
 End Schema.
+
+Hint Resolve SchemaIsomorphism2Isomorphism'.
+
+Ltac concatenate4associativity' a b c d := transitivity (concatenate a (concatenate (concatenate b c) d));
+  try solve [ repeat rewrite concatenate_associative; reflexivity ].
+Ltac concatenate4associativity :=
+  match goal with
+    | [ |- ?Rel (concatenate (concatenate ?a ?b) (concatenate ?c ?d)) _ ] => concatenate4associativity' a b c d
+    | [ |- ?Rel _ (concatenate (concatenate ?a ?b) (concatenate ?c ?d)) ] => concatenate4associativity' a b c d
+  end.
+
+Section SchemaIsomorphismEquivalenceRelation.
+  Variable C : Schema.
+  Variable s d d' : C.
+
+  Theorem SchemaIsomorphismComposition (p : path C s d) (p' : path C d d') :
+    SchemaIsomorphism p -> SchemaIsomorphism p' -> SchemaIsomorphism (concatenate p p').
+    repeat destruct 1; unfold SInverseOf in *; destruct_hypotheses.
+      match goal with
+        | [ m : path _ _ _, m' : path _ _ _ |- _ ] => exists (concatenate m m')
+      end;
+      split;
+        concatenate4associativity; t_con @PathsEquivalent.
+  Qed.
+End SchemaIsomorphismEquivalenceRelation.
+
+Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ _ _ x' x.
+(*
+Section SchemaObjects1.
+  Variable C : Schema.
+
+  Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
+    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', SchemaIsomorphism' m /\ is_unique m.
+
+  Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
+    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | SchemaIsomorphism' m & is_unique m }.
+
+  (* A terminal object is an object with a unique morphism from every other object. *)
+  Definition TerminalObject' (o : C) : Prop :=
+    forall o', exists! m : C.(Morphism) o' o, True.
+
+  Definition TerminalObject (o : C) :=
+    forall o', { m : C.(Morphism) o' o | is_unique m }.
+
+  (* An initial object is an object with a unique morphism from every other object. *)
+  Definition InitialObject' (o : C) : Prop :=
+    forall o', exists! m : C.(Morphism) o o', True.
+
+  Definition InitialObject (o : C) :=
+    forall o', { m : C.(Morphism) o o' | is_unique m }.
+End SchemaObjects1.
+
+Implicit Arguments UniqueUpToUniqueIsomorphism' [C].
+Implicit Arguments UniqueUpToUniqueIsomorphism [C].
+Implicit Arguments InitialObject' [C].
+Implicit Arguments InitialObject [C].
+Implicit Arguments TerminalObject' [C].
+Implicit Arguments TerminalObject [C].
+
+Section SchemaObjects2.
+  Variable C : Schema.
+
+  Hint Unfold TerminalObject InitialObject InverseOf.
+
+  Ltac unique := intros o Ho o' Ho'; destruct (Ho o); destruct (Ho o'); destruct (Ho' o); destruct (Ho' o');
+    unfold is_unique, unique, uniqueness in *;
+      repeat (destruct 1);
+      repeat match goal with
+               | [ x : _ |- _ ] => exists x
+             end; eauto; try split; try solve [ etransitivity; eauto ].
+
+  (* The terminal object is unique up to unique isomorphism. *)
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject C).
+    unique.
+  Qed.
+
+  (* The initial object is unique up to unique isomorphism. *)
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (@InitialObject C).
+    unique.
+  Qed.
+End SchemaObjects2.
+*)

@@ -14,6 +14,18 @@ Section MetaTranslation.
     SCommutes : forall s d (e : C.(Edge) s d),
       PathsEquivalent _ _ _ (concatenate (F.(PathOf) _ _ e) (SComponentsOf d)) (concatenate (SComponentsOf s) (G.(PathOf) _ _ e))
   }.
+
+  Hint Rewrite SCommutes.
+
+  Lemma SCommutes_TransferPath MT : forall s d (p : path C s d),
+    PathsEquivalent _ _ _ (concatenate (F.(TransferPath) p) (MT.(SComponentsOf) d)) (concatenate (MT.(SComponentsOf) s) (G.(TransferPath) p)).
+    intros s d p; induction p; t.
+    repeat rewrite concatenate_associative.
+    rewrite SCommutes.
+    repeat rewrite <- concatenate_associative.
+    t.
+  Qed.
+
 End MetaTranslation.
 
 Section MetaTranslationComposition.

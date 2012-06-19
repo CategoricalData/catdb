@@ -49,6 +49,11 @@ Section Schemas.
     unfold TransferPath; simpl.
     apply concatenate_transferPath.
   Qed.
+
+  Lemma TransferPath_NoEdges o T :
+    TransferPath T (@NoEdges _ _ o) = NoEdges.
+    reflexivity.
+  Qed.
 End Schemas.
 
 Hint Rewrite concatenate_transferPath concatenate_TransferPath.
