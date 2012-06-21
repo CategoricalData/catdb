@@ -1,6 +1,6 @@
-Require Import Bool Omega Setoid.
+Require Import FunctionalExtensionality Bool Omega Setoid.
 Require Export Schema.
-Require Import Common EquivalenceRelation.
+Require Import Common EquivalenceRelation Translation SetSchema.
 
 Set Implicit Arguments.
 
@@ -20,4 +20,25 @@ Section Schema.
       forall x, PUComponentsOf d (compose I I.(FunctionOf) p x)
         = compose J J.(FunctionOf) p (PUComponentsOf s x)
   }.
+
+  Variable I : Instance.
+
+  Lemma compose_transferPath : forall s d (p : path S s d) x,
+    compose I.(TypeOf) I.(FunctionOf) p x
+    = compose (fun x => x) (fun _ _ e => e) (transferPath (I.(TypeOf) : S -> TypeSch)
+      (fun _ _ e => AddEdge NoEdges (I.(FunctionOf) _ _ e)) p) x.
+    induction p; simpl; intuition; f_equal; auto.
+  Qed.
+
+  Definition translationOf : Translation S TypeSch.
+    refine (@Build_Translation S TypeSch
+      I.(TypeOf)
+      (fun _ _ e => AddEdge NoEdges (I.(FunctionOf) _ _ e))
+      _);
+    abstract (intros; hnf; extensionality x;
+      do 2 rewrite <- compose_transferPath; apply EquivalenceOf; assumption).
+  Defined.
+
 End Schema.
+
+Coercion translationOf : Instance >-> Translation.
