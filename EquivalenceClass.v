@@ -180,7 +180,25 @@ Add Parametric Relation value equiv : _ (@sameClass value equiv)
   transitivity proved by (@sameClass_trans _ _)
     as sameClass_mor.
 
-Ltac replace_InClass :=
+Ltac create_classOf_InClass :=
+  repeat match goal with
+           | [ H : InClass (@classOf ?v ?e ?r ?s ?t ?val) _ |- _ ] =>
+             let hyp := constr:(@classOf_refl v e r s t val) in
+               let T := type of hyp in
+                 match goal with
+                   | [ H' : T |- _ ] => fail 1 (* the hypothesis already exists *)
+                   | _ => let H' := fresh in assert (H' := hyp)
+                 end
+           | [ |- InClass (@classOf ?v ?e ?r ?s ?t ?val) _ ] =>
+             let hyp := constr:(@classOf_refl v e r s t val) in
+               let T := type of hyp in
+                 match goal with
+                   | [ H' : T |- _ ] => fail 1 (* the hypothesis already exists *)
+                   | _ => let H' := fresh in assert (H' := hyp)
+                 end
+         end.
+
+Ltac replace_InClass := create_classOf_InClass;
   repeat match goal with
            | [ H : InClass ?C ?x, H' : InClass ?C ?x' |- _ ] =>
              let equiv := constr:(ElementsEquivalent C _ _ H H') in
@@ -261,6 +279,16 @@ Hint Resolve apply_to_class_f_inj.
 Implicit Arguments apply_to_class [value0 equiv0
   value' equiv' equiv'_refl equiv'_sym equiv'_trans].
 
+Lemma apply_to_classOf value0 equiv0 equiv0_refl equiv0_sym equiv0_trans value' equiv' equiv'_refl equiv'_sym equiv'_trans f f_mor e0 :
+  @apply_to_class value0 equiv0 value' equiv' f f_mor
+  (@classOf _ _ equiv0_refl equiv0_sym equiv0_trans e0)
+  equiv'_refl equiv'_sym equiv'_trans
+  = @classOf _ _ equiv'_refl equiv'_sym equiv'_trans (f e0).
+Proof.
+  apply forall__eq; intros; split; intros;
+    hnf in *; destruct_hypotheses; clear_InClass; eauto.
+Qed.
+
 Section apply2.
   Variable value0 : Type.
   Variable equiv0 : value0 -> value0 -> Prop.
@@ -325,3 +353,21 @@ Hint Resolve apply2_to_class_f_inj.
 Implicit Arguments apply2_to_class [value0 equiv0
   value1 equiv1
   value' equiv' equiv'_refl equiv'_sym equiv'_trans].
+
+Lemma apply2_to_classOf
+  value0 equiv0 equiv0_refl equiv0_sym equiv0_trans
+  value1 equiv1 equiv1_refl equiv1_sym equiv1_trans
+  value' equiv' equiv'_refl equiv'_sym equiv'_trans
+  f f_mor e0 e1 :
+  @apply2_to_class value0 equiv0 value1 equiv1 value' equiv'
+  equiv'_refl equiv'_sym equiv'_trans
+  f f_mor
+  (@classOf _ _ equiv0_refl equiv0_sym equiv0_trans e0)
+  (@classOf _ _ equiv1_refl equiv1_sym equiv1_trans e1)
+  = @classOf _ _ equiv'_refl equiv'_sym equiv'_trans (f e0 e1).
+Proof.
+  apply forall__eq; intros; split; intros;
+    hnf in *; destruct_hypotheses;
+      repeat (clear_InClass; eexists; repeat split);
+      clear_InClass; eauto; try reflexivity.
+Qed.
