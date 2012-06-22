@@ -67,6 +67,11 @@ Section Translations_Equal.
       simpl; intros; firstorder; subst tp tp'; repeat subst;
         f_equal; apply proof_irrelevance.
   Qed.
+
+  Lemma translations_equal_parts : forall C D (F G : Translation C D),
+    F = G -> VertexOf F = VertexOf G /\ PathOf F == PathOf G.
+    intros; repeat subst; split; trivial.
+  Qed.
 End Translations_Equal.
 
 Ltac translation_eq_step_with tac := intros; simpl;
@@ -152,3 +157,100 @@ Section TranslationCompositionLemmas.
     end.
   Qed.
 End TranslationCompositionLemmas.
+
+Section TranslationsEquivalent.
+  Variables C D : Schema.
+  Variables F G : Translation C D.
+
+  Definition TranslationsEquivalent :=
+    exists vo po po' eo eo',
+      F = {| VertexOf := vo; PathOf := po; TEquivalenceOf := eo |} /\
+      G = {| VertexOf := vo; PathOf := po'; TEquivalenceOf := eo' |} /\
+      forall s d (e : C.(Edge) s d), PathsEquivalent _ _ _ (po _ _ e) (po' _ _ e).
+
+  Lemma translations_equivalent :
+    VertexOf F = VertexOf G
+    -> (VertexOf F = VertexOf G ->
+        forall s d (e : C.(Edge) s d), GeneralizedPathsEquivalent (PathOf F _ _ e) (PathOf G _ _ e))
+    -> TranslationsEquivalent.
+    unfold TranslationsEquivalent;
+      destruct F as [ vo po tp eo ], G as [ vo' po' tp' eo' ];
+        simpl; intros; subst tp tp'; intuition; repeat subst;
+          repeat esplit; f_equal; intros.
+    match goal with
+      | [ s : _, d : _, e : _, H : _ |- _ ] => specialize (H s d e); simpl_GeneralizedPathsEquivalent; assumption
+    end.
+  Qed.
+End TranslationsEquivalent.
+
+Ltac translation_eqv_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- TranslationsEquivalent _ _ ] => apply translations_equivalent
+    | [ |- (fun _ : ?A => _) = _ ] => apply functional_extensionality_dep; intro
+    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | [ H := _ |- _ ] => subst H
+    | _ => simpl in *; repeat subst; try simpl_GeneralizedPathsEquivalent; tac
+  end; repeat simpl in *; JMeq_eq.
+
+Ltac translation_eqv_with tac := repeat translation_eqv_step_with tac.
+
+Ltac translation_eqv_step := translation_eqv_step_with idtac.
+Ltac translation_eqv := translation_eqv_with idtac.
+
+Section TranslationsEquivalent_Relation.
+  Variables C D E : Schema.
+
+  Lemma TranslationsEquivalent_refl (T : Translation C D) : TranslationsEquivalent T T.
+    translation_eqv.
+  Qed.
+
+  Lemma TranslationsEquivalent_sym (T U : Translation C D) :
+    TranslationsEquivalent T U -> TranslationsEquivalent U T.
+    intro H; destruct H; destruct_hypotheses.
+    translation_eqv; symmetry; intuition.
+  Qed.
+
+  Lemma TranslationsEquivalent_trans (T U V : Translation C D) :
+    TranslationsEquivalent T U -> TranslationsEquivalent U V -> TranslationsEquivalent T V.
+    intros H0 H1; destruct H0, H1; destruct_hypotheses.
+    translation_eqv;
+    match goal with
+      | [ H : _ |- _ ] => apply translations_equal_parts in H; unfold PathOf, VertexOf in H; destruct H; repeat subst
+    end; try reflexivity.
+    etransitivity; eauto.
+  Qed.
+
+  Hint Resolve TEquivalenceOf.
+
+  Lemma PreComposeTranslationsEquivalent (T T' : Translation C D) (U : Translation D E) :
+    TranslationsEquivalent T T' -> TranslationsEquivalent (ComposeTranslations U T) (ComposeTranslations U T').
+    intro H; destruct H; translation_eqv_with ltac:(destruct_hypotheses; eauto).
+  Qed.
+
+  Hint Resolve concatenate_mor.
+
+  Lemma PostComposeTranslationsEquivalent (T : Translation C D) (U U' : Translation D E) :
+    TranslationsEquivalent U U' -> TranslationsEquivalent (ComposeTranslations U T) (ComposeTranslations U' T).
+    intro H; destruct H; translation_eqv_with ltac:(destruct_hypotheses; eauto).
+    destruct T; unfold TransferPath; translation_eqv.
+    match goal with
+      | [ |- ?Rel (transferPath _ _ ?p) (transferPath _ _ ?p) ] => induction p; simpl; try reflexivity
+    end; eauto.
+  Qed.
+End TranslationsEquivalent_Relation.
+
+Add Parametric Relation C D : _ (@TranslationsEquivalent C D)
+  reflexivity proved by (@TranslationsEquivalent_refl _ _)
+  symmetry proved by (@TranslationsEquivalent_sym _ _)
+  transitivity proved by (@TranslationsEquivalent_trans _ _)
+    as TranslationsEquivalent_rel.
+
+Add Parametric Morphism C D E : (@ComposeTranslations C D E)
+  with signature (@TranslationsEquivalent _ _) ==> (@TranslationsEquivalent _ _) ==> (@TranslationsEquivalent _ _)
+    as ComposeTranslations_mor.
+  intros ? ? H0 ? ? H1.
+  etransitivity; try apply PostComposeTranslationsEquivalent; eauto;
+    apply PreComposeTranslationsEquivalent; eauto.
+Qed.
