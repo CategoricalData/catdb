@@ -1,4 +1,4 @@
-Require Import Bool Omega Setoid.
+Require Import Bool Omega Setoid ProofIrrelevance.
 Require Import Common EquivalenceRelation.
 
 Set Implicit Arguments.
@@ -85,6 +85,11 @@ Section path'_Theorems.
 
   Hint Rewrite concatenate_noedges_p concatenate_addedge.
   Hint Rewrite <- concatenate_prepend_equivalent.
+
+  Lemma concatenate_p_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
+    concatenate p (AddEdge p' e) = AddEdge (concatenate p p') e.
+    induction p; t.
+  Qed.
 
   Lemma concatenate_prepend : forall s s' d d' (p1 : path' E s' d) (p2 : path' E d d') (e : E s s'),
     (prepend (concatenate p1 p2) e) = (concatenate (prepend p1 e) p2).
@@ -345,6 +350,57 @@ Section SchemaIsomorphismEquivalenceRelation.
 End SchemaIsomorphismEquivalenceRelation.
 
 Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ _ _ x' x.
+
+Section GeneralizedPathEquivalence.
+  Variable S : Schema.
+
+  Inductive GeneralizedPathsEquivalent s d (p : path S s d) : forall s' d' (p' : path S s' d'), Prop :=
+    | GPathsEquivalent (p' : path S s d) : PathsEquivalent _ _ _ p p' -> GeneralizedPathsEquivalent p p'.
+
+  Lemma GeneralizedPathsEquivalent_PathsEquivalent s d (p p' : path S s d) :
+    GeneralizedPathsEquivalent p p' -> PathsEquivalent _ _ _ p p'.
+    intro H; inversion H.
+    repeat match goal with
+             | [ H : _ |- _ ] => repeat apply inj_pair2 in H
+           end.
+    repeat subst.
+    assumption.
+  Qed.
+
+  Lemma GeneralizedPathsEquivalent_eq s d (p : path S s d) s' d' (p' : path S s' d') :
+    GeneralizedPathsEquivalent p p' -> s = s' /\ d = d'.
+    intro H; inversion H.
+    repeat subst.
+    split; trivial.
+  Qed.
+End GeneralizedPathEquivalence.
+
+Ltac simpl_GeneralizedPathsEquivalent := intros;
+  repeat match goal with
+           | [ H : GeneralizedPathsEquivalent _ _ |- _ ]
+             => destruct (GeneralizedPathsEquivalent_eq H); repeat subst;
+               apply GeneralizedPathsEquivalent_PathsEquivalent in H
+           | [ |- GeneralizedPathsEquivalent _ _ ] => apply GPathsEquivalent
+         end.
+
+Section GeneralizedPathsEquivalenceRelation.
+  Variable S : Schema.
+
+  Lemma GeneralizedPathsEquivalent_refl s d (p : path S s d) : GeneralizedPathsEquivalent p p.
+    simpl_GeneralizedPathsEquivalent; reflexivity.
+  Qed.
+
+  Lemma GeneralizedPathsEquivalent_sym s d (p : path S s d) s' d' (p' : path S s' d') :
+    GeneralizedPathsEquivalent p p' -> GeneralizedPathsEquivalent p' p.
+    simpl_GeneralizedPathsEquivalent; symmetry; assumption.
+  Qed.
+
+  Lemma GeneralizedPathsEquivalent_trans s d (p : path S s d) s' d' (p' : path S s' d') s'' d'' (p'' : path S s'' d'') :
+    GeneralizedPathsEquivalent p p' -> GeneralizedPathsEquivalent p' p'' -> GeneralizedPathsEquivalent p p''.
+    simpl_GeneralizedPathsEquivalent; transitivity p'; eauto.
+  Qed.
+End GeneralizedPathsEquivalenceRelation.
+
 (*
 Section SchemaObjects1.
   Variable C : Schema.
