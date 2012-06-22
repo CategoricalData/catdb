@@ -79,3 +79,39 @@ Ltac split_iff :=
                let H1 := context p[fun a b => b -> a] in let H1' := eval simpl in H1 in assert H1' by (apply H);
                  clear H
          end.
+
+Ltac clear_hyp_of_type type :=
+  repeat match goal with
+           | [ H : type |- _ ] => clear H
+         end.
+
+(* If [conVar] is not mentioned in any hypothesis other than [hyp],
+   nor in the goal, then clear any hypothesis of the same type as [hyp] *)
+Ltac clear_hyp_unless_context hyp conVar :=
+  let hypT := type of hyp in
+    match goal with
+      | [ H0 : hypT, H : context[conVar] |- _ ] => fail 1 (* there is a hypotheses distinct from [hyp] which mentions [conVar] *)
+      | [ |- context[conVar] ] => fail 1
+      | _ => clear_hyp_of_type hypT
+    end.
+
+(* equivalent to [idtac] if [subexpr] appears nowhere in [expr],
+   equivalent to [fail] otherwise *)
+Ltac FreeQ expr subexpr :=
+  match expr with
+    | appcontext[subexpr] => fail 1
+    | _ => idtac
+  end.
+
+Ltac subst_mor x :=
+  match goal with
+    | [ H : ?Rel ?a x |- _ ] => FreeQ a x; rewrite <- H in *;
+      try clear_hyp_unless_context H x
+    | [ H : ?Rel x ?a |- _ ] => FreeQ a x; rewrite H in *;
+      try clear_hyp_unless_context H x
+  end.
+
+Ltac repeat_subst_mor_of_type type :=
+  repeat match goal with
+           | [ m : context[type] |- _ ] => subst_mor m; try clear m
+         end.
