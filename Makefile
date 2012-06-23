@@ -9,6 +9,7 @@ MODULES    := Common \
 	FunctorCategory \
 	SmallCategory \
 	Limits \
+	LimitFunctors \
 	Duals \
 	ProductCategory \
 	ProductFunctor \
