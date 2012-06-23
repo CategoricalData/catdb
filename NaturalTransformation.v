@@ -172,6 +172,22 @@ Section IdentityNaturalTransformation.
       |};
     abstract t.
   Defined.
+
+  Hint Resolve LeftIdentity RightIdentity.
+
+  Lemma LeftIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F' F) :
+    NTComposeT IdentityNaturalTransformation T = T.
+    unfold IdentityNaturalTransformation, NTComposeT.
+    nteq; simpl; auto.
+  Qed.
+
+  Lemma RightIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F F') :
+    NTComposeT T IdentityNaturalTransformation = T.
+    unfold IdentityNaturalTransformation, NTComposeT.
+    nteq; simpl; auto.
+  Qed.
 End IdentityNaturalTransformation.
 
 Implicit Arguments IdentityNaturalTransformation [C D].
+
+Hint Rewrite LeftIdentityNaturalTransformation RightIdentityNaturalTransformation.
