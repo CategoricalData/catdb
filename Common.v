@@ -1,6 +1,13 @@
 Require Import Program.
 Set Implicit Arguments.
 
+Ltac unique_pose defn :=
+  let T := type of defn in
+    match goal with
+      | [ H : T |- _ ] => fail 1
+      | _ => let H := fresh in assert (H := defn)
+    end.
+
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
 
