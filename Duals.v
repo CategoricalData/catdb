@@ -1,5 +1,7 @@
-Require Export Category Functor ProductCategory.
+Require Export Category Functor ProductCategory NaturalTransformation.
 Require Import Common CategoryEquality.
+
+Set Implicit Arguments.
 
 Local Infix "*" := ProductCategory.
 
@@ -58,4 +60,18 @@ Section OppositeFunctor.
   Defined.
 End OppositeFunctor.
 
-Implicit Arguments OppositeFunctor [C D].
+Section OppositeNaturalTransformation.
+  Variables C D : Category.
+  Variable F G : Functor C D.
+  Variable T : NaturalTransformation F G.
+  Let COp := OppositeCategory C.
+  Let DOp := OppositeCategory D.
+  Let FOp := OppositeFunctor F.
+  Let GOp := OppositeFunctor G.
+
+  Definition OppositeNaturalTransformation : NaturalTransformation GOp FOp.
+    refine {| ComponentsOf := (fun c : COp => T.(ComponentsOf) c : Morphism DOp (GOp c) (FOp c));
+      Commutes := (fun s d m => eq_sym (@Commutes _ _ _ _ T d s m))
+    |}.
+  Defined.
+End OppositeNaturalTransformation.
