@@ -122,3 +122,44 @@ Ltac repeat_subst_mor_of_type type :=
   repeat match goal with
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
          end.
+
+Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
+  intros; repeat subst; reflexivity.
+Qed.
+
+Ltac fg_equal :=
+  repeat match goal with
+           | [ H : _ |- _ ] => let H' := fresh in assert (H' := fg_equal H); clear H; simpl in H'
+         end.
+
+Ltac intro_proj2_sig_from_goal :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+         end; simpl in *.
+
+Ltac recr_destruct_with tac H :=
+  let H0 := fresh in let H1 := fresh in
+    (tac H; try reflexivity; try clear H) ||
+      (destruct H as [ H0 H1 ];
+        simpl in H0, H1;
+          recr_destruct_with tac H0 || recr_destruct_with tac H1;
+            try clear H0; try clear H1).
+
+Ltac do_rewrite H := rewrite H.
+Ltac do_rewrite_rev H := rewrite <- H.
+Ltac recr_destruct_rewrite H := recr_destruct_with do_rewrite H.
+Ltac recr_destruct_rewrite_rev H := recr_destruct_with do_rewrite_rev H.
+
+
+Ltac use_proj2_sig_with tac :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] =>
+             match x with
+               | context[proj1_sig] => fail 1
+               | _ => let H := fresh in assert (H := proj2_sig x); simpl in H;
+                 tac H; try clear H
+             end
+         end.
+
+Ltac rewrite_proj2_sig := use_proj2_sig_with recr_destruct_rewrite.
+Ltac rewrite_rev_proj2_sig := use_proj2_sig_with recr_destruct_rewrite_rev.
