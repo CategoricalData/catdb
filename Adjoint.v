@@ -105,7 +105,7 @@ Section AdjunctionEquivalences.
      [η c = ϕ(1_{F c})]
      *)
   Definition UnitOf (A : Adjunction F G) : AdjunctionUnit F G.
-    eexists (Build_NaturalTransformation _ _ (IdentityFunctor C) (ComposeFunctors G F) (fun c => A.(AComponentsOf) c (F c) (Identity _)) _).
+    eexists (Build_NaturalTransformation (IdentityFunctor C) (ComposeFunctors G F) (fun c => A.(AComponentsOf) c (F c) (Identity _)) _).
     simpl.
     intros c d f.
     exists (proj1_sig (A.(AIsomorphism) c d) f).
@@ -129,7 +129,7 @@ Section AdjunctionEquivalences.
 
 
   Definition CounitOf (A : Adjunction F G) : AdjunctionCounit F G.
-    eexists (Build_NaturalTransformation _ _ (ComposeFunctors F G) (IdentityFunctor D) (fun d => proj1_sig (A.(AIsomorphism) (G d) d) (Identity _)) _).
+    eexists (Build_NaturalTransformation (ComposeFunctors F G) (IdentityFunctor D) (fun d => proj1_sig (A.(AIsomorphism) (G d) d) (Identity _)) _).
     simpl.
     intros c d f.
     exists (A.(AComponentsOf) c d f).

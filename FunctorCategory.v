@@ -1,6 +1,8 @@
 Require Export Category.
 Require Import Common Functor NaturalTransformation.
 
+Set Implicit Arguments.
+
 Section FunctorCategory.
   Variable C D : Category.
 
@@ -14,6 +16,6 @@ Section FunctorCategory.
       Morphism := @NaturalTransformation C D;
       Compose := @NTComposeT C D;
       Identity := @IdentityNaturalTransformation C D
-      |}; intros; unfold NTComposeT; t_with t'; nteq_with eauto.
+      |}; abstract (nt_eq; auto).
   Defined.
 End FunctorCategory.

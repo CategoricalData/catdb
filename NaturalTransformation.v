@@ -1,6 +1,8 @@
-Require Import Setoid Program.
-Require Export Functor.
+Require Import FunctionalExtensionality ProofIrrelevance.
+Require Export Functor FEqualDep.
 Require Import Common.
+
+Set Implicit Arguments.
 
 Section Categories_NaturalTransformation.
   Variable C D : Category.
@@ -30,40 +32,32 @@ Section Categories_NaturalTransformation.
   }.
 End Categories_NaturalTransformation.
 
-Implicit Arguments NaturalTransformation [C D].
-Implicit Arguments ComponentsOf [C D F G].
-Implicit Arguments Commutes [C D F G].
-
-Ltac destruct_natural_transformations :=
-  repeat match goal with
-           | [ T : @NaturalTransformation _ _ _ _ |- _ ] => destruct T
-         end.
-
-Section nteq.
+Section NaturalTransformations_Equal.
   Variables C D : Category.
   Variables F G : Functor C D.
 
-  Lemma nteq_co_eq co co' com com' : co = co' -> Build_NaturalTransformation C D F G co com = Build_NaturalTransformation C D F G co' com'.
-    intro p.
-    generalize com com'.
-    rewrite <- p.
-    intros; apply f_equal.
-    apply proof_irrelevance.
+  Lemma NaturalTransformations_Equal : forall (T U : NaturalTransformation F G),
+    ComponentsOf T = ComponentsOf U
+    -> T = U.
+    destruct T, U; simpl; intros; repeat subst;
+      f_equal; reflexivity || apply proof_irrelevance.
   Qed.
-End nteq.
+End NaturalTransformations_Equal.
 
-Ltac nteq_with tac := autounfold with core in *;
-  destruct_natural_transformations;
-  repeat match goal with
-           | [ |- Build_NaturalTransformation _ _ _ _ ?co ?com = Build_NaturalTransformation _ _ _ _ ?co ?com' ] =>
-             let H := fresh in
-               assert (H : com = com') by (reflexivity || apply proof_irrelevance);
-                 (rewrite H; reflexivity) || (rewrite <- H; reflexivity)
-           | [ |- Build_NaturalTransformation _ _ _ _ ?co ?com = Build_NaturalTransformation _ _ _ _ ?co' ?com' ] =>
-             apply nteq_co_eq; try (apply functional_extensionality_dep; intros); tac
-         end.
-Ltac nteq := nteq_with ltac:(try reflexivity).
+Ltac nt_eq_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- @eq (@NaturalTransformation _ _ _ _) _ _ ] => apply NaturalTransformations_Equal
+    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | [ |- _ = _ ] => apply proof_irrelevance
+    | _ => tac
+  end; repeat simpl.
 
+Ltac nt_eq_with tac := repeat nt_eq_step_with tac.
+
+Ltac nt_eq_step := nt_eq_step_with idtac.
+Ltac nt_eq := nt_eq_with idtac.
 
 Section NaturalTransformationComposition.
   Variable C D E : Category.
@@ -153,14 +147,11 @@ Section NaturalTransformationComposition.
 
   Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F'):
     NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    refine (Build_NaturalTransformation _ _ (ComposeFunctors G F) (ComposeFunctors G' F')
+    refine (Build_NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
       (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
       _). abstract (simpl; intros; autorewrite with core in *; trivial).
   Defined.
 End NaturalTransformationComposition.
-
-Implicit Arguments NTComposeT [C D F F' F''].
-Implicit Arguments NTComposeF [C D E F F' G G'].
 
 Section IdentityNaturalTransformation.
   Variable C D : Category.
@@ -177,17 +168,13 @@ Section IdentityNaturalTransformation.
 
   Lemma LeftIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F' F) :
     NTComposeT IdentityNaturalTransformation T = T.
-    unfold IdentityNaturalTransformation, NTComposeT.
-    nteq; simpl; auto.
+    nt_eq; auto.
   Qed.
 
   Lemma RightIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F F') :
     NTComposeT T IdentityNaturalTransformation = T.
-    unfold IdentityNaturalTransformation, NTComposeT.
-    nteq; simpl; auto.
+    nt_eq; auto.
   Qed.
 End IdentityNaturalTransformation.
-
-Implicit Arguments IdentityNaturalTransformation [C D].
 
 Hint Rewrite LeftIdentityNaturalTransformation RightIdentityNaturalTransformation.
