@@ -16,6 +16,7 @@ MODULES    := Common \
 	SetCategory \
 	Hom \
 	FunctorAttributes \
+	AdjointUnit \
 	Adjoint \
 	Grothendieck \
 	EquivalenceClass \
