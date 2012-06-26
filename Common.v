@@ -8,6 +8,12 @@ Ltac unique_pose defn :=
       | _ => let H := fresh in assert (H := defn)
     end.
 
+Ltac simpl_do tac H :=
+  let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
+
+Ltac simpl_do_clear tac H :=
+  let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'; try clear H'.
+
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
 
@@ -156,8 +162,7 @@ Ltac use_proj2_sig_with tac :=
            | [ |- appcontext[proj1_sig ?x] ] =>
              match x with
                | context[proj1_sig] => fail 1
-               | _ => let H := fresh in assert (H := proj2_sig x); simpl in H;
-                 tac H; try clear H
+               | _ => simpl_do_clear tac (proj2_sig x)
              end
          end.
 
