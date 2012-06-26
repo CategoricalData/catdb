@@ -6,21 +6,22 @@ Local Notation "C ^ D" := (FunctorCategory D C).
 Section HasLimits.
   Variable C : Category.
 
-  Definition FunctorHasLimit' D (F : Functor D C) := exists L, exists _ : Limit F L, True.
-  Definition FunctorHasLimit D (F : Functor D C) := { L : C & Limit F L }.
+  Definition FunctorHasLimit' (D : SmallCategory) (F : Functor D C) := exists L, exists _ : Limit F L, True.
+  Definition FunctorHasLimit (D : SmallCategory) (F : Functor D C) := { L : C & Limit F L }.
 
-  Definition HasLimits' (D : Category) := forall F : Functor D C, FunctorHasLimit' D F.
-  Definition HasLimits (D : Category) := forall F : Functor D C, FunctorHasLimit D F.
+  Definition HasLimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit' D F.
+  Definition HasLimits (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit D F.
 
-  Definition FunctorHasColimit' D (F : Functor D C) := exists c, exists _ : Colimit F c, True.
-  Definition FunctorHasColimit D (F : Functor D C) := { c : C & Colimit F c }.
+  Definition FunctorHasColimit' (D : SmallCategory) (F : Functor D C) := exists c, exists _ : Colimit F c, True.
+  Definition FunctorHasColimit (D : SmallCategory) (F : Functor D C) := { c : C & Colimit F c }.
 
-  Definition HasColimits' (D : Category) := forall F : Functor D C, FunctorHasColimit' D F.
-  Definition HasColimits (D : Category) := forall F : Functor D C, FunctorHasColimit D F.
+  Definition HasColimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit' D F.
+  Definition HasColimits (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit D F.
 End HasLimits.
 
 Section LimitFunctors.
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : SmallCategory.
 
   Hypothesis HL : HasLimits C D.
   Hypothesis HC : HasColimits C D.

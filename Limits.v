@@ -2,10 +2,13 @@ Require Import Setoid Program.
 Require Export Category Functor.
 Require Import Common NaturalTransformation NaturalEquivalence FunctorCategory.
 
+Set Implicit Arguments.
+
 Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section DiagonalFunctor.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : SmallCategory.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -28,7 +31,7 @@ Section DiagonalFunctor.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
     simpl; unfold diagonal_functor_object_of; intro m.
-    refine {| ComponentsOf := fun d : D => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
+    refine {| ComponentsOf := fun d => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
       |}; abstract t.
   Defined.
 
@@ -46,7 +49,8 @@ End DiagonalFunctor.
 Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
 
 Section Limit.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : SmallCategory.
   Variable F : Functor D C.
 
   (**
@@ -82,13 +86,10 @@ Section Limit.
     }.
 End Limit.
 
-Implicit Arguments Limit [C D].
-Implicit Arguments Colimit [C D].
-
 Section LimitMorphisms.
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : SmallCategory.
   Variable F : Functor D C.
-
 
   Definition MorphismBetweenLimits L L' : Limit F L -> Limit F L' -> Morphism _ L L'.
     intros; destruct_type Limit; specialized_assumption ltac:(destruct_type sig).
@@ -98,6 +99,3 @@ Section LimitMorphisms.
     intros; destruct_type Colimit; specialized_assumption ltac:(destruct_type sig).
   Defined.
 End LimitMorphisms.
-
-Implicit Arguments MorphismBetweenLimits [C D F L L'].
-Implicit Arguments MorphismBetweenColimits [C D F c c'].

@@ -1,10 +1,11 @@
-Require Export Category.
+Require Export Category SmallCategory.
 Require Import Common Functor NaturalTransformation.
 
 Set Implicit Arguments.
 
 Section FunctorCategory.
-  Variable C D : Category.
+  Variable C : SmallCategory.
+  Variable D : Category.
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
 
