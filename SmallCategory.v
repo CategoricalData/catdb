@@ -4,6 +4,16 @@ Require Import Common Functor.
 
 Set Implicit Arguments.
 
+(**
+   Quoting Wikipedia:
+   A category [C] is called small if both ob(C) and hom(C) are
+   actually sets and not proper classes, and large otherwise.
+
+   I don't impose this restriction, because I want to see if I
+   can make it work with just saying that the objects and morphisms
+   of a small category are no larger than the objects and morphisms
+   of a (large) category.
+   *)
 Record SmallCategory := {
   SObject :> Type;
   SMorphism : SObject -> SObject -> Type;

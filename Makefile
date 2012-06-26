@@ -8,6 +8,7 @@ MODULES    := Common \
 	NaturalEquivalence \
 	FunctorCategory \
 	SmallCategory \
+	LocallySmallCategory \
 	Limits \
 	LimitFunctors \
 	Duals \
