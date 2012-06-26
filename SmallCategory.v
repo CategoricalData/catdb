@@ -1,5 +1,6 @@
-Require Import Common Bool Omega Setoid.
-Require Import EquivalenceRelation Category Functor NaturalTransformation NaturalEquivalence.
+Require Import Bool Omega Setoid.
+Require Export Category.
+Require Import Common Functor.
 
 Set Implicit Arguments.
 
@@ -32,9 +33,13 @@ End SmallCat2Cat.
 Coercion smallcat2cat : SmallCategory >-> Category.
 
 Section SmallCat.
-(*  Definition SmallCat : Category.
+  Hint Resolve ComposeFunctorsAssociativity LeftIdentityFunctor RightIdentityFunctor.
+
+  Definition SmallCat : Category.
     refine {| Object := SmallCategory;
-      Morphism := (fun C D => Functor C D);
-      MorphismsEquivalent' := (fun C D => NaturalEquivalence C D)
-      |}.*)
+      Morphism := @Functor;
+      Identity := @IdentityFunctor;
+      Compose := @ComposeFunctors
+      |}; auto.
+  Defined.
 End SmallCat.
