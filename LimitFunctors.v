@@ -1,5 +1,7 @@
 Require Export Limits.
-Require Import Common NaturalTransformation FunctorCategory.
+Require Import Common NaturalTransformation SmallNaturalTransformation FunctorCategory Adjoint AdjointUnit.
+
+Set Implicit Arguments.
 
 Local Notation "C ^ D" := (FunctorCategory D C).
 
@@ -9,14 +11,14 @@ Section HasLimits.
   Definition FunctorHasLimit' (D : SmallCategory) (F : Functor D C) := exists L, exists _ : Limit F L, True.
   Definition FunctorHasLimit (D : SmallCategory) (F : Functor D C) := { L : C & Limit F L }.
 
-  Definition HasLimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit' D F.
-  Definition HasLimits (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit D F.
+  Definition HasLimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit' F.
+  Definition HasLimits (D : SmallCategory) := forall F : Functor D C, FunctorHasLimit F.
 
   Definition FunctorHasColimit' (D : SmallCategory) (F : Functor D C) := exists c, exists _ : Colimit F c, True.
   Definition FunctorHasColimit (D : SmallCategory) (F : Functor D C) := { c : C & Colimit F c }.
 
-  Definition HasColimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit' D F.
-  Definition HasColimits (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit D F.
+  Definition HasColimits' (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit' F.
+  Definition HasColimits (D : SmallCategory) := forall F : Functor D C, FunctorHasColimit F.
 End HasLimits.
 
 Section LimitFunctors.
@@ -39,7 +41,7 @@ Section LimitFunctors.
     simpl.
     specialize (s limG); specialize (s' limF).
     exact (projT1 (s' (NTComposeT m t))).*)
-    exact (projT1 ((projT2 (projT2 (HL G))) (projT1 (HL F)) (NTComposeT m (projT1 (projT2 (HL F)))))).
+    exact (projT1 ((projT2 (projT2 (HL G))) (projT1 (HL F)) (SNTComposeT m (projT1 (projT2 (HL F)))))).
   Defined.
 
   Definition ColimitFunctor_morphism_of (F G : @Object (C ^ D)) (m : Morphism (C ^ D) F G) : Morphism C (ColimitOf F) (ColimitOf G).
@@ -48,7 +50,7 @@ Section LimitFunctors.
     simpl.
     specialize (s colimG); specialize (s' colimF).
     exact (projT1 (s (NTComposeT t' m))).*)
-    exact (projT1 ((projT2 (projT2 (HC F))) (projT1 (HC G)) (NTComposeT (projT1 (projT2 (HC G))) m))).
+    exact (projT1 ((projT2 (projT2 (HC F))) (projT1 (HC G)) (SNTComposeT (projT1 (projT2 (HC G))) m))).
   Defined.
 
   Hint Unfold ColimitFunctor_morphism_of LimitFunctor_morphism_of.

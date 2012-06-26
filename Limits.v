@@ -1,6 +1,6 @@
 Require Import Setoid Program.
 Require Export Category Functor.
-Require Import Common NaturalTransformation NaturalEquivalence FunctorCategory.
+Require Import Common NaturalTransformation SmallNaturalTransformation NaturalEquivalence FunctorCategory.
 
 Set Implicit Arguments.
 
@@ -31,11 +31,11 @@ Section DiagonalFunctor.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
     simpl; unfold diagonal_functor_object_of; intro m.
-    refine {| ComponentsOf := fun d => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
+    refine {| SComponentsOf := fun d => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
       |}; abstract t.
   Defined.
 
-  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of ComponentsOf NTComposeT IdentityNaturalTransformation.
+  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of SComponentsOf SNTComposeT IdentitySmallNaturalTransformation.
   Hint Resolve f_equal f_equal2.
   Hint Extern 1 (_ = _) => apply proof_irrelevance.
 
@@ -62,10 +62,10 @@ Section Limit.
      there exists a unique map [s' : X -> L] in [C] such that [t (Δ s') = s].
      **)
   Definition Limit (L : C) :=
-    { t : NaturalTransformation ((DiagonalFunctor C D) L) F &
-      forall X : C, forall s : NaturalTransformation ((DiagonalFunctor C D) X) F,
+    { t : SmallNaturalTransformation ((DiagonalFunctor C D) L) F &
+      forall X : C, forall s : SmallNaturalTransformation ((DiagonalFunctor C D) X) F,
         { s' : C.(Morphism) X L | is_unique s' /\
-          NTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s
+          SNTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s
         }
     }.
 
@@ -78,10 +78,10 @@ Section Limit.
      there exists a unique map [s' : c -> X] in [C] such that [(Δ s') t = s].
      **)
   Definition Colimit (c : C) :=
-    { t : NaturalTransformation F ((DiagonalFunctor C D) c) &
-      forall X : C, forall s : NaturalTransformation F ((DiagonalFunctor C D) X),
+    { t : SmallNaturalTransformation F ((DiagonalFunctor C D) c) &
+      forall X : C, forall s : SmallNaturalTransformation F ((DiagonalFunctor C D) X),
         { s' : C.(Morphism) c X | is_unique s' /\
-          NTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
+          SNTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
         }
     }.
 End Limit.

@@ -5,10 +5,10 @@ MODULES    := Common \
 	Functor \
 	ComputableCategory \
 	NaturalTransformation \
+	SmallNaturalTransformation \
 	NaturalEquivalence \
 	FunctorCategory \
 	SmallCategory \
-	LocallySmallCategory \
 	Limits \
 	LimitFunctors \
 	Duals \

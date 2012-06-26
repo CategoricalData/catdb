@@ -1,6 +1,5 @@
-Require Import Bool Omega Setoid.
 Require Export Category.
-Require Import Common Functor.
+Require Import Common.
 
 Set Implicit Arguments.
 
@@ -27,21 +26,27 @@ Record SmallCategory := {
   SRightIdentity : forall a b (f : SMorphism a b), SCompose f (SIdentity a) = f
 }.
 
+Implicit Arguments SCompose [s s0 d d'].
+Implicit Arguments SIdentity [s].
+
+Hint Rewrite SLeftIdentity SRightIdentity.
+
 Hint Resolve SAssociativity SLeftIdentity SRightIdentity.
 
 Section SmallCat2Cat.
   Variable C : SmallCategory.
 
   Definition smallcat2cat : Category.
-    refine {| Object := C.(SObject);
-      Morphism := C.(SMorphism);
-      Compose := C.(SCompose)
+    refine {| Object := @SObject C;
+      Morphism := @SMorphism C;
+      Compose := @SCompose C
     |}; auto.
   Defined.
 End SmallCat2Cat.
 
 Coercion smallcat2cat : SmallCategory >-> Category.
 
+(*
 Section SmallCat.
   Hint Resolve ComposeFunctorsAssociativity LeftIdentityFunctor RightIdentityFunctor.
 
@@ -53,3 +58,4 @@ Section SmallCat.
       |}; auto.
   Defined.
 End SmallCat.
+*)

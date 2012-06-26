@@ -1,5 +1,5 @@
 Require Export Category SmallCategory.
-Require Import Common Functor NaturalTransformation.
+Require Import Common Functor SmallNaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -14,9 +14,9 @@ Section FunctorCategory.
      *)
   Definition FunctorCategory : Category.
     refine {| Object := Functor C D;
-      Morphism := @NaturalTransformation C D;
-      Compose := @NTComposeT C D;
-      Identity := @IdentityNaturalTransformation C D
-      |}; abstract (nt_eq; auto).
+      Morphism := @SmallNaturalTransformation C D;
+      Compose := @SNTComposeT C D;
+      Identity := @IdentitySmallNaturalTransformation C D
+      |}; abstract (snt_eq; auto).
   Defined.
 End FunctorCategory.
