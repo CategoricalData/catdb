@@ -143,6 +143,11 @@ Ltac intro_proj2_sig_from_goal :=
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
          end; simpl in *.
 
+Ltac intro_projT2_from_goal :=
+  repeat match goal with
+           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+         end; simpl in *.
+
 Ltac recr_destruct_with tac H :=
   let H0 := fresh in let H1 := fresh in
     (tac H; try reflexivity; try clear H) ||
