@@ -23,6 +23,7 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Grothendieck \
+	Yoneda \
 	EquivalenceClass \
 	EquivalenceRelation \
 	Schema \
