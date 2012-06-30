@@ -1,5 +1,6 @@
 MODULES    := Common \
 	FEqualDep \
+	DefinitionSimplification \
 	Category \
 	CategoryEquality \
 	SmallCategory \
@@ -13,6 +14,7 @@ MODULES    := Common \
 	SmallCat \
 	Limits \
 	LimitFunctors \
+	LimitFunctorTheorems \
 	Duals \
 	SmallDuals \
 	ProductCategory \

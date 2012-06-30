@@ -48,6 +48,23 @@ End DiagonalFunctor.
 
 Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
 
+Section DiagonalFunctorLemmas.
+  Variable C : Category.
+  Variable D D' : SmallCategory.
+
+  Lemma Compose_diagonal_functor_object_of x (F : Functor D' D) :
+    ComposeFunctors (diagonal_functor_object_of C D x) F = diagonal_functor_object_of _ _ x.
+    functor_eq.
+  Qed.
+
+  Lemma Compose_DiagonalFunctor x (F : Functor D' D) :
+    ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
+    simpl; apply Compose_diagonal_functor_object_of.
+  Qed.
+End DiagonalFunctorLemmas.
+
+Hint Rewrite Compose_diagonal_functor_object_of Compose_DiagonalFunctor.
+
 Section Limit.
   Variable C : Category.
   Variable D : SmallCategory.

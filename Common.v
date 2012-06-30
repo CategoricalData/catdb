@@ -61,11 +61,35 @@ Ltac destruct_hypotheses :=
            | [ H : prod _ _ |- _ ] => destruct H
          end.
 
+Ltac destruct_sig :=
+  repeat match goal with
+           | [ H : @sig _ _ |- _ ] => destruct H
+           | [ H : @sigT _ _ |- _ ] => destruct H
+           | [ H : @sig2 _ _ _ |- _ ] => destruct H
+           | [ H : @sigT2 _ _ _ |- _ ] => destruct H
+         end.
+
 Ltac specialized_assumption tac := tac;
   match goal with
     | [ x : ?T, H : forall _ : ?T, _ |- _ ] => specialize (H x); specialized_assumption tac
     | _ => assumption
   end.
+
+Ltac specialize_uniquely :=
+  repeat match goal with
+           | [ x : ?T, y : ?T, H : _ |- _ ] => fail 1
+           | [ x : ?T, H : _ |- _ ] => specialize (H x)
+         end.
+
+Ltac specialize_all_ways_forall :=
+  repeat match goal with
+           | [ x : ?T, H : forall _ : ?T, _ |- _ ] => unique_pose (H x)
+         end.
+
+Ltac specialize_all_ways :=
+  repeat match goal with
+           | [ x : ?T, H : _ |- _ ] => unique_pose (H x)
+         end.
 
 Ltac try_rewrite rew_H tac :=
   (repeat (rewrite rew_H); tac) ||
@@ -108,6 +132,14 @@ Ltac clear_hyp_unless_context hyp conVar :=
       | _ => clear_hyp_of_type hypT
     end.
 
+Ltac recur_clear_context con :=
+  repeat match goal with
+           | [ H : appcontext[con] |- _ ] =>
+             recur_clear_context H; try clear H
+           | [ H := appcontext[con] |- _ ] =>
+             recur_clear_context H; try clear H
+         end.
+
 (* equivalent to [idtac] if [subexpr] appears nowhere in [expr],
    equivalent to [fail] otherwise *)
 Ltac FreeQ expr subexpr :=
@@ -146,6 +178,20 @@ Ltac intro_proj2_sig_from_goal :=
 Ltac intro_projT2_from_goal :=
   repeat match goal with
            | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+         end; simpl in *.
+
+Ltac intro_proj2_sig :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ H : appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
+           | [ H := appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
+         end; simpl in *.
+
+Ltac intro_projT2 :=
+  repeat match goal with
+           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+           | [ H : appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
+           | [ H := appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
          end; simpl in *.
 
 Ltac recr_destruct_with tac H :=
