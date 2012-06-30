@@ -261,9 +261,6 @@ Section CategoryIsomorphismEquivalenceRelation.
   Qed.
 End CategoryIsomorphismEquivalenceRelation.
 
-Definition is_unique (A : Type) (x : A) := forall x' : A, x' = x.
-Implicit Arguments is_unique [A].
-
 Section CategoryObjects1.
   Variable C : Category.
 

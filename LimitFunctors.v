@@ -1,3 +1,4 @@
+Require Import FunctionalExtensionality.
 Require Export Limits.
 Require Import Common NaturalTransformation SmallNaturalTransformation FunctorCategory Adjoint AdjointUnit.
 
@@ -83,3 +84,78 @@ Section LimitFunctors.
       ).
   Defined.
 End LimitFunctors.
+
+Section Adjoint.
+  Variable C : Category.
+  Variable D : SmallCategory.
+  Hypothesis HL : HasLimits C D.
+  Hypothesis HC : HasColimits C D.
+
+  Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) (LimitFunctor HL).
+    refine {| AComponentsOf := (fun (c : C) (F : C ^ D)
+      => (fun (T : Hom.HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F))
+        => proj1_sig (projT2 (projT2 (HL F)) c T) : Hom.HomFunctor C (c, (LimitFunctor HL) F)
+      )) |}; intros; unfold CategoryIsomorphism, HasLimits, FunctorHasLimit, Limit in *; simpl in *;
+    try match goal with
+          | [ |- { _ : Morphism _ ?c ?L -> SmallNaturalTransformation (diagonal_functor_object_of _ _ ?c) ?F | _ } ] =>
+            eexists (fun f : Morphism _ c L =>
+              Build_SmallNaturalTransformation (diagonal_functor_object_of C D c) F
+              (fun d => Compose (projT1 (projT2 (HL F)) d) f)
+              _
+            )
+        end;
+    repeat split; simpl in *; repeat (apply functional_extensionality_dep; intro);
+      try snt_eq;
+        intro_proj2_sig_from_goal;
+        simpl in *; destruct_hypotheses;
+          try rewrite_unique;
+            intro_fresh_unique;
+            t_rev_with t'.
+    Grab Existential Variables.
+    abstract (
+      intros; simpl in *; auto; autorewrite with core; simpl;
+        try_associativity ltac:(apply f_equal2; try reflexivity);
+        match goal with
+          | [ |- SComponentsOf ?T ?d = Compose _ _ ] => simpl_do do_rewrite_rev (SCommutes T)
+        end;
+        autorewrite with core; reflexivity
+    ).
+  Defined.
+
+  Definition ColimitAdjunction : Adjunction (ColimitFunctor HC) (DiagonalFunctor C D).
+    refine {| AComponentsOf := (fun (F : C ^ D) (c : C)
+      => fun f : Hom.HomFunctor C (ColimitFunctor HC F, c)
+        => Build_SmallNaturalTransformation F (diagonal_functor_object_of C D c)
+        (fun d => Compose f (projT1 (projT2 (HC F)) d))
+        _
+        : Hom.HomFunctor (C ^ D) (F, DiagonalFunctor C D c)
+    ) |}; try (
+      intros F c; eexists (fun (T : SmallNaturalTransformation F (DiagonalFunctor C D c))
+        => proj1_sig (projT2 (projT2 (HC F)) c T)
+      )
+    );
+    intros; repeat split; simpl in *;
+      try snt_eq;
+        repeat try_associativity ltac:(apply f_equal2; try reflexivity);
+          unfold ColimitFunctor_morphism_of;
+            intro_proj2_sig_from_goal;
+            intro_projT2_from_goal;
+            simpl in *; destruct_hypotheses;
+              try rewrite_unique;
+                intro_fresh_unique;
+                t_rev_with t';
+                match goal with
+                  | [ H : ?a = ?b |- _ ] => assert (forall x, a x = b x) by (rewrite H || rewrite <- H; reflexivity)
+                end;
+                simpl in *; t_with t'.
+    Grab Existential Variables.
+    abstract (
+      intros; simpl in *; auto; autorewrite with core; simpl;
+        try_associativity ltac:(apply f_equal2; try reflexivity);
+        match goal with
+          | [ |- Compose _ _ = SComponentsOf ?T ?d ] => simpl_do do_rewrite (SCommutes T)
+        end;
+        autorewrite with core; reflexivity
+    ).
+  Defined.
+End Adjoint.

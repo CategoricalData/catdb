@@ -173,3 +173,24 @@ Ltac use_proj2_sig_with tac :=
 
 Ltac rewrite_proj2_sig := use_proj2_sig_with recr_destruct_rewrite.
 Ltac rewrite_rev_proj2_sig := use_proj2_sig_with recr_destruct_rewrite_rev.
+
+Definition is_unique (A : Type) (x : A) := forall x' : A, x' = x.
+Implicit Arguments is_unique [A].
+
+Ltac rewrite_unique :=
+  match goal with
+    | [ H : is_unique _ |- _ ] => unfold is_unique in H; rewrite H || rewrite <- H; reflexivity
+  end.
+
+Ltac generalize_is_unique_hyp H T :=
+  assert (forall a b : T, a = b) by (intros; etransitivity; apply H || symmetry; apply H); clear H.
+
+Ltac generalize_is_unique :=
+  repeat match goal with
+           | [ H : @is_unique ?T _ |- _ ] => generalize_is_unique_hyp H T
+         end.
+
+Ltac intro_fresh_unique :=
+  repeat match goal with
+           | [ H : @is_unique ?T ?x |- _ ] => let x' := fresh in assert (x' := x); rewrite <- (H x') in *; generalize_is_unique_hyp H T
+         end.
