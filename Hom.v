@@ -1,6 +1,6 @@
 Require Import Program.
 Require Export Category Functor.
-Require Import Common Duals ProductCategory SetCategory.
+Require Import Common SmallCategory Duals SmallDuals ProductCategory SetCategory.
 
 Set Implicit Arguments.
 
@@ -8,7 +8,9 @@ Local Infix "*" := ProductCategory.
 
 Section HomFunctor.
   Variable C : Category.
+  Variable C' : SmallCategory.
   Let COp := OppositeCategory C.
+  Let COp' := OppositeSmallCategory C'.
 
   Section Covariant.
     Variable A : COp.
@@ -29,6 +31,18 @@ Section HomFunctor.
         |}; abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
   End Contravariant.
+
+  Section Contravariant'.
+    Variable B : C'.
+
+    Hint Resolve SAssociativity SRightIdentity SLeftIdentity.
+
+    Definition SmallContravariantHomFunctor : Functor COp' TypeCat.
+      refine {| ObjectOf := (fun X : COp'.(Object) => SMorphism COp' B X : TypeCat);
+        MorphismOf := (fun X Y h => (fun g : SMorphism COp' B X => SCompose h g))
+        |}; abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); auto).
+    Defined.
+  End Contravariant'.
 
   Definition hom_functor_object_of (c'c : Object (COp * C)) := Morphism C (fst c'c) (snd c'c) : TypeCat.
 

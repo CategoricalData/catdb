@@ -1,37 +1,51 @@
 Require Import Bool Omega Setoid Program.
-Require Export Schema Category.
+Require Export Schema Category SmallSchema SmallCategory.
 Require Import Common EquivalenceRelation EquivalenceClass.
-Require Import NaturalEquivalence ComputableCategory SNaturalEquivalence ComputableSchemaCategory.
+Require Import NaturalEquivalence ComputableCategory SNaturalEquivalence ComputableSchemaCategory SmallFunctor SmallTranslation.
 
 Set Implicit Arguments.
 
 Section Schema_Category_Equivalence.
-  Variable C : Category.
-  Variable S : Schema.
+  Variable C : SmallCategory.
+  Variable S : SmallSchema.
 
   Hint Rewrite concatenate_noedges_p concatenate_p_noedges concatenate_addedge.
   Hint Rewrite <- concatenate_prepend_equivalent.
   Hint Rewrite concatenate_associative.
 
+  Hint Rewrite sconcatenate_noedges_p sconcatenate_p_noedges sconcatenate_addedge.
+  Hint Rewrite <- sconcatenate_prepend_equivalent.
+  Hint Rewrite sconcatenate_associative.
+
   Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply addedge_equivalent.
   Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply PreCompose.
 
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply saddedge_equivalent.
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply SPreCompose.
+
   Definition path2path' s d (p : path S s d) : path' (Edge S) s d := p.
+  Definition spath2spath' s d (p : spath S s d) : spath' (SEdge S) s d := p.
 
   Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+  Hint Rewrite sconcatenate_p_noedges sconcatenate_noedges_p sconcatenate_associative.
 
   Ltac replace_noedges' :=
     match goal with
       | [ H : ?rel NoEdges ?x |- _ ] => rewrite <- H in *; clear H
       | [ H : ?rel ?x NoEdges |- _ ] => rewrite H in *; clear H
+      | [ H : ?rel SNoEdges ?x |- _ ] => rewrite <- H in *; clear H
+      | [ H : ?rel ?x SNoEdges |- _ ] => rewrite H in *; clear H
     end.
 
   Ltac replace_noedges :=
-        repeat replace_noedges'; repeat (rewrite concatenate_p_noedges in * || rewrite concatenate_noedges_p in *).
+        repeat replace_noedges';
+          repeat (rewrite concatenate_p_noedges in * || rewrite concatenate_noedges_p in *);
+            repeat (rewrite sconcatenate_p_noedges in * || rewrite sconcatenate_noedges_p in *).
 
   Ltac clear_paths :=
     repeat match goal with
              | [ H : path' _ _ _ |- _ ] => subst H || clear H
+             | [ H : spath' _ _ _ |- _ ] => subst H || clear H
            end.
 
   Ltac replace_paths_equivalent' :=
@@ -40,80 +54,84 @@ Section Schema_Category_Equivalence.
         clear_paths;
         repeat match goal with
                  | [ H : context[PathsEquivalent] |- _ ] => rewrite <- H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry;
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite <- H in *; clear H
+               end; clear_paths; repeat rewrite concatenate_associative in *; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry;
         repeat match goal with
                  | [ H : context[PathsEquivalent] |- _ ] => rewrite H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry.
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite H in *; clear H
+               end; clear_paths; repeat rewrite concatenate_associative in *; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry.
 
   (* TODO: Speed this up, automate this better. *)
-  Definition saturate : Category.
-    refine {| Object := S;
-      Morphism := (fun s d => EquivalenceClass (@PathsEquivalent S s d));
+  Definition saturate : SmallCategory.
+    refine {| SObject := S;
+      SMorphism := (fun s d => EquivalenceClass (@SPathsEquivalent S s d));
       (* foo := 1; *) (* uncommenting this line gives "Anomaly: uncaught exception Not_found. Please report."  Maybe I should report this?  But I haven't figured out a minimal test case. *)
-      Identity := (fun _ => classOf NoEdges);
-      Compose := (fun s d d' m1 m2 => apply2_to_class (@concatenate S S.(Edge) s d d') (@concatenate_mor S s d d') m2 m1)
-    |}; intros; apply forall__eq; intros; split; intros; simpl in *; destruct_hypotheses; clear_paths; clear_InClass;
-      try (replace_noedges; assumption || symmetry; assumption);
-        repeat (replace_InClass; try eexists; eauto); clear_InClass; replace_paths_equivalent'.
-    Grab Existential Variables.
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
-    intros; solve [ reflexivity || (symmetry; assumption) || etransitivity; eauto ].
+      SIdentity := (fun _ => @classOf _ (@SPathsEquivalent S _ _) (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _)
+        SNoEdges);
+      SCompose := (fun s d d' m1 m2 => @apply2_to_class _ _ _ _ _ (@SPathsEquivalent S _ _) (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _)
+        (@sconcatenate S S.(SEdge) s d d') (@sconcatenate_mor S s d d') m2 m1)
+    |}; abstract (
+      intros; apply forall__eq; intros; split; intros; simpl in *; destruct_hypotheses; clear_paths; clear_InClass;
+        try (replace_noedges; assumption || symmetry; assumption);
+          repeat (replace_InClass; try eexists; eauto); clear_InClass; replace_paths_equivalent'
+    ).
 (* abstract (intros; solve [ t | match goal with
                                           | [ p : path _ _ _ |- _ ] => solve [ induction p; t ]
                                         end ]).*)
   Defined.
 
-  Fixpoint compose_morphism_path s d (p : path' C.(Morphism) s d) : Morphism _ s d :=
+  Fixpoint scompose_morphism_path s d (p : spath' C.(SMorphism) s d) : SMorphism _ s d :=
     match p with
-      | NoEdges => Identity s
-      | AddEdge _ _ p' E => Compose E (compose_morphism_path p')
+      | SNoEdges => SIdentity s
+      | SAddEdge _ _ p' E => SCompose E (scompose_morphism_path p')
     end.
 
-  Hint Rewrite Associativity.
+  Hint Rewrite SAssociativity.
 
-  Lemma compose_morphism_path_alt : forall s d d' (E : Morphism C s d) (p : path' _ d d'),
-    compose_morphism_path (prepend p E) = Compose (compose_morphism_path p) E.
-    induction p; t; eauto.
+  Lemma scompose_morphism_path_alt : forall s d d' (E : Morphism C s d) (p : spath' _ d d'),
+    scompose_morphism_path (sprepend p E) = SCompose (scompose_morphism_path p) E.
+    induction p; simpl; autorewrite with core; auto.
   Qed.
 
-  Hint Rewrite compose_morphism_path_alt.
+  Hint Rewrite scompose_morphism_path_alt.
 
-  Definition unsaturate : Schema.
-    refine {| Vertex := C;
-      Edge := C.(Morphism);
-      PathsEquivalent' := (fun s d (p p' : _ s d) => compose_morphism_path p = compose_morphism_path p')
+  Definition unsaturate : SmallSchema.
+    refine {| SVertex := C;
+      SEdge := C.(SMorphism);
+      SPathsEquivalent' := (fun s d (p p' : _ s d) => scompose_morphism_path p = scompose_morphism_path p')
     |}; abstract (t; etransitivity; eauto).
   Defined.
 End Schema_Category_Equivalence.
 
 Section CategorySchemaCategory_RoundTrip.
-  Variable C : Category.
+  Variable C : SmallCategory.
 
-  Hint Rewrite concatenate_noedges_p concatenate_p_noedges concatenate_addedge.
-  Hint Rewrite <- concatenate_prepend_equivalent.
-  Hint Rewrite concatenate_associative.
+  Hint Rewrite sconcatenate_noedges_p sconcatenate_p_noedges sconcatenate_addedge.
+  Hint Rewrite <- sconcatenate_prepend_equivalent.
+  Hint Rewrite sconcatenate_associative.
 
-  Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply addedge_equivalent.
-  Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply PreCompose.
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply addedge_equivalent.
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply PreCompose.
 
-  Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+  Hint Rewrite sconcatenate_p_noedges sconcatenate_noedges_p sconcatenate_associative.
 
   Ltac replace_noedges' :=
     match goal with
       | [ H : ?rel NoEdges ?x |- _ ] => rewrite <- H in *; clear H
+      | [ H : ?rel SNoEdges ?x |- _ ] => rewrite <- H in *; clear H
       | [ H : ?rel ?x NoEdges |- _ ] => rewrite H in *; clear H
+      | [ H : ?rel ?x SNoEdges |- _ ] => rewrite H in *; clear H
     end.
 
   Ltac replace_noedges :=
-        repeat replace_noedges'; repeat (rewrite concatenate_p_noedges in * || rewrite concatenate_noedges_p in *).
+        repeat replace_noedges';
+          repeat (rewrite concatenate_p_noedges in * || rewrite concatenate_noedges_p in * ||
+            rewrite sconcatenate_p_noedges in * || rewrite sconcatenate_noedges_p in *).
 
   Ltac clear_paths :=
     repeat match goal with
              | [ H : path' _ _ _ |- _ ] => subst H || clear H
+             | [ H : spath' _ _ _ |- _ ] => subst H || clear H
            end.
 
   Ltac replace_paths_equivalent' :=
@@ -122,25 +140,27 @@ Section CategorySchemaCategory_RoundTrip.
         clear_paths;
         repeat match goal with
                  | [ H : context[PathsEquivalent] |- _ ] => rewrite <- H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry;
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite <- H in *; clear H
+               end; clear_paths; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry;
         repeat match goal with
                  | [ H : context[PathsEquivalent] |- _ ] => rewrite H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry.
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite H in *; clear H
+               end; clear_paths; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry.
 
 
-  Hint Rewrite compose_morphism_path_alt.
+  Hint Rewrite scompose_morphism_path_alt.
 
   Hint Rewrite LeftIdentity RightIdentity.
 
-  Lemma compose_morphism_path_distr s d d' (x : path' _ s d) (y : path' _ d d') : compose_morphism_path C (concatenate x y) = Compose (compose_morphism_path C y) (compose_morphism_path C x).
+  Lemma scompose_morphism_path_distr s d d' (x : spath' _ s d) (y : spath' _ d d') : scompose_morphism_path C (sconcatenate x y) = SCompose (scompose_morphism_path C y) (scompose_morphism_path C x).
     induction x; t_with t'.
   Qed.
 
-  Hint Rewrite compose_morphism_path_distr.
+  Hint Rewrite scompose_morphism_path_distr.
 
-  Definition sautrate_unsaturate_functor_to : Functor C (saturate (unsaturate C)).
-    refine {| ObjectOf := (fun x : C => x : (saturate (unsaturate C)));
-      MorphismOf := (fun s d m => @classOf (path' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (AddEdge NoEdges m))
+  Definition sautrate_unsaturate_functor_to : SmallFunctor C (saturate (unsaturate C)).
+    refine {| SObjectOf := (fun x : C => x : (saturate (unsaturate C)));
+      SMorphismOf := (fun s d m => @classOf (spath' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (SAddEdge SNoEdges m))
     |};
     abstract (t_with t'; unfold RelationsEquivalent in *; apply forall__eq; t_with t'; destruct_hypotheses; subst;
       t_with t'; repeat eexists (AddEdge NoEdges _); eauto; t_with t'; t_rev_with t').
@@ -155,8 +175,8 @@ Section CategorySchemaCategory_RoundTrip.
   Definition sautrate_unsaturate_functor_to_morphism : Morphism sautrate_unsaturate_roundtrip_category true false := sautrate_unsaturate_functor_to.
 
   Section chooser.
-    Variable chooser : forall s d, forall cls : EquivalenceClass (PathsEquivalent (unsaturate C) s d),
-      { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }.
+    Variable chooser : forall s d, forall cls : EquivalenceClass (SPathsEquivalent (unsaturate C) s d),
+      { m : _ | exists v, m = scompose_morphism_path C v /\ InClass cls v }.
 
     Ltac simpl_chooser :=
       repeat match goal with
@@ -170,9 +190,9 @@ Section CategorySchemaCategory_RoundTrip.
              end; simpl in *.
 
   (* XXX TODO: Automate this better. *)
-    Definition sautrate_unsaturate_functor_from : Functor (saturate (unsaturate C)) C.
-      refine {| ObjectOf := (fun x : saturate (unsaturate C) => x : C);
-        MorphismOf := (fun s d m => proj1_sig (chooser m))
+    Definition sautrate_unsaturate_functor_from : SmallFunctor (saturate (unsaturate C)) C.
+      refine {| SObjectOf := (fun x : saturate (unsaturate C) => x : C);
+        SMorphismOf := (fun s d m => proj1_sig (chooser m))
       |};
       abstract (
         repeat simpl in *; intros; unfold RelationsEquivalent in *;
@@ -197,7 +217,7 @@ Section CategorySchemaCategory_RoundTrip.
       (sautrate_unsaturate_functor_to : Morphism sautrate_unsaturate_roundtrip_category true false).
       simpl; unfold CategoryIsomorphism'.
       exists sautrate_unsaturate_functor_from.
-      unfold InverseOf; split; simpl; functor_eq; simpl_chooser;
+      split; simpl; sfunctor_eq; simpl_chooser;
         destruct_hypotheses; unfold equiv, RelationsEquivalent in *; simpl in *; t_with t';
         apply forall__eq; intros; split; intros; replace_InClass; unfold equiv, RelationsEquivalent in *; simpl in *;
           autorewrite with core in *; assumption.
@@ -219,7 +239,7 @@ Section CategorySchemaCategory_RoundTrip.
     Lemma sautrate_unsaturate_functor_from_unique chooser chooser'
       : sautrate_unsaturate_functor_from chooser = sautrate_unsaturate_functor_from chooser'.
       unfold sautrate_unsaturate_functor_from.
-      functor_eq; simpl_chooser chooser; simpl_chooser chooser'; destruct_hypotheses;
+      sfunctor_eq; simpl_chooser chooser; simpl_chooser chooser'; destruct_hypotheses;
       clear_InClass; unfold equiv, RelationsEquivalent in *; t_with t'.
     Qed.
 
@@ -247,12 +267,12 @@ Section CategorySchemaCategory_RoundTrip.
 
     (* XXX TODO: Automate this better. *)
     Lemma sautrate_unsaturate_functor_from_exists' :
-      forall s d, forall cls : EquivalenceClass (PathsEquivalent (unsaturate C) s d),
-        exists! choice : { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }, True.
+      forall s d, forall cls : EquivalenceClass (SPathsEquivalent (unsaturate C) s d),
+        exists! choice : { m : _ | exists v, m = scompose_morphism_path C v /\ InClass cls v }, True.
       intros s d cls.
       destruct (ClassInhabited cls) as [ x H ].
       simpl.
-      eexists (exist _ (compose_morphism_path C x) (ex_intro _ x (conj (eq_refl _) H))).
+      eexists (exist _ (scompose_morphism_path C x) (ex_intro _ x (conj (eq_refl _) H))).
       constructor; trivial; intros x' ?.
       destruct x' as [ x' H' ].
       destruct_hypotheses; simpl in *.
@@ -262,24 +282,24 @@ Section CategorySchemaCategory_RoundTrip.
 
     Lemma sautrate_unsaturate_functor_from_chooser_unique
       (chooser chooser' : forall s d
-        (cls : EquivalenceClass ((PathsEquivalent (unsaturate C)) s d)),
-        { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v}) :
+        (cls : EquivalenceClass ((SPathsEquivalent (unsaturate C)) s d)),
+        { m : _ | exists v, m = scompose_morphism_path C v /\ InClass cls v}) :
       chooser = chooser'.
     Proof.
       repeat (apply functional_extensionality_dep; intro).
       destruct chooser, chooser'; destruct_hypotheses.
       apply sat_unsat_exist_helper2; clear_InClass;
-        unfold equiv, RelationsEquivalent, PathsEquivalent', unsaturate in *; simpl in *; t_with t'.
+        unfold equiv, RelationsEquivalent, SPathsEquivalent', unsaturate in *; simpl in *; t_with t'.
     Qed.
 
-    Lemma chooser_helper s d (cls : EquivalenceClass ((PathsEquivalent (unsaturate C)) s d)) : (exists _ :
-      forall s' d' (cls' : EquivalenceClass ((PathsEquivalent (unsaturate C)) s' d')),
+    Lemma chooser_helper s d (cls : EquivalenceClass ((SPathsEquivalent (unsaturate C)) s d)) : (exists _ :
+      forall s' d' (cls' : EquivalenceClass ((SPathsEquivalent (unsaturate C)) s' d')),
         s = s' -> d = d' -> cls ~= cls' ->
-        { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls' v}, True).
+        { m : _ | exists v, m = scompose_morphism_path C v /\ InClass cls' v}, True).
     Proof.
       destruct (ClassInhabited cls) as [ x H ].
       constructor; intros; repeat subst; trivial.
-      exists (compose_morphism_path C x); exists x; split; trivial.
+      exists (scompose_morphism_path C x); exists x; split; trivial.
     Qed.
 
     (* [Require Import] here, because otherwise [sat_unsat_exist_helper2]
@@ -321,8 +341,8 @@ Section CategorySchemaCategory_RoundTrip.
     Qed.
 
     Lemma chooser_exists : exists! _ : (forall s d
-      (cls : EquivalenceClass ((PathsEquivalent (unsaturate C)) s d)),
-      { m : _ | exists v, m = compose_morphism_path C v /\ InClass cls v }), True.
+      (cls : EquivalenceClass ((SPathsEquivalent (unsaturate C)) s d)),
+      { m : _ | exists v, m = scompose_morphism_path C v /\ InClass cls v }), True.
       repeat match goal with
                | [ |- exists! _ : (forall s : ?T, @?f s), True ] => cut (forall s : T, exists! _ : f s, True);
                  try solve [ let H := fresh in intro H; exact (@dependent_unique_choice_unique_true _ _ H) ];
@@ -346,29 +366,31 @@ Section CategorySchemaCategory_RoundTrip.
 End CategorySchemaCategory_RoundTrip.
 
 Section SchemaCategorySchema_RoundTrip.
-  Variable C : Schema.
+  Variable C : SmallSchema.
 
-  Hint Rewrite concatenate_noedges_p concatenate_p_noedges concatenate_addedge.
-  Hint Rewrite <- concatenate_prepend_equivalent.
-  Hint Rewrite concatenate_associative.
+  Hint Rewrite sconcatenate_noedges_p sconcatenate_p_noedges sconcatenate_addedge.
+  Hint Rewrite <- sconcatenate_prepend_equivalent.
+  Hint Rewrite sconcatenate_associative.
 
-  Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply addedge_equivalent.
-  Hint Extern 1 (@RelationsEquivalent _ _ _ (PathsEquivalent _) _ _ _ _) => apply PreCompose.
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply saddedge_equivalent.
+  Hint Extern 1 (@RelationsEquivalent _ _ _ (SPathsEquivalent _) _ _ _ _) => apply SPreCompose.
 
-  Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+  Hint Rewrite sconcatenate_p_noedges sconcatenate_noedges_p sconcatenate_associative.
 
   Ltac replace_noedges' :=
     match goal with
       | [ H : ?rel NoEdges ?x |- _ ] => rewrite <- H in *; clear H
+      | [ H : ?rel SNoEdges ?x |- _ ] => rewrite <- H in *; clear H
       | [ H : ?rel ?x NoEdges |- _ ] => rewrite H in *; clear H
+      | [ H : ?rel ?x SNoEdges |- _ ] => rewrite H in *; clear H
     end.
 
   Ltac replace_noedges :=
-        repeat replace_noedges'; repeat (rewrite concatenate_p_noedges in * || rewrite concatenate_noedges_p in *).
+        repeat replace_noedges'; repeat (rewrite sconcatenate_p_noedges in * || rewrite sconcatenate_noedges_p in *).
 
   Ltac clear_paths :=
     repeat match goal with
-             | [ H : path' _ _ _ |- _ ] => subst H || clear H
+             | [ H : spath' _ _ _ |- _ ] => subst H || clear H
            end.
 
   Ltac replace_paths_equivalent' :=
@@ -376,35 +398,35 @@ Section SchemaCategorySchema_RoundTrip.
       try solve [ assumption || symmetry; assumption ];
         clear_paths;
         repeat match goal with
-                 | [ H : context[PathsEquivalent] |- _ ] => rewrite <- H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry;
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite <- H in *; clear H
+               end; clear_paths; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry;
         repeat match goal with
-                 | [ H : context[PathsEquivalent] |- _ ] => rewrite H in *; clear H
-               end; clear_paths; repeat rewrite concatenate_associative in *; try reflexivity || symmetry.
+                 | [ H : context[SPathsEquivalent] |- _ ] => rewrite H in *; clear H
+               end; clear_paths; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry.
 
 
-  Hint Rewrite compose_morphism_path_alt.
+  Hint Rewrite scompose_morphism_path_alt.
 
-  Hint Rewrite LeftIdentity RightIdentity.
-  Hint Rewrite compose_morphism_path_distr.
+  Hint Rewrite SLeftIdentity SRightIdentity.
+  Hint Rewrite scompose_morphism_path_distr.
 
-  Definition unsaturate_saturate_translation_to_PathOf s d (e : C.(Edge) s d) : path (unsaturate (saturate C)) s d :=
-    AddEdge NoEdges (@classOf (path' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (AddEdge NoEdges e)).
+  Definition unsaturate_saturate_translation_to_PathOf s d (e : C.(SEdge) s d) : spath (unsaturate (saturate C)) s d :=
+    SAddEdge SNoEdges (@classOf (spath' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (SAddEdge SNoEdges e)).
 
   Hint Unfold unsaturate_saturate_translation_to_PathOf.
 
-  Lemma unsaturate_saturate_translation_to_PathOf_InClass s d (p : path C s d) :
-    InClass (compose_morphism_path (saturate C) (transferPath _ unsaturate_saturate_translation_to_PathOf p)) p.
+  Lemma unsaturate_saturate_translation_to_PathOf_InClass s d (p : spath C s d) :
+    InClass (scompose_morphism_path (saturate C) (stransferPath _ unsaturate_saturate_translation_to_PathOf p)) p.
     induction p; simpl; repeat esplit; try reflexivity; t_with t'; try apply AddEdge_mor; try reflexivity; assumption.
   Qed.
 
-  Hint Rewrite concatenate_p_addedge.
+  Hint Rewrite sconcatenate_p_addedge.
   Hint Resolve unsaturate_saturate_translation_to_PathOf_InClass.
 
   Ltac unsaturate_saturate_translation_to_PathOf_InClass' :=
-    unfold path in *;
+    unfold path, spath in *;
     match goal with
-      | [ H : InClass ?C _, p : path' _ _ _ |- _ ] =>
+      | [ H : InClass ?C _, p : spath' _ _ _ |- _ ] =>
         assert (InClass C p) by (apply unsaturate_saturate_translation_to_PathOf_InClass);
           clear_InClass; unfold equiv in *;
             try match goal with
@@ -413,16 +435,16 @@ Section SchemaCategorySchema_RoundTrip.
                   | [ H : InClass C _ |- _ ] => clear H
                   | _ => idtac
                 end
-      | [ p : path' _ _ _ |- InClass ?C _ ] =>
+      | [ p : spath' _ _ _ |- InClass ?C _ ] =>
         assert (InClass C p) by (apply unsaturate_saturate_translation_to_PathOf_InClass);
           clear_InClass; unfold equiv in *
     end.
 
   Ltac unsaturate_saturate_translation_to_PathOf_InClass := repeat unsaturate_saturate_translation_to_PathOf_InClass'.
 
-  Lemma unsaturate_saturate_translation_to_PathOf_equivalent s d (p : path C s d) :
-    PathsEquivalent _ _ _ (transferPath _ unsaturate_saturate_translation_to_PathOf p)
-    (AddEdge NoEdges (@classOf (path' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) p)).
+  Lemma unsaturate_saturate_translation_to_PathOf_equivalent s d (p : spath C s d) :
+    SPathsEquivalent _ _ _ (stransferPath _ unsaturate_saturate_translation_to_PathOf p)
+    (SAddEdge SNoEdges (@classOf (spath' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) p)).
     induction p; unfold RelationsEquivalent, unsaturate_saturate_translation_to_PathOf in *; simpl;
     apply forall__eq; intros; split; intros; simpl in *; destruct_hypotheses; replace_noedges; repeat esplit; try reflexivity;
       eauto; autorewrite with core in *;
@@ -434,9 +456,9 @@ Section SchemaCategorySchema_RoundTrip.
     replace_paths_equivalent'.
   Qed.
 
-  Definition unsautrate_saturate_translation_to : Translation C (unsaturate (saturate C)).
-    refine {| VertexOf := (fun x : C => x : (unsaturate (saturate C)));
-      PathOf := unsaturate_saturate_translation_to_PathOf (* (fun s d e => AddEdge NoEdges (@classOf (path' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (AddEdge NoEdges e))) *)
+  Definition unsautrate_saturate_translation_to : SmallTranslation C (unsaturate (saturate C)).
+    refine {| SVertexOf := (fun x : C => x : (unsaturate (saturate C)));
+      SPathOf := unsaturate_saturate_translation_to_PathOf (* (fun s d e => AddEdge NoEdges (@classOf (path' _ s d) _ (Reflexive _ _ _) (Symmetric _ _ _) (Transitive _ _ _) (AddEdge NoEdges e))) *)
     |};
     abstract (
       t_with t'; unfold RelationsEquivalent, unsaturate_saturate_translation_to_PathOf in *; apply forall__eq; t_with t';
@@ -445,9 +467,9 @@ Section SchemaCategorySchema_RoundTrip.
     ).
   Defined.
 
-  Lemma unsaturate_saturate_cmp_eq_eqv s d (p1 p2 : path (unsaturate (saturate C)) s d) :
-    (compose_morphism_path (saturate C) p1 = compose_morphism_path (saturate C) p2) =
-    (PathsEquivalent _ _ _ p1 p2).
+  Lemma unsaturate_saturate_cmp_eq_eqv s d (p1 p2 : spath (unsaturate (saturate C)) s d) :
+    (scompose_morphism_path (saturate C) p1 = scompose_morphism_path (saturate C) p2) =
+    (SPathsEquivalent _ _ _ p1 p2).
     simpl; unfold RelationsEquivalent in *; trivial.
   Qed.
 
@@ -458,7 +480,7 @@ Section SchemaCategorySchema_RoundTrip.
               end).
 
   Section chooser.
-    Variable chooser : forall s d, forall cls : EquivalenceClass ((PathsEquivalent C) s d),
+    Variable chooser : forall s d, forall cls : EquivalenceClass ((SPathsEquivalent C) s d),
       { p : _ | InClass cls p }.
 
     Ltac simpl_chooser :=
@@ -488,25 +510,25 @@ Section SchemaCategorySchema_RoundTrip.
 
     Hint Unfold unsaturate_saturate_translation_from_PathOf.
 
-    Lemma unsaturate_saturate_translation_from_PathOf_eqv s d (p : path (unsaturate (saturate C)) s d) :
-      PathsEquivalent _ _ _
-      (transferPath _ (fun s d (e : Edge (unsaturate (saturate C)) s d) => proj1_sig (chooser e)) p)
-      (proj1_sig (chooser (compose_morphism_path (saturate C) p))).
+    Lemma unsaturate_saturate_translation_from_PathOf_eqv s d (p : spath (unsaturate (saturate C)) s d) :
+      SPathsEquivalent _ _ _
+      (stransferPath _ (fun s d (e : SEdge (unsaturate (saturate C)) s d) => proj1_sig (chooser e)) p)
+      (proj1_sig (chooser (scompose_morphism_path (saturate C) p))).
       induction p; simpl in *; simpl_chooser_more.
       destruct_hypotheses; clear_InClass.
       unfold equiv in *.
-      repeat_subst_mor_of_type @path'.
+      repeat_subst_mor_of_type @spath'.
       match goal with
-        | [ H : _ |- _ ] => rewrite H; apply concatenate_mor; eauto
+        | [ H : _ |- _ ] => rewrite H; apply sconcatenate_mor; eauto
       end.
     Qed.
 
-    Hint Rewrite concatenate_p_addedge.
+    Hint Rewrite sconcatenate_p_addedge.
     Hint Resolve unsaturate_saturate_translation_from_PathOf_eqv.
 
-    Definition unsautrate_saturate_translation_from : Translation (unsaturate (saturate C)) C.
-      refine {| VertexOf := (fun x : unsaturate (saturate C) => x : C);
-        PathOf := (fun s d e => proj1_sig (chooser e))
+    Definition unsautrate_saturate_translation_from : SmallTranslation (unsaturate (saturate C)) C.
+      refine {| SVertexOf := (fun x : unsaturate (saturate C) => x : C);
+        SPathOf := (fun s d e => proj1_sig (chooser e))
       |};
       abstract (
         repeat simpl in *; intros; unfold RelationsEquivalent in *;
@@ -521,17 +543,17 @@ Section SchemaCategorySchema_RoundTrip.
 
     (* TODO: Simplify this proof. *)
     Lemma unsautrate_saturate_roundtrip' : @CategoryIsomorphism unsautrate_saturate_roundtrip_category _ _
-      (@classOf _ _ (@TranslationsEquivalent_refl _ _) (@TranslationsEquivalent_sym _ _) (@TranslationsEquivalent_trans _ _)
+      (@classOf _ _ (@SmallTranslationsEquivalent_refl _ _) (@SmallTranslationsEquivalent_sym _ _) (@SmallTranslationsEquivalent_trans _ _)
         unsautrate_saturate_translation_to : Morphism unsautrate_saturate_roundtrip_category true false).
-      eexists (@classOf _ _ (@TranslationsEquivalent_refl _ _) (@TranslationsEquivalent_sym _ _) (@TranslationsEquivalent_trans _ _)
+      eexists (@classOf _ _ (@SmallTranslationsEquivalent_refl _ _) (@SmallTranslationsEquivalent_sym _ _) (@SmallTranslationsEquivalent_trans _ _)
         unsautrate_saturate_translation_from).
-      split; translation_eq; rewrite apply2_to_classOf;
+      split; stranslation_eq; rewrite apply2_to_classOf;
         apply forall__eq; intros; split; intros;
           clear_InClass; unfold equiv in *;
-            repeat_subst_mor_of_type @Translation;
+            repeat_subst_mor_of_type @SmallTranslation;
             repeat esplit; intros; eauto; try reflexivity; simpl in *; autorewrite with core in *;
               unfold RelationsEquivalent in *;
-                unfold TransferPath, unsautrate_saturate_translation_to, unsautrate_saturate_translation_from in *;
+                unfold STransferPath, unsautrate_saturate_translation_to, unsautrate_saturate_translation_from in *;
                   simpl; try rewrite unsaturate_saturate_translation_to_PathOf_equivalent;
                     autorewrite with core in *;
                       simpl_chooser; auto; try solve [ symmetry; auto ];
@@ -540,7 +562,7 @@ Section SchemaCategorySchema_RoundTrip.
                             apply forall__eq; intros; split; intros; simpl in *; destruct_hypotheses; auto;
                               repeat (clear_InClass; eexists; eauto; try reflexivity); clear_InClass;
                                 unfold equiv in *; auto;
-                                  repeat_subst_mor_of_type @path'; autorewrite with core; reflexivity.
+                                  repeat_subst_mor_of_type @spath'; autorewrite with core; reflexivity.
     Qed.
   End chooser.
 
@@ -557,15 +579,15 @@ Section SchemaCategorySchema_RoundTrip.
              end; simpl in *; t_rev_with t'.
 
     Lemma unsautrate_saturate_translation_from_unique chooser chooser'
-      : TranslationsEquivalent (unsautrate_saturate_translation_from chooser) (unsautrate_saturate_translation_from chooser').
+      : SmallTranslationsEquivalent (unsautrate_saturate_translation_from chooser) (unsautrate_saturate_translation_from chooser').
       unfold unsautrate_saturate_translation_from.
-      translation_eqv; simpl_chooser chooser; simpl_chooser chooser'; destruct_hypotheses;
+      stranslation_eqv; simpl_chooser chooser; simpl_chooser chooser'; destruct_hypotheses;
       clear_InClass; unfold equiv, RelationsEquivalent in *; t_with t'.
     Qed.
 
     (* XXX TODO: Automate this better. *)
     Lemma unsautrate_saturate_translation_from_exists' :
-      forall s d, forall cls : EquivalenceClass ((PathsEquivalent C) s d),
+      forall s d, forall cls : EquivalenceClass ((SPathsEquivalent C) s d),
         exists choice : { p : _ | InClass cls p }, True.
       intros s d cls.
       destruct (ClassInhabited cls) as [ x H ].
@@ -577,7 +599,7 @@ Section SchemaCategorySchema_RoundTrip.
     Require Import IndefiniteDescription.
 
     Lemma unsat_sat_chooser_exists : exists _ : (forall s d
-      (cls : EquivalenceClass ((PathsEquivalent C) s d)),
+      (cls : EquivalenceClass ((SPathsEquivalent C) s d)),
       { p : _ | InClass cls p }), True.
       constructor; trivial; intros s d cls.
       apply constructive_indefinite_description.
@@ -587,7 +609,7 @@ Section SchemaCategorySchema_RoundTrip.
   End chooser'.
 
   Theorem unsautrate_saturate_roundtrip : @CategoryIsomorphism' unsautrate_saturate_roundtrip_category _ _
-    (@classOf _ _ (@TranslationsEquivalent_refl _ _) (@TranslationsEquivalent_sym _ _) (@TranslationsEquivalent_trans _ _)
+    (@classOf _ _ (@SmallTranslationsEquivalent_refl _ _) (@SmallTranslationsEquivalent_sym _ _) (@SmallTranslationsEquivalent_trans _ _)
       unsautrate_saturate_translation_to : Morphism unsautrate_saturate_roundtrip_category true false).
     destruct unsat_sat_chooser_exists as [ chooser H ].
     apply CategoryIsomorphism2Isomorphism'. exact (unsautrate_saturate_roundtrip' chooser).

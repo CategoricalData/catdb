@@ -1,7 +1,10 @@
+Require Import JMeq ProofIrrelevance FunctionalExtensionality.
 Require Export Category.
-Require Import Common.
+Require Import Common CategoryEquality FEqualDep.
 
 Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 (**
    Quoting Wikipedia:
@@ -45,6 +48,34 @@ Section SmallCat2Cat.
 End SmallCat2Cat.
 
 Coercion smallcat2cat : SmallCategory >-> Category.
+
+Section Categories_Equal.
+  Lemma SmallCategories_Equal : forall (A B : SmallCategory),
+    SObject A = SObject B
+    -> SMorphism A == SMorphism B
+    -> @SIdentity A == @SIdentity B
+    -> @SCompose A == @SCompose B
+    -> A = B.
+    destruct A, B; simpl; intros; repeat subst;
+      f_equal; reflexivity || apply proof_irrelevance.
+  Qed.
+End Categories_Equal.
+
+Ltac scat_eq_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- @eq SmallCategory _ _ ] => apply SmallCategories_Equal
+    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
+    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | [ |- _ = _ ] => apply proof_irrelevance
+    | _ => tac
+  end; repeat simpl; JMeq_eq.
+
+Ltac scat_eq_with tac := repeat scat_eq_step_with tac.
+
+Ltac scat_eq_step := scat_eq_step_with idtac.
+Ltac scat_eq := scat_eq_with idtac.
 
 (*
 Section SmallCat.

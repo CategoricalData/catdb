@@ -2,16 +2,19 @@ MODULES    := Common \
 	FEqualDep \
 	Category \
 	CategoryEquality \
+	SmallCategory \
 	Functor \
+	SmallFunctor \
 	ComputableCategory \
 	NaturalTransformation \
 	SmallNaturalTransformation \
 	NaturalEquivalence \
 	FunctorCategory \
-	SmallCategory \
+	SmallCat \
 	Limits \
 	LimitFunctors \
 	Duals \
+	SmallDuals \
 	ProductCategory \
 	ProductFunctor \
 	SetCategory \
@@ -23,9 +26,11 @@ MODULES    := Common \
 	EquivalenceClass \
 	EquivalenceRelation \
 	Schema \
+	SmallSchema \
 	SetSchema \
 	Instance \
 	Translation \
+	SmallTranslation \
 	MetaTranslation \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory \
