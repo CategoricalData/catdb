@@ -1,5 +1,8 @@
-Require Import Program.
+Require Import ProofIrrelevance.
+
 Set Implicit Arguments.
+
+Ltac not_tac tac := (tac; fail 1) || idtac.
 
 Ltac unique_pose defn :=
   let T := type of defn in
@@ -240,3 +243,7 @@ Ltac intro_fresh_unique :=
   repeat match goal with
            | [ H : @is_unique ?T ?x |- _ ] => let x' := fresh in assert (x' := x); rewrite <- (H x') in *; generalize_is_unique_hyp H T
          end.
+
+Lemma eq_exist T (P : T -> Prop) (a b : { x | P x }) : proj1_sig a = proj1_sig b -> a = b.
+  destruct a, b; simpl in *; intro; repeat subst; f_equal; apply proof_irrelevance.
+Qed.

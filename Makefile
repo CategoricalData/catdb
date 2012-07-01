@@ -25,6 +25,7 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Grothendieck \
+	CommaCategory \
 	Yoneda \
 	EquivalenceClass \
 	EquivalenceRelation \

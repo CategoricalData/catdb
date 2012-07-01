@@ -61,8 +61,25 @@ End Small2LargeId.
 
 Hint Resolve SmallFunctor2FunctorId.
 
-Ltac sfunctor_eq_step_with tac := try apply SmallFunctor2FunctorId;
-  functor_eq_step_with ltac:(try apply SmallFunctor2FunctorId; tac).
+Section SmallFunctors_Equal.
+  Lemma SmallFunctors_Equal : forall C D (F G : SmallFunctor C D),
+    @SObjectOf _ _ F = @SObjectOf _ _ G
+    -> (@SObjectOf _ _ F = @SObjectOf _ _ G -> @SMorphismOf _ _ F == @SMorphismOf _ _ G)
+    -> F = G.
+    destruct F, G; simpl; intros; firstorder; repeat subst;
+      f_equal; apply proof_irrelevance.
+  Qed.
+End SmallFunctors_Equal.
+
+Ltac sfunctor_eq_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- @eq (SmallFunctor _ _) _ _ ] => apply SmallFunctors_Equal
+    | [ |- (fun _ : ?A => _) = _ ] => apply functional_extensionality_dep; intro
+    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | _ => tac
+  end; repeat simpl; JMeq_eq.
 
 Ltac sfunctor_eq_with tac := repeat sfunctor_eq_step_with tac.
 

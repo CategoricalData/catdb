@@ -45,25 +45,28 @@ End Small2Large.
 
 Coercion SmallNaturalTransformation2NaturalTransformation : SmallNaturalTransformation >-> NaturalTransformation.
 
-Section Small2LargeId.
+Section SmallNaturalTransformations_Equal.
   Variable C : SmallCategory.
   Variable D : Category.
-  Variable F G : Functor C D.
+  Variables F G : Functor C D.
 
-  Lemma SmallNaturalTransformation2NaturalTransformationId (T T' : SmallNaturalTransformation F G) :
-    SmallNaturalTransformation2NaturalTransformation T = SmallNaturalTransformation2NaturalTransformation T' -> T = T'.
-    intro H.
-    assert (forall x, ComponentsOf T x = ComponentsOf T' x) by (rewrite H; reflexivity).
-    unfold SmallNaturalTransformation2NaturalTransformation in *; simpl in *.
-    assert (SComponentsOf T = SComponentsOf T') by (apply functional_extensionality_dep; assumption).
-    destruct T, T'; simpl in *; repeat subst; f_equal; apply proof_irrelevance.
+  Lemma SmallNaturalTransformations_Equal : forall (T U : SmallNaturalTransformation F G),
+    SComponentsOf T = SComponentsOf U
+    -> T = U.
+    destruct T, U; simpl; intros; repeat subst;
+      f_equal; reflexivity || apply proof_irrelevance.
   Qed.
-End Small2LargeId.
+End SmallNaturalTransformations_Equal.
 
-Hint Resolve SmallNaturalTransformation2NaturalTransformationId.
-
-Ltac snt_eq_step_with tac := try apply SmallNaturalTransformation2NaturalTransformationId;
-  nt_eq_step_with ltac:(try apply SmallNaturalTransformation2NaturalTransformationId; tac).
+Ltac snt_eq_step_with tac := intros; simpl;
+  match goal with
+    | _ => reflexivity
+    | [ |- @eq (@SmallNaturalTransformation _ _ _ _) _ _ ] => apply SmallNaturalTransformations_Equal
+    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
+    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
+    | [ |- _ = _ ] => apply proof_irrelevance
+    | _ => tac
+  end; repeat simpl.
 
 Ltac snt_eq_with tac := repeat snt_eq_step_with tac.
 
