@@ -1,6 +1,6 @@
 Require Import Setoid.
-Require Export Category SmallCategory.
-Require Import Common SmallFunctor.
+Require Export Category SmallCategory SmallFunctor.
+Require Import Common.
 
 Set Implicit Arguments.
 
@@ -10,13 +10,11 @@ Section ComputableCategory.
 
   Coercion Object2Cat : O >-> SmallCategory.
 
-  Hint Resolve LeftIdentitySmallFunctor RightIdentitySmallFunctor f_equal2 ComposeSmallFunctorsAssociativity.
-
   Definition ComputableCategory : Category.
     refine {| Object := O;
       Morphism := SmallFunctor;
       Compose := @ComposeSmallFunctors;
       Identity := @IdentitySmallFunctor
-      |}; abstract (t; simpl_transitivity).
+      |}; abstract sfunctor_eq.
   Defined.
 End ComputableCategory.

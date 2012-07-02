@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality ProofIrrelevance JMeq.
-Require Export Category SmallCategory.
-Require Import Common FEqualDep Functor.
+Require Export Category SmallCategory Functor.
+Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
@@ -30,37 +30,6 @@ End Functor.
 
 Implicit Arguments SMorphismOf [C D s d].
 
-Section Small2Large.
-  Variables C D : SmallCategory.
-  Variable F : SmallFunctor C D.
-
-  Hint Resolve SFCompositionOf SFIdentityOf.
-
-  Definition SmallFunctor2Functor : Functor C D.
-    refine {| ObjectOf := F.(SObjectOf) : C.(Object) -> D.(Object);
-      MorphismOf := (@SMorphismOf _ _ F) : forall s d, C.(Morphism) _ _ -> D.(Morphism) (_ s) (_ d)
-      |}; abstract (unfold smallcat2cat; simpl; auto).
-  Defined.
-End Small2Large.
-
-Coercion SmallFunctor2Functor : SmallFunctor >-> Functor.
-
-Section Small2LargeId.
-  Variables C D : SmallCategory.
-  Variable F F' : SmallFunctor C D.
-
-  Lemma SmallFunctor2FunctorId :
-    SmallFunctor2Functor F = SmallFunctor2Functor F' -> F = F'.
-    intro H.
-    assert (ObjectOf F = ObjectOf F') by (rewrite H; reflexivity).
-    assert (MorphismOf F == MorphismOf F') by (rewrite H; reflexivity).
-    destruct F, F'; simpl in *;
-      repeat subst; f_equal; apply proof_irrelevance.
-  Qed.
-End Small2LargeId.
-
-Hint Resolve SmallFunctor2FunctorId.
-
 Section SmallFunctors_Equal.
   Lemma SmallFunctors_Equal : forall C D (F G : SmallFunctor C D),
     @SObjectOf _ _ F = @SObjectOf _ _ G
@@ -86,45 +55,69 @@ Ltac sfunctor_eq_with tac := repeat sfunctor_eq_step_with tac.
 Ltac sfunctor_eq_step := sfunctor_eq_step_with idtac.
 Ltac sfunctor_eq := sfunctor_eq_with idtac.
 
-Section FunctorComposition.
-  Variable B C D E : SmallCategory.
+Section Small2Large.
+  Variables C D : SmallCategory.
+  Variable F : SmallFunctor C D.
 
-  Hint Rewrite SFCompositionOf SFIdentityOf.
+  Hint Resolve SFCompositionOf SFIdentityOf.
 
-  Definition ComposeSmallFunctors (G : SmallFunctor D E) (F : SmallFunctor C D) : SmallFunctor C E.
-    refine {| SObjectOf := (fun c => G (F c));
-      SMorphismOf := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-      |}; abstract t.
+  Definition SmallFunctor2Functor : Functor C D.
+    refine {| ObjectOf := F.(SObjectOf) : C.(Object) -> D.(Object);
+      MorphismOf := (@SMorphismOf _ _ F) : forall s d, C.(Morphism) _ _ -> D.(Morphism) (_ s) (_ d)
+      |}; abstract (unfold smallcat2cat; simpl; auto).
   Defined.
-End FunctorComposition.
+End Small2Large.
 
-Section Category.
-  Variable C D : SmallCategory.
+Section Large2Small.
+  Definition FunctorOnSmall {C D : SmallCategory} := Functor C D.
 
-  (* There is an identity functor.  It does the obvious thing. *)
-  Definition IdentitySmallFunctor : SmallFunctor C C.
-    refine {| SObjectOf := (fun x => x);
-      SMorphismOf := (fun _ _ x => x)
-    |};
-    abstract t.
+  Variables C D : SmallCategory.
+  Variable F : @FunctorOnSmall C D.
+
+  Definition Functor2SmallFunctor : SmallFunctor C D.
+    refine {| SObjectOf := F.(ObjectOf) : C.(SObject) -> D.(SObject);
+      SMorphismOf := (@MorphismOf _ _ F) : forall s d, C.(SMorphism) _ _ -> D.(SMorphism) (_ s) (_ d)
+      |}; abstract (intros; simpl; destruct C, D, F; simpl in *; t_with t').
   Defined.
+End Large2Small.
 
-  Hint Unfold ComposeFunctors IdentityFunctor ObjectOf MorphismOf.
+Coercion SmallFunctor2Functor : SmallFunctor >-> Functor.
+Identity Coercion FunctorOnSmall_Functor_Id : FunctorOnSmall >-> Functor.
+Coercion Functor2SmallFunctor : FunctorOnSmall >-> SmallFunctor.
 
-  Lemma LeftIdentitySmallFunctor (F : SmallFunctor D C) : ComposeSmallFunctors IdentitySmallFunctor F = F.
+Section Small2Large2Small_RoundTrip.
+  Variables C D : SmallCategory.
+  Variable F : SmallFunctor C D.
+  Variable F' : Functor C D.
+
+  Lemma SmallFunctor2Functor2SmallFunctorId : Functor2SmallFunctor (SmallFunctor2Functor F) = F.
     sfunctor_eq.
   Qed.
 
-  Lemma RightIdentitySmallFunctor (F : SmallFunctor C D) : ComposeSmallFunctors F IdentitySmallFunctor = F.
-    sfunctor_eq.
+  Lemma Functor2SmallFunctor2FunctorId : SmallFunctor2Functor (Functor2SmallFunctor F') = F'.
+    functor_eq.
   Qed.
-End Category.
+End Small2Large2Small_RoundTrip.
 
-Section FunctorCompositionLemmas.
-  Variable B C D E : SmallCategory.
+Hint Rewrite SmallFunctor2Functor2SmallFunctorId Functor2SmallFunctor2FunctorId.
+Hint Resolve Functor2SmallFunctor SmallFunctor2Functor.
 
-  Lemma ComposeSmallFunctorsAssociativity (F : SmallFunctor B C) (G : SmallFunctor C D) (H : SmallFunctor D E) :
-    ComposeSmallFunctors (ComposeSmallFunctors H G) F = ComposeSmallFunctors H (ComposeSmallFunctors G F).
-    sfunctor_eq.
-  Qed.
-End FunctorCompositionLemmas.
+Definition ComposeSmallFunctors C D E (G : SmallFunctor D E) (F : SmallFunctor C D) : SmallFunctor C E
+  := ComposeFunctors G F : FunctorOnSmall.
+Definition IdentitySmallFunctor C : SmallFunctor C C := IdentityFunctor C : FunctorOnSmall.
+
+Lemma LeftIdentitySmallFunctor C D (F : SmallFunctor C D) : ComposeSmallFunctors (IdentitySmallFunctor _) F = F.
+  sfunctor_eq.
+Qed.
+
+Lemma RightIdentitySmallFunctor C D (F : SmallFunctor C D) : ComposeSmallFunctors F (IdentitySmallFunctor _) = F.
+  sfunctor_eq.
+Qed.
+
+Lemma ComposeFunctorsAssociativity B C D E (F : SmallFunctor B C) (G : SmallFunctor C D) (H : SmallFunctor D E) :
+  ComposeSmallFunctors (ComposeSmallFunctors H G) F = ComposeSmallFunctors H (ComposeSmallFunctors G F).
+  sfunctor_eq.
+Qed.
+
+Hint Unfold ComposeSmallFunctors IdentitySmallFunctor.
+Hint Rewrite LeftIdentitySmallFunctor RightIdentitySmallFunctor.

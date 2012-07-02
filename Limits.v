@@ -42,7 +42,7 @@ Section DiagonalFunctor.
   Definition DiagonalFunctor : Functor C (C ^ D).
     refine {| ObjectOf := diagonal_functor_object_of;
       MorphismOf := diagonal_functor_morphism_of
-      |}; abstract (simpl; autounfold with core in *; eauto).
+      |}; abstract snt_eq.
   Defined.
 End DiagonalFunctor.
 

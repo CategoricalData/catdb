@@ -33,18 +33,6 @@ Section Categories_NaturalTransformation.
   }.
 End Categories_NaturalTransformation.
 
-Section Small2Large.
-  Variable C : SmallCategory.
-  Variable D : Category.
-  Variable F G : Functor C D.
-
-  Definition SmallNaturalTransformation2NaturalTransformation (T : SmallNaturalTransformation F G) : NaturalTransformation F G.
-    refine {| ComponentsOf := (fun c : C.(Object) => T.(SComponentsOf) c); Commutes := T.(SCommutes) |}.
-  Defined.
-End Small2Large.
-
-Coercion SmallNaturalTransformation2NaturalTransformation : SmallNaturalTransformation >-> NaturalTransformation.
-
 Section SmallNaturalTransformations_Equal.
   Variable C : SmallCategory.
   Variable D : Category.
@@ -73,61 +61,67 @@ Ltac snt_eq_with tac := repeat snt_eq_step_with tac.
 Ltac snt_eq_step := snt_eq_step_with idtac.
 Ltac snt_eq := snt_eq_with idtac.
 
-
-Section NaturalTransformationCompositionT.
+Section Small2Large.
   Variable C : SmallCategory.
   Variable D : Category.
-  Variables F F' F'' : Functor C D.
+  Variable F G : Functor C D.
 
-  Hint Resolve SCommutes f_equal f_equal2.
-  Hint Rewrite Associativity.
+  Definition NaturalTransformationOnSmall := NaturalTransformation F G.
 
-  Definition SNTComposeT (T' : SmallNaturalTransformation F' F'') (T : SmallNaturalTransformation F F') :
-    SmallNaturalTransformation F F''.
-    refine {| SComponentsOf := (fun c => Compose (T' c) (T c)) |};
-      (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
-      abstract (intros; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _))); try_associativity eauto).
+  Definition SmallNaturalTransformation2NaturalTransformation (T : SmallNaturalTransformation F G) : NaturalTransformation F G.
+    refine {| ComponentsOf := (fun c : C.(Object) => T.(SComponentsOf) c); Commutes := T.(SCommutes) |}.
   Defined.
-End NaturalTransformationCompositionT.
 
-Section NaturalTransformationCompositionF.
-  Variables C D : SmallCategory.
-  Variable E : Category.
-  Variable F F' : Functor C D.
-  Variable G G' : Functor D E.
-
-  Definition SNTComposeF (U : SmallNaturalTransformation G G') (T : SmallNaturalTransformation F F'):
-    SmallNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    refine (Build_SmallNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
-      (fun c => Compose (G'.(MorphismOf) (T.(SComponentsOf) c)) (U.(SComponentsOf) (F c)))
-      _);
-    abstract (simpl; intros; repeat try_associativity ltac:(repeat rewrite SCommutes; repeat rewrite <- FCompositionOf); reflexivity).
+  Definition NaturalTransformation2SmallNaturalTransformation (T : NaturalTransformationOnSmall) : SmallNaturalTransformation F G.
+    refine {| SComponentsOf := (fun c : C.(SObject) => T.(ComponentsOf) c); SCommutes := T.(Commutes) |}.
   Defined.
-End NaturalTransformationCompositionF.
+End Small2Large.
 
-Section IdentityNaturalTransformation.
+Arguments NaturalTransformationOnSmall {C D F G}.
+
+Coercion SmallNaturalTransformation2NaturalTransformation : SmallNaturalTransformation >-> NaturalTransformation.
+Identity Coercion NaturalTransformationOnSmall_NaturalTransformation_Id : NaturalTransformationOnSmall >-> NaturalTransformation.
+Coercion NaturalTransformation2SmallNaturalTransformation : NaturalTransformationOnSmall >-> SmallNaturalTransformation.
+
+Section Small2Large2Small_RoundTrip.
   Variable C : SmallCategory.
   Variable D : Category.
-  Variable F : Functor C D.
+  Variables F G : Functor C D.
+  Variable T : SmallNaturalTransformation F G.
+  Variable T' : NaturalTransformation F G.
 
-  (* There is an identity natrual transformation. *)
-  Definition IdentitySmallNaturalTransformation : SmallNaturalTransformation F F.
-    refine {| SComponentsOf := (fun c => Identity (F c))
-      |};
-    abstract t.
-  Defined.
-
-  Hint Resolve LeftIdentity RightIdentity.
-
-  Lemma LeftIdentitySmallNaturalTransformation (F' : Functor C D) (T : SmallNaturalTransformation F' F) :
-    SNTComposeT IdentitySmallNaturalTransformation T = T.
-    snt_eq; auto.
+  Lemma SmallNaturalTransformation2NaturalTransformation2SmallNaturalTransformationId :
+    NaturalTransformation2SmallNaturalTransformation (SmallNaturalTransformation2NaturalTransformation T) = T.
+    snt_eq.
   Qed.
 
-  Lemma RightIdentitySmallNaturalTransformation (F' : Functor C D) (T : SmallNaturalTransformation F F') :
-    SNTComposeT T IdentitySmallNaturalTransformation = T.
-    snt_eq; auto.
+  Lemma NaturalTransformation2SmallNaturalTransformation2NaturalTransformationId :
+    SmallNaturalTransformation2NaturalTransformation (NaturalTransformation2SmallNaturalTransformation T') = T'.
+    nt_eq.
   Qed.
-End IdentityNaturalTransformation.
+End Small2Large2Small_RoundTrip.
 
+Hint Rewrite SmallNaturalTransformation2NaturalTransformation2SmallNaturalTransformationId NaturalTransformation2SmallNaturalTransformation2NaturalTransformationId.
+Hint Resolve NaturalTransformation2SmallNaturalTransformation SmallNaturalTransformation2NaturalTransformation.
+
+Definition SNTComposeT C D F F' F'' (T' : @SmallNaturalTransformation C D F' F'') (T : @SmallNaturalTransformation C D F F') :
+    SmallNaturalTransformation F F''
+    := NTComposeT T' T : NaturalTransformationOnSmall.
+Definition SNTComposeF C D E F F' G G' (U : @SmallNaturalTransformation D E G G') (T : @SmallNaturalTransformation C D F F'):
+    SmallNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
+    := NTComposeF U T : NaturalTransformationOnSmall.
+Definition IdentitySmallNaturalTransformation C D F : @SmallNaturalTransformation C D F F
+  := IdentityNaturalTransformation F : NaturalTransformationOnSmall.
+
+Lemma LeftIdentitySmallNaturalTransformation C D F F' (T : @SmallNaturalTransformation C D F' F) :
+    SNTComposeT (IdentitySmallNaturalTransformation _) T = T.
+  snt_eq; autorewrite with core; auto.
+Qed.
+
+Lemma RightIdentitySmallNaturalTransformation C D F F' (T : @SmallNaturalTransformation C D F F') :
+    SNTComposeT T (IdentitySmallNaturalTransformation _) = T.
+  snt_eq; autorewrite with core; auto.
+Qed.
+
+Hint Unfold SNTComposeT SNTComposeF IdentitySmallNaturalTransformation.
 Hint Rewrite LeftIdentitySmallNaturalTransformation RightIdentitySmallNaturalTransformation.
