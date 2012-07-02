@@ -76,17 +76,3 @@ Ltac scat_eq_with tac := repeat scat_eq_step_with tac.
 
 Ltac scat_eq_step := scat_eq_step_with idtac.
 Ltac scat_eq := scat_eq_with idtac.
-
-(*
-Section SmallCat.
-  Hint Resolve ComposeFunctorsAssociativity LeftIdentityFunctor RightIdentityFunctor.
-
-  Definition SmallCat : Category.
-    refine {| Object := SmallCategory;
-      Morphism := @Functor;
-      Identity := @IdentityFunctor;
-      Compose := @ComposeFunctors
-      |}; auto.
-  Defined.
-End SmallCat.
-*)
