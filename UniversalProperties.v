@@ -55,10 +55,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        repeat match goal with
-                 | [ H : _ |- _ ] => generalize dependent H; clear H
-               end.
-        repeat (intro; repeat rewrite RightIdentity; repeat rewrite LeftIdentity).
+        repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
         destruct_sig; simpl in *.
         split; try (assumption || symmetry; assumption); intros.
         match goal with
@@ -113,10 +110,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        repeat match goal with
-                 | [ H : _ |- _ ] => generalize dependent H; clear H
-               end.
-        repeat (intro; repeat rewrite RightIdentity; repeat rewrite LeftIdentity).
+        repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
         destruct_sig; simpl in *.
         split; try (assumption || symmetry; assumption); intros.
         match goal with
@@ -174,7 +168,8 @@ Section UniversalMorphism.
           eapply InitialProperty_Morphism || eapply TerminalProperty_Morphism;
             assumption.
       Defined.
-(*      Definition UniversalPropertyT (Y : D) : Type.
+
+      Definition UniversalPropertyT (Y : D) : Type.
         assert (m := UniversalMorphism_Morphism).
         assert (m' := UniversalProperty_Morphism Y).
         destruct M; simpl in *.
@@ -190,33 +185,20 @@ Section UniversalMorphism.
             Compose m (MorphismOf U g) = f)
           (m' f)
         ).
-      Defined.*)
+      Defined.
 
-      Lemma UniversalProperty
-        (Y : D) :
-        match M as s return
-          (match s with | inl _ => _ | inr _ => _ end
-            -> (match s with | inl _ => _ | inr _ => _ end
-              -> match s with | inl _ => _ | inr _ => _ end)
-            -> Type) with
-          | inl _ =>
-            fun m m' =>
-              forall f,
-                unique
-                (fun g =>
-                  Compose (U.(MorphismOf) g) m = f)
-                (m' f)
-          | inr _ =>
-            fun m m' =>
-              forall f,
-                unique
-                (fun g =>
-                  Compose m (U.(MorphismOf) g) = f)
-                (m' f)
-        end UniversalMorphism_Morphism (UniversalProperty_Morphism Y).
-        unfold UniversalMorphism_Object, UniversalMorphism_Morphism, UniversalProperty_Morphism; destruct M; simpl;
-          eapply InitialProperty || eapply TerminalProperty.
-      Qed.
+      Definition UniversalProperty'
+        (Y : D) : { T : Type & T }.
+        destruct M as [ m | m ].
+        exact (existT _ _ (InitialProperty m Y)).
+        exact (existT _ _ (TerminalProperty m Y)).
+      Defined.
+
+      Definition UniversalProperty'' (Y : D) : { A : Type & A }.
+        simpl_definition_by_tac_and_exact (UniversalProperty' Y) ltac:( unfold UniversalProperty in * ).
+      Defined.
+
+      Definition UniversalProperty (Y : D) := Eval cbv beta iota zeta delta [UniversalProperty' UniversalProperty''] in projT2 (UniversalProperty'' Y).
     End AbstractionBarrier.
   End UniversalMorphism.
 End UniversalMorphism.
@@ -247,4 +229,18 @@ Ltac intro_universal_properties :=
            | [ m : TerminalMorphism _ _ |- _ ] => unique_pose (TerminalProperty m)
            | [ m : InitialMorphism _ _ |- _ ] => unique_pose (InitialProperty m)
            | [ m : UniversalMorphism _ _ |- _ ] => unique_pose (UniversalProperty m)
+
+           | [ _ : appcontext[TerminalProperty_Morphism ?a] |- _ ] => unique_pose (TerminalProperty a)
+           | [ _ : appcontext[InitialProperty_Morphism ?a] |- _ ] => unique_pose (InitialProperty a)
+           | [ _ : appcontext[UniversalProperty_Morphism ?a] |- _ ] => unique_pose (UniversalProperty a)
+           | [ |- appcontext[TerminalProperty_Morphism ?a] ] => unique_pose (TerminalProperty a)
+           | [ |- appcontext[InitialProperty_Morphism ?a] ] => unique_pose (InitialProperty a)
+           | [ |- appcontext[UniversalProperty_Morphism ?a] ] => unique_pose (UniversalProperty a)
+
+           | [ _ : appcontext[TerminalProperty_Morphism ?a ?b] |- _ ] => unique_pose (TerminalProperty a b)
+           | [ _ : appcontext[InitialProperty_Morphism ?a ?b] |- _ ] => unique_pose (InitialProperty a b)
+           | [ _ : appcontext[UniversalProperty_Morphism ?a ?b] |- _ ] => unique_pose (UniversalProperty a b)
+           | [ |- appcontext[TerminalProperty_Morphism ?a ?b] ] => unique_pose (TerminalProperty a b)
+           | [ |- appcontext[InitialProperty_Morphism ?a ?b] ] => unique_pose (InitialProperty a b)
+           | [ |- appcontext[UniversalProperty_Morphism ?a ?b] ] => unique_pose (UniversalProperty a b)
          end.

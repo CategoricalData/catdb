@@ -266,19 +266,37 @@ Lemma eq_exist T (P : T -> Prop) (a b : { x | P x }) : proj1_sig a = proj1_sig b
   destruct a, b; simpl in *; intro; repeat subst; f_equal; apply proof_irrelevance.
 Qed.
 
-(* equivalent to [change x with y], but requires that [x = y] be provable with [taceq],
-   rather than that [x] and [y] are convertible *)
-Tactic Notation "generalized_change" constr(x) "with" constr(y) "by" tactic(taceq) :=
-  let xeqy := fresh in
-    assert (xeqy : x = y) by (taceq || symmetry; taceq);
-      let x' := fresh in
-        pose x as x';
-          let xeqx' := fresh in
-            let x'eqy := fresh in
-              assert (xeqx' : x = x') by reflexivity;
-                change x with x';
-                  assert (x'eqy : x' = y) by (transitivity y; exact xeqy || symmetry; exact xeqy || trivial);
-                    clear xeqx';
-                      clearbody x';
-                        subst x';
-                          clear xeqy.
+(* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
+Ltac simultaneous_rewrite' E :=
+  match type of E with
+    | ?X = _ => generalize E; generalize dependent X; intros; subst
+  end.
+
+Ltac simultaneous_rewrite_rev' E :=
+  match type of E with
+    | _ = ?X => generalize E; generalize dependent X; intros; subst
+  end.
+
+Ltac simultaneous_rewrite E :=
+  match type of E with
+    | forall x : ?T, _ =>
+      let y := fresh in evar (y : T);
+        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
+    | ?T = _ => let H := fresh in
+      match goal with
+        | [ _ : context[?F] |- _ ] =>
+          assert (H : T = F) by reflexivity; clear H
+      end; simultaneous_rewrite' E
+  end.
+
+Ltac simultaneous_rewrite_rev E :=
+  match type of E with
+    | forall x : ?T, _ =>
+      let y := fresh in evar (y : T);
+        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
+    | _ = ?T => let H := fresh in
+      match goal with
+        | [ _ : context[?F] |- _ ] =>
+          assert (H : T = F) by reflexivity; clear H
+      end; simultaneous_rewrite_rev' E
+  end.
