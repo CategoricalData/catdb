@@ -1,5 +1,5 @@
-Require Export Category SmallCategory.
-Require Import Common Functor SmallNaturalTransformation.
+Require Export Category SmallCategory Functor SmallNaturalTransformation NaturalTransformation.
+Require Import Common.
 
 Set Implicit Arguments.
 
