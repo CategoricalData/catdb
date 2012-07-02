@@ -47,7 +47,7 @@ Section CommaCategory.
   Definition CommaCategory_Object := { αβ : A * B & Morphism C (S (fst αβ)) (T (snd αβ)) }.
   Definition CommaCategory_Morphism (αβf α'β'f' : CommaCategory_Object) :=
     { gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f') |
-      Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh)) = Compose (T.(MorphismOf) (snd gh)) (projT2 αβf)
+      Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }.
   Definition CommaCategory_Compose s d d' (gh : CommaCategory_Morphism d d') (g'h' : CommaCategory_Morphism s d) : CommaCategory_Morphism s d'.
     exists (Compose (proj1_sig gh) (proj1_sig g'h')).
@@ -58,7 +58,7 @@ Section CommaCategory.
                end;
         repeat rewrite FCompositionOf;
           repeat rewrite <- Associativity;
-            t_with t'
+            t_rev_with t'
     ).
   Defined.
 
@@ -94,20 +94,28 @@ End CommaCategory.
 Local Notation "S ↓ T" := (CommaCategory S T) (at level 70, no associativity).
 
 Section SliceCategory.
-  Variable C : Category.
-  Variable A : C.
-  Let S := IdentityFunctor C.
+  Variables A C : Category.
+  Variable a : C.
+  Variable S : Functor A C.
   Let B := TerminalCategory.
 
   Definition SliceCategory_Functor : Functor B C.
-    refine {| ObjectOf := (fun _ => A);
-      MorphismOf := (fun _ _ _ => Identity A)
+    refine {| ObjectOf := (fun _ => a);
+      MorphismOf := (fun _ _ _ => Identity a)
     |}; abstract (t_with t').
   Defined.
 
   Definition SliceCategory := CommaCategory S SliceCategory_Functor.
   Definition CosliceCategory := CommaCategory SliceCategory_Functor S.
 End SliceCategory.
+
+Section SliceCategoryOver.
+  Variable C : Category.
+  Variable a : C.
+
+  Definition SliceCategoryOver := SliceCategory a (IdentityFunctor C).
+  Definition CosliceCategoryOver := CosliceCategory a (IdentityFunctor C).
+End SliceCategoryOver.
 
 Section ArrowCategory.
   Variable C : Category.

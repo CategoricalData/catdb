@@ -12,6 +12,8 @@ MODULES    := Common \
 	NaturalEquivalence \
 	FunctorCategory \
 	SmallCat \
+	CommaCategory \
+	UniversalProperties \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
@@ -25,7 +27,6 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Grothendieck \
-	CommaCategory \
 	Yoneda \
 	EquivalenceClass \
 	EquivalenceRelation \

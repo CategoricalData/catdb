@@ -2,6 +2,18 @@ Require Import ProofIrrelevance.
 
 Set Implicit Arguments.
 
+Section sig.
+  Definition sigT2_sigT A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
+  Global Coercion sigT2_sigT : sigT2 >-> sigT.
+  Definition projT3 A P Q (x : @sigT2 A P Q) :=
+    let (x0, _, h) as x0 return (Q (projT1 x0)) := x in h.
+
+  Definition sig2_sig A P Q (x : @sig2 A P Q) := let (a, h, _) := x in exist _ a h.
+  Global Coercion sig2_sig : sig2 >-> sig.
+  Definition proj3_sig A P Q (x : @sig2 A P Q) :=
+    let (x0, _, h) as x0 return (Q (proj1_sig x0)) := x in h.
+End sig.
+
 Ltac not_tac tac := (tac; fail 1) || idtac.
 
 Ltac unique_pose defn :=
@@ -10,6 +22,12 @@ Ltac unique_pose defn :=
       | [ H : T |- _ ] => fail 1
       | _ => let H := fresh in assert (H := defn)
     end.
+
+Ltac unique_pose_with_body defn :=
+  match goal with
+    | [ H := defn |- _ ] => fail 1
+    | _ => pose defn
+  end.
 
 Ltac simpl_do tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
@@ -247,3 +265,20 @@ Ltac intro_fresh_unique :=
 Lemma eq_exist T (P : T -> Prop) (a b : { x | P x }) : proj1_sig a = proj1_sig b -> a = b.
   destruct a, b; simpl in *; intro; repeat subst; f_equal; apply proof_irrelevance.
 Qed.
+
+(* equivalent to [change x with y], but requires that [x = y] be provable with [taceq],
+   rather than that [x] and [y] are convertible *)
+Tactic Notation "generalized_change" constr(x) "with" constr(y) "by" tactic(taceq) :=
+  let xeqy := fresh in
+    assert (xeqy : x = y) by (taceq || symmetry; taceq);
+      let x' := fresh in
+        pose x as x';
+          let xeqx' := fresh in
+            let x'eqy := fresh in
+              assert (xeqx' : x = x') by reflexivity;
+                change x with x';
+                  assert (x'eqy : x' = y) by (transitivity y; exact xeqy || symmetry; exact xeqy || trivial);
+                    clear xeqx';
+                      clearbody x';
+                        subst x';
+                          clear xeqy.
