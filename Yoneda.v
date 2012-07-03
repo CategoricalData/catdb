@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export Category Functor FunctorCategory Hom.
+Require Export Category Functor FunctorCategory Hom FunctorAttributes.
 Require Import Common SmallDuals ProductCategory SetCategory.
 
 Set Implicit Arguments.
@@ -60,17 +60,20 @@ Section YonedaLemma.
     ).
   Defined.
 
+  (* XXX TODO: Automate proof more. *)
   Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : CategoryIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
     split; simpl; snt_eq;
       pose (FIdentityOf X);
         pose (FCompositionOf X);
           unfold smallcat2cat in *; simpl in *; t_with t'.
-    rename x0 into c'.
-    rename x1 into f.
-    rename x into a.
-    unfold YonedaLemmaMorphism; simpl.
-    admit.
+    match goal with
+      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
+        let H' := fresh in
+          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
+            etransitivity; try apply H'; clear H';
+              try solve [ t_with t' ]
+    end.
   Qed.
 End YonedaLemma.
 
@@ -100,10 +103,48 @@ Section CoYonedaLemma.
       pose (FIdentityOf X);
         pose (FCompositionOf X);
           unfold smallcat2cat in *; simpl in *; t_with t'.
-    rename x0 into c'.
-    rename x1 into f.
-    rename x into a.
-    unfold CoYonedaLemmaMorphism; simpl.
-    admit.
+    match goal with
+      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
+        let H' := fresh in
+          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
+            etransitivity; try apply H'; clear H';
+              try solve [ t_with t' ]
+    end.
   Qed.
 End CoYonedaLemma.
+
+Section FullyFaithful.
+  Variable C : SmallCategory.
+
+  Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
+    unfold FunctorFullyFaithful.
+    intros c c'.
+    destruct (@YonedaLemma C c (CovariantHomFunctor C c')) as [ m i ].
+    exists (YonedaLemmaMorphism (X := CovariantHomFunctor C c')).
+    t_with t'; repeat (apply functional_extensionality_dep; intro); t_with t'.
+    snt_eq.
+    match goal with
+      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
+        let H' := fresh in
+          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
+            etransitivity; try apply H'; clear H';
+              try solve [ t_with t' ]
+    end.
+  Qed.
+
+  Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
+    unfold FunctorFullyFaithful.
+    intros c c'.
+    destruct (@CoYonedaLemma C c (SmallContravariantHomFunctor C c')) as [ m i ].
+    exists (CoYonedaLemmaMorphism (X := SmallContravariantHomFunctor C c')).
+    t_with t'; repeat (apply functional_extensionality_dep; intro); t_with t'.
+    snt_eq.
+    match goal with
+      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
+        let H' := fresh in
+          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
+            etransitivity; try apply H'; clear H';
+              try solve [ t_with t' ]
+    end.
+  Qed.
+End FullyFaithful.
