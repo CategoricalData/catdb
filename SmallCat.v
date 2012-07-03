@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality JMeq.
-Require Export Category SmallCategory SmallFunctor.
+Require Export Category SmallCategory SmallFunctor DiscreteCategory.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.
@@ -15,27 +15,10 @@ Section SmallCat.
 End SmallCat.
 
 Section Objects.
-  Hint Extern 1 (@eq unit ?a ?b) => try destruct a; try destruct b; try reflexivity.
-  Hint Extern 1 (_ = _) => simpl in *; tauto.
-
-  Definition TerminalCategory : SmallCategory.
-    refine {| SObject := unit;
-      SMorphism := (fun _ _ => unit);
-      SCompose := (fun _ _ _ _ _ => tt);
-      SIdentity := (fun _ => tt)
-    |}; abstract (intros; auto).
-  Defined.
-
-  Definition InitialCategory : SmallCategory.
-    refine {| SObject := Empty_set;
-      SMorphism := (fun s _ => match s with end);
-      SCompose := (fun s _ _ _ _ => match s with end);
-      SIdentity := (fun o => match o with end)
-    |}; abstract (intros; auto).
-  Defined.
-
   Hint Extern 1 (_ = _) => apply functional_extensionality_dep; intro.
   Hint Extern 1 (JMeq _ _) => apply (@functional_extensionality_dep_JMeq _); intros.
+  Hint Extern 3 (_ = _) => destruct_to_empty_set.
+  Hint Extern 3 (JMeq _ _) => destruct_to_empty_set.
 
   Lemma TerminalCategory_Terminal : @TerminalObject SmallCat TerminalCategory.
     unfold TerminalObject, TerminalCategory in *.
@@ -54,8 +37,6 @@ Section Objects.
     intros; eexists.
     unfold is_unique; intros;
       sfunctor_eq; auto.
-    apply (@functional_extensionality_dep_JMeq _);
-      tauto.
     Grab Existential Variables.
     eapply Build_SmallFunctor; intros; simpl in *; tauto.
     Grab Existential Variables.

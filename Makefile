@@ -11,6 +11,7 @@ MODULES    := Common \
 	SmallNaturalTransformation \
 	NaturalEquivalence \
 	FunctorCategory \
+	DiscreteCategory \
 	SmallCat \
 	CommaCategory \
 	UniversalProperties \

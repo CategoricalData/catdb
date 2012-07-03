@@ -35,6 +35,16 @@ Ltac simpl_do tac H :=
 Ltac simpl_do_clear tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'; try clear H'.
 
+Ltac destruct_exists' T := cut T; try (let H := fresh in intro H; exists H).
+Ltac destruct_exists :=
+  match goal with
+    | [ |- @ex ?T _ ] => destruct_exists' T
+    | [ |- @sig ?T _ ] => destruct_exists' T
+    | [ |- @sigT ?T _ ] => destruct_exists' T
+    | [ |- @sig2 ?T _ _ ] => destruct_exists' T
+    | [ |- @sigT2 ?T _ _ ] => destruct_exists' T
+  end.
+
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
 
