@@ -46,6 +46,12 @@ Section SmallNaturalTransformations_Equal.
   Qed.
 End SmallNaturalTransformations_Equal.
 
+Ltac snt_eq'_step_with tac := intros; simpl;
+  match goal with
+    | [ |- @eq (@SmallNaturalTransformation _ _ _ _) _ _ ] => apply SmallNaturalTransformations_Equal
+    | _ => tac
+  end; repeat simpl.
+
 Ltac snt_eq_step_with tac := intros; simpl;
   match goal with
     | _ => reflexivity
@@ -57,9 +63,11 @@ Ltac snt_eq_step_with tac := intros; simpl;
   end; repeat simpl.
 
 Ltac snt_eq_with tac := repeat snt_eq_step_with tac.
+Ltac snt_eq'_with tac := repeat (snt_eq'_step_with tac; try solve [ repeat snt_eq_step_with tac ]).
 
 Ltac snt_eq_step := snt_eq_step_with idtac.
 Ltac snt_eq := snt_eq_with idtac.
+Ltac snt_eq' := snt_eq'_with idtac.
 
 Section Small2Large.
   Variable C : SmallCategory.

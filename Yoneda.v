@@ -7,6 +7,15 @@ Set Implicit Arguments.
 Local Infix "*" := ProductCategory.
 Local Notation "C ^ D" := (FunctorCategory D C).
 
+Local Ltac apply_scommutes_by_transitivity_and_solve_with tac :=
+  repeat (apply functional_extensionality_dep; intro);
+    match goal with
+      | [ a : _, f : _ |- _ ] => let H := fresh in
+        assert (H := fg_equal (SCommutes a _ _ f)); simpl in H;
+          let fin_tac := (solve [ etransitivity; try apply H; clear H; tac ]) in
+            fin_tac || symmetry in H; fin_tac
+    end.
+
 Section Yoneda.
   Variable C : SmallCategory.
   Let COp := OppositeSmallCategory C.
@@ -60,20 +69,14 @@ Section YonedaLemma.
     ).
   Defined.
 
-  (* XXX TODO: Automate proof more. *)
   Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : CategoryIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
+    unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
+    pose (FIdentityOf X).
+    pose (FCompositionOf X).
     split; simpl; snt_eq;
-      pose (FIdentityOf X);
-        pose (FCompositionOf X);
-          unfold smallcat2cat in *; simpl in *; t_with t'.
-    match goal with
-      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
-        let H' := fresh in
-          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
-            etransitivity; try apply H'; clear H';
-              try solve [ t_with t' ]
-    end.
+      unfold smallcat2cat in *; simpl in *; t_with t'.
+    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End YonedaLemma.
 
@@ -103,13 +106,7 @@ Section CoYonedaLemma.
       pose (FIdentityOf X);
         pose (FCompositionOf X);
           unfold smallcat2cat in *; simpl in *; t_with t'.
-    match goal with
-      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
-        let H' := fresh in
-          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
-            etransitivity; try apply H'; clear H';
-              try solve [ t_with t' ]
-    end.
+    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End CoYonedaLemma.
 
@@ -121,15 +118,8 @@ Section FullyFaithful.
     intros c c'.
     destruct (@YonedaLemma C c (CovariantHomFunctor C c')) as [ m i ].
     exists (YonedaLemmaMorphism (X := CovariantHomFunctor C c')).
-    t_with t'; repeat (apply functional_extensionality_dep; intro); t_with t'.
-    snt_eq.
-    match goal with
-      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
-        let H' := fresh in
-          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
-            etransitivity; try apply H'; clear H';
-              try solve [ t_with t' ]
-    end.
+    t_with t'; snt_eq; t_with t'.
+    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 
   Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
@@ -137,14 +127,7 @@ Section FullyFaithful.
     intros c c'.
     destruct (@CoYonedaLemma C c (SmallContravariantHomFunctor C c')) as [ m i ].
     exists (CoYonedaLemmaMorphism (X := SmallContravariantHomFunctor C c')).
-    t_with t'; repeat (apply functional_extensionality_dep; intro); t_with t'.
-    snt_eq.
-    match goal with
-      | [ a : _, f : _ |- _ ] => let H := fresh in pose (SCommutes a _ _ f) as H; simpl in H; symmetry in H;
-        let H' := fresh in
-          pose (fg_equal H) as H'; clearbody H'; clear H; simpl in H';
-            etransitivity; try apply H'; clear H';
-              try solve [ t_with t' ]
-    end.
+    t_with t'; snt_eq; t_with t'.
+    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End FullyFaithful.
