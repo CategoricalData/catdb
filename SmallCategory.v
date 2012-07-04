@@ -76,3 +76,50 @@ Ltac scat_eq_with tac := repeat scat_eq_step_with tac.
 
 Ltac scat_eq_step := scat_eq_step_with idtac.
 Ltac scat_eq := scat_eq_with idtac.
+
+(* build a small category from a category *)
+Ltac scat_from_cat_obj_mor cat obj mor :=
+(* unfold [Identity] and [Compose] and also turn [cat] into [Build_Category _], if we can *)
+  let cat' := eval hnf in cat in
+    let ident := eval cbv beta iota zeta delta [Identity] in (@Identity cat') in
+      let compose := eval cbv beta iota zeta delta [Compose] in (@Compose cat') in
+        match goal with
+          | [ |- SmallCategory ] =>
+            eapply (@Build_SmallCategory
+              obj
+              mor
+              (ident : forall o : obj, mor o o)
+              (compose : forall s d d' : obj, mor d d' -> mor s d -> mor s d')
+            ) || fail 1;
+            try abstract (
+              intros; (
+                simpl_do do_rewrite (@LeftIdentity cat') ||
+                simpl_do do_rewrite (@RightIdentity cat') ||
+                  simpl_do do_rewrite (@Associativity cat')
+              );
+              reflexivity
+            )
+          | [ |- _ ] => assert SmallCategory; scat_from_cat_obj_mor cat obj mor
+        end.
+
+Ltac scat_from_cat_obj cat obj :=
+(* unfold [Morphism] and also turn [cat] into [Build_Category _], if we can *)
+  let cat' := eval hnf in cat in
+    let mor := eval cbv beta iota zeta delta [Morphism] in (@Morphism cat') in
+      match type of SMorphism with
+        | (forall s : SmallCategory, SObject s -> SObject s -> ?T) =>
+          scat_from_cat_obj_mor cat obj (mor : obj -> obj -> T)
+        | _ =>
+          scat_from_cat_obj_mor cat obj (mor : obj -> obj -> _)
+      end.
+
+Ltac scat_from_cat cat :=
+(* unfold [Object] and also turn [cat] into [Build_Category _], if we can *)
+  let cat' := eval hnf in cat in
+    let objType :=
+      match type of SObject with
+        | (SmallCategory -> ?T) => T
+        | _ => type of (@Object cat')
+      end in
+      let obj := eval cbv beta iota zeta delta [Object] in (@Object cat') in
+        scat_from_cat_obj cat' (obj : objType).
