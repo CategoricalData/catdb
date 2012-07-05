@@ -123,8 +123,12 @@ Ltac specialize_all_ways :=
          end.
 
 Ltac try_rewrite rew_H tac :=
-  (repeat (rewrite rew_H); tac) ||
-    (repeat (rewrite <- rew_H); tac).
+  (repeat rewrite rew_H; tac) ||
+    (repeat rewrite <- rew_H; tac).
+
+Ltac try_rewrite_by rew_H by_tac tac :=
+  (repeat rewrite rew_H by by_tac; tac) ||
+    (repeat rewrite <- rew_H by by_tac; tac).
 
 Ltac try_rewrite_repeat rew_H tac :=
   (repeat (rewrite rew_H; tac)) ||
@@ -140,13 +144,16 @@ Ltac simpl_exist :=
       try solve [ let H := fresh in intro H; rewrite H; intros ? ?; apply f_equal; apply proof_irrelevance ]
   end.
 
-Ltac split_iff :=
+Ltac split_in_context ident funl funr :=
   repeat match goal with
-           | [ H : context p [iff] |- _ ] =>
-             let H0 := context p[fun a b => a -> b] in let H0' := eval simpl in H0 in assert H0' by (apply H);
-               let H1 := context p[fun a b => b -> a] in let H1' := eval simpl in H1 in assert H1' by (apply H);
+           | [ H : context p [ident] |- _ ] =>
+             let H0 := context p[funl] in let H0' := eval simpl in H0 in assert H0' by (apply H);
+               let H1 := context p[funr] in let H1' := eval simpl in H1 in assert H1' by (apply H);
                  clear H
          end.
+
+Ltac split_iff := split_in_context iff (fun a b : Prop => a -> b) (fun a b : Prop => b -> a).
+Ltac split_and := split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
 
 Ltac clear_hyp_of_type type :=
   repeat match goal with

@@ -1,6 +1,12 @@
 MODULES    := Common \
 	FEqualDep \
+	StructureEquality \
 	DefinitionSimplification \
+	SpecializedCategory \
+	SpecializedFunctor \
+	SpecializedNaturalTransformation \
+	SpecializedNaturalEquivalence \
+	SpecializedFunctorCategory \
 	Category \
 	CategoryEquality \
 	SmallCategory \
