@@ -7,6 +7,11 @@ MODULES    := Common \
 	SpecializedNaturalTransformation \
 	SpecializedNaturalEquivalence \
 	SpecializedFunctorCategory \
+	SpecializedComputableCategory \
+	SpecializedDiscreteCategory \
+	SpecializedProductCategory \
+	SpecializedCommaCategory \
+	SpecializedUniversalProperties \
 	Category \
 	CategoryEquality \
 	SmallCategory \
@@ -19,6 +24,7 @@ MODULES    := Common \
 	FunctorCategory \
 	DiscreteCategory \
 	SmallCat \
+	ProductCategory \
 	CommaCategory \
 	UniversalProperties \
 	Limits \
@@ -26,7 +32,6 @@ MODULES    := Common \
 	LimitFunctorTheorems \
 	Duals \
 	SmallDuals \
-	ProductCategory \
 	ProductFunctor \
 	SetCategory \
 	Hom \

@@ -82,22 +82,33 @@ Ltac eq2eq_refl :=
 
 Ltac destruct_type T :=
   repeat match goal with
-           | [ H : context[T] |- _ ] => destruct H
+           | [ H : context[T] |- _ ] => destruct H; simpl in *
          end.
 
 Ltac destruct_hypotheses :=
   repeat match goal with
-           | [ H : ex _ |- _ ] => destruct H
-           | [ H : and _ _ |- _ ] => destruct H
-           | [ H : prod _ _ |- _ ] => destruct H
+           | [ H : ex _ |- _ ] => destruct H; simpl in *
+           | [ H : and _ _ |- _ ] => destruct H; simpl in *
+           | [ H : prod _ _ |- _ ] => destruct H; simpl in *
          end.
 
 Ltac destruct_sig :=
   repeat match goal with
-           | [ H : @sig _ _ |- _ ] => destruct H
-           | [ H : @sigT _ _ |- _ ] => destruct H
-           | [ H : @sig2 _ _ _ |- _ ] => destruct H
-           | [ H : @sigT2 _ _ _ |- _ ] => destruct H
+           | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sigT _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sig2 _ _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sigT2 _ _ _ |- _ ] => destruct H; simpl in *
+         end.
+
+Ltac destruct_all_hypotheses :=
+  repeat match goal with
+           | [ H : ex _ |- _ ] => destruct H; simpl in *
+           | [ H : and _ _ |- _ ] => destruct H; simpl in *
+           | [ H : prod _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sigT _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sig2 _ _ _ |- _ ] => destruct H; simpl in *
+           | [ H : @sigT2 _ _ _ |- _ ] => destruct H; simpl in *
          end.
 
 Ltac specialized_assumption tac := tac;
@@ -286,12 +297,20 @@ Qed.
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
   match type of E with
-    | ?X = _ => generalize E; generalize dependent X; intros; subst
+    | ?X = _ => generalize E; generalize dependent X; intros until 1;
+      let H := fresh in intro H at top;
+        match type of H with
+          ?X' = _ => subst X'
+        end
   end.
 
 Ltac simultaneous_rewrite_rev' E :=
   match type of E with
-    | _ = ?X => generalize E; generalize dependent X; intros; subst
+    | _ = ?X => generalize E; generalize dependent X; intros until 1;
+      let H := fresh in intro H at top;
+        match type of H with
+          _ = ?X' => subst X'
+        end
   end.
 
 Ltac simultaneous_rewrite E :=
