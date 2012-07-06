@@ -1,4 +1,5 @@
-Require Import Common.
+Require Import ProofIrrelevance.
+Require Import Common StructureEquality.
 
 Set Implicit Arguments.
 
@@ -50,6 +51,23 @@ Definition LocallySmallSpecializedCategory (obj : Type) (mor : obj -> obj -> Set
 Definition SmallSpecializedCategory (obj : Set) (mor : obj -> obj -> Set) := SpecializedCategory mor.
 Identity Coercion LocallySmallSpecializedCategory_SpecializedCategory_Id : LocallySmallSpecializedCategory >-> SpecializedCategory.
 Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : SmallSpecializedCategory >-> SpecializedCategory.
+
+Section Categories_Equal.
+  Lemma SpecializedCategories_Equal obj mor : forall (C D : @SpecializedCategory obj mor),
+    @Identity' _ _ C = @Identity' _ _ D
+    -> @Compose' _ _ C = @Compose' _ _ D
+    -> C = D.
+    destruct C, D; unfold Object, Morphism in *; simpl in *; intros; firstorder; repeat subst;
+      f_equal; apply proof_irrelevance.
+  Qed.
+End Categories_Equal.
+
+Ltac spcat_eq_step_with tac := present_spcategory; structures_eq_step_with SpecializedCategories_Equal tac.
+
+Ltac spcat_eq_with tac := repeat spcat_eq_step_with tac.
+
+Ltac spcat_eq_step := spcat_eq_step_with idtac.
+Ltac spcat_eq := spcat_eq_with idtac.
 
 Ltac solve_for_identity :=
   match goal with

@@ -12,6 +12,7 @@ MODULES    := Common \
 	SpecializedProductCategory \
 	SpecializedCommaCategory \
 	SpecializedUniversalProperties \
+	SpecializedDuals \
 	Category \
 	CategoryEquality \
 	SmallCategory \

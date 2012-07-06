@@ -1,6 +1,6 @@
 Require Import JMeq ProofIrrelevance.
 Require Export SpecializedCategory.
-Require Import Common StructureEquality.
+Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
@@ -67,9 +67,32 @@ Section Functors_Equal.
     destruct F, G; simpl; intros; firstorder; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
+
+  Lemma SpecializedFunctors_JMeq objC morC objD morD objC' morC' objD' morD' :
+    forall C D C' D' (F : @SpecializedFunctor objC morC objD morD C D) (G : @SpecializedFunctor objC' morC' objD' morD' C' D'),
+      objC = objC'
+      -> objD = objD'
+      -> (objC = objC' -> morC == morC')
+      -> (objD = objD' -> morD == morD')
+      -> (objC = objC' -> morC == morC' -> C == C')
+      -> (objD = objD' -> morD == morD' -> D == D')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        ObjectOf F == ObjectOf G)
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        ObjectOf F == ObjectOf G -> MorphismOf F == MorphismOf G)
+      -> F == G.
+    simpl; intros; subst objC' objD'; firstorder; subst morC' morD'; firstorder;
+      JMeq_eq.
+    repeat subst; JMeq_eq.
+    apply SpecializedFunctors_Equal; intros; repeat subst; trivial.
+  Qed.
 End Functors_Equal.
 
-Ltac spfunctor_eq_step_with tac := structures_eq_step_with SpecializedFunctors_Equal tac.
+Ltac spfunctor_eq_step_with tac :=
+  try structures_eq_step_with SpecializedFunctors_Equal tac;
+    try structures_eq_step_with SpecializedFunctors_JMeq tac.
 
 Ltac spfunctor_eq_with tac := repeat spfunctor_eq_step_with tac.
 

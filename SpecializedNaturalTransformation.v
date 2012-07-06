@@ -1,6 +1,6 @@
 Require Import JMeq ProofIrrelevance.
 Require Export SpecializedFunctor.
-Require Import Common StructureEquality.
+Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
@@ -54,23 +54,43 @@ Ltac present_spnt := present_spcategory; present_spfunctor;
   present_obj_mor_obj_mor @ComponentsOf' @ComponentsOf.
 
 Section NaturalTransformations_Equal.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
-  Variables F G : SpecializedFunctor C D.
-
-  Lemma SpecializedNaturalTransformations_Equal : forall (T U : SpecializedNaturalTransformation F G),
+  Lemma SpecializedNaturalTransformations_Equal objC morC objD morD C D F G :
+    forall (T U : @SpecializedNaturalTransformation objC morC objD morD C D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
     destruct T, U; simpl; intros; repeat subst;
       f_equal; reflexivity || apply proof_irrelevance.
   Qed.
+
+  Lemma SpecializedNaturalTransformations_JMeq objC morC objD morD objC' morC' objD' morD' :
+    forall C D C' D' F G F' G'
+      (T : @SpecializedNaturalTransformation objC morC objD morD C D F G) (U : @SpecializedNaturalTransformation objC' morC' objD' morD' C' D' F' G'),
+      objC = objC'
+      -> objD = objD'
+      -> (objC = objC' -> morC == morC')
+      -> (objD = objD' -> morD == morD')
+      -> (objC = objC' -> morC == morC' -> C == C')
+      -> (objD = objD' -> morD == morD' -> D == D')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        F == F')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        G == G')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        F == F' -> G == G' -> ComponentsOf T == ComponentsOf U)
+      -> T == U.
+    simpl; intros; subst objC' objD'; firstorder; subst morC' morD'; firstorder;
+      JMeq_eq.
+    repeat subst; JMeq_eq.
+    apply SpecializedNaturalTransformations_Equal; intros; repeat subst; trivial.
+  Qed.
 End NaturalTransformations_Equal.
 
-Ltac spnt_eq_step_with tac := structures_eq_step_with SpecializedNaturalTransformations_Equal tac.
+Ltac spnt_eq_step_with tac :=
+  try structures_eq_step_with SpecializedNaturalTransformations_Equal tac;
+    try structures_eq_step_with SpecializedNaturalTransformations_JMeq tac.
 
 Ltac spnt_eq_with tac := repeat spnt_eq_step_with tac.
 
