@@ -20,6 +20,7 @@ MODULES    := Common \
 	SpecializedAdjointUnit \
 	SpecializedAdjoint \
 	SpecializedGrothendieck \
+	SpecializedYoneda \
 	Category \
 	CategoryEquality \
 	SmallCategory \
