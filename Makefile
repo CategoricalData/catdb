@@ -18,6 +18,7 @@ MODULES    := Common \
 	SpecializedHom \
 	SpecializedFunctorAttributes \
 	SpecializedAdjointUnit \
+	SpecializedAdjoint \
 	Category \
 	CategoryEquality \
 	SmallCategory \

@@ -80,36 +80,39 @@ Ltac eq2eq_refl :=
            | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by (apply proof_irrelevance); subst
          end.
 
-Ltac destruct_type T :=
+Ltac destruct_all_matches matcher :=
   repeat match goal with
-           | [ H : context[T] |- _ ] => destruct H; simpl in *
+           | [ H : ?T |- _ ] => matcher T; destruct H; simpl in *
          end.
 
-Ltac destruct_hypotheses :=
-  repeat match goal with
-           | [ H : ex _ |- _ ] => destruct H; simpl in *
-           | [ H : and _ _ |- _ ] => destruct H; simpl in *
-           | [ H : prod _ _ |- _ ] => destruct H; simpl in *
-         end.
+Ltac destruct_type_matcher T HT :=
+  match HT with
+    | context[T] => idtac
+  end.
+Ltac destruct_type T := destruct_all_matches ltac:(destruct_type_matcher T).
 
-Ltac destruct_sig :=
-  repeat match goal with
-           | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sigT _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sig2 _ _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sigT2 _ _ _ |- _ ] => destruct H; simpl in *
-         end.
+Ltac destruct_hypotheses_matcher HT :=
+  let HT' := eval hnf in HT in
+    match HT' with
+      | ex _ => idtac
+      | and _ _ => idtac
+      | prod _ _ => idtac
+    end.
+Ltac destruct_hypotheses := destruct_all_matches destruct_hypotheses_matcher.
 
-Ltac destruct_all_hypotheses :=
-  repeat match goal with
-           | [ H : ex _ |- _ ] => destruct H; simpl in *
-           | [ H : and _ _ |- _ ] => destruct H; simpl in *
-           | [ H : prod _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sigT _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sig2 _ _ _ |- _ ] => destruct H; simpl in *
-           | [ H : @sigT2 _ _ _ |- _ ] => destruct H; simpl in *
-         end.
+Ltac destruct_sig_matcher HT :=
+  let HT' := eval hnf in HT in
+    match HT' with
+      | @sig _ _ => idtac
+      | @sigT _ _ => idtac
+      | @sig2 _ _ _ => idtac
+      | @sigT2 _ _ _ => idtac
+    end.
+Ltac destruct_sig := destruct_all_matches destruct_sig_matcher.
+
+Ltac destruct_all_hypotheses := destruct_all_matches ltac:(fun HT =>
+  destruct_hypotheses_matcher HT || destruct_sig_matcher HT
+).
 
 Ltac specialized_assumption tac := tac;
   match goal with
@@ -264,9 +267,16 @@ Ltac curry_in_Quant H :=
 
 Ltac reifyToTelescope' H := let HT := type of H in let H' := uncurry HT in
   match H' with
-    | @eq (forall x : ?a, @?b x) ?f ?g => constr:(@Base a b f g)
-    | forall x, @eq (forall y : @?a x, @?b x y) (@?f x) (@?g x) => constr:(Quant (fun x => @Base (a x) (b x) (f x) (g x)))
+    | @eq ?T ?f ?g => let T' := eval hnf in T in
+      match T' with
+        | forall x : ?a, @?b x => constr:(@Base a b f g)
+      end
+    | forall x, @eq (@?T x) (@?f x) (@?g x) => let T' := eval hnf in T in (* XXX does [hnf] even do anything on [(fun _ => _)]?  I want to do [hnf] inside the function, but I don't want to do [compute] *)
+      match T' with
+        | (fun x => forall y : @?a x, @?b x y) => constr:(Quant (fun x => @Base (a x) (b x) (f x) (g x)))
+      end
   end.
+
 Ltac reifyToTelescope H := let t' := reifyToTelescope' H in curry_in_Quant t'.
 Ltac fg_equal_in H := let t := reifyToTelescope H in apply (generalized_fg_equal t) in H; simpl in H.
 

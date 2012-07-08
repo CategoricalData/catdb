@@ -126,8 +126,11 @@ Ltac find_composition_to_identity :=
     | [ H : @Compose _ _ _ _ _ _ ?a ?b = @Identity _ _ _ _ |- context[@Compose ?A ?B ?C ?D ?E ?F ?c ?d] ]
       => let H' := fresh in
         assert (H' : b = d /\ a = c) by (split; reflexivity); clear H';
-          assert (H' : @Compose A B C D E F c d = @Identity _ _ _ _) by (unfold Object in H |- *; simpl in H |- *; rewrite H; reflexivity);
-            rewrite H'; clear H'
+          assert (H' : @Compose A B C D E F c d = @Identity _ _ _ _) by (
+            exact H ||
+              (unfold Object in H |- *; simpl in H |- *; exact H || (rewrite H; reflexivity))
+          );
+          rewrite H'; clear H'
   end.
 
 (** * Back to the main content.... *)
