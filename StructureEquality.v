@@ -19,6 +19,7 @@ Ltac structures_eq_step_with_tac structures_equal_tac tac := intros; simpl;
     | _ => reflexivity
     | [ |- _ = _ ] => structures_equal_tac
     | [ |- _ == _ ] => structures_equal_tac
-  end; structures_eq_simpl_step_with tac.
+    | _ => structures_eq_simpl_step_with tac
+  end.
 
 Ltac structures_eq_step_with structures_equal_lemma tac := structures_eq_step_with_tac ltac:(apply structures_equal_lemma) tac.

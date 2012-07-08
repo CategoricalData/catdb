@@ -89,8 +89,7 @@ Section NaturalTransformations_Equal.
 End NaturalTransformations_Equal.
 
 Ltac spnt_eq_step_with tac :=
-  try structures_eq_step_with SpecializedNaturalTransformations_Equal tac;
-    try structures_eq_step_with SpecializedNaturalTransformations_JMeq tac.
+  structures_eq_step_with_tac ltac:(apply SpecializedNaturalTransformations_Equal || apply SpecializedNaturalTransformations_JMeq) tac.
 
 Ltac spnt_eq_with tac := repeat spnt_eq_step_with tac.
 

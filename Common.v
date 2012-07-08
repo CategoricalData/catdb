@@ -152,11 +152,11 @@ Ltac solve_repeat_rewrite rew_H tac :=
   solve [ repeat (rewrite rew_H; tac) ] ||
     solve [ repeat (rewrite <- rew_H; tac) ].
 
-Ltac simpl_exist :=
-  match goal with
-    | [ |- exist _ ?x1 ?p1 = exist _ ?x2 ?p2 ] => generalize p1; generalize p2; cut (x1 = x2);
-      try solve [ let H := fresh in intro H; rewrite H; intros ? ?; apply f_equal; apply proof_irrelevance ]
-  end.
+Lemma simpl_exist_helper A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
+  destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
+Qed.
+
+Ltac simpl_exist := apply simpl_exist_helper; simpl.
 
 Ltac split_in_context ident funl funr :=
   repeat match goal with
