@@ -19,6 +19,7 @@ MODULES    := Common \
 	SpecializedFunctorAttributes \
 	SpecializedAdjointUnit \
 	SpecializedAdjoint \
+	SpecializedLimits \
 	SpecializedGrothendieck \
 	SpecializedYoneda \
 	Category \
