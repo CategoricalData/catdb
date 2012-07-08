@@ -210,13 +210,69 @@ Ltac repeat_subst_mor_of_type type :=
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
          end.
 
+(* So we know the difference betwen the [sigT]s we're using and the [sigT]s others use *)
+Inductive Common_sigT (A : Type) (P : A -> Type) : Type :=
+    Common_existT : forall x : A, P x -> Common_sigT P.
+Definition Common_projT1 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (a, _) := x in a.
+Definition Common_projT2 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (x0, h) as x0 return (P (Common_projT1 x0)) := x in h.
+
+Ltac uncurry H :=
+  match eval simpl in H with
+    | forall (x : ?T1) (y : @?T2 x), @?f x y => uncurry (forall xy : @Common_sigT T1 T2, f (projT1 xy) (projT2 xy))
+    | ?H' => H'
+  end.
+
+Ltac curry H :=
+  match eval simpl in H with
+    | forall xy : { x : ?T1 & ?T2 x }, @?f xy => curry (forall (x : T1) (y : T2 x), f (@existT T1 T2 x y))
+    | ?H' => H'
+  end.
+
 Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
   intros; repeat subst; reflexivity.
 Qed.
 
+Section telescope.
+  Inductive telescope :=
+  | Base : forall (A : Type) (B : A -> Type), (forall a, B a) -> (forall a, B a) -> telescope
+  | Quant : forall A : Type, (A -> telescope) -> telescope.
+
+  Fixpoint telescopeOut (t : telescope) :=
+    match t with
+      | Base _ _ x y => x = y
+      | Quant _ f => forall x, telescopeOut (f x)
+    end.
+
+  Fixpoint telescopeOut' (t : telescope) :=
+    match t with
+      | Base _ _ f g => forall x, f x = g x
+      | Quant _ f => forall x, telescopeOut' (f x)
+    end.
+
+  Theorem generalized_fg_equal : forall (t : telescope),
+    telescopeOut t
+    -> telescopeOut' t.
+    induction t; simpl; intuition; subst; auto.
+  Qed.
+End telescope.
+
+Ltac curry_in_Quant H :=
+  match eval simpl in H with
+    | @Quant (@Common_sigT ?T1 ?T2) (fun xy => @?f xy) => curry_in_Quant (@Quant T1 (fun x => @Quant (T2 x) (fun y => f (@Common_existT T1 T2 x y))))
+    | ?H' => H'
+  end.
+
+Ltac reifyToTelescope' H := let HT := type of H in let H' := uncurry HT in
+  match H' with
+    | @eq (forall x : ?a, @?b x) ?f ?g => constr:(@Base a b f g)
+    | forall x, @eq (forall y : @?a x, @?b x y) (@?f x) (@?g x) => constr:(Quant (fun x => @Base (a x) (b x) (f x) (g x)))
+  end.
+Ltac reifyToTelescope H := let t' := reifyToTelescope' H in curry_in_Quant t'.
+Ltac fg_equal_in H := let t := reifyToTelescope H in apply (generalized_fg_equal t) in H; simpl in H.
+
 Ltac fg_equal :=
   repeat match goal with
-           | [ H : _ |- _ ] => let H' := fresh in assert (H' := fg_equal H); clear H; simpl in H'
+           | [ H : _ |- _ ] => fg_equal_in H
          end.
 
 Ltac intro_proj2_sig_from_goal :=

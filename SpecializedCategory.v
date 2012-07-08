@@ -20,27 +20,49 @@ Section SpecializedCategoryInterface.
   Variable mor : obj -> obj -> Type.
   Variable C : @SpecializedCategory obj mor.
 
-  Definition Morphism (s d : C) := mor s d.
-  Definition Identity (o : C) : Morphism o o := C.(Identity') o.
-  Definition Compose (s d d' : C) (m : Morphism d d') (m0 : Morphism s d) : Morphism s d' := C.(Compose') s d d' m m0.
-  Definition Associativity (o1 o2 o3 o4 : C) (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4) :
+  Definition Morphism : forall s d : C, _ := mor.
+  Definition Identity : forall o : C, Morphism o o := C.(Identity').
+  Definition Compose : forall (s d d' : C) (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := C.(Compose').
+  Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
     Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1)
-    := C.(Associativity') o1 o2 o3 o4 m1 m2 m3.
-  Definition LeftIdentity (a b : C) (f : Morphism a b) :
+    := C.(Associativity').
+  Definition LeftIdentity : forall (a b : C) (f : Morphism a b),
     Compose (Identity b) f = f
-    := C.(LeftIdentity') a b f.
-  Definition RightIdentity (a b : C) (f : Morphism a b) :
+    := C.(LeftIdentity').
+  Definition RightIdentity : forall (a b : C) (f : Morphism a b),
     Compose f (Identity a) = f
-    := C.(RightIdentity') a b f.
+    := C.(RightIdentity').
 End SpecializedCategoryInterface.
+Global Opaque Morphism Identity Compose.
+Global Opaque Associativity LeftIdentity RightIdentity.
+
+Ltac present_mor_all mor_fun cat :=
+  repeat match goal with
+           | [ _ : appcontext[mor_fun ?s ?d] |- _ ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
+           | [ |- appcontext[mor_fun ?s ?d] ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
+         end.
+
+Ltac present_mor mor_fun cat :=
+  repeat match goal with
+           | [ _ : mor_fun ?s ?d |- _ ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
+         end.
+
+Ltac present_mor_from_context cmd :=
+  repeat match goal with
+           | [ _ : appcontext[cmd ?obj ?mor ?C] |- _ ] => progress present_mor mor C
+           | [ |- appcontext[cmd ?obj ?mor ?C] ] => progress present_mor mor C
+         end.
 
 Ltac present_obj_mor from to :=
   repeat match goal with
-           | [ _ : appcontext[from ?obj ?mor] |- _ ] => change (from obj mor) with (to obj mor) in *
-           | [ |- appcontext[from ?obj ?mor] ] => change (from obj mor) with (to obj mor) in *
+           | [ _ : appcontext[from ?obj ?mor ?C] |- _ ] => progress change (from obj mor) with (to obj mor) in *
+           | [ |- appcontext[from ?obj ?mor ?C] ] => progress change (from obj mor) with (to obj mor) in *
          end.
 
-Ltac present_spcategory := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose.
+Ltac present_spcategory := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose;
+  repeat match goal with
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor mor C
+         end.
 
 Arguments Compose {obj mor} [C s d d'] m m0.
 Arguments Identity {obj mor} [C] o.
@@ -57,14 +79,15 @@ Section Categories_Equal.
     @Identity' _ _ C = @Identity' _ _ D
     -> @Compose' _ _ C = @Compose' _ _ D
     -> C = D.
+    Transparent Object Morphism.
     destruct C, D; unfold Object, Morphism in *; simpl in *; intros; firstorder; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.
 
-Ltac spcat_eq_step_with tac := present_spcategory; structures_eq_step_with SpecializedCategories_Equal tac.
+Ltac spcat_eq_step_with tac := structures_eq_step_with SpecializedCategories_Equal tac.
 
-Ltac spcat_eq_with tac := repeat spcat_eq_step_with tac.
+Ltac spcat_eq_with tac := present_spcategory; repeat spcat_eq_step_with tac.
 
 Ltac spcat_eq_step := spcat_eq_step_with idtac.
 Ltac spcat_eq := spcat_eq_with idtac.
@@ -102,10 +125,9 @@ Ltac find_composition_to_identity :=
   match goal with
     | [ H : @Compose _ _ _ _ _ _ ?a ?b = @Identity _ _ _ _ |- context[@Compose ?A ?B ?C ?D ?E ?F ?c ?d] ]
       => let H' := fresh in
-        assert (H' : b = d) by reflexivity; clear H';
-          assert (H' : a = c) by reflexivity; clear H';
-            assert (H' : @Compose A B C D E F c d = @Identity _ _ _ _) by (unfold Morphism, Object in *; simpl in *; rewrite H; reflexivity);
-              rewrite H'; clear H'
+        assert (H' : b = d /\ a = c) by (split; reflexivity); clear H';
+          assert (H' : @Compose A B C D E F c d = @Identity _ _ _ _) by (unfold Object in H |- *; simpl in H |- *; rewrite H; reflexivity);
+            rewrite H'; clear H'
   end.
 
 (** * Back to the main content.... *)
@@ -136,16 +158,18 @@ Section Category.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
-  Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    Compose m' m = Identity s /\
-    Compose m m' = Identity d.
+  Definition InverseOf' s d (m : mor s d) (m' : mor d s) : Prop :=
+    Compose m' m = @Identity _ _ C s /\
+    Compose m m' = @Identity _ _ C d.
+  Definition InverseOf s d (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := InverseOf' m m'.
+  Global Identity Coercion InverseOf_InverseOf'_Id : InverseOf >-> InverseOf'.
 
   Lemma InverseOf_sym s d m m' : @InverseOf s d m m' -> @InverseOf d s m' m.
     firstorder.
   Qed.
 
   (* A morphism is an isomorphism if it has an inverse *)
-  Definition CategoryIsomorphism' s d (m : C.(Morphism) s d) : Prop :=
+  Definition IsCategoryIsomorphism s d (m : C.(Morphism) s d) : Prop :=
     exists m', InverseOf m m'.
 
   (* As per David's comment, everything is better when we supply a witness rather
@@ -162,9 +186,32 @@ Section Category.
        is not allowed on a predicate in sort Type
        because proofs can be eliminated only to build proofs.
      ) *)
-  Definition CategoryIsomorphism s d (m : C.(Morphism) s d) := { m' | InverseOf m m' }.
+  Definition CategoryIsomorphism' (s d : obj) (m : mor s d) := { m' | InverseOf' m m' }.
+  Definition CategoryIsomorphism (s d : C) (m : C.(Morphism) s d) := @CategoryIsomorphism' s d m.
+  Global Identity Coercion CategoryIsomorphism_CategoryIsomorphism'_Id : CategoryIsomorphism >-> CategoryIsomorphism'.
 
-  Hint Unfold InverseOf CategoryIsomorphism' CategoryIsomorphism.
+  (* XXX Outside of this section, why does
+     [[
+     Set Printing Universes.
+     Check (@CategoryIsomorphism' nat).
+     Check (@CategoryIsomorphism' nat (fun _ _ => unit : Set)).
+     ]]
+     give
+     [[
+     CategoryIsomorphism' (obj:=nat)
+     : forall mor : nat -> nat -> Type (* Top.15911 *),
+       SpecializedCategory mor ->
+       forall s d : nat, mor s d -> Type (* Top.15911 *)
+     CategoryIsomorphism' (mor:=fun _ _ : nat => unit:Set)
+     : SpecializedCategory (fun _ _ : nat => unit:Set) ->
+       forall s d : nat,
+       (fun _ _ : nat => unit:Set) s d -> Type (* Top.15911 *)
+     ]]
+     ?  Shouldn't fake universe polymorphism make it give
+     [Set] in the second [Check]?
+     *)
+
+  Hint Unfold InverseOf InverseOf' CategoryIsomorphism' IsCategoryIsomorphism CategoryIsomorphism.
 
   Lemma InverseOf1 : forall (s d : C) (m : _ s d) m', InverseOf m m'
     -> Compose m' m = Identity s.
@@ -176,7 +223,7 @@ Section Category.
     firstorder.
   Qed.
 
-  Lemma CategoryIsomorphism2Isomorphism' s d (m : _ s d) : CategoryIsomorphism m -> CategoryIsomorphism' m.
+  Lemma CategoryIsomorphism2Isomorphism' s d (m : _ s d) : CategoryIsomorphism m -> IsCategoryIsomorphism m.
     firstorder.
   Qed.
 
@@ -192,7 +239,7 @@ Section Category.
   Lemma InverseOf1' : forall x y z (m : C.(Morphism) x y) (m' : C.(Morphism) y x) (m'' : C.(Morphism) z _),
     InverseOf m m'
     -> Compose m' (Compose m m'') = m''.
-    unfold InverseOf; intros; destruct_hypotheses; repeat rewrite <- Associativity; t.
+    unfold InverseOf, InverseOf'; intros; destruct_hypotheses; repeat rewrite <- Associativity; t.
   Qed.
 
   Hint Rewrite InverseOf1' using assumption.
@@ -201,7 +248,7 @@ Section Category.
   Lemma iso_is_mono s d (m : _ s d) : CategoryIsomorphism m -> Monomorphism m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
     transitivity (Compose (Compose x m) m1). t_with t'.
-    transitivity (Compose (Compose x m) m2); solve [ repeat (rewrite Associativity); t_with t' ] || t_with t'.
+    transitivity (Compose (Compose x m) m2); solve [ repeat rewrite Associativity; t_with t' ] || t_with t'.
   Qed.
 
   Theorem CategoryIdentityInverse (o : C) : InverseOf (Identity o) (Identity o).
@@ -211,10 +258,11 @@ Section Category.
   Hint Resolve CategoryIdentityInverse.
 
   Theorem CategoryIdentityIsomorphism (o : C) : CategoryIsomorphism (Identity o).
-    eauto.
+    eexists; t.
   Qed.
 End Category.
 
+Arguments IsCategoryIsomorphism {obj mor} [C s d] m.
 Arguments CategoryIsomorphism' {obj mor} [C s d] m.
 Arguments CategoryIsomorphism {obj mor} [C s d] m.
 Arguments Epimorphism {obj mor} [C x y] m.
@@ -257,9 +305,10 @@ Section CategoryIsomorphismEquivalenceRelation.
 
   Theorem CategoryIsomorphismComposition (m : C.(Morphism) s d) (m' : C.(Morphism) d d') :
     CategoryIsomorphism m -> CategoryIsomorphism m' -> CategoryIsomorphism (Compose m' m).
-    repeat destruct 1; unfold InverseOf in *; destruct_hypotheses.
+    repeat destruct 1; unfold InverseOf, InverseOf' in *; destruct_hypotheses;
       match goal with
         | [ m : Morphism _ _ _, m' : Morphism _ _ _ |- _ ] => exists (Compose m m')
+        | [ m : mor _ _, m' : mor _ _ |- _ ] => exists (@Compose _ _ C _ _ _ m m')
       end;
       split;
         compose4associativity; t.
@@ -272,10 +321,10 @@ Section CategoryObjects1.
   Variable C : SpecializedCategory mor.
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
-    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', CategoryIsomorphism' m /\ is_unique m.
+    forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsCategoryIsomorphism m /\ is_unique m.
 
   Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
-    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | CategoryIsomorphism' m & is_unique m }.
+    forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | IsCategoryIsomorphism m & is_unique m }.
 
   (* A terminal object is an object with a unique morphism from every other object. *)
   Definition TerminalObject' (o : C) : Prop :=

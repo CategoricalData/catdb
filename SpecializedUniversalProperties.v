@@ -49,10 +49,12 @@ Section UniversalMorphism.
       Definition InitialMorphism_Object : D := snd (projT1 (projT1 M)).
       Definition InitialMorphism_Morphism : C.(Morphism) X (U (InitialMorphism_Object)) := projT2 (projT1 M).
       Definition InitialProperty_Morphism (Y : D) (f : C.(Morphism) X (U Y)) : D.(Morphism) InitialMorphism_Object Y
-        := snd (proj1_sig (proj1_sig (projT2 M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f)))). (* This is super slow now.  wtf? *)
+        := snd (proj1_sig (proj1_sig (projT2 M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f)))).
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
+        Transparent Morphism Object.
+        Hint Unfold Morphism Object.
         unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
@@ -60,7 +62,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        unfold Morphism, Object in *; simpl in *.
+        repeat (autounfold with core in *; simpl in *).
         destruct_all_hypotheses; simpl in *.
         repeat simultaneous_rewrite RightIdentity; repeat simultaneous_rewrite LeftIdentity.
         split; try (assumption || symmetry; assumption); intros.
@@ -105,10 +107,12 @@ Section UniversalMorphism.
       Definition TerminalMorphism_Object : D := fst (projT1 (projT1 M)).
       Definition TerminalMorphism_Morphism : C.(Morphism) (U (TerminalMorphism_Object)) X := projT2 (projT1 M).
       Definition TerminalProperty_Morphism (Y : D) (f : C.(Morphism) (U Y) X) : D.(Morphism) Y TerminalMorphism_Object
-        := fst (proj1_sig (proj1_sig (projT2 M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f)))). (* so slow .... :-( *)
+        := fst (proj1_sig (proj1_sig (projT2 M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f)))).
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
+        Transparent Morphism Object.
+        Hint Unfold Object Morphism.
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
@@ -116,11 +120,10 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        unfold Object, Morphism in *; simpl in *.
+        repeat (autounfold with core in *; simpl in *).
         destruct_sig; simpl in *.
         repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
         split; try (assumption || symmetry; assumption); intros.
-        simpl in *.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
             symmetry in pf;

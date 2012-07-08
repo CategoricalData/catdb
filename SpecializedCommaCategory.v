@@ -59,6 +59,7 @@ Section CommaSpecializedCategory.
     }.
   Definition CommaSpecializedCategory_Compose s d d' (gh : CommaSpecializedCategory_Morphism d d') (g'h' : CommaSpecializedCategory_Morphism s d) :
     CommaSpecializedCategory_Morphism s d'.
+    Transparent Object Morphism Compose.
     exists (Compose (proj1_sig gh) (proj1_sig g'h')).
     abstract (
       simpl; unfold CommaSpecializedCategory_Object, CommaSpecializedCategory_Morphism in *; simpl in *;
@@ -96,9 +97,11 @@ Section CommaSpecializedCategory.
   Defined.
 
   Definition CommaSpecializedCategory := Eval cbv beta iota zeta delta
-    [CommaSpecializedCategory' CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object]
+    [CommaSpecializedCategory' (*CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object*)]
     in CommaSpecializedCategory'.
 End CommaSpecializedCategory.
+
+Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object.
 
 Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
 

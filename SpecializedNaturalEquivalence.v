@@ -51,15 +51,17 @@ Section SpecializedNaturalTransformationInverse.
   Variable F G : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F G.
 
-  Hint Unfold InverseOf Morphism.
+  Hint Unfold InverseOf InverseOf'.
   Hint Resolve f_equal f_equal2 Commutes.
   Hint Rewrite LeftIdentity RightIdentity.
 
   Definition SpecializedNaturalEquivalenceInverse : SpecializedNaturalEquivalence T -> SpecializedNaturalTransformation G F.
+    Transparent Morphism.
     refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
       abstract (
-        present_spnt; intros; destruct (X s); destruct (X d);
-          simpl; unfold InverseOf in *; destruct_hypotheses;
+        intros; destruct (X s); destruct (X d);
+          simpl; unfold InverseOf, InverseOf' in *; destruct_hypotheses;
+            present_spnt;
             pre_compose_to_identity; post_compose_to_identity;
             auto
       ).
@@ -69,8 +71,10 @@ Section SpecializedNaturalTransformationInverse.
   Hint Immediate InverseOf_sym.
 
   Lemma SpecializedNaturalEquivalenceInverse_SpecializedNaturalEquivalence (TE : SpecializedNaturalEquivalence T) : SpecializedNaturalEquivalence (SpecializedNaturalEquivalenceInverse TE).
-    unfold SpecializedNaturalEquivalence, CategoryIsomorphism in *; simpl in *;
-      intro x; destruct (TE x); eauto.
+    unfold SpecializedNaturalEquivalence, CategoryIsomorphism, CategoryIsomorphism', InverseOf' in *; simpl in *;
+      intro x; destruct (TE x);
+        destruct_hypotheses;
+        eauto.
   Qed.
 End SpecializedNaturalTransformationInverse.
 
@@ -86,7 +90,7 @@ Section IdentitySpecializedNaturalTransformation.
   Hint Resolve CategoryIdentityInverse.
 
   Theorem IdentitySpecializedNaturalEquivalence : SpecializedNaturalEquivalence (IdentitySpecializedNaturalTransformation F).
-    hnf; intros; hnf; simpl; eauto.
+    hnf; intros; hnf; simpl; unfold InverseOf' in *; eexists; t_with eauto.
   Qed.
 End IdentitySpecializedNaturalTransformation.
 
@@ -135,8 +139,8 @@ Add Parametric Morphism objC morC objD morD objE morE (C : @SpecializedCategory 
     ==> (@SpecializedFunctorsNaturallyEquivalent _ _ _ _ _ _)
     ==> (@SpecializedFunctorsNaturallyEquivalent _ _ _ _ _ _)
     as specialized_functors_naturally_equivalent_mor.
-  intros F F' NEF G G' NEG; unfold SpecializedFunctorsNaturallyEquivalent, SpecializedNaturalEquivalence, CategoryIsomorphism, InverseOf in *;
-    destruct_hypotheses.
+  intros F F' NEF G G' NEG; unfold SpecializedFunctorsNaturallyEquivalent, SpecializedNaturalEquivalence, CategoryIsomorphism, InverseOf, InverseOf' in *;
+    destruct_hypotheses; unfold CategoryIsomorphism', InverseOf, InverseOf' in *.
   simpl in *.
   match goal with
     | [ T1 : _ , T2 : _ |- _ ] => exists (SPNTComposeF T1 T2); try (constructor; trivial)
@@ -153,7 +157,7 @@ Add Parametric Morphism objC morC objD morD objE morE (C : @SpecializedCategory 
   eexists (Compose _ (MorphismOf _ _));
     split; compose4associativity;
       repeat (try find_composition_to_identity; autorewrite with core);
-        auto.
+        reflexivity.
 Qed.
 
 Section SpecializedFunctorSpecializedNaturalEquivalenceLemmas.
@@ -191,7 +195,7 @@ Section SpecializedFunctorSpecializedNaturalEquivalenceLemmas.
 
   Hint Rewrite LeftIdentity RightIdentity.
 
-  Hint Unfold SpecializedFunctorsNaturallyEquivalent ComposeSpecializedFunctors SpecializedNaturalEquivalence CategoryIsomorphism InverseOf.
+  Hint Unfold SpecializedFunctorsNaturallyEquivalent ComposeSpecializedFunctors SpecializedNaturalEquivalence CategoryIsomorphism CategoryIsomorphism' InverseOf InverseOf'.
 
   (* XXX TODO: Automate this better. *)
   Lemma PreComposeSpecializedFunctorsNE (G : SpecializedFunctor D E) (F1 F2 : SpecializedFunctor C D) :

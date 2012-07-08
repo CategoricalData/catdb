@@ -64,7 +64,7 @@ Section Functors_Equal.
     ObjectOf F = ObjectOf G
     -> (ObjectOf F = ObjectOf G -> MorphismOf F == MorphismOf G)
     -> F = G.
-    destruct F, G; simpl; intros; firstorder; repeat subst;
+    destruct F, G; simpl; intros; specialize_all_ways; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
 
@@ -118,7 +118,11 @@ Section FunctorComposition.
   Definition ComposeSpecializedFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
     refine {| ObjectOf' := (fun c => G (F c));
       MorphismOf' := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-      |}; abstract t.
+      |};
+    abstract (
+      present_spcategory; intros; simpl; repeat rewrite FCompositionOf; repeat rewrite FIdentityOf; reflexivity
+    ).
+    (* abstract t. *)
   Defined.
 End FunctorComposition.
 

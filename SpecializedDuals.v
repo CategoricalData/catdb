@@ -1,4 +1,4 @@
-Require Import JMeq.
+Require Import JMeq Eqdep.
 Require Export SpecializedCategory SpecializedFunctor SpecializedProductCategory SpecializedNaturalTransformation.
 Require Import Common FEqualDep.
 
@@ -36,7 +36,7 @@ Section DualCategories.
   Hint Unfold OppositeSpecializedCategory ProductSpecializedCategory.
 
   Lemma op_distribute_prod : OppositeSpecializedCategory (C * D) = (OppositeSpecializedCategory C) * (OppositeSpecializedCategory D).
-    spcat_eq_with ltac:(autounfold with core in *; destruct_type @prod).
+    spcat_eq.
   Qed.
 End DualCategories.
 

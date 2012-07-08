@@ -10,9 +10,14 @@ MODULES    := Common \
 	SpecializedComputableCategory \
 	SpecializedDiscreteCategory \
 	SpecializedProductCategory \
+	SpecializedProductFunctor \
 	SpecializedCommaCategory \
 	SpecializedUniversalProperties \
 	SpecializedDuals \
+	SpecializedSetCategory \
+	SpecializedHom \
+	SpecializedFunctorAttributes \
+	SpecializedAdjointUnit \
 	Category \
 	CategoryEquality \
 	SmallCategory \
