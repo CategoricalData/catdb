@@ -20,6 +20,7 @@ MODULES    := Common \
 	SpecializedAdjointUnit \
 	SpecializedAdjoint \
 	SpecializedLimits \
+	SpecializedLimitFunctors \
 	SpecializedGrothendieck \
 	SpecializedYoneda \
 	Category \

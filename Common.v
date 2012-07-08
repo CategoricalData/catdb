@@ -219,16 +219,30 @@ Inductive Common_sigT (A : Type) (P : A -> Type) : Type :=
 Definition Common_projT1 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (a, _) := x in a.
 Definition Common_projT2 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (x0, h) as x0 return (P (Common_projT1 x0)) := x in h.
 
-Ltac uncurry H :=
+Ltac uncurryT H :=
   match eval simpl in H with
-    | forall (x : ?T1) (y : @?T2 x), @?f x y => uncurry (forall xy : @Common_sigT T1 T2, f (projT1 xy) (projT2 xy))
+    | forall (x : ?T1) (y : @?T2 x), @?f x y => uncurryT (forall xy : @Common_sigT T1 T2, f (Common_projT1 xy) (Common_projT2 xy))
     | ?H' => H'
   end.
 
-Ltac curry H :=
+Ltac curryT H :=
   match eval simpl in H with
-    | forall xy : { x : ?T1 & ?T2 x }, @?f xy => curry (forall (x : T1) (y : T2 x), f (@existT T1 T2 x y))
+    | forall xy : @Common_sigT ?T1 ?T2, @?f xy => curryT (forall (x : T1) (y : T2 x), f (@Common_existT T1 T2 x y))
     | ?H' => H'
+  end.
+
+Ltac uncurry H := let HT := type of H in
+  match eval simpl in HT with
+    | forall (x : ?T1) (y : @?T2 x) (z : @?T3 x y), @?f x y z =>
+      uncurry (fun xyz => H (Common_projT1 (Common_projT1 xyz)) (Common_projT2 (Common_projT1 xyz)) (Common_projT2 xyz))
+    | forall (x : ?T1) (y : @?T2 x), @?f x y => uncurry (fun xy : @Common_sigT T1 T2 => H (Common_projT1 xy) (Common_projT2 xy))
+    | ?H' => H
+  end.
+
+Ltac curry H := let HT := type of H in
+  match eval simpl in HT with
+    | forall xy : @Common_sigT ?T1 ?T2, @?f xy => curry (fun (x : T1) (y : T2 x) => H (@Common_existT T1 T2 x y))
+    | ?H' => H
   end.
 
 Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
@@ -265,7 +279,7 @@ Ltac curry_in_Quant H :=
     | ?H' => H'
   end.
 
-Ltac reifyToTelescope' H := let HT := type of H in let H' := uncurry HT in
+Ltac reifyToTelescope' H := let HT := type of H in let H' := uncurryT HT in
   match H' with
     | @eq ?T ?f ?g => let T' := eval hnf in T in
       match T' with
@@ -284,6 +298,20 @@ Ltac fg_equal :=
   repeat match goal with
            | [ H : _ |- _ ] => fg_equal_in H
          end.
+
+Lemma f_equal_helper A0 (A B : A0 -> Type) (f : forall a0, A a0 -> B a0) (x y : forall a0, A a0) :
+  (forall a0, x a0 = y a0) -> (forall a0, f a0 (x a0) = f a0 (y a0)).
+  intros H a0; specialize (H a0); rewrite H; reflexivity.
+Qed.
+
+Ltac f_equal_in_r H k := let H' := uncurry H in let H'T := type of H' in
+  let k' := (fun v => let v' := curry v in let H := fresh in assert (H := v'); simpl in H) in
+    match eval simpl in H'T with
+      | @eq ?A ?x ?y => k (fun B (f : A -> B) => @f_equal A B f x y H') k'
+      | forall a0 : ?A0, @eq (@?A a0) (@?x a0) (@?y a0)
+        => k (fun (B : A0 -> Type) (f : forall a0 : A0, A a0 -> B a0) => @f_equal_helper A0 A B f x y H') k'
+    end; clear H.
+Ltac f_equal_in f H := f_equal_in_r H ltac:(fun pf k => k (pf _ f)).
 
 Ltac intro_proj2_sig_from_goal :=
   repeat match goal with

@@ -236,7 +236,7 @@ Section Category.
   Lemma iso_is_epi s d (m : _ s d) : CategoryIsomorphism m -> Epimorphism m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
     transitivity (Compose m1 (Compose m x)). t.
-    transitivity (Compose m2 (Compose m x)); repeat (rewrite <- Associativity); t.
+    transitivity (Compose m2 (Compose m x)); repeat rewrite <- Associativity; t.
   Qed.
 
   Lemma InverseOf1' : forall x y z (m : C.(Morphism) x y) (m' : C.(Morphism) y x) (m'' : C.(Morphism) z _),

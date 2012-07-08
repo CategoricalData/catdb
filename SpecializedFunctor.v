@@ -35,7 +35,7 @@ Section Functor.
   Section FunctorInterface.
     Variable F : SpecializedFunctor.
 
-    Definition ObjectOf : C -> D := F.(ObjectOf').
+    Definition ObjectOf : forall c, D := F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
     Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d) := F.(MorphismOf').
     Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
       MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
@@ -57,6 +57,7 @@ Ltac present_spfunctor := present_spcategory;
   present_obj_mor_obj_mor @ObjectOf' @ObjectOf; present_obj_mor_obj_mor @MorphismOf' @MorphismOf.
 
 Arguments SpecializedFunctor {objC morC objD morD} C D.
+Arguments ObjectOf {objC morC objD morD C D} F c.
 Arguments MorphismOf {objC morC objD morD} [C D] F [s d] m.
 
 Section Functors_Equal.

@@ -48,6 +48,7 @@ Section Categories_NaturalTransformation.
   End SpecializedNaturalTransformationInterface.
 End Categories_NaturalTransformation.
 
+Arguments ComponentsOf {objC morC objD morD C D F G} T c.
 Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
 
 Ltac present_spnt := present_spcategory; present_spfunctor;
