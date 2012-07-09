@@ -21,6 +21,7 @@ MODULES    := Common \
 	SpecializedAdjoint \
 	SpecializedLimits \
 	SpecializedLimitFunctors \
+	SpecializedLimitFunctorTheorems \
 	SpecializedGrothendieck \
 	SpecializedYoneda \
 	Category \
