@@ -25,19 +25,19 @@ Section Grothendieck.
 
   Variable F : SpecializedFunctor C TypeCat.
 
-  Record GrothendiekPair := {
-    GrothendiekC' : objC;
-    GrothendiekX' : F GrothendiekC'
+  Record GrothendieckPair := {
+    GrothendieckC' : objC;
+    GrothendieckX' : F GrothendieckC'
   }.
 
-  Section GrothendiekInterface.
-    Variable G : GrothendiekPair.
+  Section GrothendieckInterface.
+    Variable G : GrothendieckPair.
 
-    Definition GrothendiekC : C := G.(GrothendiekC').
-    Definition GrothendiekX : F GrothendiekC := G.(GrothendiekX').
-  End GrothendiekInterface.
+    Definition GrothendieckC : C := G.(GrothendieckC').
+    Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
+  End GrothendieckInterface.
 
-  Definition GrothendiekCompose cs xs cd xd cd' xd' :
+  Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
     { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
     Transparent Compose.
@@ -51,9 +51,9 @@ Section Grothendieck.
     ).
   Defined.
 
-  Arguments GrothendiekCompose [cs xs cd xd cd' xd'] m2 m1.
+  Arguments GrothendieckCompose [cs xs cd xd cd' xd'] m2 m1.
 
-  Definition GrothendiekIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
+  Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
     Transparent Identity.
     exists (Identity c).
     abstract (
@@ -67,21 +67,21 @@ Section Grothendieck.
   Hint Extern 1 (exist _ _ _ = exist _ _ _) => simpl_exist.
 
   Definition CategoryOfElements : @SpecializedCategory
-    GrothendiekPair
+    GrothendieckPair
     (fun s d =>
-      { f : C.(Morphism) (GrothendiekC s) (GrothendiekC d) | F.(MorphismOf) f (GrothendiekX s) = (GrothendiekX d) }).
+      { f : morC (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) }).
     refine {|
-      Compose' := (fun _ _ _ m1 m2 => GrothendiekCompose m1 m2);
-      Identity' := (fun o => GrothendiekIdentity (GrothendiekC o) (GrothendiekX o))
+      Compose' := (fun _ _ _ m1 m2 => GrothendieckCompose m1 m2);
+      Identity' := (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
     |};
     abstract (
-      unfold GrothendiekC, GrothendiekX, GrothendiekCompose, GrothendiekIdentity in *;
-        intros; destruct_type GrothendiekPair; destruct_sig; simpl_exist; eauto
+      unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
+        intros; destruct_type GrothendieckPair; destruct_sig; simpl_exist; eauto
     ).
   Defined.
 
   Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
-    refine {| ObjectOf' := (fun o : CategoryOfElements.(Object) => GrothendiekC o);
+    refine {| ObjectOf' := (fun o : CategoryOfElements.(Object) => GrothendieckC o);
       MorphismOf' := (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
     |}; abstract (eauto; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
