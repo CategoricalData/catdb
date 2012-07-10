@@ -18,6 +18,7 @@ MODULES    := Common \
 	SpecializedSetCategory \
 	SpecializedHom \
 	SpecializedFunctorAttributes \
+	SpecializedGroupoid \
 	SpecializedAdjointUnit \
 	SpecializedAdjoint \
 	SpecializedLimits \
