@@ -430,3 +430,22 @@ Ltac simultaneous_rewrite_rev E :=
           assert (H : T = F) by reflexivity; clear H
       end; simultaneous_rewrite_rev' E
   end.
+
+Section unit.
+  Lemma unit_singleton (u : unit) : u = tt.
+    case u; reflexivity.
+  Qed.
+
+  Lemma unit_eq (u u' : unit) : u = u'.
+    case u; case u'; reflexivity.
+  Qed.
+
+  Lemma Empty_set_eq (a b : Empty_set) : a = b.
+    destruct a.
+  Qed.
+End unit.
+
+Hint Rewrite unit_singleton.
+Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Hint Extern 0 unit => constructor.
+Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.

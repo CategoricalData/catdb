@@ -14,10 +14,7 @@ Ltac destruct_to_empty_set_in_match :=
     | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
   end.
 
-Hint Extern 1 (@eq unit ?a ?b) => try destruct a; try destruct b; try reflexivity.
-Hint Extern 1 (@eq Empty_set ?a ?b) => destruct a || destruct b.
 Hint Extern 2 (_ = _) => simpl in *; tauto.
-Hint Extern 1 unit => constructor.
 
 Section DCategory.
   Variable O : Type.

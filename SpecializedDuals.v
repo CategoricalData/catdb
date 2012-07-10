@@ -47,7 +47,7 @@ Ltac unfold_OppositeSpecializedCategory :=
            | [ |- appcontext[@Compose ?obj ?mor ?C] ] => unfold_OppositeSpecializedCategory_of obj mor C
          end.
 
-Hint Extern 1 => unfold_OppositeSpecializedCategory.
+(*Hint Extern 1 => unfold_OppositeSpecializedCategory.*)
 
 Section DualCategories.
   Variable objC : Type.

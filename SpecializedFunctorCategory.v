@@ -45,4 +45,4 @@ Ltac unfold_SpecializedFunctorCategory :=
            | [ |- appcontext[@Compose ?obj ?mor (?C ^ ?D)] ] => unfold_SpecializedFunctorCategory_of obj mor D C
          end.
 
-Hint Extern 1 => unfold_SpecializedFunctorCategory.
+(*Hint Extern 1 => unfold_SpecializedFunctorCategory.*)
