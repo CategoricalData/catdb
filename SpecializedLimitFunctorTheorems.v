@@ -53,7 +53,7 @@ Section InducedMaps.
     Let limF2 := LimitObject F2_Limit.
 
     Definition InducedLimitMap' : D.(Morphism) limF2 limF1.
-      Transparent Morphism.
+      Transparent Object Morphism.
       unfold LimitObject, Limit in *.
       intro_universal_morphisms.
       match goal with
@@ -83,7 +83,7 @@ Section InducedMaps.
     Let colimF2 := ColimitObject F2_Colimit.
 
     Definition InducedColimitMap' : Morphism D colimF1 colimF2.
-      Transparent Morphism.
+      Transparent Object Morphism.
       unfold ColimitObject, Colimit in *.
       intro_universal_morphisms.
       match goal with

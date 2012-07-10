@@ -57,8 +57,8 @@ Ltac present_spfunctor := present_spcategory;
   present_obj_mor_obj_mor @ObjectOf' @ObjectOf; present_obj_mor_obj_mor @MorphismOf' @MorphismOf.
 
 Arguments SpecializedFunctor {objC morC objD morD} C D.
-Arguments ObjectOf {objC morC objD morD C D} F c.
-Arguments MorphismOf {objC morC objD morD} [C D] F [s d] m.
+Arguments ObjectOf {objC morC objD morD C D} !F c.
+Arguments MorphismOf {objC morC objD morD} [C D] !F [s d] m.
 
 Section Functors_Equal.
   Lemma SpecializedFunctors_Equal objC morC objD morD : forall C D (F G : @SpecializedFunctor objC morC objD morD C D),
@@ -92,8 +92,7 @@ Section Functors_Equal.
 End Functors_Equal.
 
 Ltac spfunctor_eq_step_with tac :=
-  try structures_eq_step_with SpecializedFunctors_Equal tac;
-    try structures_eq_step_with SpecializedFunctors_JMeq tac.
+  structures_eq_step_with_tac ltac:(apply SpecializedFunctors_Equal || apply SpecializedFunctors_JMeq) tac.
 
 Ltac spfunctor_eq_with tac := repeat spfunctor_eq_step_with tac.
 

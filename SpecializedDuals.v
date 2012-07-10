@@ -21,6 +21,34 @@ Section OppositeSpecializedCategory.
   Defined.
 End OppositeSpecializedCategory.
 
+Ltac unOppositeSpecializedCategory C :=
+  match eval unfold C in C with
+    @OppositeSpecializedCategory ?obj ?mor ?C' => C'
+  end.
+
+Ltac unfold_OppositeSpecializedCategory_of obj mor C :=
+  let C' := unOppositeSpecializedCategory C in
+    progress (
+      change (@Object obj mor C) with (Object C') in *; simpl in *;
+        change (@Morphism obj mor C) with (fun s d => Morphism C' d s) in *; simpl in *;
+          change (@Identity obj mor C) with (fun o => Identity C' o) in *; simpl in *;
+            change (@Compose obj mor C) with (fun s d d' m1 m2 => Morphism C' m2 m1) in *; simpl in *
+    ).
+
+Ltac unfold_OppositeSpecializedCategory :=
+  repeat match goal with
+           | [ _ : appcontext[@Object ?obj ?mor ?C] |- _ ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ _ : appcontext[@Morphism ?obj ?mor ?C] |- _ ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ _ : appcontext[@Identity ?obj ?mor ?C] |- _ ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ _ : appcontext[@Compose ?obj ?mor ?C] |- _ ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ |- appcontext[@Object ?obj ?mor ?C] ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ |- appcontext[@Morphism ?obj ?mor ?C] ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ |- appcontext[@Identity ?obj ?mor ?C] ] => unfold_OppositeSpecializedCategory_of obj mor C
+           | [ |- appcontext[@Compose ?obj ?mor ?C] ] => unfold_OppositeSpecializedCategory_of obj mor C
+         end.
+
+Hint Extern 1 => unfold_OppositeSpecializedCategory.
+
 Section DualCategories.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
@@ -32,8 +60,6 @@ Section DualCategories.
   Lemma op_op_id : OppositeSpecializedCategory (OppositeSpecializedCategory C) = C.
     spcat_eq.
   Qed.
-
-  Hint Unfold OppositeSpecializedCategory ProductSpecializedCategory.
 
   Lemma op_distribute_prod : OppositeSpecializedCategory (C * D) = (OppositeSpecializedCategory C) * (OppositeSpecializedCategory D).
     spcat_eq.

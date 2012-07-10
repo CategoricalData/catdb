@@ -7,6 +7,8 @@ Set Implicit Arguments.
 Local Infix "*" := ProductSpecializedCategory.
 Local Notation "C ^ D" := (SpecializedFunctorCategory D C).
 
+Local Transparent Object.
+
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
   repeat (apply functional_extensionality_dep; intro);
     match goal with

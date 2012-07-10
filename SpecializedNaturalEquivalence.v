@@ -56,7 +56,6 @@ Section SpecializedNaturalTransformationInverse.
   Hint Rewrite LeftIdentity RightIdentity.
 
   Definition SpecializedNaturalEquivalenceInverse : SpecializedNaturalEquivalence T -> SpecializedNaturalTransformation G F.
-    Transparent Morphism.
     refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
       abstract (
         intros; destruct (X s); destruct (X d);

@@ -48,11 +48,21 @@ Section Categories_NaturalTransformation.
   End SpecializedNaturalTransformationInterface.
 End Categories_NaturalTransformation.
 
-Arguments ComponentsOf {objC morC objD morD C D F G} T c.
+Arguments ComponentsOf {objC morC objD morD C D F G} !T c.
 Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
 
 Ltac present_spnt := present_spcategory; present_spfunctor;
-  present_obj_mor_obj_mor @ComponentsOf' @ComponentsOf.
+  present_obj_mor_obj_mor @ComponentsOf' @ComponentsOf;
+  repeat match goal with
+           | [ H : appcontext[@ObjectOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ H : appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ |- appcontext[@ObjectOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ |- appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ H : appcontext[@MorphismOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ H : appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ |- appcontext[@MorphismOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ |- appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+         end.
 
 Section NaturalTransformations_Equal.
   Lemma SpecializedNaturalTransformations_Equal objC morC objD morD C D F G :

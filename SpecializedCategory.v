@@ -32,8 +32,13 @@ Section SpecializedCategoryInterface.
   Definition RightIdentity : forall (a b : C) (f : Morphism a b),
     Compose f (Identity a) = f
     := C.(RightIdentity').
+
+  Lemma unfold_Object : @Object obj mor C = obj. reflexivity. Qed.
+  Lemma unfold_Morphism : Morphism = (mor : Object C -> Object C -> Type). reflexivity. Qed.
+  Lemma unfold_Identity : Identity = (C.(Identity') : forall o : C, Morphism o o). reflexivity. Qed.
+  Lemma unfold_Compose : Compose = (C.(Compose') : forall (s d d' : C), Morphism d d' -> Morphism s d -> Morphism s d'). reflexivity. Qed.
 End SpecializedCategoryInterface.
-Global Opaque Morphism Identity Compose.
+Global Opaque Object Morphism Identity Compose.
 Global Opaque Associativity LeftIdentity RightIdentity.
 
 Ltac present_mor_all mor_fun cat :=
@@ -61,7 +66,7 @@ Ltac present_obj_mor from to :=
 
 Ltac present_spcategory := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose;
   repeat match goal with
-           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor mor C
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor_all mor C
          end.
 
 Arguments Compose {obj mor} [C s d d'] m m0.
@@ -79,8 +84,7 @@ Section Categories_Equal.
     @Identity' _ _ C = @Identity' _ _ D
     -> @Compose' _ _ C = @Compose' _ _ D
     -> C = D.
-    Transparent Object Morphism.
-    destruct C, D; unfold Object, Morphism in *; simpl in *; intros; firstorder; repeat subst;
+    destruct C, D; repeat rewrite unfold_Object, unfold_Morphism in *; simpl in *; intros; firstorder; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.
@@ -128,7 +132,7 @@ Ltac find_composition_to_identity :=
         assert (H' : b = d /\ a = c) by (split; reflexivity); clear H';
           assert (H' : @Compose A B C D E F c d = @Identity _ _ _ _) by (
             exact H ||
-              (unfold Object in H |- *; simpl in H |- *; exact H || (rewrite H; reflexivity))
+              (rewrite unfold_Object in H |- *; simpl in H |- *; exact H || (rewrite H; reflexivity))
           );
           rewrite H'; clear H'
   end.
