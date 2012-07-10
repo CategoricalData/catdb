@@ -2,6 +2,7 @@ MODULES    := Common \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \
+	EquivalenceSet \
 	SpecializedCategory \
 	SpecializedFunctor \
 	SpecializedNaturalTransformation \
