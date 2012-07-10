@@ -3,6 +3,7 @@ MODULES    := Common \
 	StructureEquality \
 	DefinitionSimplification \
 	EquivalenceSet \
+	EquivalenceRelationGenerator \
 	SpecializedCategory \
 	SpecializedFunctor \
 	SpecializedNaturalTransformation \
