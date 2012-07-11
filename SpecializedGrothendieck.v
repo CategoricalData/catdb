@@ -24,6 +24,7 @@ Section Grothendieck.
   Variable C : SpecializedCategory morC.
 
   Variable F : SpecializedFunctor C TypeCat.
+  Variable F' : SpecializedFunctor C SetCat.
 
   Record GrothendieckPair := {
     GrothendieckC' : objC;
@@ -36,6 +37,18 @@ Section Grothendieck.
     Definition GrothendieckC : C := G.(GrothendieckC').
     Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
   End GrothendieckInterface.
+
+  Record SetGrothendieckPair := {
+    SetGrothendieckC' : objC;
+    SetGrothendieckX' : F' SetGrothendieckC'
+  }.
+
+  Section SetGrothendieckInterface.
+    Variable G : SetGrothendieckPair.
+
+    Definition SetGrothendieckC : C := G.(SetGrothendieckC').
+    Definition SetGrothendieckX : F' SetGrothendieckC := G.(SetGrothendieckX').
+  End SetGrothendieckInterface.
 
   Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
@@ -86,3 +99,18 @@ Section Grothendieck.
     |}; abstract (eauto; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
 End Grothendieck.
+
+Section SetGrothendieckCoercion.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+
+  Variable F : SpecializedFunctor C SetCat.
+  Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
+
+  Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'.
+    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.
+  Defined.
+End SetGrothendieckCoercion.
+
+Coercion SetGrothendieck2Grothendieck : SetGrothendieckPair >-> GrothendieckPair.
