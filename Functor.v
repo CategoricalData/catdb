@@ -31,36 +31,37 @@ Section SpecializedFunctor.
       MorphismOf' (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' m2) (MorphismOf' m1);
     FIdentityOf' : forall o, MorphismOf' (C.(Identity') o) = D.(Identity') (ObjectOf' o)
   }.
-
-  Section FunctorInterface.
-    Variable F : SpecializedFunctor.
-
-    Definition ObjectOf : forall c, D := F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
-    Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d) := F.(MorphismOf').
-    Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
-      MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
-      := F.(FCompositionOf').
-    Definition FIdentityOf : forall (o : C), MorphismOf (Identity o) = Identity (ObjectOf o)
-      := F.(FIdentityOf').
-  End FunctorInterface.
 End SpecializedFunctor.
-
-Global Coercion ObjectOf : SpecializedFunctor >-> Funclass.
 
 Section Functor.
   Variable C D : Category.
 
   Definition Functor := SpecializedFunctor C D.
+
+  Section FunctorInterface.
+    Variable F : Functor.
+
+    Definition ObjectOf : forall c, D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
+    Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
+      := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
+    Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
+      MorphismOf _ _ (Compose m2 m1) = Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1)
+      := F.(FCompositionOf').
+    Definition FIdentityOf : forall (o : C), MorphismOf _ _ (Identity o) = Identity (ObjectOf o)
+      := F.(FIdentityOf').
+  End FunctorInterface.
 End Functor.
 
 Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor.
-Definition GeneralizeFunctor objC morC C objD morD D (F : @SpecializedFunctor objC morC C objD morD D) : Functor C D := F.
+Definition GeneralizeFunctor objC morC C objD morD D (F : @SpecializedFunctor objC morC C objD morD D) : Functor C D := F : Functor C D.
+Arguments GeneralizeFunctor [objC morC C objD morD D] F /.
 Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
+Coercion ObjectOf : Functor >-> Funclass.
 
 Ltac present_obj_mor_obj_mor from to :=
   repeat match goal with
-           | [ _ : appcontext[from ?obj ?mor ?obj' ?mor'] |- _ ] => change (from obj mor obj' mor') with (to obj mor obj' mor') in *
-           | [ |- appcontext[from ?obj ?mor ?obj' ?mor'] ] => change (from obj mor obj' mor') with (to obj mor obj' mor') in *
+           | [ _ : appcontext[from ?obj ?mor ?C ?obj' ?mor' ?C'] |- _ ] => change (from obj mor C obj' mor' C') with (to C C') in *
+           | [ |- appcontext[from ?obj ?mor ?C ?obj' ?mor' ?C'] ] => change (from obj mor C obj' mor' C') with (to C C') in *
          end.
 
 Ltac present_spfunctor' := present_spcategory';
@@ -70,8 +71,8 @@ Ltac present_spfunctor := present_spcategory;
 
 Arguments SpecializedFunctor {objC morC} C {objD morD} D.
 Arguments Functor C D.
-Arguments ObjectOf {objC morC C objD morD D} !F c.
-Arguments MorphismOf {objC morC} [C] {objD morD} [D] !F [s d] m.
+Arguments ObjectOf [C D] F c : simpl nomatch.
+Arguments MorphismOf [C D] F [s d] m : simpl nomatch.
 
 Section Functors_Equal.
   Lemma Functors_Equal objC morC C objD morD D : forall (F G : @SpecializedFunctor objC morC C objD morD D),
@@ -113,27 +114,22 @@ Ltac functor_eq_step := functor_eq_step_with idtac.
 Ltac functor_eq := functor_eq_with idtac.
 
 Section FunctorComposition.
-  Variable objB : Type.
-  Variable morB : objB -> objB -> Type.
-  Variable B : SpecializedCategory morB.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
-  Variable objE : Type.
-  Variable morE : objE -> objE -> Type.
-  Variable E : SpecializedCategory morE.
+  Variables B C D E : Category.
 
   Hint Rewrite FCompositionOf FIdentityOf.
 
-  Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
+  Definition ComposeFunctors (G : Functor D E) (F : Functor C D) : Functor C E.
     refine {| ObjectOf' := (fun c => G (F c));
       MorphismOf' := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
       |};
-    abstract (
-      present_spcategory; intros; simpl; repeat rewrite FCompositionOf; repeat rewrite FIdentityOf; reflexivity
+(*    abstract ( *)
+      intros; present_spcategory; simpl in *.
+
+    repeat match goal with
+             | [ _ : appcontext[@Compose' ?obj ?mor ?C] |- _ ] => progress change (@Compose' obj mor C) with (@Compose C) in *
+             | [ |- appcontext[@Compose' ?obj ?mor ?C] ] => progress change (@Compose' obj mor C) with (@Compose C) in *
+           end.
+ repeat rewrite FCompositionOf; repeat rewrite FIdentityOf; destruct C, D, F, G, E; simpl in *. reflexivity
     ).
     (* abstract t. *)
   Defined.

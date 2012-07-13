@@ -10,40 +10,39 @@ Section Categories_Equal.
   Lemma Categories_Equal : forall (A B : Category),
     Object A = Object B
     -> Morphism A == Morphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
-    Transparent Object Morphism Identity Compose.
-    unfold Identity, Compose, Morphism, Object.
     intros.
-    destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    destruct_type @Category; destruct_type @SpecializedCategory;
+      unfold Identity, Compose in *; simpl in *;
+        repeat subst; repeat f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma SmallCategories_Equal : forall (A B : SmallCategory),
     SObject A = SObject B
     -> SMorphism A == SMorphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
     Transparent SObject SMorphism Object Morphism Identity Compose.
     unfold Identity, Compose, Morphism, Object, SObject, SMorphism.
     intros.
-    destruct_type @SmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    destruct_type @SmallCategory; hnf in *; destruct_type @SpecializedCategory;
+      unfold Identity, Compose in *; simpl in *;
+        repeat subst; repeat f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma LocallySmallCategories_Equal : forall (A B : LocallySmallCategory),
     LSObject A = LSObject B
     -> LSMorphism A == LSMorphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
-    Transparent LSObject LSMorphism Object Morphism Identity Compose.
-    unfold Identity, Compose, Morphism, Object, LSObject, LSMorphism.
     intros.
-    destruct_type @LocallySmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    destruct_type @LocallySmallCategory; hnf in *; destruct_type @SpecializedCategory;
+      unfold Identity, Compose in *; simpl in *;
+        repeat subst; repeat f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.
 
