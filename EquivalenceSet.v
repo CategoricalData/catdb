@@ -60,14 +60,12 @@ Section equiv.
   Variable value : Set.
   Variable equiv : value -> value -> Prop.
 
-  Hypothesis equiv_refl : forall v, equiv v v.
-  Hypothesis equiv_sym : forall v v', equiv v v' -> equiv v' v.
-  Hypothesis equiv_trans : forall v v' v'', equiv v v' -> equiv v' v'' -> equiv v v''.
+  Hypothesis equiv_Equivalence : Equivalence equiv.
 
   Local Add Parametric Relation : _ equiv
-    reflexivity proved by equiv_refl
-    symmetry proved by equiv_sym
-    transitivity proved by equiv_trans
+    reflexivity proved by (Equivalence.equiv_reflexive _)
+    symmetry proved by (Equivalence.equiv_symmetric _)
+    transitivity proved by (Equivalence.equiv_transitive _)
       as equiv_equiv_rel.
 
   Hypotheses equiv_dec : forall v v', {equiv v v'} + {~equiv v v'}.
@@ -82,8 +80,11 @@ Section equiv.
 
   Local Ltac simpl_equiv := hnf; intros; trivial;
     repeat match goal with
+             | _ => solve [ reflexivity ]
              | _ => solve [ symmetry; trivial ]
              | _ => solve [ etransitivity; eauto ]
+             | _ => solve [ symmetry; etransitivity; eauto ]
+             | _ => solve [ etransitivity; eauto; symmetry; eauto ]
              | [ H : false = true |- _ ] => discriminate H
              | [ H : equiv _ _ -> False |- _ ] => contradict H; trivial
              | [ H : ~ equiv _ _ |- _ ] => contradict H; trivial
@@ -116,19 +117,19 @@ Section equiv.
   Definition notDisjointSets' (C C' : EquivalenceSet equiv) := exists v v', InSet C v /\ InSet C' v' /\ equiv v v'.
 
   Lemma sameSet_refl : Reflexive sameSet.
-    firstorder.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
   Lemma sameSet_sym : Symmetric sameSet.
-    firstorder.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
   Lemma sameSet_trans : Transitive sameSet.
-    firstorder.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
   Lemma sameSet_eq (C C' : EquivalenceSet equiv) : (sameSet C C') -> (C = C').
-    intro H.
+    clear equiv_Equivalence; intro H.
     cut (InSet' C = InSet' C');
       destruct C, C'; simpl;
         intros;
@@ -157,13 +158,13 @@ Section equiv.
   Qed.
 
   Lemma disjointSets_differentSets (C C' : EquivalenceSet equiv) : (disjointSets C C') -> (differentSets C C').
-    unfold differentSets, disjointSets; intro H.
+    clear equiv_Equivalence; unfold differentSets, disjointSets; intro H.
     pose (SetInhabited C) as H'; destruct H' as [ x H' ].
     exists x; specialize (H x); tauto.
   Qed.
 
   Lemma notDisjointSets_sameSet (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> (sameSet C C').
-    unfold notDisjointSets, sameSet; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
+    clear equiv_Equivalence; unfold notDisjointSets, sameSet; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
       match goal with
         | [ H0 : InSet ?C ?x, H1 : InSet ?C ?y |- InSet ?C' ?x ]
           => let H := fresh in
@@ -173,20 +174,20 @@ Section equiv.
   Qed.
 
   Lemma notDisjointSets_eq (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> C = C'.
-    intro; apply sameSet_eq; apply notDisjointSets_sameSet; assumption.
+    clear equiv_Equivalence; intro; apply sameSet_eq; apply notDisjointSets_sameSet; assumption.
   Qed.
 
-  Lemma forall_equiv__eq (C C' : EquivalenceSet equiv) :
+  Lemma EquivalenceSet_forall_equiv__eq (C C' : EquivalenceSet equiv) :
     (forall v v', (InSet C v \/ InSet C' v') -> (InSet C v /\ InSet C' v' <-> equiv v v')) ->
     C' = C.
-    intro H. apply sameSet_eq; unfold sameSet; intro v.
+    clear equiv_Equivalence; intro H. apply sameSet_eq; unfold sameSet; intro v.
     assert (equiv v v) by reflexivity; firstorder.
   Qed.
 
-  Lemma forall__eq (C C' : EquivalenceSet equiv) :
+  Lemma EquivalenceSet_forall__eq (C C' : EquivalenceSet equiv) :
     (forall v, InSet C v <-> InSet C' v) ->
     C' = C.
-    intro H. apply sameSet_eq; unfold sameSet;
+    clear equiv_Equivalence; intro H. apply sameSet_eq; unfold sameSet;
     firstorder.
   Qed.
 End equiv.
@@ -199,8 +200,8 @@ Add Parametric Relation value equiv : _ (@sameSet value equiv)
 
 Ltac create_setOf_InSet :=
   repeat match goal with
-           | [ H : InSet (@setOf ?v ?e ?r ?s ?t ?val) _ |- _ ] => unique_pose (@setOf_refl v e r s t val)
-           | [ |- InSet (@setOf ?v ?e ?r ?s ?t ?val) _ ] => unique_pose (@setOf_refl v e r s t val)
+           | [ H : InSet (@setOf ?v ?e ?eq ?eqdec ?val) _ |- _ ] => unique_pose (@setOf_refl v e eq eqdec val)
+           | [ |- InSet (@setOf ?v ?e ?eq ?eqdec ?val) _ ] => unique_pose (@setOf_refl v e eq eqdec val)
          end.
 
 Ltac replace_InSet := create_setOf_InSet;
@@ -218,7 +219,7 @@ Ltac replace_InSet := create_setOf_InSet;
              end
          end.
 
-Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply forall__eq; replace_InSet.
+Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.
 
 Ltac clear_InSet' :=
   repeat match goal with

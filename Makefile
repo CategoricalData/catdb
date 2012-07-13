@@ -5,56 +5,34 @@ MODULES    := Common \
 	EquivalenceSet \
 	EquivalenceRelationGenerator \
 	SpecializedCategory \
-	SpecializedFunctor \
-	SpecializedNaturalTransformation \
-	SpecializedNaturalEquivalence \
-	SpecializedFunctorCategory \
-	SpecializedComputableCategory \
-	SpecializedDiscreteCategory \
-	SpecializedProductCategory \
-	SpecializedProductFunctor \
-	SpecializedCommaCategory \
-	SpecializedUniversalProperties \
-	SpecializedDuals \
-	SpecializedSetCategory \
-	SpecializedHom \
-	SpecializedFunctorAttributes \
-	SpecializedGroupoid \
-	SpecializedAdjointUnit \
-	SpecializedAdjoint \
-	SpecializedLimits \
-	SpecializedLimitFunctors \
-	SpecializedLimitFunctorTheorems \
-	SpecializedGrothendieck \
-	SpecializedYoneda \
 	Category \
 	CategoryEquality \
-	SmallCategory \
 	Functor \
-	SmallFunctor \
-	ComputableCategory \
 	NaturalTransformation \
-	SmallNaturalTransformation \
 	NaturalEquivalence \
 	FunctorCategory \
+	ComputableCategory \
 	DiscreteCategory \
-	SmallCat \
 	ProductCategory \
+	ProductFunctor \
+	SmallCat \
 	CommaCategory \
 	UniversalProperties \
-	Limits \
-	LimitFunctors \
-	LimitFunctorTheorems \
 	Duals \
-	SmallDuals \
-	ProductFunctor \
 	SetCategory \
 	Hom \
 	FunctorAttributes \
+	Groupoid \
 	AdjointUnit \
 	Adjoint \
+	Limits \
+	SpecializedLimitFunctors \
+	SpecializedLimitFunctorTheorems \
 	Grothendieck \
 	Yoneda \
+	\
+	LimitFunctors \
+	LimitFunctorTheorems \
 	EquivalenceClass \
 	EquivalenceRelation \
 	Schema \

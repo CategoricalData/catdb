@@ -1,133 +1,152 @@
 Require Import FunctionalExtensionality.
-Require Export Category Functor FunctorCategory Hom FunctorAttributes.
-Require Import Common SmallDuals ProductCategory SetCategory.
+Require Export SpecializedCategory Functor FunctorCategory Hom FunctorAttributes.
+Require Import Common ProductCategory SetCategory.
 
 Set Implicit Arguments.
 
 Local Infix "*" := ProductCategory.
 Local Notation "C ^ D" := (FunctorCategory D C).
 
-Local Ltac apply_scommutes_by_transitivity_and_solve_with tac :=
+Local Transparent Object.
+
+Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
   repeat (apply functional_extensionality_dep; intro);
     match goal with
       | [ a : _, f : _ |- _ ] => let H := fresh in
-        assert (H := fg_equal (SCommutes a _ _ f)); simpl in H;
+        assert (H := fg_equal (Commutes a _ _ f)); simpl in H;
           let fin_tac := (solve [ etransitivity; try apply H; clear H; tac ]) in
             fin_tac || symmetry in H; fin_tac
     end.
 
 Section Yoneda.
-  Variable C : SmallCategory.
-  Let COp := OppositeSmallCategory C.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Let COp := OppositeCategory C.
 
   Section Yoneda.
-    Definition Yoneda : Functor COp (TypeCat ^ C).
-      refine {| ObjectOf := (fun c : COp.(Object) => CovariantHomFunctor C c : TypeCat ^ C);
-        MorphismOf := (fun s d (f : SMorphism COp s d) =>
-          Build_SmallNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d)
-          (fun c : C => (fun m => SCompose m f))
+    Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
+      Transparent Morphism Compose Identity.
+      refine {| ObjectOf' := (fun c : COp => CovariantHomFunctor C c : TypeCat ^ C);
+        MorphismOf' := (fun s d (f : COp.(Morphism) s d) =>
+          Build_SpecializedNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d)
+          (fun c : C => (fun m : C.(Morphism) _ _ => Compose m f))
           _
         )
-      |}; simpl; snt_eq; abstract auto.
+      |}; simpl; nt_eq; abstract t.
       Grab Existential Variables.
-      abstract (intros; simpl; apply functional_extensionality_dep; intros; auto).
+      abstract (intros; simpl; apply functional_extensionality_dep; t).
     Defined.
   End Yoneda.
 
   Section CoYoneda.
-    Definition CoYoneda : Functor C (TypeCat ^ COp).
-      refine {| ObjectOf := (fun c : C.(Object) => SmallContravariantHomFunctor C c : TypeCat ^ COp);
-        MorphismOf := (fun s d (f : SMorphism C s d) =>
-          Build_SmallNaturalTransformation (SmallContravariantHomFunctor C s) (SmallContravariantHomFunctor C d)
-          (fun c : C => (fun m => SCompose m f))
+    Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
+      Transparent Morphism Compose Identity.
+      refine {| ObjectOf' := (fun c : C => ContravariantHomFunctor C c : TypeCat ^ COp);
+        MorphismOf' := (fun s d (f : C.(Morphism) s d) =>
+          Build_SpecializedNaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d)
+          (fun c : C => (fun m : COp.(Morphism) _ _ => Compose m f))
           _
         )
-      |}; simpl; snt_eq; abstract auto.
+      |}; simpl; nt_eq; abstract t.
       Grab Existential Variables.
-      abstract (intros; simpl; apply functional_extensionality_dep; intros; auto).
+      abstract (intros; simpl; apply functional_extensionality_dep; t).
     Defined.
   End CoYoneda.
 End Yoneda.
 
 Section YonedaLemma.
-  Variable C : SmallCategory.
-  Let COp := OppositeSmallCategory C.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Let COp := OppositeCategory C : SpecializedCategory _.
 
-  Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism _ (Yoneda _ c) X) (X c).
+  (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
+  Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
+    Transparent Morphism.
     simpl; intro a.
-    exact (a c (SIdentity _)).
+    exact (a c (Identity _)).
   Defined.
 
-  Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism _ (Yoneda _ c) X).
+  Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
     simpl; intro Xc.
-    refine {| SComponentsOf := (fun c' : C => (fun f : SMorphism _ c c' => X.(MorphismOf) f Xc) : Morphism TypeCat (CovariantHomFunctor C c c') (X c')) |}.
+    refine {| ComponentsOf' := (fun c' : C => (fun f : Morphism _ c c' => X.(MorphismOf) f Xc) : TypeCat.(Morphism) (CovariantHomFunctor C c c') (X c')) |}.
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
-          unfold smallcat2cat in *; simpl in *;
+          simpl in *;
             t_with t'
     ).
   Defined.
 
   Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : CategoryIsomorphism (@YonedaLemmaMorphism c X).
+    Transparent Compose Morphism Identity.
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
     pose (FIdentityOf X).
     pose (FCompositionOf X).
-    split; simpl; snt_eq;
-      unfold smallcat2cat in *; simpl in *; t_with t'.
-    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
+    split; simpl; nt_eq;
+      simpl in *; t_with t'.
+    apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End YonedaLemma.
 
 Section CoYonedaLemma.
-  Variable C : SmallCategory.
-  Let COp := OppositeSmallCategory C.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Let COp := OppositeCategory C.
 
-  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda _ c) X) (X c).
+  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
+    Transparent Morphism.
     simpl; intro a.
-    exact (a c (SIdentity _)).
+    exact (a c (Identity _)).
   Defined.
 
-  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda _ c) X).
+  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
     simpl; intro Xc.
-    refine {| SComponentsOf := (fun c' : COp => (fun f : SMorphism COp c c' => X.(MorphismOf) f Xc) : Morphism TypeCat (SmallContravariantHomFunctor C c c') (X c')) |}.
+    refine {| ComponentsOf' := (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc) : TypeCat.(Morphism) (ContravariantHomFunctor C c c') (X c')) |}.
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
-          unfold smallcat2cat in *; simpl in *;
+          simpl in *;
             t_with t'
     ).
   Defined.
 
   Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : CategoryIsomorphism (@CoYonedaLemmaMorphism c X).
+    Transparent Compose Morphism Identity.
     exists (@CoYonedaLemmaMorphismInverse c X).
-    split; simpl; snt_eq;
+    split; simpl; nt_eq;
       pose (FIdentityOf X);
         pose (FCompositionOf X);
-          unfold smallcat2cat in *; simpl in *; t_with t'.
-    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
+          simpl in *; t_with t'.
+    apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End CoYonedaLemma.
 
 Section FullyFaithful.
-  Variable C : SmallCategory.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
+    Transparent Morphism Compose.
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@YonedaLemma C c (CovariantHomFunctor C c')) as [ m i ].
+    destruct (@YonedaLemma _ _ C c (CovariantHomFunctor C c')) as [ m i ].
     exists (YonedaLemmaMorphism (X := CovariantHomFunctor C c')).
-    t_with t'; snt_eq; t_with t'.
-    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
+    t_with t'; nt_eq; t_with t'.
+    apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 
   Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
+    Transparent Morphism Compose Identity.
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@CoYonedaLemma C c (SmallContravariantHomFunctor C c')) as [ m i ].
-    exists (CoYonedaLemmaMorphism (X := SmallContravariantHomFunctor C c')).
-    t_with t'; snt_eq; t_with t'.
-    apply_scommutes_by_transitivity_and_solve_with ltac:(t_with t').
+    destruct (@CoYonedaLemma _ _ C c (ContravariantHomFunctor C c')) as [ m i ].
+    exists (CoYonedaLemmaMorphism (X := ContravariantHomFunctor C c')).
+    t_with t'; nt_eq; t_with t'.
+    apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
   Qed.
 End FullyFaithful.

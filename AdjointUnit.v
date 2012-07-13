@@ -52,12 +52,12 @@ Section Adjunction.
     **)
   Definition AdjunctionUnit (F : Functor C D) (G : Functor D C) :=
     { T : NaturalTransformation (IdentityFunctor C) (ComposeFunctors G F) &
-      forall (c : C) (d : D) (f : Morphism _ c (G d)),
-        { g : Morphism _ (F c) d | unique (fun g => f = Compose (G.(MorphismOf) g) (T c)) g }
+      forall (c : C) (d : D) (f : C.(Morphism) c (G d)),
+        { g : D.(Morphism) (F c) d | unique (fun g => f = Compose (G.(MorphismOf) g) (T c)) g }
     }.
 
   (**
-     Paraphrasing and quoting from Awody's "Category Theory",
+     Paraphrasing and quoting from Awody's "SpecializedCategory Theory",
      An adjunction between categories [C] and [D]
      consists of functors
      [F : C <-> D : G]
@@ -91,7 +91,7 @@ Section Adjunction.
     **)
   Definition AdjunctionCounit (F : Functor C D) (G : Functor D C) :=
     { U : NaturalTransformation (ComposeFunctors F G) (IdentityFunctor D) &
-      forall (c : C) (d : D) (g : Morphism _ (F c) d),
-        { f : Morphism _ c (G d) | unique (fun f => g = Compose (U d) (F.(MorphismOf) f)) f }
+      forall (c : C) (d : D) (g : D.(Morphism) (F c) d),
+        { f : C.(Morphism) c (G d) | unique (fun f => g = Compose (U d) (F.(MorphismOf) f)) f }
     }.
 End Adjunction.

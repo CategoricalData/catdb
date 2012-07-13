@@ -1,7 +1,13 @@
-Require Import Setoid Eqdep.
-Import Eq_rect_eq.
-Require Export NaturalTransformation.
+Require Import Setoid.
+Require Export Category NaturalTransformation.
 Require Import Common.
+
+Set Implicit Arguments.
+
+Local Ltac intro_object_of :=
+  repeat match goal with
+           | [ |- appcontext[ObjectOf ?G ?x] ] => unique_pose_with_body (ObjectOf G x)
+         end.
 
 Section NaturalEquivalence.
   Variable C D : Category.
@@ -14,8 +20,12 @@ Section NaturalEquivalence.
     exists T : NaturalTransformation F G, exists TE : NaturalEquivalence T, True.
 End NaturalEquivalence.
 
-Implicit Arguments NaturalEquivalence [C D F G].
-Implicit Arguments FunctorsNaturallyEquivalent [C D].
+(* grumble, grumble, grumble, [Functors] take [SpecializedCategories] and so we don't get type inference.
+   Perhaps I should fix this?  But I don't like having to prefix so many things with [Specialized] and
+   having duplicated code just so I get type inference.
+   *)
+Arguments NaturalEquivalence [C D F G] T.
+Arguments FunctorsNaturallyEquivalent [C D] F G.
 
 Section NaturalEquivalenceOfCategories.
   Variable C D : Category.
@@ -28,24 +38,27 @@ Section NaturalEquivalenceOfCategories.
     exists F : Functor C D, exists G : Functor D C, NaturalEquivalenceOfCategories F G.
 End NaturalEquivalenceOfCategories.
 
+Arguments NaturalEquivalenceOfCategories [C D] F G.
+
 Section NaturalTransformationInverse.
   Variable C D : Category.
   Variable F G : Functor C D.
   Variable T : NaturalTransformation F G.
 
-  Hint Unfold InverseOf Morphism.
+  Hint Unfold InverseOf.
   Hint Resolve f_equal f_equal2 Commutes.
   Hint Rewrite LeftIdentity RightIdentity.
 
   Definition NaturalEquivalenceInverse : NaturalEquivalence T -> NaturalTransformation G F.
-    refine (fun X => {| ComponentsOf := (fun c => proj1_sig (X c)) |});
-      abstract (intros; destruct (X s); destruct (X d); simpl; firstorder;
-        eapply iso_is_epi; [ eauto | ]; eapply iso_is_mono; [ eauto | ];
-          repeat match goal with
-                   | [ H : _ |- _ ]
-                     => try_associativity ltac:(try rewrite H; (rewrite LeftIdentity || rewrite RightIdentity); eauto)
-                 end
-    (*morphisms 2*)).
+    refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
+      abstract (
+        intros; destruct (X s); destruct (X d);
+          simpl; unfold InverseOf in *; destruct_hypotheses;
+            present_spnt; present_spcategory_all;
+            pre_compose_to_identity; post_compose_to_identity;
+            auto
+      ).
+    (*morphisms 2*)
   Defined.
 
   Hint Immediate InverseOf_sym.
@@ -56,24 +69,18 @@ Section NaturalTransformationInverse.
   Qed.
 End NaturalTransformationInverse.
 
-Implicit Arguments NaturalEquivalenceInverse [C D F G T].
-
 Section IdentityNaturalTransformation.
   Variable C D : Category.
   Variable F : Functor C D.
 
-  Hint Resolve LeftIdentity RightIdentity.
-
-  Lemma InverseOf_Identity : forall C (x : C.(Object)), InverseOf (Identity x) (Identity x).
-    firstorder.
-  Qed.
-
-  Hint Resolve InverseOf_Identity.
+  Hint Resolve CategoryIdentityInverse.
 
   Theorem IdentityNaturalEquivalence : NaturalEquivalence (IdentityNaturalTransformation F).
-    hnf; intros; hnf; simpl; eauto.
+    hnf; intros; hnf; simpl; unfold InverseOf in *; eexists; t_with eauto.
   Qed.
 End IdentityNaturalTransformation.
+
+Arguments IdentityNaturalEquivalence [C D] F x.
 
 Section FunctorNaturalEquivalenceRelation.
   Variable C D : Category.
@@ -102,14 +109,14 @@ Section FunctorNaturalEquivalenceRelation.
 End FunctorNaturalEquivalenceRelation.
 
 Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
-  reflexivity proved by (functors_naturally_equivalent_refl _ _)
-  symmetry proved by (functors_naturally_equivalent_sym _ _)
-  transitivity proved by (functors_naturally_equivalent_trans _ _)
+  reflexivity proved by (@functors_naturally_equivalent_refl _ _)
+  symmetry proved by (@functors_naturally_equivalent_sym _ _)
+  transitivity proved by (@functors_naturally_equivalent_trans _ _)
     as functors_naturally_equivalent.
 
 (* XXX TODO: Automate this better *)
-Add Parametric Morphism C D E :
-  (@ComposeFunctors C D E)
+Add Parametric Morphism (C D E : Category) :
+  (@ComposeFunctors _ _ C _ _ D _ _ E)
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
   intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalence, CategoryIsomorphism, InverseOf in *;
     destruct_hypotheses.
@@ -117,20 +124,18 @@ Add Parametric Morphism C D E :
     | [ T1 : _ , T2 : _ |- _ ] => exists (NTComposeF T1 T2); try (constructor; trivial)
   end.
   intros; simpl.
-  match goal with
-    | [ x : ?C, H : (forall _ : ?C, _) |- _ ] => specialize (H x)
-  end.
-  match goal with
-    | [ H : (forall _ : ?D, { _ : Morphism _ (?F' _) (?F _) | _ }) |- { _ : Morphism _ (?F' ?x') (?F ?x) | _ } ]
-      => generalize (H x); generalize (H x'); intros ? ?; clear H
-  end.
-  destruct_type sig; destruct_type and.
-  Hint Resolve f_equal f_equal2.
+  intro_object_of.
+  specialize_all_ways.
+  destruct_sig; destruct_hypotheses.
+  repeat match goal with
+           | [ H := _ |- _ ] => subst H
+         end.
   Hint Rewrite <- FCompositionOf.
   Hint Rewrite FIdentityOf.
-  match goal with
-    | [ F' : _, mG'x2Gx : _, mF'Gx2FGx : _ |- _ ] => exists (Compose mF'Gx2FGx (F'.(MorphismOf) mG'x2Gx))
-  end; split; compose4associativity; t_with t'.
+  eexists (Compose _ (MorphismOf _ _));
+    split; compose4associativity;
+      repeat (try find_composition_to_identity; autorewrite with core);
+        reflexivity.
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
@@ -165,11 +170,12 @@ Section FunctorNaturalEquivalenceLemmas.
     intro H.
     destruct H as [ T [ H t ] ]; clear t.
     eexists (NTComposeF (IdentityNaturalTransformation _) _).
-    constructor; trivial; simpl.
-    repeat ( autounfold with core in * ); simpl.
-    intro x0; specialize (H x0).
-    destruct_type sig. destruct_type and.
-    eexists (MorphismOf G x);
+    constructor; trivial; repeat (hnf; intros);
+      repeat autounfold with core in *;
+        simpl in *.
+    specialize_all_ways;
+    destruct_sig; destruct_hypotheses.
+    eexists (MorphismOf G _);
       repeat (rewrite LeftIdentity || rewrite RightIdentity);
       repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf);
         split; rewrite FIdentityOf; eauto 15.
@@ -180,10 +186,15 @@ Section FunctorNaturalEquivalenceLemmas.
     intro H.
     destruct H as [ T [ H t ] ]; clear t.
     eexists (NTComposeF _ (IdentityNaturalTransformation _)).
-    constructor; trivial; simpl.
-    repeat autounfold with core in *; simpl.
-    intro x0; specialize (H (F x0)).
-    destruct_type sig. destruct_type and.
+    constructor; trivial; repeat (hnf; intros);
+      repeat autounfold with core in *;
+        simpl in *.
+    intro_object_of.
+    specialize_all_ways;
+    destruct_sig; destruct_hypotheses.
+    repeat match goal with
+             | [ H := _ |- _ ] => subst H
+           end.
     eexists; split; t_rev_with t'.
   Qed.
 

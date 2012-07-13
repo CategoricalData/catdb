@@ -431,6 +431,25 @@ Ltac simultaneous_rewrite_rev E :=
       end; simultaneous_rewrite_rev' E
   end.
 
+(* rewrite by convertiblity rather than syntactic equality *)
+Ltac conv_rewrite_with rew_tac H :=
+  match type of H with
+    | ?a = _ => match goal with
+                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                end
+  end.
+Ltac conv_rewrite_rev_with rew_tac H :=
+  match type of H with
+    | _ = ?a => match goal with
+                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                end
+  end.
+
+Ltac conv_rewrite H := conv_rewrite_with ltac:(fun h => rewrite h) H.
+Ltac conv_rewrite_rev H := conv_rewrite_rev_with ltac:(fun h => rewrite <- h) H.
+Ltac conv_repeat_rewrite H := repeat conv_rewrite_with ltac:(fun h => repeat rewrite h) H.
+Ltac conv_repeat_rewrite_rev H := repeat conv_rewrite_rev_with ltac:(fun h => repeat rewrite <- h) H.
+
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.

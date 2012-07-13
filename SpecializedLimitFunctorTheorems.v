@@ -1,9 +1,9 @@
 Require Export SpecializedLimitFunctors.
-Require Import Common SpecializedCategory SpecializedFunctor SpecializedFunctorCategory SpecializedNaturalTransformation DefinitionSimplification.
+Require Import Common DefinitionSimplification SpecializedCategory Functor FunctorCategory NaturalTransformation.
 
 Set Implicit Arguments.
 
-Local Notation "C ^ D" := (SpecializedFunctorCategory D C).
+Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section InducedMaps.
   (** Quoting David:
@@ -57,7 +57,7 @@ Section InducedMaps.
       unfold LimitObject, Limit in *.
       intro_universal_morphisms.
       match goal with
-        | [ t : _, F : _ |- _ ] => unique_pose (SPNTComposeF t (IdentitySpecializedNaturalTransformation F))
+        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
       end.
       repeat match goal with
                | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
@@ -87,7 +87,7 @@ Section InducedMaps.
       unfold ColimitObject, Colimit in *.
       intro_universal_morphisms.
       match goal with
-        | [ t : _, F : _ |- _ ] => unique_pose (SPNTComposeF t (IdentitySpecializedNaturalTransformation F))
+        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
       end.
       repeat match goal with
                | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H

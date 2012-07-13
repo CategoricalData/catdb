@@ -1,6 +1,5 @@
-Require Import Bool Omega.
-Require Export Category SmallCategory.
-Require Import DefinitionSimplification.
+Require Export SpecializedCategory.
+Require Import Common DefinitionSimplification.
 
 Ltac destruct_to_empty_set :=
   match goal with
@@ -15,10 +14,7 @@ Ltac destruct_to_empty_set_in_match :=
     | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
   end.
 
-Hint Extern 1 (@eq unit ?a ?b) => try destruct a; try destruct b; try reflexivity.
-Hint Extern 1 (@eq Empty_set ?a ?b) => destruct a || destruct b.
 Hint Extern 2 (_ = _) => simpl in *; tauto.
-Hint Extern 1 unit => constructor.
 
 Section DCategory.
   Variable O : Type.
@@ -54,11 +50,10 @@ Section DCategory.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategory : Category.
-    refine {| Object := O;
-      Morphism := (fun s d => if s == d then unit else Empty_set);
-      Compose := DiscreteCategory_Compose;
-      Identity := DiscreteCategory_Identity
+  Definition DiscreteCategory : @SpecializedCategory O (fun s d => match s == d return Set with left _ => unit | right _ => Empty_set end).
+    refine {|
+      Compose' := DiscreteCategory_Compose;
+      Identity' := DiscreteCategory_Identity
     |};
     abstract (
       unfold DiscreteCategory_Compose, DiscreteCategory_Identity;
@@ -68,16 +63,6 @@ Section DCategory.
 End DCategory.
 
 Hint Unfold DiscreteCategory_Compose DiscreteCategory_Identity.
-
-Section DSmallCategory.
-  Variable O : Set.
-
-  Variable eq_dec : forall a b : O, {a = b} + {~a = b}.
-
-  Definition DiscreteSmallCategory : SmallCategory.
-    scat_from_cat (DiscreteCategory O eq_dec).
-  Defined.
-End DSmallCategory.
 
 Section InitialTerminal.
   Let decide_empty_equality (a b : Empty_set) : {a = b} + {~a = b} := match a with end.
@@ -89,6 +74,8 @@ Section InitialTerminal.
                                   end
                               end.
 
-  Definition InitialCategory : SmallCategory := Eval unfold DiscreteSmallCategory in DiscreteSmallCategory Empty_set decide_empty_equality.
-  Definition TerminalCategory : SmallCategory := Eval unfold DiscreteSmallCategory in DiscreteSmallCategory unit decide_unit_equality.
+  Definition InitialCategory : SmallSpecializedCategory _ :=
+    Eval unfold DiscreteCategory in DiscreteCategory Empty_set decide_empty_equality.
+  Definition TerminalCategory : SmallSpecializedCategory _ :=
+    Eval unfold DiscreteCategory in DiscreteCategory unit decide_unit_equality.
 End InitialTerminal.

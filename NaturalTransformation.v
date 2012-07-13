@@ -1,12 +1,19 @@
-Require Import FunctionalExtensionality ProofIrrelevance.
-Require Export Functor FEqualDep.
-Require Import Common.
+Require Import JMeq ProofIrrelevance.
+Require Export Functor.
+Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
-Section Categories_NaturalTransformation.
-  Variable C D : Category.
-  Variable F G : Functor C D.
+Local Infix "==" := JMeq (at level 70).
+
+Section SpecializedNaturalTransformation.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variables F G : SpecializedFunctor C D.
 
   (**
      Quoting from the lecture notes for 18.705, Commutative Algebra:
@@ -25,34 +32,89 @@ Section Categories_NaturalTransformation.
       V    G m     V
      G A --------> G B
      **)
-  Record NaturalTransformation := {
-    ComponentsOf :> forall c : C.(Object), Morphism _ (F c) (G c);
-    Commutes : forall s d (m : Morphism C s d),
-      Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
+  Record SpecializedNaturalTransformation := {
+    ComponentsOf' : forall c, morD (F.(ObjectOf') c) (G.(ObjectOf') c);
+    Commutes' : forall s d (m : morC s d),
+      D.(Compose') _ _ _ (ComponentsOf' d) (F.(MorphismOf') _ _ m) = D.(Compose') _ _ _ (G.(MorphismOf') _ _ m) (ComponentsOf' s)
   }.
-End Categories_NaturalTransformation.
+
+  Section NaturalTransformationInterface.
+    Variable T : SpecializedNaturalTransformation.
+
+    Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := T.(ComponentsOf').
+    Definition Commutes : forall (s d : C) (m : C.(Morphism) s d),
+      Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
+      := T.(Commutes').
+  End NaturalTransformationInterface.
+End SpecializedNaturalTransformation.
+
+Arguments ComponentsOf {objC morC C objD morD D F G} !T c.
+Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
+
+Section NaturalTransformation.
+  Variable C D : Category.
+  Variable F G : Functor C D.
+
+  Definition NaturalTransformation := SpecializedNaturalTransformation F G.
+End NaturalTransformation.
+
+Identity Coercion NaturalTransformation_SpecializedNaturalTransformation_Id : NaturalTransformation >-> SpecializedNaturalTransformation.
+Definition GeneralizeNaturalTransformation objC morC C objD morD D F G (T : @SpecializedNaturalTransformation objC morC C objD morD D F G) :
+  NaturalTransformation F G := T.
+Global Coercion GeneralizeNaturalTransformation : SpecializedNaturalTransformation >-> NaturalTransformation.
+
+Ltac present_spnt' := present_spcategory'; present_spfunctor';
+  present_obj_mor_obj_mor @ComponentsOf' @ComponentsOf.
+Ltac present_spnt := present_spcategory; present_spfunctor;
+  present_obj_mor_obj_mor @ComponentsOf' @ComponentsOf(*;
+  repeat match goal with
+           | [ H : appcontext[@ObjectOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ H : appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ |- appcontext[@ObjectOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ |- appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ H : appcontext[@MorphismOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ H : appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
+           | [ |- appcontext[@MorphismOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+           | [ |- appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
+         end*).
 
 Section NaturalTransformations_Equal.
-  Variables C D : Category.
-  Variables F G : Functor C D.
-
-  Lemma NaturalTransformations_Equal : forall (T U : NaturalTransformation F G),
+  Lemma NaturalTransformations_Equal objC morC C objD morD D F G :
+    forall (T U : @SpecializedNaturalTransformation objC morC C objD morD D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
     destruct T, U; simpl; intros; repeat subst;
       f_equal; reflexivity || apply proof_irrelevance.
   Qed.
+
+  Lemma NaturalTransformations_JMeq objC morC C objD morD D objC' morC' C' objD' morD' D' :
+    forall F G F' G'
+      (T : @SpecializedNaturalTransformation objC morC C objD morD D F G) (U : @SpecializedNaturalTransformation objC' morC' C' objD' morD' D' F' G'),
+      objC = objC'
+      -> objD = objD'
+      -> (objC = objC' -> morC == morC')
+      -> (objD = objD' -> morD == morD')
+      -> (objC = objC' -> morC == morC' -> C == C')
+      -> (objD = objD' -> morD == morD' -> D == D')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        F == F')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        G == G')
+      -> (objC = objC' -> morC == morC' -> C == C' ->
+        objD = objD' -> morD == morD' -> D == D' ->
+        F == F' -> G == G' -> ComponentsOf T == ComponentsOf U)
+      -> T == U.
+    simpl; intros; subst objC' objD'; firstorder; subst morC' morD'; firstorder;
+      JMeq_eq.
+    repeat subst; JMeq_eq.
+    apply NaturalTransformations_Equal; intros; repeat subst; trivial.
+  Qed.
 End NaturalTransformations_Equal.
 
-Ltac nt_eq_step_with tac := intros; simpl;
-  match goal with
-    | _ => reflexivity
-    | [ |- @eq (@NaturalTransformation _ _ _ _) _ _ ] => apply NaturalTransformations_Equal
-    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
-    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
-    | [ |- _ = _ ] => apply proof_irrelevance
-    | _ => tac
-  end; repeat simpl.
+Ltac nt_eq_step_with tac :=
+  structures_eq_step_with_tac ltac:(apply NaturalTransformations_Equal || apply NaturalTransformations_JMeq) tac.
 
 Ltac nt_eq_with tac := repeat nt_eq_step_with tac.
 
@@ -60,9 +122,17 @@ Ltac nt_eq_step := nt_eq_step_with idtac.
 Ltac nt_eq := nt_eq_with idtac.
 
 Section NaturalTransformationComposition.
-  Variable C D E : Category.
-  Variable F F' F'' : Functor C D.
-  Variable G G' : Functor D E.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variable objE : Type.
+  Variable morE : objE -> objE -> Type.
+  Variable E : SpecializedCategory morE.
+  Variables F F' F'' : SpecializedFunctor C D.
+  Variables G G' : SpecializedFunctor D E.
 
   Hint Resolve Commutes f_equal f_equal2.
   Hint Rewrite Associativity.
@@ -103,10 +173,10 @@ Section NaturalTransformationComposition.
 
   *)
 
-  Definition NTComposeT (T' : NaturalTransformation F' F'') (T : NaturalTransformation F F') :
-    NaturalTransformation F F''.
-    refine {| ComponentsOf := (fun c => Compose (T' c) (T c)) |};
-      (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
+  Definition NTComposeT (T' : SpecializedNaturalTransformation F' F'') (T : SpecializedNaturalTransformation F F') :
+    SpecializedNaturalTransformation F F''.
+    refine {| ComponentsOf' := (fun c => Compose (T' c) (T c)) |};
+    (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
       abstract (intros; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _))); try_associativity eauto).
   Defined.
 
@@ -136,42 +206,50 @@ Section NaturalTransformationComposition.
   (* XXX TODO: Automate this better *)
 
   Hint Rewrite Commutes.
-  Hint Resolve FCompositionOf.
+  Hint Resolve f_equal2.
+  Hint Extern 1 (_ = _) => apply FCompositionOf.
 
-  Lemma FCompositionOf2 : forall C D (F : Functor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
+  Lemma FCompositionOf2 : forall objC morC objD morD (C : @SpecializedCategory objC morC) (D : @SpecializedCategory objD morD)
+    (F : SpecializedFunctor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
     Compose (MorphismOf F m1) (Compose (MorphismOf F m2) m3) = Compose (MorphismOf F (Compose m1 m2)) m3.
-    intros; try_associativity eauto.
+    intros; symmetry; try_associativity eauto.
   Qed.
 
   Hint Rewrite FCompositionOf2.
 
-  Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F'):
-    NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    refine (Build_NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
-      (fun c => Compose (G'.(MorphismOf) (T.(ComponentsOf) c)) (U.(ComponentsOf) (F c)))
-      _). abstract (simpl; intros; autorewrite with core in *; trivial).
+  Definition NTComposeF (U : SpecializedNaturalTransformation G G') (T : SpecializedNaturalTransformation F F'):
+    SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
+    refine (Build_SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
+      (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)))
+      _);
+    abstract (simpl; intros; autorewrite with core in *; trivial).
   Defined.
 End NaturalTransformationComposition.
 
 Section IdentityNaturalTransformation.
-  Variable C D : Category.
-  Variable F : Functor C D.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variable F : SpecializedFunctor C D.
 
   (* There is an identity natrual transformation. *)
-  Definition IdentityNaturalTransformation : NaturalTransformation F F.
-    refine {| ComponentsOf := (fun c => Identity (F c))
+  Definition IdentityNaturalTransformation : SpecializedNaturalTransformation F F.
+    refine {| ComponentsOf' := (fun c => Identity (F c))
       |};
     abstract t.
   Defined.
 
   Hint Resolve LeftIdentity RightIdentity.
 
-  Lemma LeftIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F' F) :
+  Lemma LeftIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F' F) :
     NTComposeT IdentityNaturalTransformation T = T.
     nt_eq; auto.
   Qed.
 
-  Lemma RightIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F F') :
+  Lemma RightIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F F') :
     NTComposeT T IdentityNaturalTransformation = T.
     nt_eq; auto.
   Qed.
