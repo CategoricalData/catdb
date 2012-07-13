@@ -123,13 +123,78 @@ Section FunctorComposition.
       MorphismOf' := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
       |};
 (*    abstract ( *)
-      intros; present_spcategory; simpl in *.
+    intros; present_spcategory; simpl in *.
+    Set Printing All.
+    generalize dependent (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C)).
+    Lemma baz : forall (X Y : Type) (f : X -> Y), (fun x => f x) = f.
+      intros X Y f.
+      change (fun x => f x) with f.
+      reflexivity.
+    Qed.
 
-    repeat match goal with
-             | [ _ : appcontext[@Compose' ?obj ?mor ?C] |- _ ] => progress change (@Compose' obj mor C) with (@Compose C) in *
-             | [ |- appcontext[@Compose' ?obj ?mor ?C] ] => progress change (@Compose' obj mor C) with (@Compose C) in *
-           end.
- repeat rewrite FCompositionOf; repeat rewrite FIdentityOf; destruct C, D, F, G, E; simpl in *. reflexivity
+    Print Assumptions baz.
+    Inductive focus (T : Type) : Type := focused : T -> focus T.
+    Definition typeOf T (f : focus T) := match f with focused A => A end.
+    assert (C' := focused (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C))).
+
+    change (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C)) with (typeOf C').
+    change (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C)) with C'.
+    unfold Object, Morphism, UnderlyingCategory in C'.
+    simpl in C'.
+
+    sanitize_spcategory.
+
+    Record foo := { bar : Type }.
+    Lemma baz : forall (f : foo), Build_foo (bar f) = f.
+      intro f.
+      unfold bar.
+      Require Import ProofIrrelevance Eqdep.
+      Print eq_rect_eq.
+      Goal forall (U : Type) (p : U) (Q : U -> Type) (x : Q p) (h : @eq U p p),
+       @eq (Q p) x (@eq_rect U p Q x p h).
+        intros.
+        unfold eq_rect.
+        destruct h.
+        change (@eq (Q p) x match h in (@eq _ _ y) return (Q y) with
+               | eq_refl => x
+               end) with (match h in (@eq _ _ y) return Prop with
+               | eq_refl => @eq (Q p) x x
+               end).
+      Goal forall (A B : Type) (a : A) (A (pf : a = a)
+      change (Build_foo match f return Type with
+                      | Build_foo bar => bar
+                      end) with (match f return foo with
+                      | Build_foo bar => bar
+                      end).
+      change (match f return foo with | Build_foo bar => Build_foo bar end) with (match f return foo with | foo' => foo' end).
+      change (match f return foo with | foo' => foo' end) with f.
+      (*change (Build_foo (bar f)) with f. (* Error: Not convertible. *)*)
+      destruct f; simpl; reflexivity.
+    Qed.
+    Goal
+    Print baz.
+    Eval simpl in fun f : foo =>
+match f as f0 return (@eq foo (Build_foo (bar f0)) f0) with
+| Build_foo bar0 => @eq_refl foo (Build_foo bar0)
+end.
+
+
+      unfold bar.
+      cbv iota.
+      change (Build_foo match f return Type with
+                      | Build_foo bar => bar
+                      end) with (match f return foo with
+                      | Build_foo bar => Build_foo bar
+                      end).
+
+    simultaneous_rewrite Category_eta.
+    change (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C)) with C in *.
+    match goal with
+      | [ |- appcontext[@Build_Category (Object ?C) (Morphism ?C) (UnderlyingCategory ?C)] ] => progress change (@Build_Category (Object C) (Morphism C) (UnderlyingCategory C)) with C in *
+    end.
+
+    rewrite FCompositionOf.
+    repeat rewrite FCompositionOf; repeat rewrite FIdentityOf; simpl in *. reflexivity
     ).
     (* abstract t. *)
   Defined.
