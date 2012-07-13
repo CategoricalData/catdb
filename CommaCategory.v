@@ -57,24 +57,23 @@ Section CommaCategory.
     Transparent Object Morphism Compose.
     exists (Compose (proj1_sig gh) (proj1_sig g'h')).
     abstract (
-      simpl; unfold CommaCategory_Object, CommaCategory_Morphism in *; simpl in *;
+      simpl;
         destruct_all_hypotheses;
-        unfold Morphism in *;
-          destruct_hypotheses;
-          repeat rewrite FCompositionOf;
-            repeat rewrite <- Associativity;
-              t_rev_with t'
+        present_spfunctor;
+        repeat rewrite FCompositionOf;
+          repeat rewrite <- Associativity;
+            t_rev_with t'
     ).
   Defined.
 
+  Hint Rewrite FIdentityOf.
+
   Definition CommaCategory_Identity o : CommaCategory_Morphism o o.
-    exists (@Identity _ _ (A * B) (projT1 o)).
+    exists (Identity (C := A * B) (projT1 o)).
     abstract (
-      simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity;
-            repeat rewrite RightIdentity;
-              reflexivity
+      destruct_all_hypotheses;
+      present_spfunctor;
+      t_with t'
     ).
   Defined.
 
@@ -118,7 +117,7 @@ Section SliceCategory.
   Definition SliceCategory_Functor : Functor B C.
     refine {| ObjectOf' := (fun _ => a);
       MorphismOf' := (fun _ _ _ => Identity a)
-    |}; abstract (t_with t').
+    |}; abstract (present_spfunctor; t_with t').
   Defined.
 
   Definition SliceCategory := CommaCategory S SliceCategory_Functor.
@@ -134,9 +133,7 @@ Section SliceCategoryOver.
 End SliceCategoryOver.
 
 Section ArrowCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Variable C : Category.
 
   Definition ArrowCategory := CommaCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowCategory.

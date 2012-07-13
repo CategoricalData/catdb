@@ -116,7 +116,7 @@ Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
 
 (* XXX TODO: Automate this better *)
 Add Parametric Morphism (C D E : Category) :
-  (@ComposeFunctors _ _ C _ _ D _ _ E)
+  (ComposeFunctors (C := C) (D := D) (E := E))
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
   intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalence, CategoryIsomorphism, InverseOf in *;
     destruct_hypotheses.

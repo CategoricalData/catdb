@@ -1,4 +1,4 @@
-Require Export SpecializedCategory.
+Require Export SpecializedCategory Category.
 Require Import Common.
 
 Set Implicit Arguments.

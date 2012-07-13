@@ -94,6 +94,24 @@ Defined.
 
 Coercion GeneralizeLocallySmallCategory : LocallySmallSpecializedCategory >-> LocallySmallCategory.
 
+Ltac sanitize_category_by_destruction' C := (* Thanks, andersk! *)
+  first [ has_no_body C | let C' := constr:(C) in
+    fail "Sanitization by destruction only works if a hypothesis has no body.  Hypothesis " C' " has a body." ];
+  let objC := fresh in let morC := fresh in let C' := fresh in
+    destruct C as [ objC morC C' ]; try clear C; (* because sometimes it isn't cleared... *)
+      progress change
+        (@Build_Category (@Object (@Build_Category objC morC C')) (@Morphism (@Build_Category objC morC C')) (@UnderlyingCategory (@Build_Category objC morC C'))) with
+        (@Build_Category objC morC C') in *;
+        set (C := @Build_Category objC morC C') in *;
+          clearbody C;
+            clear objC morC C'.
+
+Ltac sanitize_category_by_destruction := unfold GeneralizeCategory in *;
+  repeat match goal with
+           | [ _ : appcontext[@Build_Category (Object ?C) (Morphism ?C) (UnderlyingCategory ?C)] |- _ ] => sanitize_category_by_destruction' C
+           | [ |- appcontext[@Build_Category (Object ?C) (Morphism ?C) (UnderlyingCategory ?C)] ] => sanitize_category_by_destruction' C
+         end.
+
 Ltac sanitize_spcategory :=
   repeat match goal with
            | [ _ : appcontext[fun x => ?f x] |- _ ] => progress change (fun x => f x) with f in *
@@ -104,18 +122,21 @@ Ltac sanitize_spcategory :=
            | [ _ : appcontext [?f (@Object ?obj ?mor ?C) ?mor ?C] |- _ ] => progress change (f (@Object obj mor C) mor C) with (f obj mor C) in *
            | [ |- appcontext [?f (@Object ?obj ?mor ?C) ?mor ?C] ] => progress change (f (@Object obj mor C) mor C) with (f obj mor C) in * *)
          end;
-  repeat rewrite Category_eta in *.
+  repeat rewrite Category_eta in *;
+    sanitize_category_by_destruction.
 
 Ltac present_mor_all mor_fun cat :=
   repeat match goal with
-           | [ _ : appcontext[mor_fun ?s ?d] |- _ ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
-           | [ |- appcontext[mor_fun ?s ?d] ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
+           | [ _ : appcontext[mor_fun ?s ?d] |- _ ] => progress change (mor_fun s d) with (@Morphism cat s d) in *
+           | [ |- appcontext[mor_fun ?s ?d] ] => progress change (mor_fun s d) with (@Morphism cat s d) in *
          end.
 
 Ltac present_mor mor_fun cat :=
   repeat match goal with
-           | [ _ : mor_fun ?s ?d |- _ ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
+           | [ _ : mor_fun ?s ?d |- _ ] => progress change (mor_fun s d) with (@Morphism cat s d) in *
          end.
+
+Ltac present_obj obj cat := change obj with (Object cat) in *; simpl in *.
 
 Ltac present_mor_from_context cmd :=
   repeat match goal with
@@ -142,7 +163,7 @@ Ltac present_spcategory := present_obj_mor @Identity' @Identity; present_obj_mor
 
 Ltac present_spcategory_all := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose;
   repeat match goal with
-           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor_all mor C
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress (present_mor_all mor C; present_obj obj C)
          end;
   sanitize_spcategory.
 

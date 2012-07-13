@@ -13,8 +13,8 @@ Section ComputableCategory.
 
   Definition ComputableCategory : @SpecializedCategory I (fun C D : I => SpecializedFunctor C D).
     refine {|
-      Identity' := (fun o : I => @IdentityFunctor _ _ o);
-      Compose' := (fun C D E : I => @ComposeFunctors _ _ C _ _ D _ _ E)
+      Identity' := (fun o : I => IdentityFunctor o);
+      Compose' := (fun C D E : I => ComposeFunctors (C := C) (D := D) (E := E))
       |}; abstract functor_eq.
   Defined.
 End ComputableCategory.
