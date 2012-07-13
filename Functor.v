@@ -35,8 +35,9 @@ Section SpecializedFunctor.
   Section FunctorInterface.
     Variable F : SpecializedFunctor.
 
-    Definition ObjectOf : forall c, D := F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
-    Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d) := F.(MorphismOf').
+    Definition ObjectOf : forall c, D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
+    Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
+      := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
     Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
       MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
       := F.(FCompositionOf').
@@ -57,6 +58,11 @@ Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor
 Definition GeneralizeFunctor objC morC C objD morD D (F : @SpecializedFunctor objC morC C objD morD D) : Functor C D := F.
 Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
 
+Arguments SpecializedFunctor {objC morC} C {objD morD} D.
+Arguments Functor C D.
+Arguments ObjectOf {objC morC C objD morD D} F c : simpl nomatch.
+Arguments MorphismOf {objC morC} [C] {objD morD} [D] F [s d] m : simpl nomatch.
+
 Ltac present_obj_mor_obj_mor from to :=
   repeat match goal with
            | [ _ : appcontext[from ?obj ?mor ?obj' ?mor'] |- _ ] => change (from obj mor obj' mor') with (to obj mor obj' mor') in *
@@ -67,11 +73,6 @@ Ltac present_spfunctor' := present_spcategory';
   present_obj_mor_obj_mor @ObjectOf' @ObjectOf; present_obj_mor_obj_mor @MorphismOf' @MorphismOf.
 Ltac present_spfunctor := present_spcategory;
   present_obj_mor_obj_mor @ObjectOf' @ObjectOf; present_obj_mor_obj_mor @MorphismOf' @MorphismOf.
-
-Arguments SpecializedFunctor {objC morC} C {objD morD} D.
-Arguments Functor C D.
-Arguments ObjectOf {objC morC C objD morD D} !F c.
-Arguments MorphismOf {objC morC} [C] {objD morD} [D] !F [s d] m.
 
 Section Functors_Equal.
   Lemma Functors_Equal objC morC C objD morD D : forall (F G : @SpecializedFunctor objC morC C objD morD D),

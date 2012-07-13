@@ -9,9 +9,9 @@ Local Infix "*" := ProductCategory.
 Section Adjunction.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
   Variable objD : Type.
   Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
   Variable D : SpecializedCategory morD.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
@@ -66,9 +66,9 @@ Section Adjunction.
 
     Definition AComponentsOf : forall (A : C) (A' : D),
       TypeCat.(Morphism) (HomFunctor D (F A, A')) (HomFunctor C (A, G A'))
-      := T.(AComponentsOf').
+      := Eval cbv beta delta [AComponentsOf'] in T.(AComponentsOf').
     Definition AIsomorphism : forall (A : C) (A' : D), @CategoryIsomorphism _ _ TypeCat _ _ (@AComponentsOf A A')
-      := T.(AIsomorphism').
+      := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism').
     Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@AComponentsOf B B') (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) =
       Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')) (@AComponentsOf A A')
@@ -80,25 +80,28 @@ Section Adjunction.
     forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
       Compose (proj1_sig (T.(AIsomorphism) B B')) (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')).
-    Opaque MorphismOf.
+    Opaque TypeCat MorphismOf.
     intros.
     pose (T.(AIsomorphism) B B').
     pose (T.(AIsomorphism) A A').
     intro_proj2_sig_from_goal.
     unfold InverseOf in *; simpl in *; destruct_hypotheses.
     present_spcategory.
-    Transparent Object Morphism.
+    Transparent Morphism.
     post_compose_to_identity; pre_compose_to_identity.
     apply ACommutes.
   Qed.
 End Adjunction.
 
+Arguments AComponentsOf {objC morC C objD morD D} [F G] T A A' _ : simpl nomatch.
+Arguments AIsomorphism {objC morC C objD morD D} [F G] T A A' : simpl nomatch.
+
 Section AdjunctionEquivalences.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
   Variable objD : Type.
   Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
   Variable D : SpecializedCategory morD.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.

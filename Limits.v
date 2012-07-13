@@ -32,10 +32,17 @@ Section DiagonalFunctor.
   Defined.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
-    Transparent Object.
+    Transparent Object Morphism.
     simpl; unfold diagonal_functor_object_of; intro m.
-    refine {| ComponentsOf' := fun d => m : C.(Morphism) ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
-      |}; abstract t.
+    hnf.
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+          (fun d => m : C.(Morphism) ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d))
+          _
+        )
+    end;
+    abstract t.
   Defined.
 
   Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).

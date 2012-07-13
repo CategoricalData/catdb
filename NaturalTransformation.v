@@ -41,14 +41,14 @@ Section SpecializedNaturalTransformation.
   Section NaturalTransformationInterface.
     Variable T : SpecializedNaturalTransformation.
 
-    Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := T.(ComponentsOf').
+    Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := Eval cbv beta delta [ComponentsOf'] in T.(ComponentsOf').
     Definition Commutes : forall (s d : C) (m : C.(Morphism) s d),
       Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
       := T.(Commutes').
   End NaturalTransformationInterface.
 End SpecializedNaturalTransformation.
 
-Arguments ComponentsOf {objC morC C objD morD D F G} !T c.
+Arguments ComponentsOf {objC morC C objD morD D F G} T c : simpl nomatch.
 Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
 
 Section NaturalTransformation.

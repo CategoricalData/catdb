@@ -21,8 +21,8 @@ Section SpecializedCategoryInterface.
   Variable C : @SpecializedCategory obj mor.
 
   Definition Morphism : forall s d : C, _ := mor.
-  Definition Identity : forall o : C, Morphism o o := C.(Identity').
-  Definition Compose : forall (s d d' : C) (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := C.(Compose').
+  Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
+  Definition Compose : forall (s d d' : C) (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
   Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
     Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1)
     := C.(Associativity').
@@ -38,7 +38,11 @@ Section SpecializedCategoryInterface.
   Lemma unfold_Identity : Identity = (C.(Identity') : forall o : C, Morphism o o). reflexivity. Qed.
   Lemma unfold_Compose : Compose = (C.(Compose') : forall (s d d' : C), Morphism d d' -> Morphism s d -> Morphism s d'). reflexivity. Qed.
 End SpecializedCategoryInterface.
-Global Opaque Object Morphism Identity Compose.
+
+Arguments Compose {obj mor} [C s d d'] m m0 : simpl nomatch.
+Arguments Identity {obj mor} [C] o : simpl nomatch.
+
+Global Opaque Object Morphism.
 Global Opaque Associativity LeftIdentity RightIdentity.
 
 Ltac unfold_Object :=
@@ -102,9 +106,6 @@ Ltac present_spcategory_all := present_obj_mor @Identity' @Identity; present_obj
            | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor_all mor C
          end;
   sanitize_spcategory.
-
-Arguments Compose {obj mor} [C s d d'] m m0.
-Arguments Identity {obj mor} [C] o.
 
 Hint Rewrite LeftIdentity RightIdentity.
 
