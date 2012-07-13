@@ -1,17 +1,14 @@
-Require Export SpecializedCategory Functor UniversalProperties.
-Require Import Common FunctorCategory NaturalTransformation.
+Require Import Setoid Program.
+Require Export Category Functor.
+Require Import Common NaturalTransformation SmallNaturalTransformation NaturalEquivalence FunctorCategory.
 
 Set Implicit Arguments.
 
 Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section DiagonalFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Variable C : Category.
+  Variable D : SmallCategory.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -25,63 +22,53 @@ Section DiagonalFunctor.
      each object [d] of [D].
      **)
 
+  (* TODO: Try to combine these definitions into a single definition. *)
   Definition diagonal_functor_object_of (c : C) : C ^ D.
-    refine {| ObjectOf' := fun _ => c;
-      MorphismOf' := (fun _ _ _ => Identity c)
+    refine {| ObjectOf := fun _ => c;
+      MorphismOf := (fun _ _ _ => Identity c)
     |}; abstract t.
   Defined.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
-    Transparent Object Morphism.
     simpl; unfold diagonal_functor_object_of; intro m.
-    hnf.
-    match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun d => m : C.(Morphism) ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d))
-          _
-        )
-    end;
-    abstract t.
+    refine {| SComponentsOf := fun d => m : Morphism C ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d)
+      |}; abstract t.
   Defined.
 
-  Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).
-    Transparent Morphism.
-    refine {| ObjectOf' := diagonal_functor_object_of;
-      MorphismOf' := diagonal_functor_morphism_of
-      |}; abstract nt_eq.
-  Defined.
+  Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of SComponentsOf SNTComposeT IdentitySmallNaturalTransformation.
+  Hint Resolve f_equal f_equal2.
+  Hint Extern 1 (_ = _) => apply proof_irrelevance.
 
-  Definition DiagonalFunctor := Eval cbv beta iota zeta delta [DiagonalFunctor' diagonal_functor_object_of (*diagonal_functor_morphism_of*)] in DiagonalFunctor'.
+  Definition DiagonalFunctor : Functor C (C ^ D).
+    refine {| ObjectOf := diagonal_functor_object_of;
+      MorphismOf := diagonal_functor_morphism_of
+      |}; abstract snt_eq.
+  Defined.
 End DiagonalFunctor.
 
-Section DiagonalFunctorLemmas.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable objD' : Type.
-  Variable morD' : objD' -> objD' -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
-  Variable D' : SpecializedCategory morD'.
+Hint Unfold diagonal_functor_object_of diagonal_functor_morphism_of.
 
-  Lemma Compose_DiagonalFunctor x (F : SpecializedFunctor D' D) :
-    ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
+Section DiagonalFunctorLemmas.
+  Variable C : Category.
+  Variable D D' : SmallCategory.
+
+  Lemma Compose_diagonal_functor_object_of x (F : Functor D' D) :
+    ComposeFunctors (diagonal_functor_object_of C D x) F = diagonal_functor_object_of _ _ x.
     functor_eq.
+  Qed.
+
+  Lemma Compose_DiagonalFunctor x (F : Functor D' D) :
+    ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
+    simpl; apply Compose_diagonal_functor_object_of.
   Qed.
 End DiagonalFunctorLemmas.
 
-Hint Rewrite Compose_DiagonalFunctor.
+Hint Rewrite Compose_diagonal_functor_object_of Compose_DiagonalFunctor.
 
 Section Limit.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
-  Variable F : SpecializedFunctor D C.
+  Variable C : Category.
+  Variable D : SmallCategory.
+  Variable F : Functor D C.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -91,16 +78,13 @@ Section Limit.
      such that for every object [X] of [C] and every natural transformation [s : Δ X -> F],
      there exists a unique map [s' : X -> L] in [C] such that [t (Δ s') = s].
      **)
-  Definition Limit := TerminalMorphism (DiagonalFunctor C D) F.
-  (*  Definition Limit (L : C) :=
-    { t : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) L) F &
-      forall X : C, forall s : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) X) F,
-        { s' : C.(Morphism) X L |
-          unique
-          (fun s' => SNTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s)
-          s'
+  Definition Limit (L : C) :=
+    { t : SmallNaturalTransformation ((DiagonalFunctor C D) L) F &
+      forall X : C, forall s : SmallNaturalTransformation ((DiagonalFunctor C D) X) F,
+        { s' : C.(Morphism) X L | is_unique s' /\
+          SNTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s
         }
-    }.*)
+    }.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -110,57 +94,25 @@ Section Limit.
      such that for every object [X] of [C] and every natural transformation [s : F -> Δ X],
      there exists a unique map [s' : c -> X] in [C] such that [(Δ s') t = s].
      **)
-  Definition Colimit := @InitialMorphism (C ^ D) _ F (DiagonalFunctor C D).
-  (*  Definition Colimit (c : C) :=
-    { t : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) c) &
-      forall X : C, forall s : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) X),
+  Definition Colimit (c : C) :=
+    { t : SmallNaturalTransformation F ((DiagonalFunctor C D) c) &
+      forall X : C, forall s : SmallNaturalTransformation F ((DiagonalFunctor C D) X),
         { s' : C.(Morphism) c X | is_unique s' /\
           SNTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
         }
-    }.*)
-
-  Section AbstractionBarrier.
-    Variable l : Limit.
-    Variable c : Colimit.
-
-    Definition LimitObject := TerminalMorphism_Object l.
-    Definition LimitMorphism := TerminalMorphism_Morphism l.
-    Definition LimitProperty_Morphism := TerminalProperty_Morphism l.
-    Definition LimitProperty := TerminalProperty l.
-
-    Definition ColimitObject := InitialMorphism_Object c.
-    Definition ColimitMorphism := InitialMorphism_Morphism c.
-    Definition ColimitProperty_Morphism := InitialProperty_Morphism c.
-    Definition ColimitProperty := InitialProperty c.
-  End AbstractionBarrier.
+    }.
 End Limit.
 
 Section LimitMorphisms.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
-  Variable F : SpecializedFunctor D C.
+  Variable C : Category.
+  Variable D : SmallCategory.
+  Variable F : Functor D C.
 
-  Definition MorphismBetweenLimits (L L' : Limit F) : C.(Morphism) (LimitObject L) (LimitObject L').
-    unfold Limit, LimitObject in *.
-    intro_universal_morphisms.
-    intro_universal_property_morphisms.
-    match goal with
-      | [ |- Morphism _ ?a ?b ] => pose a; pose b
-    end.
-    specialized_assumption idtac.
+  Definition MorphismBetweenLimits L L' : Limit F L -> Limit F L' -> Morphism _ L L'.
+    intros; destruct_type Limit; specialized_assumption ltac:(destruct_type sig).
   Defined.
 
-  Definition MorphismBetweenColimits (c c' : Colimit F) : C.(Morphism) (ColimitObject c) (ColimitObject c').
-    unfold Colimit, ColimitObject in *.
-    intro_universal_morphisms.
-    intro_universal_property_morphisms.
-    match goal with
-      | [ |- Morphism _ ?a ?b ] => pose a; pose b
-    end.
-    specialized_assumption idtac.
+  Definition MorphismBetweenColimits c c' : Colimit F c -> Colimit F c' -> Morphism _ c c'.
+    intros; destruct_type Colimit; specialized_assumption ltac:(destruct_type sig).
   Defined.
 End LimitMorphisms.

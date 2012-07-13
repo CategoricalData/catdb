@@ -7,46 +7,17 @@ Set Implicit Arguments.
 Local Infix "*" := ProductFunctor.
 
 Section FullFaithful.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable morC' : objC -> objC -> Set.
-  Variable C : SpecializedCategory morC.
-  Variable C' : LocallySmallSpecializedCategory morC'.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable morD' : objD -> objD -> Set.
-  Variable D : SpecializedCategory morD.
-  Variable D' : LocallySmallSpecializedCategory morD'.
-  Variable F : SpecializedFunctor C D.
-  Variable F' : SpecializedFunctor C' D'.
-  Let COp := OppositeCategory C.
-  Let DOp := OppositeCategory D.
-  Let FOp := OppositeFunctor F.
-  Let C'Op := OppositeCategory C'.
-  Let D'Op := OppositeCategory D'.
-  Let F'Op := OppositeFunctor F'.
+  Variables C D : Category.
+  Variable F : Functor C D.
 
   Hint Rewrite FCompositionOf.
 
-  Definition InducedHomNaturalTransformation :
-    SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
-    refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
-      (fun sd : (ProductCategory COp C) =>
-        @MorphismOf _ _ _ _ _ _ F _ _ )
-      _
-    );
-    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
-  Defined.
-
-  Definition InducedHomSetNaturalTransformation :
-    SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F')).
-    clear morC morD C D COp DOp FOp F.
-    refine (Build_SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F'))
-      (fun sd : (ProductCategory C'Op C') =>
-        @MorphismOf _ _ _ _ _ _ F' _ _ )
-      _
-    );
-    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
+  Definition InducedHomNaturalTransformation : NaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) ((OppositeFunctor F) * F)).
+  (* Gahhh, type signatures and casting *)
+    refine {| ComponentsOf := (fun sd : (Object (ProductCategory (OppositeCategory C) C)) =>
+      (fun m : Morphism C (fst sd) (snd sd) =>
+        F.(MorphismOf) m) : Morphism TypeCat ((HomFunctor C) _) ((ComposeFunctors (HomFunctor D) ((OppositeFunctor F) * F)) _))
+      |}; abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
   Defined.
 
   (* We really want surjective/injective here, but we only have epi/mono.
@@ -59,7 +30,7 @@ Section FullFaithful.
 
   Lemma FunctorFullyFaithful_split : FunctorFullyFaithful -> FunctorFull /\ FunctorFaithful.
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful; intro H; split; intros;
-      apply iso_is_epi || apply iso_is_mono; auto.
+      apply iso_is_epi || apply iso_is_mono; trivial.
   Qed.
 
 (*
@@ -69,7 +40,7 @@ Section FullFaithful.
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful in *.
     intros x y; specialize (e x y); specialize (m x y).
     unfold Epimorphism, Monomorphism in *; simpl in *.
-    unfold SpecializedCategoryIsomorphism; simpl.
+    unfold CategoryIsomorphism; simpl.
     destruct C, D, F; simpl in *; clear C D F.
     *)
 End FullFaithful.

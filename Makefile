@@ -1,38 +1,34 @@
 MODULES    := Common \
 	FEqualDep \
-	StructureEquality \
 	DefinitionSimplification \
-	EquivalenceSet \
-	EquivalenceRelationGenerator \
-	SpecializedCategory \
 	Category \
 	CategoryEquality \
+	SmallCategory \
 	Functor \
+	SmallFunctor \
+	ComputableCategory \
 	NaturalTransformation \
+	SmallNaturalTransformation \
 	NaturalEquivalence \
 	FunctorCategory \
-	ComputableCategory \
 	DiscreteCategory \
-	ProductCategory \
-	ProductFunctor \
 	SmallCat \
 	CommaCategory \
 	UniversalProperties \
+	Limits \
+	LimitFunctors \
+	LimitFunctorTheorems \
 	Duals \
+	SmallDuals \
+	ProductCategory \
+	ProductFunctor \
 	SetCategory \
 	Hom \
 	FunctorAttributes \
-	Groupoid \
 	AdjointUnit \
 	Adjoint \
-	Limits \
-	SpecializedLimitFunctors \
-	SpecializedLimitFunctorTheorems \
 	Grothendieck \
 	Yoneda \
-	\
-	LimitFunctors \
-	LimitFunctorTheorems \
 	EquivalenceClass \
 	EquivalenceRelation \
 	Schema \

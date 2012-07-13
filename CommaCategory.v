@@ -1,15 +1,13 @@
 Require Import ProofIrrelevance.
-Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common DiscreteCategory.
+Require Export Category Functor ProductCategory.
+Require Import Common SmallCat.
 
 Set Implicit Arguments.
 
 Local Infix "*" := ProductCategory.
 
 Section CommaCategory.
-  (* [Definition]s are not sort-polymorphic, and it's too slow to not use
-     [Definition]s, so we might as well use [Category]s rather than [SpecializedCategory]s. *)
-  Variable A B C : Category.
+  Variables A B C : Category.
   Variable S : Functor A C.
   Variable T : Functor B C.
 
@@ -43,32 +41,29 @@ Section CommaCategory.
      *)
 
   (* By definining all the parts separately, we can make the [Prop]
-     Parts of the definition opaque via [abstract].  This speeds things
+     parts of the definition opaque via [abstract].  This speeds things
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
-  (* stupid lack of sort-polymorphism in definitions... *)
-  Definition CommaCategory_Object := { αβ : A * B & C.(Morphism) (S (fst αβ)) (T (snd αβ)) }.
+  Definition CommaCategory_Object := { αβ : A * B & Morphism C (S (fst αβ)) (T (snd αβ)) }.
   Definition CommaCategory_Morphism (αβf α'β'f' : CommaCategory_Object) :=
-    { gh : (A * B).(Morphism) (projT1 αβf) (projT1 α'β'f') |
+    { gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f') |
       Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }.
-  Definition CommaCategory_Compose s d d' (gh : CommaCategory_Morphism d d') (g'h' : CommaCategory_Morphism s d) :
-    CommaCategory_Morphism s d'.
-    Transparent Object Morphism Compose.
+  Definition CommaCategory_Compose s d d' (gh : CommaCategory_Morphism d d') (g'h' : CommaCategory_Morphism s d) : CommaCategory_Morphism s d'.
     exists (Compose (proj1_sig gh) (proj1_sig g'h')).
     abstract (
-      simpl; unfold CommaCategory_Object, CommaCategory_Morphism in *; simpl in *;
-        destruct_all_hypotheses;
-        unfold Morphism in *;
-          destruct_hypotheses;
-          repeat rewrite FCompositionOf;
-            repeat rewrite <- Associativity;
-              t_rev_with t'
+      simpl; unfold CommaCategory_Object, CommaCategory_Morphism in *; simpl;
+        repeat match goal with
+                 | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
+               end;
+        repeat rewrite FCompositionOf;
+          repeat rewrite <- Associativity;
+            t_rev_with t'
     ).
   Defined.
 
   Definition CommaCategory_Identity o : CommaCategory_Morphism o o.
-    exists (@Identity _ _ (A * B) (projT1 o)).
+    exists (@Identity (A * B) (projT1 o)).
     abstract (
       simpl;
         repeat rewrite FIdentityOf;
@@ -79,33 +74,22 @@ Section CommaCategory.
   Defined.
 
   Definition CommaCategory' : Category.
-    refine (@Build_Category
-      CommaCategory_Object
-      CommaCategory_Morphism
-      (@Build_SpecializedCategory _ _
-        CommaCategory_Identity
-        CommaCategory_Compose
-        _
-        _
-        _
-      )
-    );
+    refine {| Object := CommaCategory_Object;
+      Morphism := CommaCategory_Morphism;
+      Compose := CommaCategory_Compose;
+      Identity := CommaCategory_Identity
+    |};
     abstract (
       simpl in *;
         repeat (let H:= fresh in intro H; destruct H as [ [ ] ? ]; simpl in *);
-          try apply eq_exist; simpl; present_spcategory; autorewrite with core;
-            f_equal
+          try apply eq_exist; simpl; f_equal; auto
     ).
   Defined.
 
   Definition CommaCategory := Eval cbv beta iota zeta delta
-    [CommaCategory' (*CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object*)]
+    [CommaCategory' CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object]
     in CommaCategory'.
 End CommaCategory.
-
-Hint Unfold CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object.
-
-Arguments CommaCategory [A B C] S T.
 
 Local Notation "S ↓ T" := (CommaCategory S T) (at level 70, no associativity).
 
@@ -116,8 +100,8 @@ Section SliceCategory.
   Let B := TerminalCategory.
 
   Definition SliceCategory_Functor : Functor B C.
-    refine {| ObjectOf' := (fun _ => a);
-      MorphismOf' := (fun _ _ _ => Identity a)
+    refine {| ObjectOf := (fun _ => a);
+      MorphismOf := (fun _ _ _ => Identity a)
     |}; abstract (t_with t').
   Defined.
 
@@ -134,9 +118,7 @@ Section SliceCategoryOver.
 End SliceCategoryOver.
 
 Section ArrowCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Variable C : Category.
 
   Definition ArrowCategory := CommaCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowCategory.
