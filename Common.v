@@ -14,9 +14,9 @@ Section sig.
     let (x0, _, h) as x0 return (Q (proj1_sig x0)) := x in h.
 End sig.
 
-Tactic Notation not_tac tactic:(tac) := (tac; fail 1) || idtac.
+Tactic Notation "not_tac" tactic(tac) := (tac; fail 1) || idtac.
 
-Tactic Notation test_tac tactic:(tac) := not_tac (not_tac tac).
+Tactic Notation "test_tac" tactic(tac) := not_tac (not_tac tac).
 
 Ltac unique_pose defn :=
   let T := type of defn in
@@ -31,11 +31,11 @@ Ltac unique_pose_with_body defn :=
     | _ => pose defn
   end.
 
-Tactic Notation has_no_body hyp:(H) :=
+Tactic Notation "has_no_body" hyp(H) :=
   not_tac (let H' := fresh in pose H as H'; unfold H in H').
 
-Tactic Notation has_body hyp:(H) :=
-  not_tac (has_body H).
+Tactic Notation "has_body" hyp(H) :=
+  not_tac (has_no_body H).
 
 Ltac simpl_do tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
