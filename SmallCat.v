@@ -20,7 +20,7 @@ Section Objects.
   Hint Extern 3 (_ = _) => destruct_to_empty_set.
   Hint Extern 3 (JMeq _ _) => destruct_to_empty_set.
 
-  Lemma TerminalCategory_Terminal : @TerminalObject SmallCat TerminalCategory.
+  Lemma TerminalCategory_Terminal : TerminalObject (C := SmallCat) TerminalCategory.
     unfold TerminalObject, TerminalCategory in *.
     intros; eexists.
     unfold is_unique; intros;
@@ -32,7 +32,7 @@ Section Objects.
     simpl in *; tauto.
   Qed.
 
-  Lemma InitialCategory_Initial : @InitialObject SmallCat InitialCategory.
+  Lemma InitialCategory_Initial : InitialObject (C := SmallCat) InitialCategory.
     unfold InitialObject, InitialCategory in *.
     intros; eexists.
     unfold is_unique; intros;
