@@ -1,9 +1,11 @@
+Require Import JMeq.
 Require Export Category Functor ProductCategory NaturalTransformation.
 Require Import Common CategoryEquality.
 
 Set Implicit Arguments.
 
 Local Infix "*" := ProductCategory.
+Local Infix "==" := JMeq (at level 70).
 
 Section OppositeCategory.
   Variable C : Category.
@@ -27,9 +29,11 @@ Section DualCategories.
   Hint Unfold OppositeCategory ProductCategory.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
-    cat_eq_with ltac:(autounfold with core in *; destruct_type @prod).
+    cat_eq.
   Qed.
 End DualCategories.
+
+Hint Rewrite op_op_id op_distribute_prod.
 
 Section DualObjects.
   Variable C : Category.
@@ -60,6 +64,19 @@ Section OppositeFunctor.
   Defined.
 End OppositeFunctor.
 
+Section OppositeFunctor_Id.
+  Variables C D : Category.
+  Variable F : Functor C D.
+
+  Lemma op_op_functor_id : OppositeFunctor (OppositeFunctor F) == F.
+    functor_eq; cat_eq.
+  Qed.
+End OppositeFunctor_Id.
+
+(* not terribly useful, given that this would make [autorewrite with core] give "Anomaly: Uncaught exception Failure("nth"). Please report." *)
+(*Hint Rewrite op_op_functor_id.*)
+
+
 Section OppositeNaturalTransformation.
   Variables C D : Category.
   Variable F G : Functor C D.
@@ -75,3 +92,16 @@ Section OppositeNaturalTransformation.
     |}.
   Defined.
 End OppositeNaturalTransformation.
+
+Section OppositeNaturalTransformation_Id.
+  Variables C D : Category.
+  Variables F G : Functor C D.
+  Variable T : NaturalTransformation F G.
+
+  Lemma op_op_nt_id : OppositeNaturalTransformation (OppositeNaturalTransformation T) == T.
+    nt_eq; functor_eq; cat_eq.
+  Qed.
+End OppositeNaturalTransformation_Id.
+
+(* not terribly useful, given that this would make [autorewrite with core] give "Anomaly: Uncaught exception Failure("nth"). Please report." *)
+(*Hint Rewrite op_op_nt_id.*)
