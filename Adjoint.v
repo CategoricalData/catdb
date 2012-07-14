@@ -110,6 +110,9 @@ Section AdjunctionEquivalences.
           exact (fun A0 A' B B' m m' => A.(Commutes) (A0, A') (B, B') (m, m')) ].
   Defined.
 
+  Global Coercion HomAdjunction2Adjunction : HomAdjunction >-> Adjunction.
+  Global Coercion Adjunction2HomAdjunction : Adjunction >-> HomAdjunction.
+
   Hint Rewrite FIdentityOf.
 
   Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
@@ -203,6 +206,9 @@ Section AdjunctionEquivalences.
     ).
   Defined.
 
+  Global Coercion UnitOf : HomAdjunction >-> AdjunctionUnit.
+  Global Coercion CounitOf : HomAdjunction >-> AdjunctionCounit.
+
   Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
     refine {| AComponentsOf := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (projT1 T c)) |};
       try (intros; exists (fun f => proj1_sig (projT2 T _ _ f)));
@@ -239,4 +245,7 @@ Section AdjunctionEquivalences.
                 try_associativity rewrite_rev_proj2_sig
       ).
   Defined.
+
+  Global Coercion HomAdjunctionOfUnit : AdjunctionUnit >-> HomAdjunction.
+  Global Coercion HomAdjunctionOfCounit : AdjunctionCounit >-> HomAdjunction.
 End AdjunctionEquivalences.
