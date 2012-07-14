@@ -4,20 +4,27 @@ Require Import Common Hom Duals ProductFunctor NaturalTransformation SetCategory
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductFunctor.
+Local Infix "*" := ProductCategory.
+Local Infix "**" := ProductFunctor (at level 70).
 
 Section FullFaithful.
   Variables C D : Category.
   Variable F : Functor C D.
+  Let COp := OppositeCategory C.
+  Let DOp := OppositeCategory D.
+  Let FOp := OppositeFunctor F.
 
   Hint Rewrite FCompositionOf.
 
-  Definition InducedHomNaturalTransformation : NaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) ((OppositeFunctor F) * F)).
-  (* Gahhh, type signatures and casting *)
-    refine {| ComponentsOf := (fun sd : (Object (ProductCategory (OppositeCategory C) C)) =>
-      (fun m : Morphism C (fst sd) (snd sd) =>
-        F.(MorphismOf) m) : Morphism TypeCat ((HomFunctor C) _) ((ComposeFunctors (HomFunctor D) ((OppositeFunctor F) * F)) _))
-      |}; abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
+  Definition InducedHomNaturalTransformation : NaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp ** F)).
+    match goal with
+      | [ |- NaturalTransformation ?F0 ?G0 ] =>
+        refine (Build_NaturalTransformation F0 G0
+          (fun sd => (fun m => F.(MorphismOf) m))
+          _
+        )
+    end;
+    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
   Defined.
 
   (* We really want surjective/injective here, but we only have epi/mono.
