@@ -7,6 +7,7 @@ MODULES    := Common \
 	CategoryEquality \
 	SmallCategory \
 	Functor \
+	Groupoid \
 	SmallFunctor \
 	ComputableCategory \
 	NaturalTransformation \
