@@ -1,17 +1,16 @@
-Require Import Setoid.
 Require Export Category SmallCategory SmallFunctor.
 Require Import Common.
 
 Set Implicit Arguments.
 
 Section ComputableCategory.
-  Variable O : Type.
-  Variable Object2Cat : O -> SmallCategory.
+  Variable I : Type.
+  Variable Index2Cat : I -> SmallCategory.
 
-  Coercion Object2Cat : O >-> SmallCategory.
+  Coercion Index2Cat : I >-> SmallCategory.
 
   Definition ComputableCategory : Category.
-    refine {| Object := O;
+    refine {| Object := I;
       Morphism := SmallFunctor;
       Compose := @ComposeSmallFunctors;
       Identity := @IdentitySmallFunctor

@@ -1,6 +1,6 @@
-Require Import FunctionalExtensionality ProofIrrelevance.
+Require Import ProofIrrelevance.
 Require Export SmallCategory Functor NaturalTransformation FEqualDep.
-Require Import Common.
+Require Import Common StructureEquality.
 
 Set Implicit Arguments.
 
@@ -27,7 +27,7 @@ Section Categories_NaturalTransformation.
      G A --------> G B
      **)
   Record SmallNaturalTransformation := {
-    SComponentsOf :> forall c : C.(SObject), Morphism _ (F c) (G c);
+    SComponentsOf :> forall c : C, Morphism _ (F c) (G c);
     SCommutes : forall s d (m : Morphism C s d),
       Compose (SComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (SComponentsOf s)
   }.
@@ -46,28 +46,12 @@ Section SmallNaturalTransformations_Equal.
   Qed.
 End SmallNaturalTransformations_Equal.
 
-Ltac snt_eq'_step_with tac := intros; simpl;
-  match goal with
-    | [ |- @eq (@SmallNaturalTransformation _ _ _ _) _ _ ] => apply SmallNaturalTransformations_Equal
-    | _ => tac
-  end; repeat simpl.
-
-Ltac snt_eq_step_with tac := intros; simpl;
-  match goal with
-    | _ => reflexivity
-    | [ |- @eq (@SmallNaturalTransformation _ _ _ _) _ _ ] => apply SmallNaturalTransformations_Equal
-    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
-    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
-    | [ |- _ = _ ] => apply proof_irrelevance
-    | _ => tac
-  end; repeat simpl.
+Ltac snt_eq_step_with tac := structures_eq_step_with SmallNaturalTransformations_Equal tac.
 
 Ltac snt_eq_with tac := repeat snt_eq_step_with tac.
-Ltac snt_eq'_with tac := repeat (snt_eq'_step_with tac; try solve [ repeat snt_eq_step_with tac ]).
 
 Ltac snt_eq_step := snt_eq_step_with idtac.
 Ltac snt_eq := snt_eq_with idtac.
-Ltac snt_eq' := snt_eq'_with idtac.
 
 Section Small2Large.
   Variable C : SmallCategory.

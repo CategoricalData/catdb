@@ -1,6 +1,6 @@
-Require Import JMeq ProofIrrelevance FunctionalExtensionality.
+Require Import ProofIrrelevance JMeq.
 Require Export Category.
-Require Import Common CategoryEquality FEqualDep.
+Require Import Common CategoryEquality StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
@@ -29,8 +29,8 @@ Record SmallCategory := {
   SRightIdentity : forall a b (f : SMorphism a b), SCompose f (SIdentity a) = f
 }.
 
-Implicit Arguments SCompose [s s0 d d'].
-Implicit Arguments SIdentity [s].
+Arguments SCompose [s s0 d d'] _ _.
+Arguments SIdentity [s] o.
 
 Hint Rewrite SLeftIdentity SRightIdentity.
 
@@ -61,16 +61,7 @@ Section Categories_Equal.
   Qed.
 End Categories_Equal.
 
-Ltac scat_eq_step_with tac := intros; simpl;
-  match goal with
-    | _ => reflexivity
-    | [ |- @eq SmallCategory _ _ ] => apply SmallCategories_Equal
-    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
-    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
-    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
-    | [ |- _ = _ ] => apply proof_irrelevance
-    | _ => tac
-  end; repeat simpl; JMeq_eq.
+Ltac scat_eq_step_with tac := structures_eq_step_with SmallCategories_Equal tac.
 
 Ltac scat_eq_with tac := repeat scat_eq_step_with tac.
 

@@ -53,9 +53,7 @@ Section CommaCategory.
     exists (Compose (proj1_sig gh) (proj1_sig g'h')).
     abstract (
       simpl; unfold CommaCategory_Object, CommaCategory_Morphism in *; simpl;
-        repeat match goal with
-                 | [ H : @sig _ _ |- _ ] => destruct H; simpl in *
-               end;
+        destruct_sig;
         repeat rewrite FCompositionOf;
           repeat rewrite <- Associativity;
             t_rev_with t'
@@ -87,9 +85,13 @@ Section CommaCategory.
   Defined.
 
   Definition CommaCategory := Eval cbv beta iota zeta delta
-    [CommaCategory' CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object]
+    [CommaCategory' (*CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object*)]
     in CommaCategory'.
 End CommaCategory.
+
+Hint Unfold CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object.
+
+Arguments CommaCategory [A B C] S T.
 
 Local Notation "S ↓ T" := (CommaCategory S T) (at level 70, no associativity).
 
