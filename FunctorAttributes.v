@@ -37,7 +37,7 @@ Section FullFaithful.
 
   Lemma FunctorFullyFaithful_split : FunctorFullyFaithful -> FunctorFull /\ FunctorFaithful.
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful; intro H; split; intros;
-      apply iso_is_epi || apply iso_is_mono; trivial.
+      apply iso_is_epi || apply iso_is_mono; auto.
   Qed.
 
 (*

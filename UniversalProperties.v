@@ -48,20 +48,21 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : Morphism C X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
+        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism, CommaCategory_Morphism in *;
           simpl in *.
         destruct M; clear M.
         unfold InitialObject, is_unique, unique in *; simpl in *.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
+        autounfold with core in *; simpl in *.
         repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
-        destruct_sig; simpl in *.
+        destruct_all_hypotheses; simpl in *.
         split; try (assumption || symmetry; assumption); intros.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
             specialize (H (existT _ (tt, m) pf));
-              apply eq_sig_fst in H; apply (f_equal snd) in H;
+              apply eq_sig_fst in H; apply (f_equal (@snd _ _)) in H;
                 solve [ intuition ]
         end.
       Qed.
@@ -110,6 +111,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
+        autounfold with core in *; simpl in *.
         repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
         destruct_sig; simpl in *.
         split; try (assumption || symmetry; assumption); intros.
@@ -243,4 +245,11 @@ Ltac intro_universal_properties :=
            | [ |- appcontext[TerminalProperty_Morphism ?a ?b] ] => unique_pose (TerminalProperty a b)
            | [ |- appcontext[InitialProperty_Morphism ?a ?b] ] => unique_pose (InitialProperty a b)
            | [ |- appcontext[UniversalProperty_Morphism ?a ?b] ] => unique_pose (UniversalProperty a b)
+
+           | [ _ : appcontext[TerminalProperty_Morphism ?a ?b ?c] |- _ ] => unique_pose (TerminalProperty a b c)
+           | [ _ : appcontext[InitialProperty_Morphism ?a ?b ?c] |- _ ] => unique_pose (InitialProperty a b c)
+           | [ _ : appcontext[UniversalProperty_Morphism ?a ?b ?c] |- _ ] => unique_pose (UniversalProperty a b c)
+           | [ |- appcontext[TerminalProperty_Morphism ?a ?b ?c] ] => unique_pose (TerminalProperty a b c)
+           | [ |- appcontext[InitialProperty_Morphism ?a ?b ?c] ] => unique_pose (InitialProperty a b c)
+           | [ |- appcontext[UniversalProperty_Morphism ?a ?b ?c] ] => unique_pose (UniversalProperty a b c)
          end.
