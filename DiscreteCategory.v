@@ -1,6 +1,5 @@
-Require Import Bool Omega.
 Require Export Category SmallCategory.
-Require Import DefinitionSimplification.
+Require Import Common DefinitionSimplification.
 
 Ltac destruct_to_empty_set :=
   match goal with
@@ -15,10 +14,7 @@ Ltac destruct_to_empty_set_in_match :=
     | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
   end.
 
-Hint Extern 1 (@eq unit ?a ?b) => try destruct a; try destruct b; try reflexivity.
-Hint Extern 1 (@eq Empty_set ?a ?b) => destruct a || destruct b.
 Hint Extern 2 (_ = _) => simpl in *; tauto.
-Hint Extern 1 unit => constructor.
 
 Section DCategory.
   Variable O : Type.
@@ -54,9 +50,10 @@ Section DCategory.
     simpl_eq_dec.
   Defined.
 
+  Set Printing All.
   Definition DiscreteCategory : Category.
     refine {| Object := O;
-      Morphism := (fun s d => if s == d then unit else Empty_set);
+      Morphism := (fun s d => (if s == d then unit else Empty_set) : Set);
       Compose := DiscreteCategory_Compose;
       Identity := DiscreteCategory_Identity
     |};
