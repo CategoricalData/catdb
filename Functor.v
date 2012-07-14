@@ -61,7 +61,7 @@ Ltac functor_eq_step := functor_eq_step_with idtac.
 Ltac functor_eq := functor_eq_with idtac.
 
 Section FunctorComposition.
-  Variable B C D E : Category.
+  Variables B C D E : Category.
 
   Hint Rewrite FCompositionOf FIdentityOf.
 
