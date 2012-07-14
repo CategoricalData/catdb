@@ -1,6 +1,6 @@
 Require Import Setoid FunctionalExtensionality.
 Require Export Category Functor AdjointUnit.
-Require Import Common Hom.
+Require Import Common Hom SetCategory.
 
 Set Implicit Arguments.
 
@@ -40,17 +40,14 @@ Section Adjunction.
     forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@MorphismOf _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
       Compose (proj1_sig (T.(AIsomorphism) B B')) (@MorphismOf _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')).
+    Opaque TypeCat HomFunctor.
     intros.
     pose (T.(AIsomorphism) B B').
     pose (T.(AIsomorphism) A A').
     repeat match goal with
              | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
-           end; unfold InverseOf in *; destruct_hypotheses.
-    eapply iso_is_epi; [ eauto | ]; eapply iso_is_mono; [ eauto | ].
-      repeat match goal with
-               | [ H : _ |- _ ]
-                 => try_associativity ltac:(rewrite H; (rewrite LeftIdentity || rewrite RightIdentity))
-             end.
+           end; unfold InverseOf in *; destruct_hypotheses;
+    pre_compose_to_identity; post_compose_to_identity;
     apply ACommutes.
   Qed.
 End Adjunction.
