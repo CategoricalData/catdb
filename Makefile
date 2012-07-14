@@ -1,6 +1,7 @@
 MODULES    := Common \
 	FEqualDep \
 	DefinitionSimplification \
+	StructureEquality \
 	Category \
 	CategoryEquality \
 	SmallCategory \
