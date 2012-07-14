@@ -1134,7 +1134,7 @@ unfold CategoryIsomorphism, IsCategoryIsomorphism, InverseOf in *. hnf; simpl;
     ).
   Defined.
 End Adjoint.
-*)
+
 
 
 
@@ -1268,3 +1268,4 @@ Section Adjoint.
     ).
   Defined.
 End Adjoint.
+*)
