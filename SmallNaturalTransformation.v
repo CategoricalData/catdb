@@ -1,8 +1,10 @@
-Require Import ProofIrrelevance.
+Require Import ProofIrrelevance JMeq.
 Require Export SmallCategory Functor NaturalTransformation FEqualDep.
 Require Import Common StructureEquality.
 
 Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 Section Categories_NaturalTransformation.
   Variable C : SmallCategory.
@@ -34,19 +36,30 @@ Section Categories_NaturalTransformation.
 End Categories_NaturalTransformation.
 
 Section SmallNaturalTransformations_Equal.
-  Variable C : SmallCategory.
-  Variable D : Category.
-  Variables F G : Functor C D.
-
-  Lemma SmallNaturalTransformations_Equal : forall (T U : SmallNaturalTransformation F G),
+  Lemma SmallNaturalTransformations_Equal (C : SmallCategory) D (F G : Functor C D) : forall (T U : SmallNaturalTransformation F G),
     SComponentsOf T = SComponentsOf U
     -> T = U.
     destruct T, U; simpl; intros; repeat subst;
-      f_equal; reflexivity || apply proof_irrelevance.
+      f_equal; apply proof_irrelevance.
+  Qed.
+
+  Lemma SmallNaturalTransformations_JMeq (C C' : SmallCategory) D D' (F G : Functor C D) (F' G' : Functor C' D')
+    (T : SmallNaturalTransformation F G) (U : SmallNaturalTransformation F' G') :
+    C = C'
+    -> D = D'
+    -> (C = C' -> D = D' -> F == F')
+    -> (C = C' -> D = D' -> G == G')
+    -> (C = C' -> D = D' -> F == F' -> G == G' -> SComponentsOf T == SComponentsOf U)
+    -> T == U.
+    intros; repeat subst; firstorder; repeat subst;
+      destruct T, U; simpl in *; intros; repeat subst;
+        JMeq_eq;
+        f_equal; apply proof_irrelevance.
   Qed.
 End SmallNaturalTransformations_Equal.
 
-Ltac snt_eq_step_with tac := structures_eq_step_with SmallNaturalTransformations_Equal tac.
+Ltac snt_eq_step_with tac :=
+  structures_eq_step_with_tac ltac:(apply SmallNaturalTransformations_Equal || apply SmallNaturalTransformations_JMeq) tac.
 
 Ltac snt_eq_with tac := repeat snt_eq_step_with tac.
 

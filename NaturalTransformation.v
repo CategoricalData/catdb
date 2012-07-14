@@ -1,8 +1,10 @@
-Require Import FunctionalExtensionality ProofIrrelevance.
+Require Import ProofIrrelevance JMeq.
 Require Export Functor FEqualDep.
-Require Import Common.
+Require Import Common StructureEquality.
 
 Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 Section Categories_NaturalTransformation.
   Variable C D : Category.
@@ -33,26 +35,29 @@ Section Categories_NaturalTransformation.
 End Categories_NaturalTransformation.
 
 Section NaturalTransformations_Equal.
-  Variables C D : Category.
-  Variables F G : Functor C D.
-
-  Lemma NaturalTransformations_Equal : forall (T U : NaturalTransformation F G),
+  Lemma NaturalTransformations_Equal C D (F G : Functor C D) : forall (T U : NaturalTransformation F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
     destruct T, U; simpl; intros; repeat subst;
       f_equal; reflexivity || apply proof_irrelevance.
   Qed.
+
+  Lemma NaturalTransformations_JMeq C D C' D' (F G : Functor C D) (F' G' : Functor C' D') (T : NaturalTransformation F G) (U : NaturalTransformation F' G') :
+    C = C'
+    -> D = D'
+    -> (C = C' -> D = D' -> F == F')
+    -> (C = C' -> D = D' -> G == G')
+    -> (C = C' -> D = D' -> F == F' -> G == G' -> ComponentsOf T == ComponentsOf U)
+    -> T == U.
+    intros; repeat subst; firstorder; repeat subst;
+      destruct T, U; simpl in *; intros; repeat subst;
+        JMeq_eq;
+        f_equal; apply proof_irrelevance.
+  Qed.
 End NaturalTransformations_Equal.
 
-Ltac nt_eq_step_with tac := intros; simpl;
-  match goal with
-    | _ => reflexivity
-    | [ |- @eq (@NaturalTransformation _ _ _ _) _ _ ] => apply NaturalTransformations_Equal
-    | [ |- (fun _ : ?A => _) = _ ] => apply (@functional_extensionality_dep A); intro
-    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
-    | [ |- _ = _ ] => apply proof_irrelevance
-    | _ => tac
-  end; repeat simpl.
+Ltac nt_eq_step_with tac :=
+  structures_eq_step_with_tac ltac:(apply NaturalTransformations_Equal || apply NaturalTransformations_JMeq) tac.
 
 Ltac nt_eq_with tac := repeat nt_eq_step_with tac.
 

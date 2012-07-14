@@ -1,6 +1,6 @@
-Require Import FunctionalExtensionality ProofIrrelevance JMeq.
+Require Import ProofIrrelevance JMeq.
 Require Export Category.
-Require Import Common FEqualDep.
+Require Import Common FEqualDep StructureEquality.
 
 Set Implicit Arguments.
 
@@ -39,17 +39,21 @@ Section Functors_Equal.
       f_equal; apply proof_irrelevance.
   Qed.
 
+  Lemma Functors_JMeq : forall C D C' D' (F : Functor C D) (G : Functor C' D'),
+    C = C'
+    -> D = D'
+    -> (C = C' -> D = D' -> ObjectOf F == ObjectOf G)
+    -> (C = C' -> D = D' -> ObjectOf F == ObjectOf G -> MorphismOf F == MorphismOf G)
+    -> F == G.
+    intros; repeat subst; firstorder;
+      destruct F, G; simpl in *; repeat subst;
+        JMeq_eq;
+        f_equal; apply proof_irrelevance.
+  Qed.
 End Functors_Equal.
 
-Ltac functor_eq_step_with tac := intros; simpl;
-  match goal with
-    | _ => reflexivity
-    | [ |- @eq (Functor _ _) _ _ ] => apply Functors_Equal
-    | [ |- (fun _ : ?A => _) = _ ] => apply functional_extensionality_dep; intro
-    | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
-    | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
-    | _ => tac
-  end; repeat simpl; JMeq_eq.
+Ltac functor_eq_step_with tac :=
+  structures_eq_step_with_tac ltac:(apply Functors_Equal || apply Functors_JMeq) tac.
 
 Ltac functor_eq_with tac := repeat functor_eq_step_with tac.
 

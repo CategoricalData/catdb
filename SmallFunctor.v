@@ -38,9 +38,21 @@ Section SmallFunctors_Equal.
     destruct F, G; simpl; intros; firstorder; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
+
+  Lemma SmallFunctors_JMeq : forall C D C' D' (F : SmallFunctor C D) (G : SmallFunctor C' D'),
+    C = C'
+    -> D = D'
+    -> (C = C' -> D = D' -> @SObjectOf _ _ F == @SObjectOf _ _ G)
+    -> (C = C' -> D = D' -> @SObjectOf _ _ F == @SObjectOf _ _ G -> @SMorphismOf _ _ F == @SMorphismOf _ _ G)
+    -> F == G.
+    intros; repeat subst; firstorder;
+      destruct F, G; simpl in *; repeat subst;
+        JMeq_eq;
+        f_equal; apply proof_irrelevance.
+  Qed.
 End SmallFunctors_Equal.
 
-Ltac sfunctor_eq_step_with tac := structures_eq_step_with SmallFunctors_Equal tac.
+Ltac sfunctor_eq_step_with tac := structures_eq_step_with_tac ltac:(apply SmallFunctors_Equal || apply SmallFunctors_JMeq) tac.
 
 Ltac sfunctor_eq_with tac := repeat sfunctor_eq_step_with tac.
 
