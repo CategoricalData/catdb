@@ -1,5 +1,5 @@
 Require Export LimitFunctors.
-Require Import Common Category Functor FunctorCategory SmallCategory SmallNaturalTransformation DefinitionSimplification.
+Require Import Common DefinitionSimplification Category Functor FunctorCategory SmallCategory SmallNaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -38,27 +38,24 @@ Section InducedMaps.
 
   Hypothesis TriangleCommutes : ComposeFunctors F2 G = F1.
 
-  Section Limit.
-    Hypothesis F1_HasLimit : FunctorHasLimit F1.
-    Hypothesis F2_HasLimit : FunctorHasLimit F2.
+  Hint Rewrite TriangleCommutes.
 
-    Let limF1 := projT1 F1_HasLimit.
-    Let limF2 := projT1 F2_HasLimit.
+  Section Limit.
+    Hypothesis F1_Limit : Limit F1.
+    Hypothesis F2_Limit : Limit F2.
+
+    Let limF1 := LimitObject F1_Limit.
+    Let limF2 := LimitObject F2_Limit.
 
     Definition InducedLimitMap' : Morphism D limF2 limF1.
-      intro_projT2.
-      unfold Limit in *.
-      destruct_sig.
-      specialize_all_ways.
+      unfold LimitObject, Limit in *.
+      intro_universal_morphisms.
       repeat match goal with
                | [ t : _, F : _ |- _ ] => unique_pose (SNTComposeF t (IdentitySmallNaturalTransformation F))
              end.
-      simpl in *.
-      repeat match goal with
-               | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
-             end.
-      subst limF1 limF2.
-      specialized_assumption destruct_sig.
+      autorewrite with core in *.
+      intro_universal_property_morphisms.
+      specialized_assumption idtac.
     Defined.
 
     Definition InducedLimitMap'' : Morphism D limF2 limF1.
@@ -70,26 +67,21 @@ Section InducedMaps.
   End Limit.
 
   Section Colimit.
-    Hypothesis F1_HasColimit : FunctorHasColimit F1.
-    Hypothesis F2_HasColimit : FunctorHasColimit F2.
+    Hypothesis F1_Colimit : Colimit F1.
+    Hypothesis F2_Colimit : Colimit F2.
 
-    Let colimF1 := projT1 F1_HasColimit.
-    Let colimF2 := projT1 F2_HasColimit.
+    Let colimF1 := ColimitObject F1_Colimit.
+    Let colimF2 := ColimitObject F2_Colimit.
 
     Definition InducedColimitMap' : Morphism D colimF1 colimF2.
-      intro_projT2.
-      unfold Colimit in *.
-      destruct_sig.
-      specialize_all_ways.
+      unfold Colimit, ColimitObject in *.
+      intro_universal_morphisms.
       repeat match goal with
                | [ t : _, F : _ |- _ ] => unique_pose (SNTComposeF t (IdentitySmallNaturalTransformation F))
              end.
-      simpl in *.
-      repeat match goal with
-               | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
-             end.
-      subst colimF1 colimF2.
-      specialized_assumption destruct_sig.
+      autorewrite with core in *.
+      intro_universal_property_morphisms.
+      specialized_assumption idtac.
     Defined.
 
     Definition InducedColimitMap'' : Morphism D colimF1 colimF2.
