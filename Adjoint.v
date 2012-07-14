@@ -189,9 +189,8 @@ Section AdjunctionEquivalences.
       split; intros;
         t_with t';
         repeat rewrite (adjunction_naturality' A), LeftIdentity;
-          match goal with
-            | [ |- appcontext[proj1_sig ?x] ] => let H := fresh in assert (H := proj2_sig x)
-          end; unfold InverseOf in *; simpl in *; destruct_hypotheses; fg_equal; auto
+          intro_proj2_sig_from_goal;
+          unfold InverseOf in *; simpl in *; destruct_hypotheses; fg_equal; auto
     ).
     Grab Existential Variables.
     abstract (
@@ -212,12 +211,11 @@ Section AdjunctionEquivalences.
           apply functional_extensionality_dep; intros;
           solve [
               intro_proj2_sig_from_goal;
-              unfold unique in *; destruct_hypotheses;
-                auto
-          ] ||
-          solve [
-              repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
-                let H := fresh in assert (H := Commutes T); simpl in H; rewrite <- H; reflexivity
+              destruct_hypotheses;
+              auto
+            |
+              repeat rewrite FCompositionOf; repeat rewrite Associativity; f_equal;
+                simpl_do do_rewrite_rev (Commutes T); reflexivity
           ]
       ).
   Defined.
