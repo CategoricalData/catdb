@@ -2,6 +2,7 @@ MODULES    := Common \
 	FEqualDep \
 	DefinitionSimplification \
 	StructureEquality \
+	EquivalenceRelationGenerator \
 	Category \
 	CategoryEquality \
 	SmallCategory \
