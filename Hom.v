@@ -64,3 +64,36 @@ Section HomFunctor.
     ).
   Defined.
 End HomFunctor.
+
+Section SplitHomFunctor.
+  Variable C : Category.
+  Let COp := OppositeCategory C.
+
+  Lemma SplitHom (X Y : C * C) : forall gh,
+    @MorphismOf _ _ (HomFunctor C) X Y gh =
+    (Compose
+      (@MorphismOf _ _ (HomFunctor C) (fst X, snd Y) Y (fst gh, @Identity C _))
+      (@MorphismOf _ _ (HomFunctor C) X (fst X, snd Y) (@Identity C _, snd gh))).
+  Proof.
+    destruct X, Y.
+    intro gh; destruct gh.
+    simpl in *.
+    apply functional_extensionality_dep; intro.
+    autorewrite with core.
+    reflexivity.
+  Qed.
+
+  Lemma SplitHom' (X Y : C * C) : forall gh,
+    @MorphismOf _ _ (HomFunctor C) X Y gh =
+    (Compose
+      (@MorphismOf _ _ (HomFunctor C) (fst Y, snd X) Y (@Identity C _, snd gh))
+      (@MorphismOf _ _ (HomFunctor C) X (fst Y, snd X) (fst gh, @Identity C _))).
+  Proof.
+    destruct X, Y.
+    intro gh; destruct gh.
+    simpl in *.
+    apply functional_extensionality_dep; intro.
+    autorewrite with core.
+    reflexivity.
+  Qed.
+End SplitHomFunctor.
