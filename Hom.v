@@ -129,11 +129,11 @@ Section SplitHomFunctor.
   Variable C : SpecializedCategory morC.
   Let COp := OppositeCategory C.
 
-  Lemma SplitHom (X Y : C * C) : forall gh,
+  Lemma SplitHom (X Y : COp * C) : forall gh,
     @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
     (Compose
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (fst X, snd Y) Y (fst gh, @Identity _ _ C _))
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) X (fst X, snd Y) (@Identity _ _ C _, snd gh))).
+      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd Y)) (fst X) (fst Y) (fst gh))
+      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst X)) (snd X) (snd Y) (snd gh))).
   Proof.
     Transparent Object Morphism Identity Compose ObjectOf MorphismOf.
     destruct X, Y.
@@ -144,11 +144,11 @@ Section SplitHomFunctor.
     reflexivity.
   Qed.
 
-  Lemma SplitHom' (X Y : C * C) : forall gh,
+  Lemma SplitHom' (X Y : COp * C) : forall gh,
     @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
     (Compose
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (fst Y, snd X) Y (@Identity _ _ C _, snd gh))
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) X (fst Y, snd X) (fst gh, @Identity _ _ C _))).
+      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst Y)) (snd X) (snd Y) (snd gh))
+      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd X)) (fst X) (fst Y) (fst gh))).
   Proof.
     Transparent Object Morphism Identity Compose ObjectOf MorphismOf.
     destruct X, Y.
