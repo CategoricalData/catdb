@@ -326,6 +326,36 @@ Section Adjoint.
     simpl.
     change (diagonal_functor_morphism_of C D) with (@MorphismOf _ _ _ _ _ _ (DiagonalFunctor C D)).
     Opaque MorphismOf.
+    Transparent ProductCategory Morphism.
+    Print MorphismOf.
+    Implicit Arguments MorphismOf [objC morC objD morD].
+    Check @MorphismOf _ _ _ _ _ _ (HomFunctor C).
+    match goal with
+      | [ |- context[@MorphismOf _ _ _ _ _ _ (HomFunctor ?C) ?X ?Y ?gh] ] => let H := fresh in pose (@SplitHom _ _ C X Y gh) as H; simpl in H;
+        let x := constr:(@MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh) in let x' := fresh in
+          pose x as x'; change x with x' in H |- *
+    end.
+    change (MorphismOf (HomFunctor (C ^ D))
+        (MorphismOf (DiagonalFunctor C D) m, s0)) with H0 in H.
+    Implicit Arguments MorphismOf.
+    rewrite H.
+     "MorphismOf (HomFunctor (C ^ D))
+                             ((ProductFunctor
+                                 (OppositeFunctor (DiagonalFunctor C D))
+                                 (IdentityFunctor (C ^ D)))
+                                (o0, s))
+                             ((ProductFunctor
+                                 (OppositeFunctor (DiagonalFunctor C D))
+                                 (IdentityFunctor (C ^ D)))
+                                (o, s1))
+                             (MorphismOf (DiagonalFunctor C D) o o0 m, s0)"
+    Set Printing All.
+    rewrite H.
+    simpl in *.
+    rewrite H.
+    rewrite SplitHom; simpl; symmetry.
+    Implicit Arguments MorphismOf [objC morC].
+    Check (@SplitHom objC morC C).
     rewrite SplitHom; simpl; symmetry.
     rewrite SplitHom; simpl; symmetry.
     Transparent ObjectOf.
@@ -334,6 +364,114 @@ Section Adjoint.
     Opaque ObjectOf.
     repeat rewrite Associativity.
     sanitize_spcategory.
+    match goal with
+      | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+        eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
+          try_associativity ltac:(apply f_equal2; try reflexivity)
+    end;
+    unfold LimitObject.
+    intro_universal_properties.
+    Transparent HomFunctor MorphismOf.
+    Opaque DiagonalFunctor.
+    simpl.
+    Opaque HomFunctor MorphismOf FunctorCategory.
+    Transparent Compose.
+    simpl.
+    Opaque Compose.
+    Transparent TypeCat Morphism Compose MorphismOf.
+    simpl in *.
+    apply functional_extensionality_dep; intro.
+    repeat rewrite LeftIdentity.
+    match goal with
+      | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => pose (TerminalProperty a b c); destruct_hypotheses
+    end.
+    move H1 at bottom.
+    rename s into F; rename s1 into F'; rename o0 into c; rename o into c'; rename m into f; rename s0 into a.
+    Focus 2.
+    Transparent HomFunctor MorphismOf.
+    Opaque DiagonalFunctor TypeCat Morphism Compose.
+    simpl.
+    Transparent Morphism TypeCat.
+    simpl.
+    repeat match goal with
+             | [ |- context G [fun g : ?T => Compose ?a (Compose g (Identity ?b))] ]
+               => let H := fresh in let G' := context G[fun g : T => Compose a g] in
+                 cut G'; [
+                   intro H; rewrite H; apply f_equal2; try reflexivity;
+                     apply functional_extensionality_dep; intro; rewrite RightIdentity; reflexivity
+                   | ]
+           end.
+    Check Morphism TypeCat.
+    symmetry.
+
+(****** HERE ******)
+    Transparent Compose Morphism TypeCat
+    unfold Compose at 2.
+    match goal with
+      | [ |- context G [fun g : ?T => Compose ?a (Compose g (Identity ?b))] ]
+        => let G' := context G[fun g : T => Compose a g] in
+          cut G'
+    end.
+    intro H'.
+    rewrite H'.
+    apply f_equal2; try reflexivity.
+    simpl.
+    Transparent Morphism TypeCat.
+    apply functional_extensionality_dep; intro. rewrite RightIdentity; reflexivity.
+    apply functional_extensionality_dep; intro rewrite RightIdentity; reflexivity.
+
+    [ | apply functional_extensionality_dep; intro; rewrite RightIdentity; reflexivity ].
+    let x := constr:((fun g : Morphism C o0 (TerminalMorphism_Object (HL s)) =>
+      Compose
+        (TerminalProperty_Morphism (HL s1) (TerminalMorphism_Object (HL s))
+           (NTComposeT s0 (TerminalMorphism_Morphism (HL s))))
+        (Compose g (Identity o0)))) in
+    match x with
+      | context[fun g : ?T => Compose ?a (Compose g (Identity ?b))] => replace (fun g : T => Compose a (Compose g (Identity b))) with (fun g : T => Compose a g)
+    end.
+    replace (fun g : Morphism C o0 (TerminalMorphism_Object (HL s)) =>
+      Compose
+        (TerminalProperty_Morphism (HL s1) (TerminalMorphism_Object (HL s))
+           (NTComposeT s0 (TerminalMorphism_Morphism (HL s))))
+        (Compose g (Identity o0))) with (fun g : Morphism C o0 (TerminalMorphism_Object (HL s)) =>
+      Compose
+        (TerminalProperty_Morphism (HL s1) (TerminalMorphism_Object (HL s))
+           (NTComposeT s0 (TerminalMorphism_Morphism (HL s))))
+        g); [ | apply functional_extensionality_dep; intro; rewrite RightIdentity; reflexivity ].
+    Check (fun g : Morphism C o0 (TerminalMorphism_Object (HL s)) =>
+      Compose
+        (TerminalProperty_Morphism (HL s1) (TerminalMorphism_Object (HL s))
+           (NTComposeT s0 (TerminalMorphism_Morphism (HL s))))
+        (Compose g (Identity o0))).
+    Check (fun g : Morphism C o0 (TerminalMorphism_Object (HL s)) =>
+      Compose
+        (TerminalProperty_Morphism (HL s1) (TerminalMorphism_Object (HL s))
+           (NTComposeT s0 (TerminalMorphism_Morphism (HL s))))
+        (Compose g (Identity o0))).
+    Opaque HomFunctor MorphismOf FunctorCategory.
+    Transparent Compose.
+    simpl.
+    Opaque Compose.
+    Transparent TypeCat Morphism Compose MorphismOf.
+    simpl in *.
+    apply functional_extensionality_dep; intro.
+    repeat rewrite RightIdentity.
+
+
+
+
+    match goal with
+      | [ |- @eq ?T _ _ ] => pose T as T'
+    end.
+
+    apply functional_extensionality_dep; intro.
+    unfold Compose at 1.
+    Opaque Compose.
+    simpl.
+
+    rewrite LeftIdentity.
+    destruct_hypotheses.
+    rewrite ( (HomFunctor (C ^ D))).
     Transparent Object Morphism Compose Identity ObjectOf MorphismOf HomFunctor.
     Set Printing All.
     do 2 match goal with
