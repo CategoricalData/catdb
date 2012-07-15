@@ -1,4 +1,4 @@
-Require Import Program.
+Require Import FunctionalExtensionality.
 Require Export Category Functor.
 Require Import Common SmallCategory Duals SmallDuals ProductCategory SetCategory.
 
@@ -69,11 +69,11 @@ Section SplitHomFunctor.
   Variable C : Category.
   Let COp := OppositeCategory C.
 
-  Lemma SplitHom (X Y : C * C) : forall gh,
+  Lemma SplitHom (X Y : COp * C) : forall gh,
     @MorphismOf _ _ (HomFunctor C) X Y gh =
     (Compose
-      (@MorphismOf _ _ (HomFunctor C) (fst X, snd Y) Y (fst gh, @Identity C _))
-      (@MorphismOf _ _ (HomFunctor C) X (fst X, snd Y) (@Identity C _, snd gh))).
+      (@MorphismOf _ _ (ContravariantHomFunctor C (snd Y)) (fst X) (fst Y) (fst gh))
+      (@MorphismOf _ _ (CovariantHomFunctor C (fst X)) (snd X) (snd Y) (snd gh))).
   Proof.
     destruct X, Y.
     intro gh; destruct gh.
@@ -83,11 +83,11 @@ Section SplitHomFunctor.
     reflexivity.
   Qed.
 
-  Lemma SplitHom' (X Y : C * C) : forall gh,
+  Lemma SplitHom' (X Y : COp * C) : forall gh,
     @MorphismOf _ _ (HomFunctor C) X Y gh =
     (Compose
-      (@MorphismOf _ _ (HomFunctor C) (fst Y, snd X) Y (@Identity C _, snd gh))
-      (@MorphismOf _ _ (HomFunctor C) X (fst Y, snd X) (fst gh, @Identity C _))).
+      (@MorphismOf _ _ (CovariantHomFunctor C (fst Y)) (snd X) (snd Y) (snd gh))
+      (@MorphismOf _ _ (ContravariantHomFunctor C (snd X)) (fst X) (fst Y) (fst gh))).
   Proof.
     destruct X, Y.
     intro gh; destruct gh.
