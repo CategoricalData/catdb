@@ -259,13 +259,103 @@ Section Adjoint.
       (@MorphismOf _ _ (HomFunctor C) (c, _) (c', _) (m, (LimitFunctor HL).(MorphismOf) m'))
       (@LimitAdjunction_AComponentsOf c F)).
   subst LimitOf ColimitOf.
+  unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse, LimitObject, LimitProperty_Morphism in *.
   clear HC; change (DiagonalFunctor C D) with Δ.
+  repeat match goal with
+           | [ |- appcontext[fun x : ?T => ?f x] ] => change (fun x : T => f x) with f in *
+         end.
+  Opaque Compose MorphismOf.
+  simpl.
+  repeat match goal with
+           | [ |- context[@MorphismOf _ _ (HomFunctor ?C) ?s ?d ?m] ] => simpl_do_clear do_rewrite (@SplitHom C s d m)
+         end.
+  repeat rewrite Associativity.
+  simpl in *.
+  unfold LimitObject.
+  rename m' into a. rename m into f.
+  change (diagonal_functor_object_of C D) with (ObjectOf Δ).
+  Opaque Δ.
+
+  transitivity (Compose (MorphismOf
+        (ContravariantHomFunctor C (TerminalMorphism_Object (HL F'))) f)
+  (@Compose TypeCat _ _ _ (TerminalProperty_Morphism (HL F') c) (MorphismOf
+           (CovariantHomFunctor (C ^ D) (diagonal_functor_object_of C D c))
+           a)));
+  try_associativity ltac:(apply f_equal2; try reflexivity).
+
+(*  intro_universal_morphisms.
+  intro_universal_properties.
+  specialize_all_ways.*)
+  Transparent MorphismOf Compose.
+  simpl.
+  apply functional_extensionality_dep; intro.
+  pose (TerminalProperty (HL F') c') as H.
+  change (DiagonalFunctor C D) with (Δ) in H.
+  simpl in H.
+  specialize (H (SNTComposeT x (MorphismOf Δ f))).
+  destruct H as [ H0 H1 ]; move H0 at bottom.
+  simpl in *.
+  apply (f_equal (@SComponentsOf _ _ _ _)) in H0.
+  fg_equal.
+  autorewrite with core in *.
+
+
+  Focus 2.
+  change (diagonal_functor_object_of C D) with (ObjectOf Δ).
+  unfold LimitFunctor, LimitObject. simpl.
+  apply functional_extensionality_dep; intro.
+  simpl in *.
+  intro_universal_properties.
+  destruct H6 as [H6 H6']; move H6 at bottom.
+  Transparent Compose.
+  simpl in *.
+  apply (f_equal (@SComponentsOf _ _ _ _)) in H6.
+  fg_equal.
+  autorewrite with core in *.
+
+  Unfocus.
+
+
+
+Print NaturalTransformation.
+  apply
+
+
+
+
+
+
+  specialize H
+
+  ).
+  match goal with
+    | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+      eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
+        try_associativity ltac:(apply f_equal2; try reflexivity)
+  end.
+  intro_universal_morphisms.
+  intro_universal_properties.
+  specialize_all_ways.
+  Transparent MorphismOf Compose.
+  simpl.
+  apply functional_extensionality_dep; intro.
+  destruct (TerminalProperty (HL F') c'
+     (SNTComposeT x (diagonal_functor_morphism_of C D c' c m))).
+  simpl in *.
+  apply (f_equal (@SComponentsOf _ _ _ _)) in H6.
+  fg_equal.
+  simpl in H6.
+  pose (x.(SComponentsOf)).
+  rename m into f.
+  rename m' into a.
+  pose (TerminalProperty (HL F') c').
+  rewrite Commutes.
+
 (*    pose (@LimitAdjunction_AIsomorphism' (fst s) (snd s)).
     pose (@LimitAdjunction_AIsomorphism' (fst d) (snd d)).
     pose (@LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s)).
     pose (@LimitAdjunction_AComponentsOf_Inverse (fst d) (snd d)).*)
     Opaque Compose ObjectOf MorphismOf.
-    unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse, LimitObject, LimitProperty_Morphism in *.
     Opaque Object Morphism Compose Identity ObjectOf MorphismOf.
     Opaque HomFunctor.
     Transparent MorphismOf.
@@ -273,7 +363,64 @@ Section Adjoint.
     change (diagonal_functor_morphism_of C D) with (@MorphismOf _ _ Δ).
     change (DiagonalFunctor C D) with Δ.
     Opaque MorphismOf.
-    rewrite SplitHom; simpl; symmetry.
+    change (fun T => TerminalProperty_Morphism (HL F') c' T) with (TerminalProperty_Morphism (HL F') c').
+    change (fun T => TerminalProperty_Morphism (HL F) c T) with (TerminalProperty_Morphism (HL F) c).
+    Transparent Object OppositeCategory.
+    assert (H := @SplitHom (C ^ D) (Δ c, F) (Δ c', F') (MorphismOf Δ m, m')).
+    symmetry in H.
+    Set Printing All.
+    rewrite <- H.
+
+ (@MorphismOf
+           (ProductCategory (OppositeCategory (FunctorCategory D C))
+              (FunctorCategory D C)) TypeCat
+           (HomFunctor (FunctorCategory D C))
+           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
+              (@ObjectOf C (FunctorCategory D C) Δ c) F)
+           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
+              (@ObjectOf C (FunctorCategory D C) Δ c') F')
+           (@pair
+              (Morphism (FunctorCategory D C)
+                 (@ObjectOf C (FunctorCategory D C) Δ c')
+                 (@ObjectOf C (FunctorCategory D C) Δ c))
+              (Morphism (FunctorCategory D C) F F')
+              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m'))
+
+(@MorphismOf
+           (ProductCategory (OppositeCategory (FunctorCategory D C))
+              (FunctorCategory D C)) TypeCat
+           (HomFunctor (FunctorCategory D C))
+           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
+              (@ObjectOf C (FunctorCategory D C) Δ c) F)
+           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
+              (@ObjectOf C (FunctorCategory D C) Δ c') F')
+           (@pair
+              (Morphism (FunctorCategory D C)
+                 (@ObjectOf C (FunctorCategory D C) Δ c')
+                 (@ObjectOf C (FunctorCategory D C) Δ c))
+              (Morphism (FunctorCategory D C) F F')
+              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m')))
+
+
+
+    (@MorphismOf
+           (ProductCategory (OppositeCategory (FunctorCategory D C))
+              (FunctorCategory D C)) TypeCat
+           (HomFunctor (FunctorCategory D C))
+           (@pair (Object (FunctorCategory D C))
+              (Object (FunctorCategory D C))
+              (@ObjectOf C (FunctorCategory D C) Δ c) F)
+           (@pair (Object (FunctorCategory D C))
+              (Object (FunctorCategory D C))
+              (@ObjectOf C (FunctorCategory D C) Δ c') F')
+           (@pair
+              (Morphism (FunctorCategory D C)
+                 (@ObjectOf C (FunctorCategory D C) Δ c')
+                 (@ObjectOf C (FunctorCategory D C) Δ c))
+              (Morphism (FunctorCategory D C) F F')
+              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m'))
+
+    rewrite (@SplitHom (C ^ D)); simpl; symmetry.
     rewrite SplitHom; simpl; symmetry.
     Transparent ObjectOf.
     Opaque DiagonalFunctor.
