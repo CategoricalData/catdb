@@ -70,7 +70,14 @@ Section YonedaLemma.
 
   Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
     simpl; intro Xc.
-    refine {| ComponentsOf' := (fun c' : C => (fun f : Morphism _ c c' => X.(MorphismOf) f Xc) : TypeCat.(Morphism) (CovariantHomFunctor C c c') (X c')) |}.
+    hnf.
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+          (fun c' : C => (fun f : Morphism _ c c' => X.(MorphismOf) f Xc))
+          _
+        )
+    end;
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
@@ -105,7 +112,14 @@ Section CoYonedaLemma.
 
   Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
     simpl; intro Xc.
-    refine {| ComponentsOf' := (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc) : TypeCat.(Morphism) (ContravariantHomFunctor C c c') (X c')) |}.
+    hnf.
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+          (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc))
+          _
+        )
+    end;
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
