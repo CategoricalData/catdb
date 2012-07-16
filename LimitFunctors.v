@@ -182,7 +182,7 @@ End LimitFunctors.
 
 Definition LimitFunctor := Eval cbv beta iota zeta delta [LimitFunctor'(* LimitFunctor_morphism_of*)] in LimitFunctor'.
 Definition ColimitFunctor := Eval cbv beta iota zeta delta [ColimitFunctor'(* ColimitFunctor_morphism_of*)] in ColimitFunctor'.
-(*
+
 Section Adjoint.
   Variable C : Category.
   Variable D : SmallCategory.
@@ -198,8 +198,7 @@ Section Adjoint.
     Morphism TypeCat
     (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F))
     (HomFunctor C (c, (LimitFunctor HL) F))
-    := (fun T : HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)
-      => LimitProperty_Morphism (HL F) T : HomFunctor C (c, (LimitFunctor HL) F)).
+    := (fun T => LimitProperty_Morphism (HL F) T).
 
   Definition LimitAdjunction_AComponentsOf_Inverse (c : C) (F : C ^ D)
     : TypeCat.(Morphism) (HomFunctor C (c, (LimitFunctor HL) F)) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)).
@@ -249,1170 +248,166 @@ Section Adjoint.
     exact (@LimitAdjunction_AIsomorphism' _ _).
   Defined.
 
-  Check @ACommutes _ _ (DiagonalFunctor C D) (LimitFunctor HL).
-
-  Definition LimitAdjunction_ACommutes (c : C) (F : C ^ D) (c' : C) (F' : C ^ D)
+  Lemma LimitAdjunction_ACommutes (c : C) (F : C ^ D) (c' : C) (F' : C ^ D)
     (m : Morphism C c' c) (m' : Morphism (C ^ D) F F') :
     (Compose (@LimitAdjunction_AComponentsOf c' F')
       (@MorphismOf _ _ (HomFunctor (C ^ D)) (_, F) (_, F') ((DiagonalFunctor C D).(MorphismOf) m, m'))) =
     (Compose
       (@MorphismOf _ _ (HomFunctor C) (c, _) (c', _) (m, (LimitFunctor HL).(MorphismOf) m'))
       (@LimitAdjunction_AComponentsOf c F)).
-  subst LimitOf ColimitOf.
-  unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse, LimitObject, LimitProperty_Morphism in *.
-  clear HC; change (DiagonalFunctor C D) with Δ.
-  repeat match goal with
-           | [ |- appcontext[fun x : ?T => ?f x] ] => change (fun x : T => f x) with f in *
-         end.
-  Opaque Compose MorphismOf.
-  simpl.
-  repeat match goal with
-           | [ |- context[@MorphismOf _ _ (HomFunctor ?C) ?s ?d ?m] ] => simpl_do_clear do_rewrite (@SplitHom C s d m)
-         end.
-  repeat rewrite Associativity.
-  simpl in *.
-  unfold LimitObject.
-  rename m' into a. rename m into f.
-  change (diagonal_functor_object_of C D) with (ObjectOf Δ).
-  Opaque Δ.
-
-  transitivity (Compose (MorphismOf
-        (ContravariantHomFunctor C (TerminalMorphism_Object (HL F'))) f)
-  (@Compose TypeCat _ _ _ (TerminalProperty_Morphism (HL F') c) (MorphismOf
-           (CovariantHomFunctor (C ^ D) (diagonal_functor_object_of C D c))
-           a)));
-  try_associativity ltac:(apply f_equal2; try reflexivity).
-
-(*  intro_universal_morphisms.
-  intro_universal_properties.
-  specialize_all_ways.*)
-  Transparent MorphismOf Compose.
-  simpl.
-  apply functional_extensionality_dep; intro.
-  pose (TerminalProperty (HL F') c') as H.
-  change (DiagonalFunctor C D) with (Δ) in H.
-  simpl in H.
-  specialize (H (SNTComposeT x (MorphismOf Δ f))).
-  destruct H as [ H0 H1 ]; move H0 at bottom.
-  simpl in *.
-  apply (f_equal (@SComponentsOf _ _ _ _)) in H0.
-  fg_equal.
-  autorewrite with core in *.
-
-
-  Focus 2.
-  change (diagonal_functor_object_of C D) with (ObjectOf Δ).
-  unfold LimitFunctor, LimitObject. simpl.
-  apply functional_extensionality_dep; intro.
-  simpl in *.
-  intro_universal_properties.
-  destruct H6 as [H6 H6']; move H6 at bottom.
-  Transparent Compose.
-  simpl in *.
-  apply (f_equal (@SComponentsOf _ _ _ _)) in H6.
-  fg_equal.
-  autorewrite with core in *.
-
-  Unfocus.
-
-
-
-Print NaturalTransformation.
-  apply
-
-
-
-
-
-
-  specialize H
-
-  ).
-  match goal with
-    | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
-      eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
-        try_associativity ltac:(apply f_equal2; try reflexivity)
-  end.
-  intro_universal_morphisms.
-  intro_universal_properties.
-  specialize_all_ways.
-  Transparent MorphismOf Compose.
-  simpl.
-  apply functional_extensionality_dep; intro.
-  destruct (TerminalProperty (HL F') c'
-     (SNTComposeT x (diagonal_functor_morphism_of C D c' c m))).
-  simpl in *.
-  apply (f_equal (@SComponentsOf _ _ _ _)) in H6.
-  fg_equal.
-  simpl in H6.
-  pose (x.(SComponentsOf)).
-  rename m into f.
-  rename m' into a.
-  pose (TerminalProperty (HL F') c').
-  rewrite Commutes.
-
-(*    pose (@LimitAdjunction_AIsomorphism' (fst s) (snd s)).
-    pose (@LimitAdjunction_AIsomorphism' (fst d) (snd d)).
-    pose (@LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s)).
-    pose (@LimitAdjunction_AComponentsOf_Inverse (fst d) (snd d)).*)
-    Opaque Compose ObjectOf MorphismOf.
-    Opaque Object Morphism Compose Identity ObjectOf MorphismOf.
-    Opaque HomFunctor.
-    Transparent MorphismOf.
-    simpl.
-    change (diagonal_functor_morphism_of C D) with (@MorphismOf _ _ Δ).
-    change (DiagonalFunctor C D) with Δ.
-    Opaque MorphismOf.
-    change (fun T => TerminalProperty_Morphism (HL F') c' T) with (TerminalProperty_Morphism (HL F') c').
-    change (fun T => TerminalProperty_Morphism (HL F) c T) with (TerminalProperty_Morphism (HL F) c).
-    Transparent Object OppositeCategory.
-    assert (H := @SplitHom (C ^ D) (Δ c, F) (Δ c', F') (MorphismOf Δ m, m')).
-    symmetry in H.
-    Set Printing All.
-    rewrite <- H.
-
- (@MorphismOf
-           (ProductCategory (OppositeCategory (FunctorCategory D C))
-              (FunctorCategory D C)) TypeCat
-           (HomFunctor (FunctorCategory D C))
-           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
-              (@ObjectOf C (FunctorCategory D C) Δ c) F)
-           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
-              (@ObjectOf C (FunctorCategory D C) Δ c') F')
-           (@pair
-              (Morphism (FunctorCategory D C)
-                 (@ObjectOf C (FunctorCategory D C) Δ c')
-                 (@ObjectOf C (FunctorCategory D C) Δ c))
-              (Morphism (FunctorCategory D C) F F')
-              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m'))
-
-(@MorphismOf
-           (ProductCategory (OppositeCategory (FunctorCategory D C))
-              (FunctorCategory D C)) TypeCat
-           (HomFunctor (FunctorCategory D C))
-           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
-              (@ObjectOf C (FunctorCategory D C) Δ c) F)
-           (@pair (Functor (smallcat2cat D) C) (Functor (smallcat2cat D) C)
-              (@ObjectOf C (FunctorCategory D C) Δ c') F')
-           (@pair
-              (Morphism (FunctorCategory D C)
-                 (@ObjectOf C (FunctorCategory D C) Δ c')
-                 (@ObjectOf C (FunctorCategory D C) Δ c))
-              (Morphism (FunctorCategory D C) F F')
-              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m')))
-
-
-
-    (@MorphismOf
-           (ProductCategory (OppositeCategory (FunctorCategory D C))
-              (FunctorCategory D C)) TypeCat
-           (HomFunctor (FunctorCategory D C))
-           (@pair (Object (FunctorCategory D C))
-              (Object (FunctorCategory D C))
-              (@ObjectOf C (FunctorCategory D C) Δ c) F)
-           (@pair (Object (FunctorCategory D C))
-              (Object (FunctorCategory D C))
-              (@ObjectOf C (FunctorCategory D C) Δ c') F')
-           (@pair
-              (Morphism (FunctorCategory D C)
-                 (@ObjectOf C (FunctorCategory D C) Δ c')
-                 (@ObjectOf C (FunctorCategory D C) Δ c))
-              (Morphism (FunctorCategory D C) F F')
-              (@MorphismOf C (FunctorCategory D C) Δ c' c m) m'))
-
-    rewrite (@SplitHom (C ^ D)); simpl; symmetry.
-    rewrite SplitHom; simpl; symmetry.
-    Transparent ObjectOf.
-    Opaque DiagonalFunctor.
-    simpl.
-    Opaque ObjectOf.
-    repeat rewrite Associativity.
+  Proof.
+    Local Opaque FunctorCategory.
     repeat match goal with
-             | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f in *
-           end.
-    Implicit Arguments Identity [c o].
-    Definition ΔMor {s d} m := (@MorphismOf _ _ Δ s d m).
-    change (@MorphismOf _ _ Δ) with @ΔMor.
+             | [ |- context[@MorphismOf _ _ (HomFunctor ?C) ?s ?d ?m] ] => rewrite (@SplitHom C s d m)
+           end;
+    repeat rewrite Associativity;
+      match goal with
+        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+          eapply (@eq_trans _ _ (Compose a' (@Compose TypeCat _ _ _ (TerminalProperty_Morphism _ _) c)) _);
+              try_associativity ltac:(apply f_equal2; try reflexivity)
+      end;
+      simpl; unfold LimitAdjunction_AComponentsOf, LimitProperty_Morphism, LimitObject;
+        apply functional_extensionality_dep; intro;
+        repeat match goal with
+                 | [ |- appcontext[@SNTComposeT ?D ?C ?F ?G ?H ?T ?U] ] => change (@SNTComposeT D C F G H T U) with (@Compose (C ^ D) F G H T U) in *
+               end;
+          repeat match goal with
+                   | [ |- context[TerminalProperty_Morphism ?a ?b ?c] ] => let H := constr:(TerminalProperty a b c) in
+                     first [ apply H | symmetry; apply H; symmetry ];
+                       repeat rewrite FCompositionOf; repeat rewrite <- Associativity;
+                         simpl; f_equal
+                   | [ |- context[TerminalProperty_Morphism ?a ?b ?c] ] => let H := constr:(TerminalProperty a b c) in
+                     first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
+                         repeat rewrite FCompositionOf; repeat rewrite Associativity;
+                           simpl; f_equal
+                 end.
+    Local Transparent FunctorCategory.
+  Qed.
 
-    unfold LimitObject.
-    intro_universal_properties.
-    destruct_hypotheses.
-    do 3 match goal with
-           | [ H : _ = _ |- _ ] => move H at bottom
-         end.
-(*    rename s into F; rename s1 into F'; rename o0 into c; rename o into c'; *) rename m into f; rename m' into a.
-    pose (TerminalProperty_Morphism (HL F') c') as Mc'F'.
-    Ltac change_in_all from to :=
-      repeat match goal with
-               | [ H : _ |- _ ] => progress change from with to in H |- *
-             end.
-    change_in_all (TerminalProperty_Morphism (HL F') c') Mc'F'.
-    pose (TerminalProperty_Morphism (HL F) c) as McF.
-    change_in_all (TerminalProperty_Morphism (HL F) c) McF.
-(*    Definition Δ {objC morC C objD morD D} := @diagonal_functor_object_of objC morC C objD morD D.*)
-(*    Definition Δ' {C D} := @DiagonalFunctor C D. *)
-(*    Definition ΔMor {objC morC C objD morD D} {o1 o2} := @diagonal_functor_morphism_of objC morC C objD morD D o1 o2.*)
-    Definition limo F := TerminalMorphism_Object (HL F).
-    Definition φ := TerminalMorphism_Morphism.
-    Definition unique_m {objC morC} C {objD morD} D := @TerminalProperty_Morphism objC morC C objD morD D.
-    change (diagonal_functor_morphism_of C D) with @ΔMor in *;
-    change (MorphismOf (DiagonalFunctor C D)) with @ΔMor in *;
-    change_in_all (DiagonalFunctor C D)  @Δ;
-    change (TerminalMorphism_Object (HL ?F)) with (limo F) in *;
-    change TerminalMorphism_Morphism with φ in *;
-    change TerminalProperty_Morphism with @unique_m in *.
-    Local Notation "F ** G" := (ProductFunctor F G) (at level 70).
-    Local Notation "F *" := (OppositeFunctor F) (at level 70).
-    Definition IdF := IdentityFunctor.
-(*    Arguments IdF {objC morC C}.
-    change @IdentityFunctor with @IdF in *.*)
-    (*Transparent Compose ObjectOf MorphismOf Identity Morphism Object.
-    simpl.
-    apply functional_extensionality_dep; intro.
-    simpl.
-    unfold hom_functor_morphism_of.
-    unfold LimitObject in *.*)
-(*    Arguments Identity {obj mor} [C o].*)
-    Local Notation "$$ m" := (MorphismOf _ m) (at level 70).
-    Local Notation "$ m" := (ObjectOf _ m) (at level 70).
-    match goal with
-      | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
-        eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
-          try_associativity ltac:(apply f_equal2; try reflexivity)
-    end.
-    Implicit Arguments Compose [c].
+  Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) (LimitFunctor HL).
+    refine {| AComponentsOf := LimitAdjunction_AComponentsOf;
+      AIsomorphism := LimitAdjunction_AIsomorphism;
+      ACommutes := LimitAdjunction_ACommutes
+    |}.
+  Defined.
 
 
+  Definition ColimitAdjunction_AComponentsOf_Inverse (F : C ^ D) (c : C) :
+    Morphism TypeCat
+    (HomFunctor (C ^ D) (F, (DiagonalFunctor C D) c))
+    (HomFunctor C ((ColimitFunctor HC) F, c))
+    := (fun T => ColimitProperty_Morphism (HC F) T).
 
-
-
-    Print SpecializedFunctor.
-    Print FCompositionOf.
-    rewrite SplitHom at 1 2.
-    simpl.
-
-
-(****** here ******)
-
-
-
-
-
-
-    ACommutes : forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
-      Compose (AComponentsOf B B') (@MorphismOf _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) =
-      Compose (@MorphismOf _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')) (AComponentsOf A A')
-
-  Check @AMateOf _ _ _ _ _ _ (DiagonalFunctor C D) (LimitFunctor HL).
-  Eval simpl in SpecializedNaturalTransformation
-         (ComposeFunctors (HomFunctor (C ^ D))
-            (ProductFunctor
-               (OppositeFunctor (DiagonalFunctor C D))
-               (IdentityFunctor (C ^ D))))
-         (ComposeFunctors (HomFunctor C)
-            (ProductFunctor
-               (IdentityFunctor (OppositeCategory C))
-               (LimitFunctor HL))).
-  Definition LimitAdjunction_AMateOf : SpecializedNaturalTransformation
-    (ComposeFunctors (HomFunctor (C ^ D))
-      (ProductFunctor
-        (OppositeFunctor (DiagonalFunctor C D))
-        (IdentityFunctor _)))
-    (ComposeFunctors (HomFunctor C)
-      (ProductFunctor
-        (IdentityFunctor _)
-        (LimitFunctor HL))).
-    exists (fun (cF : C * (C ^ D)) => @LimitAdjunction_AComponentsOf (fst cF) (snd cF)).
-    subst LimitOf ColimitOf.
-    clear HC.
-    intros s d m;
-      present_spnt.
-(*    pose (@LimitAdjunction_AIsomorphism' (fst s) (snd s)).
-    pose (@LimitAdjunction_AIsomorphism' (fst d) (snd d)).
-    pose (@LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s)).
-    pose (@LimitAdjunction_AComponentsOf_Inverse (fst d) (snd d)).*)
-    Opaque Compose ObjectOf MorphismOf.
-    destruct_hypotheses.
-    unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse, LimitObject, LimitProperty_Morphism in *.
-    sanitize_spcategory.
-    match goal with
-      | [ |- @eq ?T _ _ ] => pose T as T'; change T with T'
-    end.
-    Transparent Object Morphism Compose Identity ObjectOf MorphismOf.
-    Opaque DiagonalFunctor.
-    hnf in T'; simpl in T'.
-    change (@Morphism ?obj ?mor (C ^ D)) with mor in *.
-    subst T'.
-    Opaque Object Morphism Compose Identity ObjectOf MorphismOf.
-    Opaque HomFunctor.
-    Transparent MorphismOf.
-    simpl.
-    change (diagonal_functor_morphism_of C D) with (@MorphismOf _ _ _ _ _ _ (DiagonalFunctor C D)).
-    Opaque MorphismOf.
-    rewrite SplitHom; simpl; symmetry.
-    rewrite SplitHom; simpl; symmetry.
-    Transparent ObjectOf.
-    Opaque DiagonalFunctor.
-    simpl.
-    Opaque ObjectOf.
-    repeat rewrite Associativity.
-    sanitize_spcategory.
-    Transparent Object Morphism Compose Identity ObjectOf MorphismOf HomFunctor.
-    Set Printing All.
-    do 2 match goal with
-           | [ |- appcontext[@Compose _ _ _ ?x] ] => let x'' := fresh in let x''' := fresh in pose x as x''; pose x as x'''; hnf in x'''; simpl in x''';
-             let x' := fresh in progress (pose x as x'; change x with x'; hnf in x'; simpl in x'; subst x')
-         end.
-    match goal with
-      | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
-        eapply (@eq_trans _ _ (Compose a (Compose _ c')) _)
-    end.
-
-
-
-    unfold LimitObject.
-    intro_universal_properties.
-    destruct_hypotheses.
-    do 3 match goal with
-           | [ H : _ = _ |- _ ] => move H at bottom
-         end.
-    rename s into F; rename s1 into F'; rename o0 into c; rename o into c'; rename m into f; rename s0 into a.
-    pose (TerminalProperty_Morphism (HL F') c') as Mc'F'.
-    Ltac change_in_all from to :=
-      repeat match goal with
-               | [ H : _ |- _ ] => progress change from with to in H |- *
-             end.
-    change_in_all (TerminalProperty_Morphism (HL F') c') Mc'F'.
-    pose (TerminalProperty_Morphism (HL F) c) as McF.
-    change_in_all (TerminalProperty_Morphism (HL F) c) McF.
-    Definition Δ {objC morC C objD morD D} := @diagonal_functor_object_of objC morC C objD morD D.
-    Definition Δ' {C D} := @DiagonalFunctor C D.
-    Definition ΔMor {objC morC C objD morD D} {o1 o2} := @diagonal_functor_morphism_of objC morC C objD morD D o1 o2.
-    Definition limo F := TerminalMorphism_Object (HL F).
-    Definition φ := TerminalMorphism_Morphism.
-    Definition unique_m {objC morC} C {objD morD} D := @TerminalProperty_Morphism objC morC C objD morD D.
-    change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
-    change (MorphismOf (DiagonalFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
-    change (ObjectOf (DiagonalFunctor C D)) with (@Δ _ _ _ _ C D) in *.
-    change (TerminalMorphism_Object (HL ?F)) with (limo F) in *;
-    change TerminalMorphism_Morphism with φ in *;
-    change TerminalProperty_Morphism with @unique_m in *.
-    Local Notation "F ** G" := (ProductFunctor F G) (at level 70).
-    Local Notation "F *" := (OppositeFunctor F) (at level 70).
-    Definition IdF := IdentityFunctor.
-    Arguments IdF {objC morC C}.
-    change @IdentityFunctor with @IdF in *.
-    (*Transparent Compose ObjectOf MorphismOf Identity Morphism Object.
-    simpl.
-    apply functional_extensionality_dep; intro.
-    simpl.
-    unfold hom_functor_morphism_of.
-    unfold LimitObject in *.*)
-    Arguments Identity {obj mor} [C o].
-    Local Notation "$$ m" := (MorphismOf _ m) (at level 70).
-    Local Notation "$ m" := (ObjectOf _ m) (at level 70).
-
-
-
-
-    Print SpecializedFunctor.
-    Print FCompositionOf.
-    rewrite SplitHom at 1 2.
-    simpl.
-
-
-(****** here ******)
-
-
-
-    replace (@MorphismOf _ _ _ _ _ _ (HomFunctor (C ^ D)) (_, F) (_, F') (ΔMor f, a)) with
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor (C ^ D)) (_, F) (_, F') (@Compose _ _ (C ^ D) _ _ _ (ΔMor f) (IdentityNaturalTransformation _), @Compose _ _ (C ^ D) _ _ _ a (IdentityNaturalTransformation _))).
-    match goal with
-      | [ |- context[MorphismOf (HomFunctor ?C) (?a, ?b)] ] => replace (MorphismOf (HomFunctor C) (a, b)) with
-    (Compose (MorphismOf (HomFunctor C) (IdentityFunctor _, b)) (MorphismOf (HomFunctor C) (a, IdentityFunctor _)))
-    end.
-    Transparent MorphismOf.
-    unfold MorphismOf at 1 2.
-    Opaque MorphismOf.
-    Transparent HomFunctor.
-    simpl.
-    unfold hom_functor_morphism_of.
-    Transparent ObjectOf.
-    Opaque DiagonalFunctor.
-    simpl.
-    Transparent Object Compose Morphism.
-    simpl.
-    Opaque Object Compose Morphism.
-    apply functional_extensionality_dep; intro.
-
-
-    apply functional_
-    Transparent ObjectOf.
-    Transparent LimitFunctor.
-    simpl.
-    Opaque ObjectOf.
-
-
-    change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
-    change (MorphismOf (DiagonalFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
-    change (ObjectOf (DiagonalFunctor C D)) with (@Δ _ _ _ _ C D) in *;
-    change (TerminalMorphism_Object (HL ?F)) with (limo F) in *;
-    change TerminalMorphism_Morphism with φ in *;
-    change TerminalProperty_Morphism with @unique_m in *.
-    change (DiagonalFunctor C D) with (@Δ' _ _ _ _ C D) in *.
-    Local Notation "C ~~~~> D" := (SpecializedFunctor C D) (at level 70).
-    Local Notation "F ====> G" := (SpecializedNaturalTransformation F G) (at level 70).
-    Local Notation "x ----> y" := (Morphism _ x y) (at level 70).
-    Local Notation "x >------ ( F ) ------> y >------ ( G ) ------> z" := (@Compose x y z G F) (at level 75).
-    Local Notation "x >~~~~~~ ( F ) ~~~~~~> y >~~~~~~ ( G ) ~~~~~~> z" := (@ComposeFunctors _ _ _ _ _ _ x y z G F) (at level 75).
-    Local Notation "x >====== ( F ) ======> y >====== ( G ) ======> z" := (@NTComposeT _ _ _ _ _ _ x y z G F) (at level 75).
-    Local Notation "F ** G" := (ProductFunctor F G) (at level 70).
-    Local Notation "F *" := (OppositeFunctor F) (at level 70).
-    pose (fun s d : Type => s -> d) as Fun; change (fun s d : Type => s -> d) with Fun.
-    Definition ΔFunctor obj := @Build_SpecializedFunctor _ _ D _ _ C
-         (fun _ : objD => obj)
-         (fun (s d : objD) (_ : morD s d) =>
-                        Identity obj)
-         (diagonal_functor_object_of_subproof morD C
-                              obj)
-         (diagonal_functor_object_of_subproof0 C obj).
-    change {|
-         ObjectOf' := fun _ : objD => limo (HL F);
-         MorphismOf' := fun (s d : objD) (_ : morD s d) =>
-                        Identity (limo (HL F));
-         FCompositionOf' := diagonal_functor_object_of_subproof morD C
-                              (limo (HL F));
-         FIdentityOf' := diagonal_functor_object_of_subproof0 C (limo (HL F)) |} with (ΔFunctor (limo (HL F))) in *.
-    change {|
-      ObjectOf' := fun _ : objD => c;
-      MorphismOf' := fun (s d : objD) (_ : morD s d) => Identity c;
-      FCompositionOf' := diagonal_functor_object_of_subproof morD C c;
-      FIdentityOf' := diagonal_functor_object_of_subproof0 C c |} with (ΔFunctor c) in *.
-    change
-      {|
-      ObjectOf' := fun _ : objD => c';
-      MorphismOf' := fun (s d : objD) (_ : morD s d) => Identity c';
-      FCompositionOf' := diagonal_functor_object_of_subproof morD C c';
-      FIdentityOf' := diagonal_functor_object_of_subproof0 C c' |} with (ΔFunctor c') in *.
-    simpl.
-    Opaque MorphismOf.
-    simpl.
-    Transparent MorphismOf.
-
-
-    Local Notation "C ~~~~> D" := (SpecializedFunctor C D) (at level 70).
-    Local Notation "F ----> G" := (SpecializedNaturalTransformation F G) (at level 70).
-    Local Notation "x ~~> y" := (Morphism _ x y) (at level 70).
-    Local Notation "x >------ F ------> y >------ G ------> z" := (@Compose x y z G F) (at level 75).
-    Local Notation "x >~~~~~~ F ~~~~~~> y >~~~~~~ G ~~~~~~> z" := (@ComposeFunctors _ _ _ _ _ _ x y z G F) (at level 75).
-    Local Notation "F ** G" := (ProductFunctor F G) (at level 70).
-    Local Notation "F *" := (OppositeFunctor F) (at level 70).
-    pose (OppositeCategory C) as COp; change (OppositeCategory C) with COp.
-    Print IdentityFunctor.
-    Definition IdF := IdentityFunctor.
-    Arguments IdF {objC morC C}.
-    change @IdentityFunctor with @IdF in *.
-    Definition Δ {C D} := @diagonal_functor_object_of C D.
-    Definition ΔMor {C D} o1 o2 := @diagonal_functor_morphism_of C D o1 o2.
-    change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
-    change (MorphismOf (DiagonalFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
-    change (ObjectOf (DiagonalFunctor C D)) with (@Δ _ _ _ _ C D) in *.
-    Definition Δ' {C D} := @DiagonalFunctor C D.
-    change (DiagonalFunctor C D) with (@Δ' _ _ _ _ C D) in *.
-
-Definition limo := TerminalMorphism_Object.
-    Definition φ := TerminalMorphism_Morphism.
-    Definition unique_m {} C {a b c} d := @TerminalProperty_Morphism C a b c d.
-
-    Arguments IdentityFunctor
-    pose IdentityFunctor as
-    simpl.
-
-    pre_compose_to_identity.
-
-
-unfold CategoryIsomorphism, IsCategoryIsomorphism, InverseOf in *. hnf; simpl;
-    hnf. simpl. unfold InverseOf. simpl.
-
-
- simpl. intro; split.
-    eapply iso_is_epi.
-    match goal with
-      | [ |- @eq (?a -> ?b) _ _ ] => change (a -> b) with (Morphism TypeCat a b)
-    end.
-    destruct (@LimitAdjunction_AIsomorphism' (fst s) (snd s)) as [ H0 H1 ].
-    eapply (@iso_is_epi _ _ TypeCat _ _ (@LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s))).
-    exists (@LimitAdjunction_AComponentsOf _ _); split; auto.
-    Ltac try_associativity_quick tac := try_rewrite Associativity tac.
-    repeat rewrite Associativity.
-    symmetry.
-    simpl in *.
-    apply functional_extensionality_dep; intro.
-    fg_equal.
-    Transparent Object Morphism Compose Identity.
-    simpl in *.
-    specialize (H1 x).
-    unfold
-    conv_rewrite H1.
-(*    unfold Object in *; simpl; rewrite H1.*)
-    match goal with
-      | [ H1 : ?a' = ?x |- Compose _ (Compose ?a _) = _ ] => assert (a = x)
-    end.
-    clear H0.
-    generalize H1.
-    repeat match goal with
-             | [ H := _ |- _ ] => subst H
-             | [ H : _ |- _ ] => clear H || subst H
-           end.
-    generalize LimitAdjunction_AComponentsOf.
-    generalize LimitAdjunction_AComponentsOf_Inverse.
-    generalize dependent s.
-    generalize (DiagonalFunctor C D).
-    generalize dependent HL.
-    simpl.
-    generalize (@LimitObject C D).
-    simpl.
-    unfold Morphism; simpl.
-    intros; generalize dependent H1.
-    repeat match goal with
-             | [ H := _ |- _ ] => subst H
-             | [ H : _ |- _ ] => clear H || subst H
-           end.
-    generalize dependent m0.
-    generalize dependent m.
-    generalize dependent s.
-    generalize dependent s0.
-    generalize dependent HL0.
-    generalize dependent o.
-    unfold HasLimits.
-    generalize (@Limit C D).
-    intros; generalize dependent H1.
-    generalize dependent (@SpecializedFunctorCategory objD morD objC morC D C).
-    intro.
-    generalize dependent (@SpecializedNaturalTransformation objD morD objC morC D C).
-    generalize dependent (@SpecializedFunctor objD morD objC morC D C).
-    intros; generalize dependent H1.
-    repeat match goal with
-             | [ H := _ |- _ ] => subst H
-             | [ H : _ |- _ ] => clear H || subst H
-           end.
-    change (@Object objC morC C) with objC in *.
-    generalize dependent objC.
-    generalize dependent T.
-    repeat match goal with
-             | [ H := _ |- _ ] => subst H
-             | [ H : _ |- _ ] => clear H || subst H
-           end.
-    intros; generalize dependent H1.
-    generalize dependent s1.
-    Set Printing All.
-    Goal forall A (a a' : A), id a = id a' -> a = a'.
-      intros A a a' H.
-      Opaque id.
-      match type of H with
-        | ?a = _ => match goal with
-                      | [ |- appcontext[?a'] ] => change a' with a; rewrite H
-                    end
-      end.
-      replace a with (@id A a).
-      exact H.
-      rewrite H.
-
-    generalize dependent (@SpecializedFunctor objC morC).
-    generalize dependent
-    intros; rewrite H1.
-    generalize dependent (@fst objC T s0).
-    simpl; intros; rewrite H1.
-    simpl; intros; rewrite H1.
-    clear s.
-    generalize dependent
-    intros; rewrite H1.
-    generalize dependent (T F).
-    intros; rewrite H1.
-    Print HasLimits.
-    generalize dependent (fst s0).
-    intros; rewrite H1.
-    generalize (LimitFunctor HL).
-    generalize (((HomFunctor C) (c, (LimitFunctor HL) F))).
-    simpl.
-    intros; rewrite H1.
-
-    generalize dependent x.
-    generalize dependent s.
-    generalize (SpecializedFunctor D C).
-
-    Set Printing All.
-
-    Lemma foo (A : Type) (B : A -> Type) (a : A) (b b' : B a) (H : @eq (B a) b b') : @eq (id (B (id a))) b b'.
-      Opaque id.
-      rewrite H
-    Goal forall a : Set, @eq Type a a -> @eq Set a a.
-      intros a H.
-    exact H1.
-    rewrite H1.
-    etransitivity; exact H1 || reflexivity.
-    rewrite H1.
-    match type of H1 with
-      | ?a = ?b => pose a as a'; simpl in *; change a with a'
-    end.
-    simultaneous_rewrite H1
-    rewrite H1.
-    Implicit Arguments  LimitAdjunction_AComponentsOf [].
-    Implicit Arguments  LimitAdjunction_AComponentsOf_Inverse [].
-    Implicit Arguments Compose [].
-    Implicit Arguments eq [].
-    Definition eq' := eq. change eq with eq' in *.
-    Implicit Arguments eq' [].
-    Set Printing All.
-    rewrite H1.
-    assert (LimitAdjunction_AComponentsOf (fst s) (snd s)
-      (LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s) x) = LimitAdjunction_AComponentsOf (fst s) (snd s)
-      (LimitAdjunction_AComponentsOf_Inverse (fst s) (snd s) x)).
-    rewrite H1.
-    rewrite (H1 x).
- (rewrite H0 || rewrite H1).
-    try_associativity ltac:(t_with t'). || eauto; try rewrite RightIdentity.
-    auto.
-    unfold LimitAdjunction_AIsomorphism in H.
-
-    intros; split.
-    pose (LimitAdjunction_AIsomorphism).
-    unfold CategoryIsomorphism, CategoryIsomorphism' in *.
-    eapply iso_is_epi; eauto.
-    exact (c _ _).
-    pre_compose_to_identity.
-    eapply (@iso_is_epi _ _ TypeCat).
-    specialize (e _ _ TypeCat).
-    unfold Epimorphism in e.
-    eapply e.
-    repeat match goal with
-             | [ _ : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in *
-             | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f in *
-           end.
-    Opaque Compose.
-    destruct s as [c F], d as [c' F'].
-    destruct m as [f a].
-    Opaque MorphismOf.
-    simpl.
-    Check (LimitProperty_Morphism (HL F') (Y:=c')).
-    unfold HomFunctor.
-    unfold ComposeFunctors.
-    simpl.
-    Transparent MorphismOf.
-    unfold MorphismOf at 1.
-    Opaque MorphismOf.
-    simpl.
-    Transparent MorphismOf.
-    unfold MorphismOf at 1.
-    Opaque MorphismOf.
-    simpl.
-    Transparent Object Morphism Identity.
-    simpl.
-    eapply iso_is_mono.
-    (*
-    simpl in *.*)
-    unfold LimitProperty_Morphism, LimitObject.
-(*    apply functional_extensionality_dep; intro.
-    Transparent Morphism.
-    hnf in x.*)
-    (*intro_universal_objects.
-    intro_universal_properties.
-    intro_universal_morphisms.*)
-    pose ((LimitFunctor HL).(MorphismOf') _ _ a).
-    present_spnt.
-    specialize_all_ways.
-(*    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.*)
-    destruct_hypotheses.
-(*    specialize_all_ways.
-    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.
-    destruct_hypotheses.
-    t_with t'.
-    t_with t'.*)
-    pose (TerminalProperty_Morphism (HL F') c') as Mc'F'.
-    change (TerminalProperty_Morphism (HL F') c') with Mc'F'.
-    pose (TerminalProperty_Morphism (HL F) c) as McF.
-    change (TerminalProperty_Morphism (HL F) c) with McF.
-    Definition Δ {C D} := @diagonal_functor_object_of C D.
-    Definition ΔMor {C D} o1 o2 := @diagonal_functor_morphism_of C D o1 o2.
-    Definition limo := TerminalMorphism_Object.
-    Definition φ := TerminalMorphism_Morphism.
-    Definition unique_m {} C {a b c} d := @TerminalProperty_Morphism C a b c d.
-    change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
-    change (MorphismOf (DiagonalFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
-    change (ObjectOf (DiagonalFunctor C D)) with (@Δ _ _ _ _ C D) in *;
-    change TerminalMorphism_Object with limo in *;
-    change TerminalMorphism_Morphism with φ in *;
-    change TerminalProperty_Morphism with @unique_m in *.
-    Opaque MorphismOf.
-    simpl.
-    Transparent MorphismOf.
-
-    simpl.
-    unfold MorphismOf, MorphismOf'.
-    simpl
-    unfold MorphismOf, MorphismOf'. simpl.
-    Check Commutes.
-    simpl
-    present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose.
-    match goal with
-             | [ C : @SpecializedCategory ?obj ?mor |- _ ] => idtac C (*
-               match goal with
-(*                 | [ _ : appcontext[mor ?s ?d] |- _ ] => progress change (mor s d) with (@Morphism _ mor C s d) in * *)
-                 | [ |- context[mor ?s ?d] ] => idtac mor; idtac s; idtac d; change (mor s d) with (@Morphism _ mor C s d) in *
-               end*)
-           end.
-    Ltac present_mor_all mor_fun cat :=
-      repeat match goal with
-               | [ _ : appcontext[mor_fun ?s ?d] |- _ ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
-               | [ |- appcontext[mor_fun ?s ?d] ] => progress change (mor_fun s d) with (@Morphism _ mor_fun cat s d) in *
-             end.
-
-    Ltac present_spcategory :=
-      repeat match goal with
-               | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor mor C
-             end.
-    Set Printing All.
-
-
-    present_spcategory.
-    present_spnt.
-    simpl; intros s d m.
-    destruct s as [c F], d as [c' F'].
-    destruct m as [f a].
-    simpl in *.
-    unfold LimitProperty_Morphism, LimitObject.
-    apply functional_extensionality_dep; intro.
-    Transparent Morphism.
-    hnf in x.
-    (*intro_universal_objects.
-    intro_universal_properties.
-    intro_universal_morphisms.*)
-    pose ((LimitFunctor HL).(MorphismOf') _ _ a).
-    present_spnt.
-    specialize_all_ways.
-(*    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.*)
-    destruct_hypotheses.
-(*    specialize_all_ways.
-    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.
-    destruct_hypotheses.
-    t_with t'.
-    t_with t'.*)
-    pose (TerminalProperty_Morphism (HL F') c') as Mc'F'.
-    change (TerminalProperty_Morphism (HL F') c') with Mc'F'.
-    pose (TerminalProperty_Morphism (HL F) c) as McF.
-    change (TerminalProperty_Morphism (HL F) c) with McF.
-    Definition Δ {C D} := @diagonal_functor_object_of C D.
-    Definition ΔMor {C D} o1 o2 := @diagonal_functor_morphism_of C D o1 o2.
-    Definition limo := TerminalMorphism_Object.
-    Definition φ := TerminalMorphism_Morphism.
-    Definition unique_m {} C {a b c} d := @TerminalProperty_Morphism C a b c d.
-    change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
-    change (MorphismOf (DiagonalFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
-    change (ObjectOf (DiagonalFunctor C D)) with (@Δ _ _ _ _ C D) in *;
-    change TerminalMorphism_Object with limo in *;
-    change TerminalMorphism_Morphism with φ in *;
-    change TerminalProperty_Morphism with @unique_m in *.
-    Set Printing All
-    specialize_all_ways.
-    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.
-    destruct_hypotheses.
-    pose (
-    match goal with
-
-
-    pose (TerminalProperty_Morphism (HL F') c') as Mc'F'.
-    change (TerminalProperty_Morphism (HL F') c') with Mc'F'.
-    pose (TerminalProperty_Morphism (HL F) c) as McF.
-    change (TerminalProperty_Morphism (HL F) c) with McF.
-
-
-    destruct s, d, m.
-    simpl in *.
-    unfold_SpecializedFunctorCategory.
-    present_spnt.
-    unfold LimitProperty_Morphism, LimitObject.
-    simpl.
-    intro_universal_objects.
-    intro_universal_morphisms.
-    intro_universal_properties.
-    specialize_all_ways.
-    do 3 match goal with
-           | [ H : unique _ _ |- _ ] => move H at bottom
-         end.
-    destruct_hypotheses.
-    pose (TerminalProperty (HL s) o x).
-    destruct (TerminalProperty (HL s0) o0
-     (SPNTComposeT s1
-        (SPNTComposeT x (diagonal_functor_morphism_of C D o0 o m)))).
-    clear H16.
-    simpl in H15.
-    s
-    Definition LimitAdjunction_AComponentsOf_Inverse (c : C) (F : C ^ D)
-    : TypeCat.(Morphism) (HomFunctor C (c, (LimitFunctor HL) F)) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)).
-    Transparent Morphism.
+  Definition ColimitAdjunction_AComponentsOf (F : C ^ D) (c : C) :
+    Morphism TypeCat
+    (HomFunctor C ((ColimitFunctor HC) F, c))
+    (HomFunctor (C ^ D) (F, (DiagonalFunctor C D) c)).
     simpl in *; intro f; hnf; simpl.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?DF ?F ] =>
-        eapply (Build_SpecializedNaturalTransformation DF F
-          (fun d => Compose (LimitMorphism (HL F) d) f)
-          _
-        )
-    end.
-    Grab Existential Variables.
-    simpl in *.
-        match goal with
-          | [ |- ComponentsOf ?T ?d = Compose _ _ ] => simpl_do do_rewrite_rev (Commutes T)
-        end.
-    unfold_Funct
-    Transparent Morphism
-    destruct
-
-  Goal SpecializedAdjunction (DiagonalFunctor C D) (LimitFunctor HL).
-    Print Build_SpecializedAdjunction.
-    Check @AMateOf _ _ _ _ _ _ (DiagonalFunctor C D) (LimitFunctor HL).
-    Eval simpl in SpecializedNaturalTransformation
-         (ComposeFunctors (HomFunctor C)
-            (ProductFunctor
-               (IdentityFunctor _)
-               (LimitFunctor HL)))
-         (ComposeFunctors (HomFunctor (C ^ D))
-            (ProductFunctor
-               (OppositeFunctor (DiagonalFunctor C D))
-               (IdentityFunctor _))).
-  Print AMateOf
-
-
-  Let LimitAdjunction_AComponentsOf (c : C) (F : C ^ D)
-    : TypeCat.(Morphism) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)) (HomFunctor C (c, (LimitFunctor HL) F))
-    := (fun T : HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)
-      => LimitProperty_Morphism (HL F) T : HomFunctor C (c, (LimitFunctor HL) F)).
-
-  Definition LimitAdjunction_AComponentsOf_Inverse (c : C) (F : C ^ D)
-    : TypeCat.(Morphism) (HomFunctor C (c, (LimitFunctor HL) F)) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)).
-    Transparent Morphism.
-    simpl in *; intro f; hnf; simpl.
-    match goal with
-      | [ |- SpecializedNaturalTransformation ?DF ?F ] =>
-        eapply (Build_SpecializedNaturalTransformation DF F
-          (fun d => Compose (LimitMorphism (HL F) d) f)
+      | [ |- SmallNaturalTransformation ?F ?DF ] =>
+        eapply (Build_SmallNaturalTransformation F DF
+          (fun d => Compose f (ColimitMorphism (HC F) d))
           _
         )
     end.
     Grab Existential Variables.
     abstract (
-      simpl in *; intros; rewrite RightIdentity;
+      simpl in *; intros; rewrite LeftIdentity;
         try_associativity ltac:(apply f_equal2; try reflexivity);
         match goal with
-          | [ |- ComponentsOf ?T ?d = Compose _ _ ] => simpl_do do_rewrite_rev (Commutes T)
+          | [ |- Compose _ _ = SComponentsOf ?T ?d ] => simpl_do do_rewrite (SCommutes T)
         end;
-        rewrite RightIdentity;
+        rewrite LeftIdentity;
           reflexivity
     ).
   Defined.
 
-  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : CategoryIsomorphism (@LimitAdjunction_AComponentsOf c F).
-    Transparent Object Morphism Compose Identity.
-    unfold CategoryIsomorphism, CategoryIsomorphism'.
-    exists (LimitAdjunction_AComponentsOf_Inverse _).
-(*    abstract ( *)
-      subst LimitAdjunction_AComponentsOf; unfold LimitAdjunction_AComponentsOf_Inverse;
-        unfold LimitMorphism, LimitProperty_Morphism, LimitObject, Limit in *;
-          split; simpl in *;
-            spnt_eq;
-            unfold LimitMorphism, LimitProperty_Morphism, LimitObject, Limit in *;
+  Lemma ColimitAdjunction_AIsomorphism' (F : C ^ D) (c : C) :
+    InverseOf (@ColimitAdjunction_AComponentsOf F c) (@ColimitAdjunction_AComponentsOf_Inverse F c).
+    unfold ColimitAdjunction_AComponentsOf, ColimitAdjunction_AComponentsOf_Inverse;
+      unfold ColimitMorphism, ColimitProperty_Morphism, ColimitObject, Colimit in *;
+        split; simpl in *;
+          repeat (apply functional_extensionality_dep; intro);
+            repeat match goal with
+                     | [ |- appcontext[InitialProperty_Morphism ?a ?b ?c] ] => let H := constr:(InitialProperty a b c) in
+                       apply (proj1 H) || apply (proj2 H)
+                   end;
+            snt_eq;
             intro_universal_properties;
             intro_universal_morphisms;
-            destruct_hypotheses;
             specialize_all_ways;
             destruct_hypotheses;
-            specialize_all_ways;
-            destruct_hypotheses;
-            repeat match goal with
-                     | [ H : _ |- _ ] => apply (f_equal ComponentsOf) in H
-                   end; fg_equal;
-            destruct_hypotheses;
+            match goal with
+              | [ T : _ |- _ ] => apply (f_equal (@SComponentsOf _ _ _ _)) in T
+            end; fg_equal;
             try specialized_assumption idtac.
-      unfold_SpecializedFunctorCategory.
-            intro_universal_properties;
-            intro_universal_morphisms;
-            destruct_hypotheses;
-            specialize_all_ways;
-            destruct_hypotheses;
-            specialize_all_ways;
-            destruct_hypotheses;
-            repeat match goal with
-                     | [ H : _ |- _ ] => apply (f_equal ComponentsOf) in H
-                   end; fg_equal;
-            destruct_hypotheses.
-            match goal with
-              | [ |- TerminalProperty_Morphism ?M ?a ?b = _ ] => destruct (TerminalProperty M a b) as [ H10 ]
-            end.
-            move H10 at bottom.
-            simpl in H10.
-            apply (f_equal ComponentsOf) in H10; fg_equal.
-            (*** HERE ***)
-            specialize (H10 c).
-            etransitivity; try apply H9.
-            unfold diagonl_functor_morphism_of in H9
-            destruct H8.
+  Qed.
 
-            specialize (H8
-      Check TerminalProperty_Morphism (HL F) c
-      change (@Object (@SpecializedFunctor objD morD objC morC D C)
-                       (@SpecializedNaturalTransformation objD morD objC morC
-                          D C) with (@SpecializedFunctor objD morD objC morC D C)
-                       (@SpecializedNaturalTransformation objD morD objC morC
-                          D C)
-      apply functional_extensionality_dep.
-            t_with t'.
-      unfold_SpecializedFunctorCategory.
-      match goal with
-      (*     | [ _ : appcontext[@Object ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_SpecializedFunctorCategory_of obj mor C
-           | [ _ : appcontext[@Morphism ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_SpecializedFunctorCategory_of obj mor C
-           | [ _ : appcontext[@Identity ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_SpecializedFunctorCategory_of obj mor C
-           | [ _ : appcontext[@Compose ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_SpecializedFunctorCategory_of obj mor C
-           | [ |- appcontext[@Object ?obj ?mor (?C ^ ?D)] ] => unfold_SpecializedFunctorCategory_of obj mor C*)
-           | [ |- appcontext[@Morphism ?obj ?mor (?C ^ ?D)] ] => idtac C; idtac D(*; unfold_SpecializedFunctorCategory_of obj mor C*)(*
-           | [ |- appcontext[@Identity ?obj ?mor (?C ^ ?D)] ] => unfold_SpecializedFunctorCategory_of obj mor C
-           | [ |- appcontext[@Compose ?obj ?mor (?C ^ ?D)] ] => unfold_SpecializedFunctorCategory_of obj mor C*)
-         end.
-      auto.
-            t_with t'.
-      match goal with
-        | [ |- TerminalProperty_Morphism ?M ?a ?b = _ ] => pose (TerminalProperty M a b)
-      end.
-      destruct_hypotheses.
-      specialize_all_ways.
-            repeat match goal with
-                     | [ H : _ |- _ ] => apply (f_equal ComponentsOf) in H
-                   end; fg_equal.
-            simpl in *.
-            eapply H6.
-            rewrite <- H8 at 2
-
-              try rewrite_unique;
-                intro_fresh_unique; simpl.
-              try rewrite_unique.
-
-            intro_proj2_sig_from_goal; simpl;
-              destruct_hypotheses;
-              try rewrite_unique;
-                intro_fresh_unique; simpl.
-      hnf in *.
-      unfold TerminalProperty_Morphism.
-      intro_proj2_sig_from_goal; simpl;
-              destruct_hypotheses;
-              try rewrite_unique;
-                intro_fresh_unique; simpl.
-      unfold Morphism in *; simpl in *.
-      unfold CommaSpecializedCategory_Morphism in *.
-      repeat match goal with
-               | [ H : _ |- _ ] => clear H
-             end.
-      intro_proj2_sig_from_goal; simpl;
-              destruct_hypotheses;
-              try rewrite_unique;
-                intro_fresh_unique; simpl.
-
- . simpl.
-            intro_proj2_sig_from_goal; simpl.
-
-                t_rev_with t'.
-    ).
+  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : CategoryIsomorphism (@ColimitAdjunction_AComponentsOf F c).
+    exists (@ColimitAdjunction_AComponentsOf_Inverse _ _).
+    exact (@ColimitAdjunction_AIsomorphism' _ _).
   Defined.
 
-  Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) (LimitFunctor HL).
-    refine {| AComponentsOf := LimitAdjunction_AComponentsOf;
-      AIsomorphism := LimitAdjunction_AIsomorphism
-    |}; abstract (
-      intros; simpl in *;
-        snt_eq;
-        unfold LimitAdjunction_AComponentsOf;
-          match goal with
-            | [ |- proj1_sig ?x = _ ] => let H := fresh in pose (proj1 (proj2_sig x)) as H; simpl in H; apply H || symmetry; apply H
-          end
-    ).
-  Defined.
+  Check @ACommutes_Inverse _ _ (ColimitFunctor HC) (DiagonalFunctor C D).
 
-  Definition ColimitAdjunction : Adjunction (ColimitFunctor HC) (DiagonalFunctor C D).
-    refine {| AComponentsOf := (fun (F : C ^ D) (c : C)
-      => fun f : HomFunctor C (ColimitFunctor HC F, c)
-        => Build_SpecializedNaturalTransformation F (diagonal_functor_object_of C D c)
-        (fun d => Compose f (projT1 (projT2 (HC F)) d))
-        _
-        : HomFunctor (C ^ D) (F, DiagonalFunctor C D c)
-    ) |}; try (
-      intros F c; eexists (fun (T : SpecializedNaturalTransformation F (DiagonalFunctor C D c))
-        => proj1_sig (projT2 (projT2 (HC F)) c T)
-      )
-    );
-    intros; repeat split; simpl in *;
-      try snt_eq;
-        repeat try_associativity ltac:(apply f_equal2; try reflexivity);
-          unfold ColimitFunctor_morphism_of;
-            intro_proj2_sig_from_goal;
-            intro_projT2_from_goal;
-            simpl in *; destruct_hypotheses;
-              try rewrite_unique;
-                intro_fresh_unique;
-                t_rev_with t';
-                match goal with
-                  | [ H : ?a = ?b |- _ ] => assert (forall x, a x = b x) by (rewrite H || rewrite <- H; reflexivity)
-                end;
-                simpl in *; t_with t'.
-    Grab Existential Variables.
-    abstract (
-      intros; simpl in *; auto; autorewrite with core; simpl;
-        try_associativity ltac:(apply f_equal2; try reflexivity);
-        match goal with
-          | [ |- Compose _ _ = SComponentsOf ?T ?d ] => simpl_do do_rewrite (SCommutes T)
-        end;
-        autorewrite with core; reflexivity
-    ).
+  Lemma ColimitAdjunction_ACommutes_Inverse (F : C ^ D) (c : C) (F' : C ^ D) (c' : C)
+    (m' : Morphism (C ^ D) F' F) (m : Morphism C c c') :
+    (Compose
+      (@MorphismOf _ _ (HomFunctor C) (_, c) (_, c') ((ColimitFunctor HC).(MorphismOf) m', m))
+      (@ColimitAdjunction_AComponentsOf_Inverse F c)) =
+    (Compose (@ColimitAdjunction_AComponentsOf_Inverse F' c')
+      (@MorphismOf _ _ (HomFunctor (C ^ D)) (F, _) (F', _) (m', (DiagonalFunctor C D).(MorphismOf) m))).
+  Proof.
+    Local Opaque FunctorCategory.
+    repeat match goal with
+             | [ |- context[@MorphismOf _ _ (HomFunctor ?C) ?s ?d ?m] ] => rewrite (@SplitHom C s d m)
+           end;
+    repeat rewrite Associativity.
+      match goal with
+        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+          eapply (@eq_trans _ _ (Compose a (@Compose TypeCat _ _ _ (InitialProperty_Morphism _ _) c')) _);
+              try_associativity ltac:(apply f_equal2; try reflexivity)
+      end;
+      simpl; unfold ColimitAdjunction_AComponentsOf_Inverse, ColimitProperty_Morphism, ColimitObject;
+        apply functional_extensionality_dep; intro;
+        repeat match goal with
+                 | [ |- appcontext[@SNTComposeT ?D ?C ?F ?G ?H ?T ?U] ] => change (@SNTComposeT D C F G H T U) with (@Compose (C ^ D) F G H T U) in *
+               end;
+          repeat match goal with
+                   | [ |- context[InitialProperty_Morphism ?a ?b ?c] ] => let H := constr:(InitialProperty a b c) in
+                     first [ apply H | symmetry; apply H; symmetry ];
+                       repeat rewrite FCompositionOf; repeat rewrite Associativity;
+                         simpl; f_equal
+                   | [ |- context[InitialProperty_Morphism ?a ?b ?c] ] => let H := constr:(InitialProperty a b c) in
+                     first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
+                         repeat rewrite FCompositionOf; repeat rewrite <- Associativity;
+                           simpl; f_equal
+                 end.
+    Local Transparent FunctorCategory.
+  Qed.
+
+  Lemma ColimitAdjunction_ACommutes (F : C ^ D) (c : C) (F' : C ^ D) (c' : C)
+    (m' : Morphism (C ^ D) F' F) (m : Morphism C c c'):
+    (Compose (@ColimitAdjunction_AComponentsOf F' c')
+      (@MorphismOf _ _ (HomFunctor C) (_, c) (_, c') ((ColimitFunctor HC).(MorphismOf) m', m))) =
+    (Compose
+      (@MorphismOf _ _ (HomFunctor (C ^ D)) (F, _) (F', _) (m', (DiagonalFunctor C D).(MorphismOf) m))
+      (@ColimitAdjunction_AComponentsOf F c)).
+  Proof.
+    Local Opaque FunctorCategory TypeCat HomFunctor.
+    pose (@ColimitAdjunction_AComponentsOf_Inverse F c).
+    pose (@ColimitAdjunction_AComponentsOf_Inverse F' c').
+    pose (@ColimitAdjunction_AIsomorphism' F c).
+    pose (@ColimitAdjunction_AIsomorphism' F' c').
+    unfold InverseOf in *; destruct_hypotheses.
+    pre_compose_to_identity; post_compose_to_identity.
+    apply ColimitAdjunction_ACommutes_Inverse.
+  Qed.
+
+  Definition ColimitAdjunction : Adjunction (ColimitFunctor HC) (DiagonalFunctor C D) .
+    refine {| AComponentsOf := ColimitAdjunction_AComponentsOf;
+      AIsomorphism := ColimitAdjunction_AIsomorphism;
+      ACommutes := ColimitAdjunction_ACommutes
+    |}.
   Defined.
 End Adjoint.
-
-
-
-
-Section Adjoint.
-
-
-  (* TODO: Perhaps there is a better way to define this, or a more automated way to define this. *)
-  (* I wonder if there's a way to simplify the definition that Coq comes up with when I use
-     destruct and specialize and generalize *)
-  Definition LimitFunctor_morphism_of (F G : @Object (C ^ D)) (m : Morphism (C ^ D) F G) : Morphism C (LimitOf F) (LimitOf G).
-(*    unfold LimitOf, HasLimits, FunctorHasLimit in *.
-    generalize (HL F); intro limF. generalize (HL G); intro limG.
-    destruct limF as [ limF [ t s ] ], limG as [ limG [ t' s' ] ].
-    simpl.
-    specialize (s limG); specialize (s' limF).
-    exact (projT1 (s' (NTComposeT m t))).*)
-    exact (projT1 ((projT2 (projT2 (HL G))) (projT1 (HL F)) (SNTComposeT m (projT1 (projT2 (HL F)))))).
-  Defined.
-
-  Definition ColimitFunctor_morphism_of (F G : @Object (C ^ D)) (m : Morphism (C ^ D) F G) : Morphism C (ColimitOf F) (ColimitOf G).
-(*    unfold ColimitOf, HasColimits, FunctorHasColimit in *. generalize (HC F); intro colimF. generalize (HC G); intro colimG.
-    destruct colimF as [ colimF [ t s ] ], colimG as [ colimG [ t' s' ] ].
-    simpl.
-    specialize (s colimG); specialize (s' colimF).
-    exact (projT1 (s (NTComposeT t' m))).*)
-    exact (projT1 ((projT2 (projT2 (HC F))) (projT1 (HC G)) (SNTComposeT (projT1 (projT2 (HC G))) m))).
-  Defined.
-
-  Hint Unfold ColimitFunctor_morphism_of LimitFunctor_morphism_of.
-
-  Definition LimitFunctor : Functor (C ^ D) C.
-    refine {| ObjectOf := LimitOf;
-      MorphismOf := LimitFunctor_morphism_of
-      |}; abstract (
-        unfold LimitFunctor_morphism_of; simpl; intros;
-          try rewrite LeftIdentityNaturalTransformation; try rewrite RightIdentityNaturalTransformation;
-            match goal with
-              | [ |- context[projT1 ?x] ] => unique_pose (projT2 x)
-            end;
-            simpl in *; destruct_hypotheses;
-              auto
-      ).
-  Defined.
-
-  Definition ColimitFunctor : Functor (C ^ D) C.
-    refine {| ObjectOf := ColimitOf;
-      MorphismOf := ColimitFunctor_morphism_of
-      |}; abstract (
-        unfold ColimitFunctor_morphism_of; simpl; intros;
-          try rewrite LeftIdentityNaturalTransformation; try rewrite RightIdentityNaturalTransformation;
-            match goal with
-              | [ |- context[projT1 ?x] ] => unique_pose (projT2 x)
-            end;
-            simpl in *; destruct_hypotheses;
-              auto
-      ).
-  Defined.
-End LimitFunctors.
-
-Section Adjoint.
-  Variable C : Category.
-  Variable D : SmallCategory.
-  Hypothesis HL : HasLimits C D.
-  Hypothesis HC : HasColimits C D.
-
-  Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) (LimitFunctor HL).
-    refine {| AComponentsOf := (fun (c : C) (F : C ^ D)
-      => (fun (T : Hom.HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F))
-        => proj1_sig (projT2 (projT2 (HL F)) c T) : Hom.HomFunctor C (c, (LimitFunctor HL) F)
-      )) |}; intros; unfold CategoryIsomorphism, HasLimits, FunctorHasLimit, Limit in *; simpl in *;
-    try match goal with
-          | [ |- { _ : Morphism _ ?c ?L -> SmallNaturalTransformation (diagonal_functor_object_of _ _ ?c) ?F | _ } ] =>
-            eexists (fun f : Morphism _ c L =>
-              Build_SmallNaturalTransformation (diagonal_functor_object_of C D c) F
-              (fun d => Compose (projT1 (projT2 (HL F)) d) f)
-              _
-            )
-        end;
-    repeat split; simpl in *; repeat (apply functional_extensionality_dep; intro);
-      try snt_eq;
-        intro_proj2_sig_from_goal;
-        simpl in *; destruct_hypotheses;
-          try rewrite_unique;
-            intro_fresh_unique;
-            t_rev_with t'.
-    Grab Existential Variables.
-    abstract (
-      intros; simpl in *; auto; autorewrite with core; simpl;
-        try_associativity ltac:(apply f_equal2; try reflexivity);
-        match goal with
-          | [ |- SComponentsOf ?T ?d = Compose _ _ ] => simpl_do do_rewrite_rev (SCommutes T)
-        end;
-        autorewrite with core; reflexivity
-    ).
-  Defined.
-
-  Definition ColimitAdjunction : Adjunction (ColimitFunctor HC) (DiagonalFunctor C D).
-    refine {| AComponentsOf := (fun (F : C ^ D) (c : C)
-      => fun f : Hom.HomFunctor C (ColimitFunctor HC F, c)
-        => Build_SmallNaturalTransformation F (diagonal_functor_object_of C D c)
-        (fun d => Compose f (projT1 (projT2 (HC F)) d))
-        _
-        : Hom.HomFunctor (C ^ D) (F, DiagonalFunctor C D c)
-    ) |}; try (
-      intros F c; eexists (fun (T : SmallNaturalTransformation F (DiagonalFunctor C D c))
-        => proj1_sig (projT2 (projT2 (HC F)) c T)
-      )
-    );
-    intros; repeat split; simpl in *;
-      try snt_eq;
-        repeat try_associativity ltac:(apply f_equal2; try reflexivity);
-          unfold ColimitFunctor_morphism_of;
-            intro_proj2_sig_from_goal;
-            intro_projT2_from_goal;
-            simpl in *; destruct_hypotheses;
-              try rewrite_unique;
-                intro_fresh_unique;
-                t_rev_with t';
-                match goal with
-                  | [ H : ?a = ?b |- _ ] => assert (forall x, a x = b x) by (rewrite H || rewrite <- H; reflexivity)
-                end;
-                simpl in *; t_with t'.
-    Grab Existential Variables.
-    abstract (
-      intros; simpl in *; auto; autorewrite with core; simpl;
-        try_associativity ltac:(apply f_equal2; try reflexivity);
-        match goal with
-          | [ |- Compose _ _ = SComponentsOf ?T ?d ] => simpl_do do_rewrite (SCommutes T)
-        end;
-        autorewrite with core; reflexivity
-    ).
-  Defined.
-End Adjoint.
-*)
