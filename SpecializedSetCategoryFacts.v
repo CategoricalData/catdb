@@ -1,8 +1,11 @@
 Require Import Setoid ProofIrrelevance FunctionalExtensionality.
-Require Export SpecializedSetCategory SpecializedDiscreteCategory EquivalenceSet EquivalenceClass SpecializedGrothendieck EquivalenceRelationGenerator.
-Require Import Common SpecializedLimits SpecializedFunctor SpecializedNaturalTransformation SpecializedFunctorCategory.
+Require Export SetCategory DiscreteCategory EquivalenceSet EquivalenceClass Grothendieck EquivalenceRelationGenerator.
+Require Import Common Limits Functor NaturalTransformation FunctorCategory.
 
 Set Implicit Arguments.
+
+Local Infix "*" := ProductCategory.
+Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section InitialTerminal.
   Local Transparent Object Morphism.
@@ -29,16 +32,16 @@ Section SetLimits.
      let F:C-->Set be a functor. An element of the limit is a collection of elements x_c,
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
-  Definition SetLimit_Object : SetCat * TerminalSpecializedCategory :=
+  Definition SetLimit_Object : SetCat * TerminalCategory :=
     (
       { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') },
       tt
     ).
 
   Definition SetLimit_Morphism : SpecializedNaturalTransformation
-    ((DiagonalSpecializedFunctor SetCat C) (fst SetLimit_Object))
-    ((SliceSpecializedCategory_SpecializedFunctor
-      (SpecializedFunctorCategory C SetCat) F) (snd SetLimit_Object)).
+    ((DiagonalFunctor SetCat C) (fst SetLimit_Object))
+    ((SliceCategory_Functor
+      (FunctorCategory C SetCat) F) (snd SetLimit_Object)).
     simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -54,9 +57,9 @@ Section SetLimits.
           t_with t'
     ).
   Defined.
-
-  Definition SetLimit_Property_Morphism_mor (o' : SliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C)) :
-    Morphism (ProductSpecializedCategory SetCat TerminalSpecializedCategory) (projT1 o')
+Print SliceCategory .
+  Definition SetLimit_Property_Morphism_mor (o' : @SliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
+    Morphism (SetCat * TerminalCategory) (projT1 o')
     SetLimit_Object.
     refine (
       (fun x : (fst (projT1 o')) => exist _ (fun c : C => ComponentsOf (projT2 o') c x) _),
@@ -71,12 +74,12 @@ Section SetLimits.
     ).
   Defined.
 
-  Definition SetLimit_Property_Morphism (o' : SliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C)) :
+  Definition SetLimit_Property_Morphism (o' : @SliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
     Morphism
-    (SliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C)) o'
+    (@SliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) o'
     (existT _ SetLimit_Object SetLimit_Morphism).
     exists (SetLimit_Property_Morphism_mor _).
-    abstract spnt_eq.
+    abstract nt_eq.
   Defined.
 
   Definition SetLimit : Limit F.
@@ -91,9 +94,10 @@ Section SetLimits.
           apply injective_projections; simpl; trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_exist);
               destruct_sig;
-              rewrite LeftIdentitySpecializedNaturalTransformation in *;
+              rewrite LeftIdentityNaturalTransformation in *;
                 subst;
-                  trivial
+                  unfold Morphism;
+                    trivial
     ).
   Defined.
 End SetLimits.
@@ -110,16 +114,16 @@ Section TypeLimits.
      let F:C-->Set be a functor. An element of the limit is a collection of elements x_c,
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
-  Definition TypeLimit_Object : TypeCat * TerminalSpecializedCategory :=
+  Definition TypeLimit_Object : TypeCat * TerminalCategory :=
     (
       { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') },
       tt
     ).
 
   Definition TypeLimit_Morphism : SpecializedNaturalTransformation
-    ((DiagonalSpecializedFunctor TypeCat C) (fst TypeLimit_Object))
-    ((SliceSpecializedCategory_SpecializedFunctor
-      (SpecializedFunctorCategory C TypeCat) F) (snd TypeLimit_Object)).
+    ((DiagonalFunctor TypeCat C) (fst TypeLimit_Object))
+    ((SliceCategory_Functor
+      (FunctorCategory C TypeCat) F) (snd TypeLimit_Object)).
     simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -136,8 +140,8 @@ Section TypeLimits.
     ).
   Defined.
 
-  Definition TypeLimit_Property_Morphism_mor (o' : SliceSpecializedCategory F (DiagonalSpecializedFunctor TypeCat C)) :
-    Morphism (ProductSpecializedCategory TypeCat TerminalSpecializedCategory) (projT1 o')
+  Definition TypeLimit_Property_Morphism_mor (o' : @SliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) :
+    Morphism (TypeCat * TerminalCategory) (projT1 o')
     TypeLimit_Object.
     refine (
       (fun x : (fst (projT1 o')) => exist _ (fun c : C => ComponentsOf (projT2 o') c x) _),
@@ -152,12 +156,12 @@ Section TypeLimits.
     ).
   Defined.
 
-  Definition TypeLimit_Property_Morphism (o' : SliceSpecializedCategory F (DiagonalSpecializedFunctor TypeCat C)) :
+  Definition TypeLimit_Property_Morphism (o' : @SliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) :
     Morphism
-    (SliceSpecializedCategory F (DiagonalSpecializedFunctor TypeCat C)) o'
+    (@SliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) o'
     (existT _ TypeLimit_Object TypeLimit_Morphism).
     exists (TypeLimit_Property_Morphism_mor _).
-    abstract spnt_eq.
+    abstract nt_eq.
   Defined.
 
   Definition TypeLimit : Limit F.
@@ -172,9 +176,10 @@ Section TypeLimits.
           apply injective_projections; simpl; trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_exist);
               destruct_sig;
-              rewrite LeftIdentitySpecializedNaturalTransformation in *;
+              rewrite LeftIdentityNaturalTransformation in *;
                 subst;
-                  trivial
+                  unfold Morphism;
+                    trivial
     ).
   Defined.
 End TypeLimits.
@@ -202,13 +207,13 @@ Section SetColimits.
 
   Hypothesis inhabited_dec : forall x y : SetColimit_Object_pre, {x ~= y} + {~(x ~= y)}.
 
-  Definition SetColimit_Object : TerminalSpecializedCategory * SetCat := (tt, EquivalenceSet SetColimit_Object_equiv).
+  Definition SetColimit_Object : TerminalCategory * SetCat := (tt, EquivalenceSet SetColimit_Object_equiv).
 
   (* TODO: Automate better. *)
-  Definition SetColimit_Morphism : Morphism (SpecializedFunctorCategory C SetCat)
-    ((SliceSpecializedCategory_SpecializedFunctor
-      (SpecializedFunctorCategory C SetCat) F) (fst SetColimit_Object))
-    ((DiagonalSpecializedFunctor SetCat C) (snd SetColimit_Object)).
+  Definition SetColimit_Morphism : Morphism (FunctorCategory C SetCat)
+    ((SliceCategory_Functor
+      (FunctorCategory C SetCat) F) (fst SetColimit_Object))
+    ((DiagonalFunctor SetCat C) (snd SetColimit_Object)).
     Transparent Identity.
     hnf; simpl.
     match goal with
@@ -245,19 +250,49 @@ Section SetColimits.
     ).
   Defined.
 
-  Definition SetColimit_Property_Morphism_mor (o' : CosliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C)) :
-    Morphism (ProductSpecializedCategory TerminalSpecializedCategory SetCat)
+  Definition SetColimit_Property_Morphism_mor (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
+    Morphism (TerminalCategory * SetCat)
     SetColimit_Object (projT1 o').
+  Print Colimit.
+  Check InitialMorphism.
+  Eval unfold InitialMorphism in  @InitialMorphism (SetCat ^ C) _ F (DiagonalFunctor SetCat C).
+  Eval unfold InitialObject in {Aφ : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C) & InitialObject Aφ}.
+  Eval simpl in {Aφ : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C) &
+       forall o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C),
+       {m : Morphism (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) Aφ o' |
+       is_unique m}}.
     hnf; simpl.
     assert (EquivalenceSet SetColimit_Object_equiv -> snd (projT1 o')).
     destruct o' as [ [ ] ]; simpl in *.
     hnf in m.
-    pose (m.(ComponentsOf')); simpl in *.
-    intro a; destruct (SetInhabited a).
+    pose (m.(ComponentsOf')) as p; simpl in *.
+    unfold SetColimit_Object_equiv, SetColimit_Object_equiv_sig, SetColimit_Object_pre.
+    intro a.
+    Print SetGrothendieckPair.
+    assert (forall cFc c'Fc' : SetGrothendieckPair F, InSet a cFc -> InSet a c'Fc' ->
+      p (SetGrothendieckC cFc) (SetGrothendieckX cFc) = p (SetGrothendieckC c'Fc') (SetGrothendieckX c'Fc')).
+    intros.
+    clear_InSet.
+    unfold SetEquivalent in H1.
+    match type of H1 with
+      | appcontext[proj1_sig ?x] => assert (H2 := proj2_sig x)
+    end.
+    simpl in *.
+    induction H1.
+    destruct H.
+    simpl in *.
+    hnf in X.
+    destruct X.
+    present_spnt.
+    rewrite <- e.
 
-  Definition SetColimit_Property_Morphism (o' : CosliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C)) :
+    unfold Equivalence in *.
+
+ destruct (SetInhabited a).
+
+  Definition SetColimit_Property_Morphism (o' : CosliceSpecializedCategory F (DiagonalFunctor SetCat C)) :
     Morphism
-    (CosliceSpecializedCategory F (DiagonalSpecializedFunctor SetCat C))
+    (CosliceSpecializedCategory F (DiagonalFunctor SetCat C))
     (existT _ SetColimit_Object SetColimit_Morphism) o'.
     hnf; simpl.
     match goal with
@@ -301,13 +336,13 @@ Section SetColimits.
     ).
     exists αβ.
     hnf; simpl.
-    unfold SliceSpecializedCategory, CommaSpecializedCategory.
+    unfold SliceCategory, CommaSpecializedCategory.
     Set Printing All.
     unfold
     hnf.
     unfold Limit.
     unfold TerminalMorphism.
-    unfold SliceSpecializedCategory, TerminalObject, CommaSpecializedCategory.
+    unfold SliceCategory, TerminalObject, CommaSpecializedCategory.
     simpl.
 End Limits.
 
