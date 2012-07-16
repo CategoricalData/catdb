@@ -118,7 +118,7 @@ Ltac find_composition_to_identity :=
     | [ H : @Compose _ _ _ _ ?a ?b = @Identity _ _ |- context[@Compose ?A ?B ?C ?D ?c ?d] ]
       => let H' := fresh in
         assert (H' : b = d /\ a = c) by (split; reflexivity); clear H';
-          first [ rewrite H | let HT := type of H in fail 2 "error in rewriting a found identity" HT ]
+          first [ rewrite H | let HT := type of H in fail 2 "error in rewriting a found identity" H "[" HT "]" ]
   end.
 
 (** * Back to the main content.... *)
