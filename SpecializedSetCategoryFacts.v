@@ -264,15 +264,18 @@ Section SetColimits.
     hnf; simpl.
     assert (EquivalenceSet SetColimit_Object_equiv -> snd (projT1 o')).
     destruct o' as [ [ ] ]; simpl in *.
+    rename o0 into x.
     hnf in m.
     pose (m.(ComponentsOf')) as p; simpl in *.
+    pose (m.(Commutes')) as pT; simpl in *.
+    fg_equal.
     unfold SetColimit_Object_equiv, SetColimit_Object_equiv_sig, SetColimit_Object_pre.
     intro a.
     Print SetGrothendieckPair.
     assert (forall cFc c'Fc' : SetGrothendieckPair F, InSet a cFc -> InSet a c'Fc' ->
       p (SetGrothendieckC cFc) (SetGrothendieckX cFc) = p (SetGrothendieckC c'Fc') (SetGrothendieckX c'Fc')).
     intros.
-    clear_InSet.
+    replace_InSet.
     unfold SetEquivalent in H1.
     match type of H1 with
       | appcontext[proj1_sig ?x] => assert (H2 := proj2_sig x)
@@ -281,6 +284,37 @@ Section SetColimits.
     induction H1.
     destruct H.
     simpl in *.
+    subst p.
+    repeat (apply functional_extensionality_dep; intro).
+    pose (m.(Commutes')).
+    present_spnt.
+    simpl in *.
+    fg_equal.
+    pose (m.(ComponentsOf')) as p.
+    simpl in *.
+    destruct H0 as [ [ X0 X1 ] ].
+    pose (e (SetGrothendieckC a0) _ X0 (SetGrothendieckX a0)).
+    simpl in *.
+    rename b into cF; rename a0 into c'F'.
+    rename X0 into q.
+    rename x into x000.
+    destruct cF as [c' x']; destruct c'F' as [c x].
+    simpl in *.
+    rewrite <- e0.
+    rewrite <- X1.
+    reflexivity.
+    reflexivity.
+
+
+    reflexivity.
+    rewrite <- (e (SetGrothendieckC a0) _ X0 (SetGrothendieckX a0)).
+    simpl.
+
+    rewrite <- (e (SetGrothendieckC b) _ (Identity _) (SetGrothendieckX b)).
+
+    rewrite <- (e (SetGrothendieckC a0) _ X0 (SetGrothendieckX a0)).
+    rewrite <- pT.
+    etransitivity; try apply pT.
     hnf in X.
     destruct X.
     present_spnt.
