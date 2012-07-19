@@ -203,22 +203,25 @@ Section InSet_setOf.
   Variable equiv : value -> value -> Prop.
   Variable C : EquivalenceSet equiv.
 
-  Let C_Equivalence : Equivalence equiv
-    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
-
   Hypothesis equiv_dec : forall v v', {equiv v v'} + {~ equiv v v'}.
 
-  Lemma InSet_setOf_eq v : InSet C v -> C = setOf C_Equivalence equiv_dec v.
+  Lemma InSet_setOf_eq eqv v : InSet C v -> C = setOf eqv equiv_dec v.
     intro H.
     apply sameSet_eq.
-    pose (setOf C_Equivalence equiv_dec v).
-    pose (setOf_refl C_Equivalence equiv_dec v).
+    pose (setOf eqv equiv_dec v).
+    pose (setOf_refl eqv equiv_dec v).
     pose (@SetContainsEquivalent _ equiv).
     pose (@SetElementsEquivalent _ equiv).
     specialize_all_ways.
     intro; split; intro;
       eauto.
   Qed.
+
+  Let C_Equivalence : Equivalence equiv
+    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
+
+  Definition InSet_setOf_eq' : forall v, InSet C v -> C = setOf C_Equivalence equiv_dec v
+    := InSet_setOf_eq C_Equivalence.
 End InSet_setOf.
 
 Ltac create_setOf_InSet :=
@@ -242,10 +245,16 @@ Ltac replace_InSet := create_setOf_InSet;
              end
          end.
 
-Ltac InSet2setOf :=
+Ltac InSet2setOf eqv :=
   repeat match goal with
            | [ equiv_dec : forall v v' : _, {?equiv v v'} + {~ ?equiv v v'}, H : InSet ?C ?x |- _ ] =>
-             apply (@InSet_setOf_eq _ _ C equiv_dec _) in H
+             apply (@InSet_setOf_eq _ _ C equiv_dec eqv _) in H
+         end.
+
+Ltac InSet2setOf' :=
+  repeat match goal with
+           | [ equiv_dec : forall v v' : _, {?equiv v v'} + {~ ?equiv v v'}, H : InSet ?C ?x |- _ ] =>
+             apply (@InSet_setOf_eq' _ _ C equiv_dec _) in H
          end.
 
 Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.

@@ -28,7 +28,7 @@ Section Grothendieck.
 
   Record GrothendieckPair := {
     GrothendieckC' : objC;
-    GrothendieckX' : F GrothendieckC'
+    GrothendieckX' : F.(ObjectOf') GrothendieckC'
   }.
 
   Section GrothendieckInterface.
@@ -109,7 +109,7 @@ Section SetGrothendieckCoercion.
   Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
 
   Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'.
-    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.
+    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F'.(ObjectOf') _ |}.
   Defined.
 End SetGrothendieckCoercion.
 

@@ -3,6 +3,8 @@ MODULES    := Common \
 	StructureEquality \
 	DefinitionSimplification \
 	EquivalenceSet \
+	EquivalenceClass \
+	EquivalenceRelation \
 	EquivalenceRelationGenerator \
 	SpecializedCategory \
 	Category \
@@ -26,16 +28,16 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Limits \
-	SetLimits \
 	SpecializedLimitFunctors \
 	SpecializedLimitFunctorTheorems \
 	Grothendieck \
+	SetLimits \
+	SetColimits \
+	SetCategoryFacts \
 	Yoneda \
 	\
 	LimitFunctors \
 	LimitFunctorTheorems \
-	EquivalenceClass \
-	EquivalenceRelation \
 	Schema \
 	SmallSchema \
 	SetSchema \
