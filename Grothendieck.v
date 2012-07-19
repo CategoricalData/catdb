@@ -77,7 +77,7 @@ Section Grothendieck.
   Defined.
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
-  Hint Extern 1 (exist _ _ _ = exist _ _ _) => simpl_exist.
+  Hint Extern 1 (@eq (sig _) _ _) => simpl_eq.
 
   Definition CategoryOfElements : @SpecializedCategory
     GrothendieckPair
@@ -89,7 +89,7 @@ Section Grothendieck.
     |};
     abstract (
       unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
-        intros; destruct_type GrothendieckPair; destruct_sig; simpl_exist; eauto
+        intros; destruct_type GrothendieckPair; destruct_sig; eauto
     ).
   Defined.
 

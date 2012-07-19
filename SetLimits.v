@@ -77,9 +77,9 @@ Section SetLimits.
     abstract (
       unfold SetLimit_Property_Morphism, SetLimit_Property_Morphism_mor; simpl in *;
         repeat (hnf in *; intros; simpl in *);
-          simpl_exist;
-          apply injective_projections; simpl; trivial;
-            repeat (apply functional_extensionality_dep; intro; try simpl_exist);
+          simpl_eq;
+          trivial;
+            repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
               rewrite LeftIdentityNaturalTransformation in *;
                 subst;
@@ -159,9 +159,9 @@ Section TypeLimits.
     abstract (
       unfold TypeLimit_Property_Morphism, TypeLimit_Property_Morphism_mor; simpl in *;
         repeat (hnf in *; intros; simpl in *);
-          simpl_exist;
-          apply injective_projections; simpl; trivial;
-            repeat (apply functional_extensionality_dep; intro; try simpl_exist);
+          simpl_eq;
+          trivial;
+            repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
               rewrite LeftIdentityNaturalTransformation in *;
                 subst;
