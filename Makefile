@@ -26,6 +26,7 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Limits \
+	SetLimits \
 	SpecializedLimitFunctors \
 	SpecializedLimitFunctorTheorems \
 	Grothendieck \
