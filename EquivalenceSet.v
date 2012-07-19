@@ -198,6 +198,29 @@ Add Parametric Relation value equiv : _ (@sameSet value equiv)
   transitivity proved by (@sameSet_trans _ _)
     as sameSet_mor.
 
+Section InSet_setOf.
+  Variable value : Set.
+  Variable equiv : value -> value -> Prop.
+  Variable C : EquivalenceSet equiv.
+
+  Let C_Equivalence : Equivalence equiv
+    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
+
+  Hypothesis equiv_dec : forall v v', {equiv v v'} + {~ equiv v v'}.
+
+  Lemma InSet_setOf_eq v : InSet C v -> C = setOf C_Equivalence equiv_dec v.
+    intro H.
+    apply sameSet_eq.
+    pose (setOf C_Equivalence equiv_dec v).
+    pose (setOf_refl C_Equivalence equiv_dec v).
+    pose (@SetContainsEquivalent _ equiv).
+    pose (@SetElementsEquivalent _ equiv).
+    specialize_all_ways.
+    intro; split; intro;
+      eauto.
+  Qed.
+End InSet_setOf.
+
 Ltac create_setOf_InSet :=
   repeat match goal with
            | [ H : InSet (@setOf ?v ?e ?eq ?eqdec ?val) _ |- _ ] => unique_pose (@setOf_refl v e eq eqdec val)
@@ -217,6 +240,12 @@ Ltac replace_InSet := create_setOf_InSet;
                  let v := fresh in let H := fresh in
                    destruct (SetInhabited C) as [ v H ]; exists v
              end
+         end.
+
+Ltac InSet2setOf :=
+  repeat match goal with
+           | [ equiv_dec : forall v v' : _, {?equiv v v'} + {~ ?equiv v v'}, H : InSet ?C ?x |- _ ] =>
+             apply (@InSet_setOf_eq _ _ C equiv_dec _) in H
          end.
 
 Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.
