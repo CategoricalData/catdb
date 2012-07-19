@@ -34,6 +34,7 @@ Section SetColimits.
   Set Printing Universes.
 
   Definition SetColimit_Object_pre := SetGrothendieckPair F. (* { c : objC & F.(ObjectOf') c }.*)
+  Global Arguments SetColimit_Object_pre /.
   Definition SetColimit_Object_equiv_sig :=
     generateEquivalence (fun x y : SetColimit_Object_pre => inhabited (Morphism (CategoryOfElements F') x y)).
   Definition SetColimit_Object_equiv :=
@@ -43,203 +44,274 @@ Section SetColimits.
 
   Local Infix "~=" := SetColimit_Object_equiv (at level 70, no associativity).
 
-  Hypothesis inhabited_dec : forall x y : SetColimit_Object_pre, {x ~= y} + {~(x ~= y)}.
-
-  Definition SetColimit_Object : TerminalCategory * SetCat := (tt, EquivalenceSet SetColimit_Object_equiv).
-
-  (* TODO: Automate better. *)
-  Definition SetColimit_Morphism : Morphism (FunctorCategory C SetCat)
-    ((SliceCategory_Functor
-      (FunctorCategory C SetCat) F) (fst SetColimit_Object))
-    ((DiagonalFunctor SetCat C) (snd SetColimit_Object)).
-    Transparent Identity.
-    hnf; simpl.
-    match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun c : objC =>
-            (fun S : F c =>
-              setOf SetColimit_Object_equiv_Equivalence inhabited_dec
-              (Build_SetGrothendieckPair F c S)
-            )
-          )
-          _
-        )
-    end.
-    abstract (
-      simpl; intros; hnf;
-        repeat (apply functional_extensionality_dep; intro);
-          simpl;
-            apply EquivalenceSet_forall__eq;
-              intros; repeat (split; intros);
-                clear_InSet;
-                t_with t';
-                match goal with
-                  | [ m : _ |- _ ]
-                    => apply gen_sym;
-                      apply gen_underlying;
-                        constructor; hnf; simpl;
-                          exists m; reflexivity
-                  | [ m : _ |- _ ]
-                    => apply gen_underlying;
-                      constructor; hnf; simpl;
-                        exists m; reflexivity
-                end
-    ).
-  Defined.
-
-
-  Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) (x y : SetGrothendieckPair F) :
-    inhabited (Morphism (CategoryOfElements ((F : SpecializedFunctorToSet _) : SpecializedFunctorToType _)) x y)
-    -> m (SetGrothendieckC x) (SetGrothendieckX x) = m (SetGrothendieckC y) (SetGrothendieckX y).
-    intro H; destruct H as [ X ]; destruct X as [ p H ].
-    destruct x as [c x], y as [c' x']; simpl in *.
+  Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) c x c' x'
+    (a := Build_SetGrothendieckPair F c x) (b := Build_SetGrothendieckPair F c' x') :
+    a ~= b
+(*    inhabited (Morphism (CategoryOfElements ((F : SpecializedFunctorToSet _) : SpecializedFunctorToType _)) a b)*)
+    -> m c x = m c' x'.
+    change c with (SetGrothendieckC a).
+    change x with (SetGrothendieckX a).
+    change c' with (SetGrothendieckC b).
+    change x' with (SetGrothendieckX b).
+    clearbody a b; clear c x c' x'.
+    intro H; induction H; try solve [ etransitivity; eauto ].
+    destruct H as [ [ p H ] ].
     pose (fg_equal (m.(Commutes') _ _ p)) as e; simpl in *.
+    unfold SetGrothendieckC, SetGrothendieckX.
     t_rev_with t'.
   Qed.
 
-  Definition SetColimit_Property_Morphism_mor_pre (S : SetCat) (eq_dec : forall s0 s1 : S, {s0 = s1} + {s0 <> s1})
-    (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) (D : snd (SetColimit_Object)) (ex_dec : { x | InSet D x }) :
-    @EquivalenceSet S eq.
-    destruct ex_dec as [ [ c x ] H ].
-    refine {| InSet' := (fun v => if eq_dec v (m c x) then true else false )
-      |};
-    abstract (
-      simpl; intros; try exists (m c x); auto;
-        repeat match goal with
-                 | [ H : false = true |- _ ] => contradict H; discriminate
-                 | [ _ : appcontext[eq_dec ?a ?b] |- _ ] => destruct (eq_dec a b); repeat subst
-                 | [ |- appcontext[eq_dec ?a ?b] ] => destruct (eq_dec a b); repeat subst
-               end; auto
-    ).
-  Defined.
+  Section chooser.
+    Variable chooser : SetColimit_Object_pre -> SetColimit_Object_pre.
+    Hypothesis chooser_respectful : forall x y, x ~= y -> chooser x = chooser y.
+    Hypothesis chooser_injective : forall x, { y | x ~= y /\ chooser y = y }.
 
-  Definition SetColimit_Property_Morphism_mor_pre' (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
-    forall (D : snd (SetColimit_Object)), exists! s : S, forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s.
-    unfold SetColimit_Object; simpl; intro D; destruct (SetInhabited D) as [ cx H ].
-    exists (m (SetGrothendieckC cx) (SetGrothendieckX cx)).
-    abstract (
-      split; unfold SetColimit_Object_pre in *; intros; auto; clear_InSet;
-        match goal with
-          | [ H : SetEquivalent _ _ _ |- _ ] => induction H; auto;
-            try solve [ etransitivity; eauto ]
-        end;
-        match goal with
-          | [ H : inhabited _ |- _ ] => destruct H as [ [ f H ] ]
-        end;
-        pose m.(Commutes');
-          simpl in *;
-          fg_equal;
-          unfold SetGrothendieckC, SetGrothendieckX in *;
-            t_rev_with t' (* [t_with t'] gives "Anomaly: Uncaught exception Failure("hd"). Please report.", if
-                             I add a second argument to the definition, [(eq_dec : forall s0 s1 : S, {s0 = s1} + {s0 <> s1})] *)
-    ).
-  Defined.
+    Local Ltac t_fin := simpl in *;
+      reflexivity || eassumption || (constructor; assumption) || (symmetry; constructor; assumption) ||
+        solve [ etransitivity; eauto ] ||
+          solve [ symmetry; etransitivity; eauto ].
 
-  Definition SetColimit_Property_Morphism_mor_sig (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
-    forall (D : snd (SetColimit_Object)), { s : S | forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s }.
-    intros; apply constructive_definite_description.
-    apply SetColimit_Property_Morphism_mor_pre'.
-  Defined.
+    Definition SetColimitByChooser_Object : TerminalCategory * SetCat := (tt, { x | chooser x = x } ).
 
-  Definition SetColimit_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
-    Morphism
-    (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C))
-    (existT _ SetColimit_Object SetColimit_Morphism) o'.
-    exists (tt, fun d => proj1_sig (@SetColimit_Property_Morphism_mor_sig (snd (projT1 o')) (projT2 o') d)).
-    abstract (
-      simpl in *;
-        nt_eq;
-        match goal with
-          | [ |- proj1_sig ?x = _ ] => let H := fresh in
-            pose (proj2_sig x _ (setOf_refl _ _ _)) as H;
+    Let chooser' (x : SetColimit_Object_pre) : { x | chooser x = x }.
+      exists (proj1_sig (chooser_injective x)).
+      abstract (intro_proj2_sig_from_goal; intuition).
+    Defined.
+
+    (* TODO: Automate better. *)
+    Definition SetColimitByChooser_Morphism : Morphism (FunctorCategory C SetCat)
+      ((SliceCategory_Functor
+        (FunctorCategory C SetCat) F) (fst SetColimitByChooser_Object))
+      ((DiagonalFunctor SetCat C) (snd SetColimitByChooser_Object)).
+      hnf; simpl.
+      match goal with
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun c : objC =>
+              (fun S : F c =>
+                chooser' (Build_SetGrothendieckPair F c S)
+              )
+            )
+            _
+          )
+      end.
+      abstract (
+        simpl; intros; hnf;
+          repeat (apply functional_extensionality_dep; intro);
+            simpl_eq;
+            match goal with
+              | [ |- proj1_sig ?x = proj1_sig ?y ] =>
+                simpl_do do_rewrite_rev (proj2 (proj2_sig x)); simpl_do do_rewrite_rev (proj2 (proj2_sig y));
+                  apply chooser_respectful;
+                    simpl_do do_rewrite_rev (proj1 (proj2_sig x)); simpl_do do_rewrite_rev (proj1 (proj2_sig y))
+            end;
+            match goal with
+              | [ m : _ |- _ ]
+                => apply gen_sym;
+                  apply gen_underlying;
+                    constructor; hnf; simpl;
+                      exists m; reflexivity
+              | [ m : _ |- _ ]
+                => apply gen_underlying;
+                  constructor; hnf; simpl;
+                    exists m; reflexivity
+            end
+      ).
+    Defined.
+
+    Definition SetColimitByChooser_Property_Morphism_mor (S : SetCat)
+      (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
+      snd (SetColimitByChooser_Object) -> S
+      := fun x => m (SetGrothendieckC (proj1_sig x)) (SetGrothendieckX (proj1_sig x)).
+
+    Global Arguments SetColimitByChooser_Property_Morphism_mor [S] m _ /.
+
+    Definition SetColimitByChooser_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
+      Morphism
+      (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C))
+      (existT _ SetColimitByChooser_Object SetColimitByChooser_Morphism) o'.
+      exists (tt, fun d => (@SetColimitByChooser_Property_Morphism_mor (snd (projT1 o')) (projT2 o') d)).
+      abstract (
+        simpl in *;
+          nt_eq;
+          apply SetColimit_Property_Morphism_respectful;
+            simpl;
+              match goal with
+                | [ |- context[proj1_sig ?x] ] => induction (proj1 (proj2_sig x))
+              end;
+              unfold SetColimit_Object_pre in *;
+                repeat match goal with
+                         | [ H : SetGrothendieckPair _ |- _ ] => destruct H
+                       end;
+                t_fin
+      ).
+    Defined.
+
+    (* TODO: Automate this better *)
+    Definition SetColimitByChooser : Colimit F.
+      exists (existT _ SetColimitByChooser_Object SetColimitByChooser_Morphism).
+      intro o'.
+      exists (SetColimitByChooser_Property_Morphism o').
+      abstract (
+        hnf; intros; simpl in *;
+          destruct_sig;
+          simpl_eq; try solve [ unfold Morphism; trivial ];
+            apply functional_extensionality_dep; intro;
               simpl in *;
-                exact H || symmetry; exact H
-        end
-    ).
-  Defined.
+                destruct_sig;
+                match goal with
+                  | [ x : SetGrothendieckPair _, H : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in H;
+                    fg_equal;
+                    let c := fresh in destruct x as [ c x ];
+                      specialize (H c); fg_equal; specialize (H x);
+                        simpl;
+                          rewrite <- H;
+                            clear H
+                end;
+                f_equal;
+                simpl_eq;
+                intro_proj2_sig_from_goal; split_and; simpl in *;
+                  match goal with
+                    | [ H0 : _ = ?x, H1 : _ = ?y |- ?x = ?y ] => rewrite <- H0 at 1; rewrite <- H1
+                  end;
+                  apply chooser_respectful;
+                    assumption
+      ).
+    Defined.
+  End chooser.
 
-  Definition SetColimit : Colimit F.
-    exists (existT _ SetColimit_Object SetColimit_Morphism).
-    intro o'.
-    exists (SetColimit_Property_Morphism o').
-    Opaque DiagonalFunctor CosliceCategory.
-    hnf; intros.
-    simpl_exist.
-    simpl in *.
-    match goal with
-      | [ |- proj1_sig ?x = _ ] => unique_pose (proj2_sig x)
-    end.
-    simpl in *.
-    pose (proj1_sig x') as x''.
-    move x'' at top.
-    repeat match goal with
-             | [ H : _ |- _ ] => progress change (proj1_sig x') with x'' in H |- *
-           end.
-    clearbody x''; clear x'.
-    simpl in *.
-    destruct x'' as [ [ ] ? ].
-    f_equal.
-    apply functional_extensionality_dep; intro.
-    simpl in *.
-    match goal with
-      | [ |- _ = proj1_sig ?x ] => unique_pose (proj2_sig x)
-    end.
-    simpl in *.
-    destruct o' as [ [ ? x' ] m' ].
-    simpl in *.
-    apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in H.
-    fg_equal.
-    simpl in *.
-    destruct (SetInhabited x) as [ cx'' H'' ].
-    specialize (H0 cx'').
-    destruct cx'' as [ c'' x'' ].
-    specialize (H c'').
-    fg_equal.
-    specialize (H x'').
-    simpl in *.
-    erewrite <- H0; auto.
-    clear_InSet.
+  Section axiom.
+    Hypothesis inhabited_dec : forall x y : SetColimit_Object_pre, {x ~= y} + {~(x ~= y)}.
 
-    etransitivity; try apply H0.
-    destruct (m x).
-    symmetry.
-    destruct (SetInhabited x).
-    specialize (H0 x0 H1).
+    Definition SetColimit_Object : TerminalCategory * SetCat := (tt, EquivalenceSet SetColimit_Object_equiv).
 
-    destruct (proj1_sig x').
-    intro_proj2_sig_
-    unfold SetColimit_Property_Morphism; simpl in *.
-    destruct x' as [ [ ] ].
-    Transparent Object Morphism Compose Identity.
-    hnf.
-    exists (existT _ SetColimit_Object SetColimit_Morphism).
-    hnf.
-    hnf; intros.
-    match goal with
-      | [ |- @sigT ?A ?P ] => assert (Aφ : A)
-    end.
-    hnf.
-    exists SetColimit_Object.
-    exact SetColimit_Morphism.
-    match goal with
-      | [ |- @sigT ?A ?P ] => assert (αβ : A)
-    end.
-    unfold Object.
-    exact (
-      { l : SpecializedFunctor C PointedTypeCat | ComposeSpecializedFunctors PointedTypeProjection l = F },
-      tt
-    ).
-    exists αβ.
-    hnf; simpl.
-    unfold SliceCategory, CommaSpecializedCategory.
-    Set Printing All.
-    unfold
-    hnf.
-    unfold Limit.
-    unfold TerminalMorphism.
-    unfold SliceCategory, TerminalObject, CommaSpecializedCategory.
-    simpl.
+    (* TODO: Automate better. *)
+    Definition SetColimit_Morphism : Morphism (FunctorCategory C SetCat)
+      ((SliceCategory_Functor
+        (FunctorCategory C SetCat) F) (fst SetColimit_Object))
+      ((DiagonalFunctor SetCat C) (snd SetColimit_Object)).
+      hnf; simpl.
+      match goal with
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun c : objC =>
+              (fun S : F c =>
+                setOf SetColimit_Object_equiv_Equivalence inhabited_dec
+                (Build_SetGrothendieckPair F c S)
+              )
+            )
+            _
+          )
+      end.
+      abstract (
+        simpl; intros; hnf;
+          repeat (apply functional_extensionality_dep; intro);
+            simpl;
+              apply EquivalenceSet_forall__eq;
+                intros; repeat (split; intros);
+                  clear_InSet;
+                  t_with t';
+                  match goal with
+                    | [ m : _ |- _ ]
+                      => apply gen_sym;
+                        apply gen_underlying;
+                          constructor; hnf; simpl;
+                            exists m; reflexivity
+                    | [ m : _ |- _ ]
+                      => apply gen_underlying;
+                        constructor; hnf; simpl;
+                          exists m; reflexivity
+                  end
+      ).
+    Defined.
+
+    Definition SetColimit_Property_Morphism_mor_pre (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
+      forall (D : snd (SetColimit_Object)), exists! s : S, forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s.
+      unfold SetColimit_Object; simpl; intro D; destruct (SetInhabited D) as [ cx H ].
+      exists (m (SetGrothendieckC cx) (SetGrothendieckX cx)).
+      abstract (
+        split; unfold SetColimit_Object_pre in *; intros; auto; clear_InSet;
+          match goal with
+            | [ H : SetEquivalent _ _ _ |- _ ] => induction H; auto;
+              try solve [ etransitivity; eauto ]
+          end;
+          match goal with
+            | [ H : inhabited _ |- _ ] => destruct H as [ [ f H ] ]
+          end;
+          pose m.(Commutes');
+            simpl in *;
+              fg_equal;
+              unfold SetGrothendieckC, SetGrothendieckX in *;
+                t_rev_with t' (* [t_with t'] gives "Anomaly: Uncaught exception Failure("hd"). Please report.", if
+                                 I add a second argument to the definition, [(eq_dec : forall s0 s1 : S, {s0 = s1} + {s0 <> s1})] *)
+      ).
+    Defined.
+
+    Definition SetColimit_Property_Morphism_mor_sig (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
+      forall (D : snd (SetColimit_Object)), { s : S | forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s }.
+      intros; apply constructive_definite_description.
+      apply SetColimit_Property_Morphism_mor_pre.
+    Defined.
+
+    Definition SetColimit_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
+      Morphism
+      (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C))
+      (existT _ SetColimit_Object SetColimit_Morphism) o'.
+      exists (tt, fun d => proj1_sig (@SetColimit_Property_Morphism_mor_sig (snd (projT1 o')) (projT2 o') d)).
+      abstract (
+        simpl in *;
+          nt_eq;
+          match goal with
+            | [ |- proj1_sig ?x = _ ] => let H := fresh in
+              pose (proj2_sig x _ (setOf_refl _ _ _)) as H;
+                simpl in *;
+                  exact H || symmetry; exact H
+          end
+      ).
+    Defined.
+
+    Definition SetColimit : Colimit F.
+      exists (existT _ SetColimit_Object SetColimit_Morphism).
+      intro o'.
+      exists (SetColimit_Property_Morphism o').
+        hnf; intros; simpl in *;
+          destruct_sig;
+          simpl_eq; try solve [ unfold Morphism; trivial ];
+            apply functional_extensionality_dep; intro;
+              simpl in *;
+                destruct_sig.
+        match goal with
+          | [ x : _ |- _ ] => destruct (SetInhabited x)
+        end.
+                match goal with
+                  | [ x : SetGrothendieckPair _, H : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in H;
+                    fg_equal;
+                    let c := fresh in destruct x as [ c x ];
+                      specialize (H c); fg_equal; specialize (H x);
+                        simpl
+                end.
+                match goal with
+                  | [ H : InSet ?S ?x |- _ ] => let H' := fresh in
+                    assert (H' : S = setOf SetColimit_Object_equiv_Equivalence inhabited_dec x);
+                      [
+                        apply sameSet_eq;
+                          intro; split; intros;
+                            clear_InSet;
+                            t_rev_with t';
+                            try reflexivity
+                      | ]; rewrite H' at 1 (* gives "Anomaly: Evar ?1948 was not declared. Please report." *)
+(*                      simpl in *;
+                        rewrite H' in *; clear H' *)
+                end.
+
+                intro_proj2_sig_from_goal; split_and; simpl in *.
+                match goal with
+                  | [ H : forall _ _, _, H' : _ |- _ ] => specialize (H _ H')
+                end.
+                match goal with
+                  | [ H : SetGrothendieckPair _ |- _ ] => destruct H; simpl in *
+                end.
+                t_with t'.
 End Limits.
 
 Section DiscreteLimits.
