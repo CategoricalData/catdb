@@ -169,9 +169,11 @@ Ltac find_composition_to_identity :=
             exact H ||
               (unfold_Object; simpl in H |- *; exact H || (rewrite H; reflexivity))
           );
-          simpl in H'; rewrite H' || (simpl; rewrite H') ||
-            (let H'T := type of H' in fail 1 "error in rewriting a found identity" H'T);
-            clear H'
+          first [
+            rewrite H'
+            | simpl in H' |- *; rewrite H'
+            | let H'T := type of H' in fail 2 "error in rewriting a found identity" H "[" HT "]"
+          ]; clear H'
   end.
 
 (** * Back to the main content.... *)
