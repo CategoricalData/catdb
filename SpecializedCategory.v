@@ -172,7 +172,7 @@ Ltac find_composition_to_identity :=
           first [
             rewrite H'
             | simpl in H' |- *; rewrite H'
-            | let H'T := type of H' in fail 2 "error in rewriting a found identity" H "[" HT "]"
+            | let H'T := type of H' in fail 2 "error in rewriting a found identity" H "[" H'T "]"
           ]; clear H'
   end.
 
