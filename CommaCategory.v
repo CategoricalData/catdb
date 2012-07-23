@@ -93,8 +93,9 @@ Section CommaCategory.
     abstract (
       simpl in *;
         repeat (let H:= fresh in intro H; destruct H as [ [ ] ? ]; simpl in *);
-          try apply eq_exist; simpl; present_spcategory; autorewrite with core;
-            f_equal
+          simpl_eq; present_spcategory; autorewrite with core;
+            f_equal;
+            try reflexivity
     ).
   Defined.
 

@@ -152,11 +152,22 @@ Ltac solve_repeat_rewrite rew_H tac :=
   solve [ repeat (rewrite rew_H; tac) ] ||
     solve [ repeat (rewrite <- rew_H; tac) ].
 
-Lemma simpl_exist_helper A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
+Lemma sig_eq A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Ltac simpl_exist := apply simpl_exist_helper; simpl.
+Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
+  destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
+Qed.
+
+Ltac simpl_eq := repeat (
+  (
+    apply sig_eq ||
+      apply sig2_eq ||
+        apply injective_projections
+  );
+  simpl in *
+).
 
 Ltac split_in_context ident funl funr :=
   repeat match goal with
@@ -313,6 +324,17 @@ Ltac f_equal_in_r H k := let H' := uncurry H in let H'T := type of H' in
     end; clear H.
 Ltac f_equal_in f H := f_equal_in_r H ltac:(fun pf k => k (pf _ f)).
 
+Ltac eta_red :=
+  repeat match goal with
+           | [ H : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in H
+           | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
+         end.
+
+Ltac intro_proj2_sig_from_goal' :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+         end.
+
 Ltac intro_proj2_sig_from_goal :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
@@ -383,10 +405,6 @@ Ltac intro_fresh_unique :=
   repeat match goal with
            | [ H : @is_unique ?T ?x |- _ ] => let x' := fresh in assert (x' := x); rewrite <- (H x') in *; generalize_is_unique_hyp H T
          end.
-
-Lemma eq_exist T (P : T -> Prop) (a b : { x | P x }) : proj1_sig a = proj1_sig b -> a = b.
-  destruct a, b; simpl in *; intro; repeat subst; f_equal; apply proof_irrelevance.
-Qed.
 
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
