@@ -450,6 +450,24 @@ Ltac conv_rewrite_rev H := conv_rewrite_rev_with ltac:(fun h => rewrite <- h) H.
 Ltac conv_repeat_rewrite H := repeat conv_rewrite_with ltac:(fun h => repeat rewrite h) H.
 Ltac conv_repeat_rewrite_rev H := repeat conv_rewrite_rev_with ltac:(fun h => repeat rewrite <- h) H.
 
+Ltac rewrite_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[x] in let ctx'' := context ctx[y] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite H; reflexivity
+          |
+        ]
+  end.
+
+Ltac rewrite_rev_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[y] in let ctx'' := context ctx[x] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite <- H; reflexivity
+          |
+        ]
+  end.
+
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.
