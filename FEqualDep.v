@@ -1,5 +1,6 @@
 Require Import FunctionalExtensionality JMeq.
 Require Import Common.
+
 Set Implicit Arguments.
 
 Local Infix "==" := JMeq (at level 70).
