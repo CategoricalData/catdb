@@ -1,4 +1,4 @@
-Require Export SpecializedCategory.
+Require Export SpecializedCategory Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -19,3 +19,5 @@ Section ProductCategory.
     |}; abstract (present_spcategory; intros; simpl in *; destruct_type @prod; t).
   Defined.
 End ProductCategory.
+
+Infix "*" := ProductCategory : category_scope.

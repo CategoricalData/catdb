@@ -1,11 +1,8 @@
-Require Import Setoid ProofIrrelevance FunctionalExtensionality ClassicalDescription.
-Require Export SetCategory DiscreteCategory EquivalenceSet EquivalenceClass Grothendieck EquivalenceRelationGenerator.
-Require Import Common Limits Functor NaturalTransformation FunctorCategory.
+Require Import FunctionalExtensionality.
+Require Export Category SetCategory DiscreteCategory.
+Require Import Common.
 
 Set Implicit Arguments.
-
-Local Infix "*" := ProductCategory.
-Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section InitialTerminal.
   Local Transparent Object Morphism.

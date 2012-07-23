@@ -33,8 +33,8 @@ Section Objects.
 
   Hint Unfold Morphism Object.
 
-  Local Arguments Object / [obj Morphism] s.
-  Local Arguments Morphism / [obj mor] C s d.
+  Local Arguments Object / {obj mor} C : rename.
+  Local Arguments Morphism / {obj mor} _ _ _.
 
   Hint Extern 1 (_ = _) => apply functional_extensionality_dep; intro.
   Hint Extern 1 (_ = _) => apply forall_extensionality_dep; intro.

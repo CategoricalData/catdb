@@ -4,9 +4,6 @@ Require Import Common Hom ProductCategory ProductFunctor Duals.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-Local Infix "**" := ProductFunctor (at level 70).
-
 Section Adjunction.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
@@ -21,8 +18,8 @@ Section Adjunction.
   Let DOp := OppositeCategory D.
   Let FOp := OppositeFunctor F.
 
-  Let HomCPreFunctor : SpecializedFunctor (COp * D) (COp * C) := (IdentityFunctor _) ** G.
-  Let HomDPreFunctor : SpecializedFunctor (COp * D) (DOp * D) := FOp ** (IdentityFunctor _).
+  Let HomCPreFunctor : SpecializedFunctor (COp * D) (COp * C) := ((IdentityFunctor _) * G)%functor.
+  Let HomDPreFunctor : SpecializedFunctor (COp * D) (DOp * D) := (FOp * (IdentityFunctor _))%functor.
 
   Record Adjunction := {
     AMateOf :> SpecializedNaturalTransformation

@@ -4,8 +4,7 @@ Require Import Common ProductCategory SetCategory.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-Local Notation "C ^ D" := (FunctorCategory D C).
+Local Open Scope category_scope.
 
 Local Transparent Object.
 

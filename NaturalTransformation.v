@@ -37,16 +37,27 @@ Section SpecializedNaturalTransformation.
     Commutes' : forall s d (m : morC s d),
       D.(Compose') _ _ _ (ComponentsOf' d) (F.(MorphismOf') _ _ m) = D.(Compose') _ _ _ (G.(MorphismOf') _ _ m) (ComponentsOf' s)
   }.
-
-  Section NaturalTransformationInterface.
-    Variable T : SpecializedNaturalTransformation.
-
-    Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := Eval cbv beta delta [ComponentsOf'] in T.(ComponentsOf').
-    Definition Commutes : forall (s d : C) (m : C.(Morphism) s d),
-      Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
-      := T.(Commutes').
-  End NaturalTransformationInterface.
 End SpecializedNaturalTransformation.
+
+Delimit Scope natural_transformation_scope with natural_transformation.
+Bind Scope natural_transformation_scope with SpecializedNaturalTransformation.
+
+Section NaturalTransformationInterface.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variables F G : SpecializedFunctor C D.
+
+  Variable T : SpecializedNaturalTransformation F G.
+
+  Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := Eval cbv beta delta [ComponentsOf'] in T.(ComponentsOf').
+  Definition Commutes : forall (s d : C) (m : C.(Morphism) s d),
+    Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
+    := T.(Commutes').
+End NaturalTransformationInterface.
 
 Arguments ComponentsOf {objC morC C objD morD D F G} T c : simpl nomatch.
 Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
@@ -57,6 +68,8 @@ Section NaturalTransformation.
 
   Definition NaturalTransformation := SpecializedNaturalTransformation F G.
 End NaturalTransformation.
+
+Bind Scope natural_transformation_scope with NaturalTransformation.
 
 Identity Coercion NaturalTransformation_SpecializedNaturalTransformation_Id : NaturalTransformation >-> SpecializedNaturalTransformation.
 Definition GeneralizeNaturalTransformation objC morC C objD morD D F G (T : @SpecializedNaturalTransformation objC morC C objD morD D F G) :

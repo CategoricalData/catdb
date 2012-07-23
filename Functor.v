@@ -31,20 +31,30 @@ Section SpecializedFunctor.
       MorphismOf' (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' m2) (MorphismOf' m1);
     FIdentityOf' : forall o, MorphismOf' (C.(Identity') o) = D.(Identity') (ObjectOf' o)
   }.
-
-  Section FunctorInterface.
-    Variable F : SpecializedFunctor.
-
-    Definition ObjectOf : forall c, D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
-    Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
-      := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
-    Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
-      MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
-      := F.(FCompositionOf').
-    Definition FIdentityOf : forall (o : C), MorphismOf (Identity o) = Identity (ObjectOf o)
-      := F.(FIdentityOf').
-  End FunctorInterface.
 End SpecializedFunctor.
+
+Delimit Scope functor_scope with functor.
+Bind Scope functor_scope with SpecializedFunctor.
+
+Section FunctorInterface.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+
+  Variable F : SpecializedFunctor C D.
+
+  Definition ObjectOf : forall c, D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
+  Definition MorphismOf : forall (s d : C) (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
+    := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
+  Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
+    MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
+    := F.(FCompositionOf').
+  Definition FIdentityOf : forall (o : C), MorphismOf (Identity o) = Identity (ObjectOf o)
+    := F.(FIdentityOf').
+End FunctorInterface.
 
 Global Coercion ObjectOf : SpecializedFunctor >-> Funclass.
 
@@ -53,6 +63,8 @@ Section Functor.
 
   Definition Functor := SpecializedFunctor C D.
 End Functor.
+
+Bind Scope functor_scope with Functor.
 
 Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor.
 Definition GeneralizeFunctor objC morC C objD morD D (F : @SpecializedFunctor objC morC C objD morD D) : Functor C D := F.

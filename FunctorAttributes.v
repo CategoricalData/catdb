@@ -4,8 +4,7 @@ Require Import Common Hom Duals ProductFunctor NaturalTransformation SetCategory
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-Local Infix "**" := ProductFunctor (at level 70).
+Local Open Scope category_scope.
 
 Section FullFaithful.
   Variable objC : Type.
@@ -30,8 +29,8 @@ Section FullFaithful.
   Hint Rewrite FCompositionOf.
 
   Definition InducedHomNaturalTransformation :
-    SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp ** F)).
-    refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp ** F))
+    SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
+    refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
       (fun sd : (COp * C) =>
         @MorphismOf _ _ _ _ _ _ F _ _ )
       _
@@ -40,9 +39,9 @@ Section FullFaithful.
   Defined.
 
   Definition InducedHomSetNaturalTransformation :
-    SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op ** F')).
+    SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F')).
     clear morC morD C D COp DOp FOp F.
-    refine (Build_SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op ** F'))
+    refine (Build_SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F'))
       (fun sd : (C'Op * C') =>
         @MorphismOf _ _ _ _ _ _ F' _ _ )
       _

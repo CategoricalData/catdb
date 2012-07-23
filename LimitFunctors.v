@@ -4,7 +4,7 @@ Require Import Common DefinitionSimplification NaturalTransformation FunctorCate
 
 Set Implicit Arguments.
 
-Local Notation "C ^ D" := (FunctorCategory D C).
+Local Open Scope category_scope.
 
 Section HasLimits.
   Variable objC : Type.

@@ -4,7 +4,7 @@ Require Import Common DiscreteCategory.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
+Local Open Scope category_scope.
 
 Section CommaCategory.
   (* [Definition]s are not sort-polymorphic, and it's too slow to not use

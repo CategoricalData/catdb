@@ -15,6 +15,13 @@ Record SpecializedCategory (obj : Type) (Morphism : obj -> obj -> Type) := {
   RightIdentity' : forall a b (f : Morphism a b), Compose' f (Identity' a) = f
 }.
 
+Delimit Scope category_scope with category.
+Bind Scope category_scope with SpecializedCategory.
+
+Arguments Object {obj%type mor} C%category : rename.
+Arguments Identity' {obj%type mor} C%category o : rename.
+Arguments Compose' {obj%type mor} C%category s d d' _ _ : rename.
+
 Section SpecializedCategoryInterface.
   Variable obj : Type.
   Variable mor : obj -> obj -> Type.

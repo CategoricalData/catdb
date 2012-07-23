@@ -3,8 +3,6 @@ Require Import Common DefinitionSimplification SpecializedCategory Functor Funct
 
 Set Implicit Arguments.
 
-Local Notation "C ^ D" := (FunctorCategory D C).
-
 Section InducedMaps.
   (** Quoting David:
      Given a commutative triangle consisting of

@@ -4,8 +4,9 @@ Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
 Local Infix "==" := JMeq (at level 70).
+
+Local Open Scope category_scope.
 
 Section OppositeCategory.
   Variable objC : Type.
