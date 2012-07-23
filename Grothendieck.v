@@ -72,7 +72,7 @@ Section Grothendieck.
     ).
   Defined.
 
-  Arguments GrothendieckCompose [cs xs cd xd cd' xd'] m2 m1.
+  Arguments GrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
   Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
     Transparent Identity.
