@@ -324,6 +324,17 @@ Ltac f_equal_in_r H k := let H' := uncurry H in let H'T := type of H' in
     end; clear H.
 Ltac f_equal_in f H := f_equal_in_r H ltac:(fun pf k => k (pf _ f)).
 
+Ltac eta_red :=
+  repeat match goal with
+           | [ H : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in H
+           | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
+         end.
+
+Ltac intro_proj2_sig_from_goal' :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+         end.
+
 Ltac intro_proj2_sig_from_goal :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
