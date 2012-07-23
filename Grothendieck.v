@@ -38,6 +38,10 @@ Section Grothendieck.
     Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
   End GrothendieckInterface.
 
+  Lemma GrothendieckPair_eta (x : GrothendieckPair) : Build_GrothendieckPair (GrothendieckC x) (GrothendieckX x) = x.
+    destruct x; reflexivity.
+  Qed.
+
   Record SetGrothendieckPair := {
     SetGrothendieckC' : objC;
     SetGrothendieckX' : F' SetGrothendieckC'
@@ -49,6 +53,10 @@ Section Grothendieck.
     Definition SetGrothendieckC : C := G.(SetGrothendieckC').
     Definition SetGrothendieckX : F' SetGrothendieckC := G.(SetGrothendieckX').
   End SetGrothendieckInterface.
+
+  Lemma SetGrothendieckPair_eta (x : SetGrothendieckPair) : Build_SetGrothendieckPair (SetGrothendieckC x) (SetGrothendieckX x) = x.
+    destruct x; reflexivity.
+  Qed.
 
   Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
