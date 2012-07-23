@@ -242,6 +242,12 @@ Section AdjunctionEquivalences.
                 auto
     ).
   Defined.
+End AdjunctionEquivalences.
+
+Section AdjunctionEquivalences'.
+  Variables C D : Category.
+  Variable F : Functor C D.
+  Variable G : Functor D C.
 
   Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (projT1 T c)) |};
@@ -291,7 +297,7 @@ Section AdjunctionEquivalences.
                   trivial
       ).
   Defined.
-End AdjunctionEquivalences.
+End AdjunctionEquivalences'.
 
 Coercion HomAdjunction2Adjunction : HomAdjunction >-> Adjunction.
 Coercion Adjunction2HomAdjunction : Adjunction >-> HomAdjunction.
