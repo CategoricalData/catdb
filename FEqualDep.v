@@ -1,4 +1,5 @@
 Require Import FunctionalExtensionality JMeq.
+Require Import Common.
 Set Implicit Arguments.
 
 Local Infix "==" := JMeq (at level 70).
@@ -39,7 +40,7 @@ Ltac JMeq_eq :=
            | [ H : _ == _ |- _ ] => apply JMeq_eq in H
          end.
 
-Ltac f_equal_dep_cleanup := JMeq_eq.
+Ltac f_equal_dep_cleanup := JMeq_eq; eta_red.
 
 Ltac f_equal_dep' := intros; f_equal; simpl in *;
   match goal with
@@ -49,11 +50,11 @@ Ltac f_equal_dep' := intros; f_equal; simpl in *;
         | [ |- ?x == ?y ] => f_equal_dep_cleanup; try reflexivity
         | _ => idtac
       end
-  end.
+  end; f_equal_dep_cleanup.
 
 Ltac f_equal_dep := intros; f_equal; simpl in *;
   repeat match goal with
            | [ |- ?f ?a = ?g ?b ] => apply JMeq_eq; f_equal_dep'
            | [ |- ?f ?a == ?g ?b ] => f_equal_dep'
            | _ => try reflexivity
-         end.
+         end; f_equal_dep_cleanup.
