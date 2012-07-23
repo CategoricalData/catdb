@@ -1,6 +1,6 @@
-Require Import Setoid ProofIrrelevance FunctionalExtensionality ClassicalDescription.
+Require Import Setoid ProofIrrelevance FunctionalExtensionality ClassicalEpsilon.
 Require Export SetCategory EquivalenceSet EquivalenceClass Grothendieck EquivalenceRelationGenerator.
-Require Import Common Limits Functor NaturalTransformation FunctorCategory.
+Require Import Common Limits Functor NaturalTransformation FunctorCategory DiscreteCategory.
 
 Set Implicit Arguments.
 
@@ -33,7 +33,6 @@ Section SetColimits.
   Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) c x c' x'
     (a := Build_SetGrothendieckPair F c x) (b := Build_SetGrothendieckPair F c' x') :
     a ~= b
-(*    inhabited (Morphism (CategoryOfElements ((F : SpecializedFunctorToSet _) : SpecializedFunctorToType _)) a b)*)
     -> m c x = m c' x'.
     change c with (SetGrothendieckC a).
     change x with (SetGrothendieckX a).
@@ -49,26 +48,30 @@ Section SetColimits.
 
   Section chooser.
     Variable chooser : SetColimit_Object_pre -> SetColimit_Object_pre.
-    Hypothesis chooser_respectful : forall x y, x ~= y -> chooser x = chooser y.
-    Hypothesis chooser_injective : forall x, { y | x ~= y /\ chooser y = y }.
+    Hypothesis chooser_respectful : forall x y, x ~= y <-> chooser x = chooser y.
+    Hypothesis chooser_idempotent : forall x, chooser (chooser x) = chooser x.
+
+    Let chooser_respectful1 x y : x ~= y -> chooser x = chooser y := proj1 (chooser_respectful x y).
+    Let chooser_respectful2 x y : chooser x = chooser y -> x ~= y := proj2 (chooser_respectful x y).
+
+    Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
 
     Local Ltac t_fin := simpl in *;
       reflexivity || eassumption || (constructor; assumption) || (symmetry; constructor; assumption) ||
         solve [ etransitivity; eauto ] ||
           solve [ symmetry; etransitivity; eauto ].
 
-    Definition SetColimitByChooser_Object : TerminalCategory * SetCat := (tt, { x | chooser x = x } ).
+    Definition SetColimit_Object : TerminalCategory * SetCat := (tt, { x | chooser x = x } ).
 
     Let chooser' (x : SetColimit_Object_pre) : { x | chooser x = x }.
-      exists (proj1_sig (chooser_injective x)).
-      abstract (intro_proj2_sig_from_goal; intuition).
+      exists (chooser x); abstract trivial.
     Defined.
 
     (* TODO: Automate better. *)
-    Definition SetColimitByChooser_Morphism : Morphism (FunctorCategory C SetCat)
+    Definition SetColimit_Morphism : Morphism (FunctorCategory C SetCat)
       ((SliceCategory_Functor
-        (FunctorCategory C SetCat) F) (fst SetColimitByChooser_Object))
-      ((DiagonalFunctor SetCat C) (snd SetColimitByChooser_Object)).
+        (FunctorCategory C SetCat) F) (fst SetColimit_Object))
+      ((DiagonalFunctor SetCat C) (snd SetColimit_Object)).
       hnf; simpl.
       match goal with
         | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -85,59 +88,48 @@ Section SetColimits.
         simpl; intros; hnf;
           repeat (apply functional_extensionality_dep; intro);
             simpl_eq;
-            match goal with
-              | [ |- proj1_sig ?x = proj1_sig ?y ] =>
-                simpl_do do_rewrite_rev (proj2 (proj2_sig x)); simpl_do do_rewrite_rev (proj2 (proj2_sig y));
-                  apply chooser_respectful;
-                    simpl_do do_rewrite_rev (proj1 (proj2_sig x)); simpl_do do_rewrite_rev (proj1 (proj2_sig y))
-            end;
-            match goal with
-              | [ m : _ |- _ ]
-                => apply gen_sym;
-                  apply gen_underlying;
+            apply chooser_respectful;
+              match goal with
+                | [ m : _ |- _ ]
+                  => apply gen_sym;
+                    apply gen_underlying;
+                      constructor; hnf; simpl;
+                        exists m; reflexivity
+                | [ m : _ |- _ ]
+                  => apply gen_underlying;
                     constructor; hnf; simpl;
                       exists m; reflexivity
-              | [ m : _ |- _ ]
-                => apply gen_underlying;
-                  constructor; hnf; simpl;
-                    exists m; reflexivity
-            end
+              end
       ).
     Defined.
 
-    Definition SetColimitByChooser_Property_Morphism_mor (S : SetCat)
+    Definition SetColimit_Property_Morphism_mor (S : SetCat)
       (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
-      snd (SetColimitByChooser_Object) -> S
+      snd (SetColimit_Object) -> S
       := fun x => m (SetGrothendieckC (proj1_sig x)) (SetGrothendieckX (proj1_sig x)).
 
-    Global Arguments SetColimitByChooser_Property_Morphism_mor [S] m _ /.
+    Global Arguments SetColimit_Property_Morphism_mor [S] m _ /.
 
-    Definition SetColimitByChooser_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
+    Definition SetColimit_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
       Morphism
       (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C))
-      (existT _ SetColimitByChooser_Object SetColimitByChooser_Morphism) o'.
-      exists (tt, fun d => (@SetColimitByChooser_Property_Morphism_mor (snd (projT1 o')) (projT2 o') d)).
+      (existT _ SetColimit_Object SetColimit_Morphism) o'.
+      exists (tt, fun d => (@SetColimit_Property_Morphism_mor (snd (projT1 o')) (projT2 o') d)).
       abstract (
         simpl in *;
           nt_eq;
           apply SetColimit_Property_Morphism_respectful;
             simpl;
-              match goal with
-                | [ |- context[proj1_sig ?x] ] => induction (proj1 (proj2_sig x))
-              end;
-              unfold SetColimit_Object_pre in *;
-                repeat match goal with
-                         | [ H : SetGrothendieckPair _ |- _ ] => destruct H
-                       end;
-                t_fin
+              rewrite SetGrothendieckPair_eta;
+                auto
       ).
     Defined.
 
     (* TODO: Automate this better *)
-    Definition SetColimitByChooser : Colimit F.
-      exists (existT _ SetColimitByChooser_Object SetColimitByChooser_Morphism).
+    Definition SetColimit : Colimit F.
+      exists (existT _ SetColimit_Object SetColimit_Morphism).
       intro o'.
-      exists (SetColimitByChooser_Property_Morphism o').
+      exists (SetColimit_Property_Morphism o').
       abstract (
         hnf; intros; simpl in *;
           destruct_sig;
@@ -156,12 +148,7 @@ Section SetColimits.
                 end;
                 f_equal;
                 simpl_eq;
-                intro_proj2_sig_from_goal; split_and; simpl in *;
-                  match goal with
-                    | [ H0 : _ = ?x, H1 : _ = ?y |- ?x = ?y ] => rewrite <- H0 at 1; rewrite <- H1
-                  end;
-                  apply chooser_respectful;
-                    assumption
+                auto
       ).
     Defined.
   End chooser.
@@ -169,125 +156,46 @@ Section SetColimits.
   Section axiom.
     Hypothesis inhabited_dec : forall x y : SetColimit_Object_pre, {x ~= y} + {~(x ~= y)}.
 
-    Definition SetColimit_Object : TerminalCategory * SetCat := (tt, EquivalenceSet SetColimit_Object_equiv).
+    Hint Resolve setOf_mor.
 
-    (* TODO: Automate better. *)
-    Definition SetColimit_Morphism : Morphism (FunctorCategory C SetCat)
-      ((SliceCategory_Functor
-        (FunctorCategory C SetCat) F) (fst SetColimit_Object))
-      ((DiagonalFunctor SetCat C) (snd SetColimit_Object)).
-      hnf; simpl.
+    Let chooserSet (x : SetColimit_Object_pre) := setOf SetColimit_Object_equiv_Equivalence inhabited_dec x.
+
+    Let chooser (x : SetColimit_Object_pre) : SetColimit_Object_pre
+      := proj1_sig (constructive_indefinite_description _ (SetInhabited (chooserSet x))).
+
+    Local Ltac solve_chooser_eq :=
       match goal with
-        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-          refine (Build_SpecializedNaturalTransformation F G
-            (fun c : objC =>
-              (fun S : F c =>
-                setOf SetColimit_Object_equiv_Equivalence inhabited_dec
-                (Build_SetGrothendieckPair F c S)
-              )
-            )
-            _
-          )
+        | [ |- chooser ?x = chooser ?y ] =>
+          cut (sameSet (chooserSet x) (chooserSet y));
+            unfold chooser, chooserSet in *;
+              [
+                let H := fresh in intro H; apply sameSet_eq in H; rewrite H; reflexivity
+                | try solve [ apply eq_sameSet; unfold chooserSet; auto ]
+              ]
       end.
-      abstract (
-        simpl; intros; hnf;
-          repeat (apply functional_extensionality_dep; intro);
-            simpl;
-              apply EquivalenceSet_forall__eq;
-                intros; repeat (split; intros);
-                  clear_InSet;
-                  t_with t';
-                  match goal with
-                    | [ m : _ |- _ ]
-                      => apply gen_sym;
-                        apply gen_underlying;
-                          constructor; hnf; simpl;
-                            exists m; reflexivity
-                    | [ m : _ |- _ ]
-                      => apply gen_underlying;
-                        constructor; hnf; simpl;
-                          exists m; reflexivity
-                  end
-      ).
-    Defined.
 
-    Definition SetColimit_Property_Morphism_mor_pre (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
-      forall (D : snd (SetColimit_Object)), exists! s : S, forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s.
-      unfold SetColimit_Object; simpl; intro D; destruct (SetInhabited D) as [ cx H ].
-      exists (m (SetGrothendieckC cx) (SetGrothendieckX cx)).
-      abstract (
-        split; unfold SetColimit_Object_pre in *; intros; auto; clear_InSet;
-          match goal with
-            | [ H : SetEquivalent _ _ _ |- _ ] => induction H; auto;
-              try solve [ etransitivity; eauto ]
-          end;
-          match goal with
-            | [ H : inhabited _ |- _ ] => destruct H as [ [ f H ] ]
-          end;
-          pose m.(Commutes');
-            simpl in *;
-              fg_equal;
-              unfold SetGrothendieckC, SetGrothendieckX in *;
-                t_rev_with t' (* [t_with t'] gives "Anomaly: Uncaught exception Failure("hd"). Please report.", if
-                                 I add a second argument to the definition, [(eq_dec : forall s0 s1 : S, {s0 = s1} + {s0 <> s1})] *)
-      ).
-    Defined.
+    Let chooser_respectful x y : x ~= y <-> chooser x = chooser y.
+      split; intro; try solve_chooser_eq;
+        match goal with
+          | [ H : chooser ?x = chooser ?y |- ?x ~= ?y ] =>
+            cut (sameSet (chooserSet x) (chooserSet y));
+              unfold chooser, chooserSet in *;
+                [
+                  intro H'; apply sameSet_eq in H'; apply setOf_eq in H'; auto
+                  | apply notDisjointSets_sameSet; intro_proj2_sig; rewrite H in *;
+                    eexists; split; eauto
+                ]
+        end.
+    Qed.
 
-    Definition SetColimit_Property_Morphism_mor_sig (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) :
-      forall (D : snd (SetColimit_Object)), { s : S | forall d, InSet D d -> m (SetGrothendieckC d) (SetGrothendieckX d) = s }.
-      intros; apply constructive_definite_description.
-      apply SetColimit_Property_Morphism_mor_pre.
-    Defined.
+    Let chooser_idempotent x : chooser (chooser x) = chooser x.
+      solve_chooser_eq.
+      apply notDisjointSets_sameSet; exists x; intro_proj2_sig; split; clear_InSet; eauto.
+    Qed.
 
-    Definition SetColimit_Property_Morphism (o' : @CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C)) :
-      Morphism
-      (@CosliceCategory _ (SetCat ^ C) F (DiagonalFunctor SetCat C))
-      (existT _ SetColimit_Object SetColimit_Morphism) o'.
-      exists (tt, fun d => proj1_sig (@SetColimit_Property_Morphism_mor_sig (snd (projT1 o')) (projT2 o') d)).
-      abstract (
-        simpl in *;
-          nt_eq;
-          match goal with
-            | [ |- proj1_sig ?x = _ ] => let H := fresh in
-              pose (proj2_sig x _ (setOf_refl _ _ _)) as H;
-                simpl in *;
-                  exact H || symmetry; exact H
-          end
-      ).
-    Defined.
-
-    Definition SetColimit : Colimit F.
-      exists (existT _ SetColimit_Object SetColimit_Morphism).
-      intro o'.
-      exists (SetColimit_Property_Morphism o').
-      abstract (
-        hnf; intros; simpl in *;
-          destruct_sig;
-          simpl_eq; try solve [ unfold Morphism; trivial ];
-            apply functional_extensionality_dep; intro;
-              simpl in *;
-                destruct_sig;
-                match goal with
-                  | [ x : _ |- _ ] => destruct (SetInhabited x)
-                end;
-                match goal with
-                  | [ x : SetGrothendieckPair _, H : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in H;
-                    fg_equal;
-                    let c := fresh in destruct x as [ c x ];
-                      specialize (H c); fg_equal; specialize (H x);
-                        simpl
-                end;
-                InSet2setOf SetColimit_Object_equiv_Equivalence;
-                match goal with
-                  | [ H : _ = _ |- _ ] => rewrite H in *; clear H
-                end;
-                intro_proj2_sig_from_goal; split_and; simpl in *;
-                  match goal with
-                    | [ H : forall _ _, _ |- _ ] => specialize (H _ (setOf_refl _ _ _))
-                  end;
-                  etransitivity; eauto
-        ).
-    Defined.
+    Lemma SetHasColimits : Colimit F.
+      exact (@SetColimit chooser chooser_respectful chooser_idempotent).
+    Qed.
   End axiom.
 End SetColimits.
 
@@ -316,7 +224,6 @@ Section TypeColimits.
   Lemma TypeColimit_Property_Morphism_respectful (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) c x c' x'
     (a := Build_GrothendieckPair F c x) (b := Build_GrothendieckPair F c' x') :
     a ~= b
-(*    inhabited (Morphism (CategoryOfElements ((F : SpecializedFunctorToSet _) : SpecializedFunctorToType _)) a b)*)
     -> m c x = m c' x'.
     change c with (GrothendieckC a).
     change x with (GrothendieckX a).
@@ -332,26 +239,30 @@ Section TypeColimits.
 
   Section chooser.
     Variable chooser : TypeColimit_Object_pre -> TypeColimit_Object_pre.
-    Hypothesis chooser_respectful : forall x y, x ~= y -> chooser x = chooser y.
-    Hypothesis chooser_injective : forall x, { y | x ~= y /\ chooser y = y }.
+    Hypothesis chooser_respectful : forall x y, x ~= y <-> chooser x = chooser y.
+    Hypothesis chooser_idempotent : forall x, chooser (chooser x) = chooser x.
+
+    Let chooser_respectful1 x y : x ~= y -> chooser x = chooser y := proj1 (chooser_respectful x y).
+    Let chooser_respectful2 x y : chooser x = chooser y -> x ~= y := proj2 (chooser_respectful x y).
+
+    Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
 
     Local Ltac t_fin := simpl in *;
       reflexivity || eassumption || (constructor; assumption) || (symmetry; constructor; assumption) ||
         solve [ etransitivity; eauto ] ||
           solve [ symmetry; etransitivity; eauto ].
 
-    Definition TypeColimitByChooser_Object : TerminalCategory * TypeCat := (tt, { x | chooser x = x } ).
+    Definition TypeColimit_Object : TerminalCategory * TypeCat := (tt, { x | chooser x = x } ).
 
     Let chooser' (x : TypeColimit_Object_pre) : { x | chooser x = x }.
-      exists (proj1_sig (chooser_injective x)).
-      abstract (intro_proj2_sig_from_goal; intuition).
+      exists (chooser x); abstract trivial.
     Defined.
 
     (* TODO: Automate better. *)
-    Definition TypeColimitByChooser_Morphism : Morphism (FunctorCategory C TypeCat)
+    Definition TypeColimit_Morphism : Morphism (FunctorCategory C TypeCat)
       ((SliceCategory_Functor
-        (FunctorCategory C TypeCat) F) (fst TypeColimitByChooser_Object))
-      ((DiagonalFunctor TypeCat C) (snd TypeColimitByChooser_Object)).
+        (FunctorCategory C TypeCat) F) (fst TypeColimit_Object))
+      ((DiagonalFunctor TypeCat C) (snd TypeColimit_Object)).
       hnf; simpl.
       match goal with
         | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -368,59 +279,48 @@ Section TypeColimits.
         simpl; intros; hnf;
           repeat (apply functional_extensionality_dep; intro);
             simpl_eq;
-            match goal with
-              | [ |- proj1_sig ?x = proj1_sig ?y ] =>
-                simpl_do do_rewrite_rev (proj2 (proj2_sig x)); simpl_do do_rewrite_rev (proj2 (proj2_sig y));
-                  apply chooser_respectful;
-                    simpl_do do_rewrite_rev (proj1 (proj2_sig x)); simpl_do do_rewrite_rev (proj1 (proj2_sig y))
-            end;
-            match goal with
-              | [ m : _ |- _ ]
-                => apply gen_sym;
-                  apply gen_underlying;
+            apply chooser_respectful;
+              match goal with
+                | [ m : _ |- _ ]
+                  => apply gen_sym;
+                    apply gen_underlying;
+                      constructor; hnf; simpl;
+                        exists m; reflexivity
+                | [ m : _ |- _ ]
+                  => apply gen_underlying;
                     constructor; hnf; simpl;
                       exists m; reflexivity
-              | [ m : _ |- _ ]
-                => apply gen_underlying;
-                  constructor; hnf; simpl;
-                    exists m; reflexivity
-            end
+              end
       ).
     Defined.
 
-    Definition TypeColimitByChooser_Property_Morphism_mor (S : TypeCat)
+    Definition TypeColimit_Property_Morphism_mor (S : TypeCat)
       (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) :
-      snd (TypeColimitByChooser_Object) -> S
+      snd (TypeColimit_Object) -> S
       := fun x => m (GrothendieckC (proj1_sig x)) (GrothendieckX (proj1_sig x)).
 
-    Global Arguments TypeColimitByChooser_Property_Morphism_mor [S] m _ /.
+    Global Arguments TypeColimit_Property_Morphism_mor [S] m _ /.
 
-    Definition TypeColimitByChooser_Property_Morphism (o' : @CosliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) :
+    Definition TypeColimit_Property_Morphism (o' : @CosliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) :
       Morphism
       (@CosliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C))
-      (existT _ TypeColimitByChooser_Object TypeColimitByChooser_Morphism) o'.
-      exists (tt, fun d => (@TypeColimitByChooser_Property_Morphism_mor (snd (projT1 o')) (projT2 o') d)).
+      (existT _ TypeColimit_Object TypeColimit_Morphism) o'.
+      exists (tt, fun d => (@TypeColimit_Property_Morphism_mor (snd (projT1 o')) (projT2 o') d)).
       abstract (
         simpl in *;
           nt_eq;
           apply TypeColimit_Property_Morphism_respectful;
             simpl;
-              match goal with
-                | [ |- context[proj1_sig ?x] ] => induction (proj1 (proj2_sig x))
-              end;
-              unfold TypeColimit_Object_pre in *;
-                repeat match goal with
-                         | [ H : GrothendieckPair _ |- _ ] => destruct H
-                       end;
-                t_fin
+              rewrite GrothendieckPair_eta;
+                auto
       ).
     Defined.
 
     (* TODO: Automate this better *)
-    Definition TypeColimitByChooser : Colimit F.
-      exists (existT _ TypeColimitByChooser_Object TypeColimitByChooser_Morphism).
+    Definition TypeColimit : Colimit F.
+      exists (existT _ TypeColimit_Object TypeColimit_Morphism).
       intro o'.
-      exists (TypeColimitByChooser_Property_Morphism o').
+      exists (TypeColimit_Property_Morphism o').
       abstract (
         hnf; intros; simpl in *;
           destruct_sig;
@@ -438,135 +338,52 @@ Section TypeColimits.
                 end;
                 f_equal;
                 simpl_eq;
-                intro_proj2_sig_from_goal; split_and; simpl in *;
-                  match goal with
-                    | [ H0 : _ = ?x, H1 : _ = ?y |- ?x = ?y ] => conv_rewrite_rev_with ltac:(fun H => rewrite <- H at 1) H0; conv_rewrite_rev H1
-                  end;
-                  apply chooser_respectful;
-                    assumption
+                auto
       ).
     Defined.
   End chooser.
 
   Section axiom.
-    Definition TypeColimit_Object : TerminalCategory * TypeCat := (tt, EquivalenceClass TypeColimit_Object_equiv).
+    Hint Resolve classOf_mor.
 
-    (* TODO: Automate better. *)
-    Definition TypeColimit_Morphism : Morphism (FunctorCategory C TypeCat)
-      ((SliceCategory_Functor
-        (FunctorCategory C TypeCat) F) (fst TypeColimit_Object))
-      ((DiagonalFunctor TypeCat C) (snd TypeColimit_Object)).
-      hnf; simpl.
+    Let chooserClass (x : TypeColimit_Object_pre) := classOf TypeColimit_Object_equiv_Equivalence x.
+
+    Let chooser (x : TypeColimit_Object_pre) : TypeColimit_Object_pre
+      := proj1_sig (constructive_indefinite_description _ (ClassInhabited (chooserClass x))).
+
+    Local Ltac solve_chooser_eq :=
       match goal with
-        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-          refine (Build_SpecializedNaturalTransformation F G
-            (fun c : objC =>
-              (fun S : F c =>
-                classOf TypeColimit_Object_equiv_Equivalence
-                (Build_GrothendieckPair F c S)
-              )
-            )
-            _
-          )
+        | [ |- chooser ?x = chooser ?y ] =>
+          cut (sameClass (chooserClass x) (chooserClass y));
+            unfold chooser, chooserClass in *;
+              [
+                let H := fresh in intro H; apply sameClass_eq in H; rewrite H; reflexivity
+                | try solve [ apply eq_sameClass; unfold chooserClass; auto ]
+              ]
       end.
-      abstract (
-        simpl; intros; hnf;
-          repeat (apply functional_extensionality_dep; intro);
-            simpl;
-              apply EquivalenceClass_forall__eq;
-                intros; repeat (split; intros);
-                  clear_InClass;
-                  t_with t';
-                  match goal with
-                    | [ m : _ |- _ ]
-                      => apply gen_sym;
-                        apply gen_underlying;
-                          constructor; hnf; simpl;
-                            exists m; reflexivity
-                    | [ m : _ |- _ ]
-                      => apply gen_underlying;
-                        constructor; hnf; simpl;
-                          exists m; reflexivity
-                  end
-      ).
-    Defined.
 
-    Definition TypeColimit_Property_Morphism_mor_pre (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) :
-      forall (D : snd (TypeColimit_Object)), exists! s : S, forall d, InClass D d -> m (GrothendieckC d) (GrothendieckX d) = s.
-      unfold TypeColimit_Object; simpl; intro D; destruct (ClassInhabited D) as [ cx H ].
-      exists (m (GrothendieckC cx) (GrothendieckX cx)).
-      abstract (
-        split; unfold TypeColimit_Object_pre in *; intros; auto; clear_InClass;
-          match goal with
-            | [ H : ClassEquivalent _ _ _ |- _ ] => induction H; auto;
-              try solve [ etransitivity; eauto ]
-          end;
-          match goal with
-            | [ H : inhabited _ |- _ ] => destruct H as [ [ f H ] ]
-          end;
-          pose m.(Commutes');
-            simpl in *;
-              fg_equal;
-              unfold GrothendieckC, GrothendieckX in *;
-                t_rev_with t' (* [t_with t'] gives "Anomaly: Uncaught exception Failure("hd"). Please report.", if
-                                 I add a second argument to the definition, [(eq_dec : forall s0 s1 : S, {s0 = s1} + {s0 <> s1})] *)
-      ).
-    Defined.
+    Let chooser_respectful x y : x ~= y <-> chooser x = chooser y.
+      split; intro; try solve_chooser_eq.
+        match goal with
+          | [ H : chooser ?x = chooser ?y |- ?x ~= ?y ] =>
+            cut (sameClass (chooserClass x) (chooserClass y));
+              unfold chooser, chooserClass in *;
+                [
+                  intro H'; apply sameClass_eq in H'; apply classOf_eq in H'; auto
+                  | apply notDisjointClasses_sameClass; intro_proj2_sig; rewrite H in *;
+                    eexists; split; eauto
+                ]
+        end.
+    Qed.
 
-    Definition TypeColimit_Property_Morphism_mor_sig (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) :
-      forall (D : snd (TypeColimit_Object)), { s : S | forall d, InClass D d -> m (GrothendieckC d) (GrothendieckX d) = s }.
-      intros; apply constructive_definite_description.
-      apply TypeColimit_Property_Morphism_mor_pre.
-    Defined.
+    Let chooser_idempotent x : chooser (chooser x) = chooser x.
+      solve_chooser_eq.
+      apply notDisjointClasses_sameClass; exists x; intro_proj2_sig_from_goal'; split; replace_InClass; simpl in *; clear_InClass;
+        eauto || symmetry; eauto.
+    Qed.
 
-    Definition TypeColimit_Property_Morphism (o' : @CosliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C)) :
-      Morphism
-      (@CosliceCategory _ (TypeCat ^ C) F (DiagonalFunctor TypeCat C))
-      (existT _ TypeColimit_Object TypeColimit_Morphism) o'.
-      exists (tt, fun d => proj1_sig (@TypeColimit_Property_Morphism_mor_sig (snd (projT1 o')) (projT2 o') d)).
-      abstract (
-        simpl in *;
-          nt_eq;
-          match goal with
-            | [ |- proj1_sig ?x = _ ] => let H := fresh in
-              pose (proj2_sig x _ (classOf_refl _ _)) as H;
-                simpl in *;
-                  exact H || symmetry; exact H
-          end
-      ).
-    Defined.
-
-    Definition TypeColimit : Colimit F.
-      exists (existT _ TypeColimit_Object TypeColimit_Morphism).
-      intro o'.
-      exists (TypeColimit_Property_Morphism o').
-      abstract (
-        hnf; intros; simpl in *;
-          destruct_sig;
-          simpl_eq; try solve [ unfold Morphism; trivial ];
-            apply functional_extensionality_dep; intro;
-              simpl in *;
-                destruct_sig;
-                match goal with
-                  | [ x : _ |- _ ] => destruct (ClassInhabited x)
-                end;
-                match goal with
-                  | [ x : GrothendieckPair _, H : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in H;
-                    fg_equal;
-                    let c := fresh in destruct x as [ c x ];
-                      specialize (H c); fg_equal; specialize (H x);
-                        simpl
-                end;
-                InClass2classOf TypeColimit_Object_equiv_Equivalence;
-                match goal with
-                  | [ H : _ = _ |- _ ] => rewrite H in *; clear H
-                end;
-                intro_proj2_sig_from_goal; split_and; simpl in *;
-                  match goal with
-                    | [ H : forall _ _, _ |- _ ] => specialize (H _ (classOf_refl _ _))
-                  end;
-                  etransitivity; eauto
-        ).
-    Defined.
+    Lemma TypeHasColimits : Colimit F.
+      exact (@TypeColimit chooser chooser_respectful chooser_idempotent).
+    Qed.
   End axiom.
 End TypeColimits.
