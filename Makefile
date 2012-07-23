@@ -26,12 +26,11 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Limits \
-	SpecializedLimitFunctors \
+	LimitFunctors \
 	SpecializedLimitFunctorTheorems \
 	Grothendieck \
 	Yoneda \
 	\
-	LimitFunctors \
 	LimitFunctorTheorems \
 	EquivalenceClass \
 	EquivalenceRelation \
