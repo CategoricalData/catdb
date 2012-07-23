@@ -95,8 +95,10 @@ Section equiv.
      the elements are equivalent to that [value]. *)
   Definition setOf (v : value) : EquivalenceSet equiv.
     exists (fun v' => if v ~= v' then true else false);
-      try exists v; repeat split; unfold InSet in *;
-        simpl_equiv.
+      abstract (
+        try exists v; repeat split; unfold InSet in *;
+          simpl_equiv
+      ).
   Defined.
 
   Lemma setOf_refl : forall v, InSet (setOf v) v.
@@ -128,7 +130,7 @@ Section equiv.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameSet_eq (C C' : EquivalenceSet equiv) : (sameSet C C') -> (C = C').
+  Lemma sameSet_eq (C C' : EquivalenceSet equiv) : sameSet C C' -> C = C'.
     clear equiv_Equivalence; intro H.
     cut (InSet' C = InSet' C');
       destruct C, C'; simpl;
@@ -150,11 +152,24 @@ Section equiv.
                     assumption || symmetry; assumption.
   Qed.
 
+  Lemma eq_sameSet (C C' : EquivalenceSet equiv) : C = C' -> sameSet C C'.
+    intro; subst; apply sameSet_refl.
+  Qed.
+
   Global Add Parametric Morphism : setOf
     with signature equiv ==> eq
       as setOf_mor.
     intros x y eqv;
       apply sameSet_eq; compute in *; intros; split; intros; simpl_equiv.
+  Qed.
+
+  Lemma setOf_eq x y : setOf x = setOf y <-> equiv x y.
+    split; intro H; try apply setOf_mor; trivial.
+    pose (setOf_refl x).
+    pose (setOf_refl y).
+    rewrite H in *;
+      compute in *;
+        simpl_equiv.
   Qed.
 
   Lemma disjointSets_differentSets (C C' : EquivalenceSet equiv) : (disjointSets C C') -> (differentSets C C').

@@ -80,8 +80,10 @@ Section equiv.
      the elements are equivalent to that [value]. *)
   Definition classOf (v : value) : EquivalenceClass equiv.
     exists (fun v' => v ~= v');
-      repeat esplit; unfold InClass in *;
-        simpl_equiv.
+      abstract (
+        repeat esplit; unfold InClass in *;
+          simpl_equiv
+      ).
   Defined.
 
   Lemma classOf_refl : forall v, InClass (classOf v) v.
@@ -127,11 +129,24 @@ Section equiv.
                     firstorder.
   Qed.
 
+  Lemma eq_sameClass (C C' : EquivalenceClass equiv) : C = C' -> sameClass C C'.
+    intro; subst; apply sameClass_refl.
+  Qed.
+
   Global Add Parametric Morphism : classOf
     with signature equiv ==> eq
       as classOf_mor.
     intros x y eqv;
       apply sameClass_eq; compute in *; intros; split; intros; simpl_equiv.
+  Qed.
+
+  Lemma classOf_eq x y : classOf x = classOf y <-> equiv x y.
+    split; intro H; try apply classOf_mor; trivial.
+    pose (classOf_refl x).
+    pose (classOf_refl y).
+    rewrite H in *;
+      compute in *;
+        simpl_equiv.
   Qed.
 
   Lemma disjointClasses_differentClasses (C C' : EquivalenceClass equiv) : (disjointClasses C C') -> (differentClasses C C').
