@@ -21,3 +21,27 @@ Section ProductCategory.
 End ProductCategory.
 
 Infix "*" := ProductCategory : category_scope.
+
+Section ProductCategoryFunctors.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+
+  Definition fst_Functor : SpecializedFunctor (C * D) C.
+    refine {| ObjectOf' := (@fst _ _);
+      MorphismOf' := (fun _ _ => @fst _ _)
+    |}; abstract eauto.
+  Defined.
+
+  Definition snd_Functor : SpecializedFunctor (C * D) D.
+    refine {| ObjectOf' := (@snd _ _);
+      MorphismOf' := (fun _ _ => @snd _ _)
+    |}; abstract eauto.
+  Defined.
+End ProductCategoryFunctors.
+
+Arguments fst_Functor {objC morC C objD morD D}.
+Arguments snd_Functor {objC morC C objD morD D}.
