@@ -19,6 +19,7 @@ MODULES    := Common \
 	ProductFunctor \
 	SmallCat \
 	CommaCategory \
+	SpecializedCommaCategory \
 	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
