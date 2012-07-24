@@ -1,31 +1,12 @@
 Require Import FunctionalExtensionality JMeq.
-Require Export Category DiscreteCategory Functor.
+Require Export Category DiscreteCategory Functor ComputableCategory.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
 Section SmallCat.
-  Definition SmallCat : @SpecializedCategory SmallCategory (fun C D => SpecializedFunctor C D).
-    refine (@Build_SpecializedCategory SmallCategory (fun C D => SpecializedFunctor C D)
-      (fun o => IdentityFunctor o)
-      (fun C D E F G => ComposeFunctors F G)
-      _
-      _
-      _
-    );
-    abstract functor_eq.
-  Defined.
-
-  Definition LocallySmallCat : @SpecializedCategory LocallySmallCategory (fun C D => SpecializedFunctor C D).
-    refine (@Build_SpecializedCategory LocallySmallCategory (fun C D => SpecializedFunctor C D)
-      (fun o => IdentityFunctor o)
-      (fun C D E F G => ComposeFunctors F G)
-      _
-      _
-      _
-    );
-    abstract functor_eq.
-  Defined.
+  Definition SmallCat := ComputableCategory _ _ SUnderlyingCategory.
+  Definition LocallySmallCat := ComputableCategory _ _ LSUnderlyingCategory.
 End SmallCat.
 
 Section Objects.
@@ -66,3 +47,68 @@ Section Objects.
     simpl in *; tauto.
   Qed.
 End Objects.
+
+Section SmallCatOver.
+  Variable C : Category.
+
+  Definition SmallCatOver_Object := { C' : SmallCategory & Functor C' C }.
+  Definition LocallySmallCatOver_Object := { C' : LocallySmallCategory & Functor C' C }.
+  Definition SmallCatOver_Morphism (s d : SmallCatOver_Object) :=
+    { F : Functor (projT1 s) (projT1 d) |
+      ComposeFunctors (projT2 d) F = (projT2 s) }.
+  Definition LocallySmallCatOver_Morphism (s d : LocallySmallCatOver_Object) :=
+    { F : Functor (projT1 s) (projT1 d) |
+      ComposeFunctors (projT2 d) F = (projT2 s) }.
+
+  Let SmallCatOver_Compose s d d' (m1 : SmallCatOver_Morphism d d') (m2 : SmallCatOver_Morphism s d) : SmallCatOver_Morphism s d'.
+    exists (ComposeFunctors (proj1_sig m1) (proj1_sig m2)).
+    abstract (
+      destruct m1, m2; simpl;
+        t_rev_with t';
+        rewrite ComposeFunctorsAssociativity; reflexivity
+    ).
+  Defined.
+
+  Let LocallySmallCatOver_Compose s d d' (m1 : LocallySmallCatOver_Morphism d d') (m2 : LocallySmallCatOver_Morphism s d) : LocallySmallCatOver_Morphism s d'.
+    exists (ComposeFunctors (proj1_sig m1) (proj1_sig m2)).
+    abstract (
+      destruct m1, m2; simpl;
+        t_rev_with t';
+        rewrite ComposeFunctorsAssociativity; reflexivity
+    ).
+  Defined.
+
+  Definition SmallCatOver : SpecializedCategory SmallCatOver_Morphism.
+    refine (Build_SpecializedCategory SmallCatOver_Morphism
+      (fun _ => existT _ (IdentityFunctor _) (RightIdentityFunctor _))
+      SmallCatOver_Compose
+      _
+      _
+      _
+    );
+    abstract (
+      subst SmallCatOver_Compose LocallySmallCatOver_Compose;
+        simpl in *; intros;
+          simpl_eq;
+          rewrite ComposeFunctorsAssociativity || rewrite RightIdentityFunctor || rewrite LeftIdentityFunctor;
+            reflexivity
+    ).
+  Defined.
+
+  Definition LocallySmallCatOver : SpecializedCategory LocallySmallCatOver_Morphism.
+    refine (Build_SpecializedCategory LocallySmallCatOver_Morphism
+      (fun _ => existT _ (IdentityFunctor _) (RightIdentityFunctor _))
+      LocallySmallCatOver_Compose
+      _
+      _
+      _
+    );
+    abstract (
+      subst SmallCatOver_Compose LocallySmallCatOver_Compose;
+        simpl in *; intros;
+          simpl_eq;
+          rewrite ComposeFunctorsAssociativity || rewrite RightIdentityFunctor || rewrite LeftIdentityFunctor;
+            reflexivity
+    ).
+  Defined.
+End SmallCatOver.
