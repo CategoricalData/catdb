@@ -186,9 +186,20 @@ Section IdentityFunctorLemmas.
 End IdentityFunctorLemmas.
 
 Section FunctorCompositionLemmas.
-  Variables B C D E : Category.
+  Variable objB : Type.
+  Variable morB : objB -> objB -> Type.
+  Variable B : SpecializedCategory morB.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variable objE : Type.
+  Variable morE : objE -> objE -> Type.
+  Variable E : SpecializedCategory morE.
 
-  Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
+  Lemma ComposeFunctorsAssociativity (F : SpecializedFunctor B C) (G : SpecializedFunctor C D) (H : SpecializedFunctor D E) :
     ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
     functor_eq.
   Qed.
