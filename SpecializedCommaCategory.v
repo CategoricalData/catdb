@@ -55,14 +55,29 @@ Section CommaSpecializedCategory.
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
   Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & morC (S (fst αβ)) (T (snd αβ)) } }.
+
+  Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
+
+  Definition CommaSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_CommaSpecializedCategory_Object.
+  Global Identity Coercion CommaSpecializedCategory_Object_Id : CommaSpecializedCategory_ObjectT >-> sigT.
+  Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
+  Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
+
   Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_Object) := { CommaSpecializedCategory_Morphism_Member :>
     { gh : (morA (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (morB (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
       Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }
   }.
 
-  Global Arguments CommaSpecializedCategory_Object_Member / _.
-  Global Arguments CommaSpecializedCategory_Morphism_Member / _ _ _.
+  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_Object) :=
+    Eval hnf in SortPolymorphic_Helper (@Build_CommaSpecializedCategory_Morphism αβf α'β'f').
+  Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
+  Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
+    @Build_CommaSpecializedCategory_Morphism _ _ mem.
+  Global Coercion Build_CommaSpecializedCategory_Morphism' : CommaSpecializedCategory_MorphismT >-> CommaSpecializedCategory_Morphism.
+
+  Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
+  Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
 
   Definition CommaSpecializedCategory_Compose s d d' (gh : CommaSpecializedCategory_Morphism d d') (g'h' : CommaSpecializedCategory_Morphism s d) :
     CommaSpecializedCategory_Morphism s d'.
