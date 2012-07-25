@@ -232,6 +232,11 @@ Ltac repeat_subst_mor_of_type type :=
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
          end.
 
+Ltac subst_body :=
+  repeat match goal with
+           | [ H := _ |- _ ] => subst H
+         end.
+
 (* So we know the difference betwen the [sigT]s we're using and the [sigT]s others use *)
 Inductive Common_sigT (A : Type) (P : A -> Type) : Type :=
     Common_existT : forall x : A, P x -> Common_sigT P.
