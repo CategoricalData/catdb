@@ -12,6 +12,7 @@ MODULES    := Common \
 	Functor \
 	NaturalTransformation \
 	NaturalEquivalence \
+	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
