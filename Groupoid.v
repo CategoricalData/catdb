@@ -34,7 +34,7 @@ Section GroupoidOf.
   Defined.
 
   Definition CategoryIsGroupoid : Prop :=
-    forall s d : C, forall m : Morphism C s d, IsCategoryIsomorphism m.
+    forall s d : C, forall m : Morphism C s d, IsIsomorphism m.
 End GroupoidOf.
 
 Hint Constructors GroupoidOf_Morphism.

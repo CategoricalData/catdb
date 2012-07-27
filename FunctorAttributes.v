@@ -52,10 +52,10 @@ Section FullFaithful.
   (* We really want surjective/injective here, but we only have epi/mono.
      They're equivalent in the category of sets.  Are they equivalent in the
      category of [Type]s? *)
-  Definition FunctorFull := forall x y : C, Epimorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
-  Definition FunctorFaithful := forall x y : C, Monomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFull := forall x y : C, IsEpimorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFaithful := forall x y : C, IsMonomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
 
-  Definition FunctorFullyFaithful := forall x y : C, CategoryIsomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFullyFaithful := forall x y : C, IsIsomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
 
   Lemma FunctorFullyFaithful_split : FunctorFullyFaithful -> FunctorFull /\ FunctorFaithful.
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful; intro H; split; intros;

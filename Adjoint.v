@@ -22,10 +22,9 @@ Section Adjunction.
   Let HomDPreFunctor : SpecializedFunctor (COp * D) (DOp * D) := (FOp * (IdentityFunctor _))%functor.
 
   Record Adjunction := {
-    AMateOf :> SpecializedNaturalTransformation
+    AMateOf :> NaturalIsomorphism
     (ComposeFunctors (HomFunctor D) HomDPreFunctor)
-    (ComposeFunctors (HomFunctor C) HomCPreFunctor);
-    AEquivalence : NaturalEquivalence AMateOf
+    (ComposeFunctors (HomFunctor C) HomCPreFunctor)
   }.
 
   (**
@@ -47,16 +46,18 @@ Section Adjunction.
        Hom_D (F B) B' ~= Hom_C B (G B')
      ]]
      *)
-
   Record HomAdjunction := {
-    AComponentsOf' : forall A A', (HomFunctor D).(ObjectOf') (F.(ObjectOf') A, A') -> (HomFunctor C).(ObjectOf') (A, G.(ObjectOf') A');
-    (* ugh, the lack of sort-polymorphisms in [Definition]s is annoying *)
-    AIsomorphism' : forall A A', { m' : _ | (fun x => m' (@AComponentsOf' A A' x)) = (fun x => x) /\ (fun x => @AComponentsOf' A A' (m' x)) = (fun x => x) };
+    AComponentsOf' : forall A A', morD (F A) A' -> morC A (G A');
+    (* [IsomorphismOf] is sort-polymorphic, but it picks up the type of morphisms in [TypeCat].  The [IsInverseOf']s don't *)
+    AIsomorphism' : forall A A', { m' : _ |
+      IsInverseOf'1 TypeCat _ _ (@AComponentsOf' A A') m' &
+      IsInverseOf'2 TypeCat _ _ (@AComponentsOf' A A') m'
+    };
     ACommutes' : forall A A' B B' (m : morC B A) (m' : morD A' B'),
-      TypeCat.(Compose') _ _ _
-      (@AComponentsOf' B B') ((HomFunctor D).(MorphismOf') (F.(ObjectOf') A, A') (F.(ObjectOf') B, B') (F.(MorphismOf') _ _ m, m'))
-      = TypeCat.(Compose') _ _ _
-      ((HomFunctor C).(MorphismOf') (A, G.(ObjectOf') A') (B, G.(ObjectOf') B') (m, G.(MorphismOf') _ _ m')) (@AComponentsOf' A A')
+      Compose (C := TypeCat)
+      (@AComponentsOf' B B') ((HomFunctor D).(MorphismOf) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m'))
+      = Compose (C := TypeCat)
+      ((HomFunctor C).(MorphismOf) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')) (@AComponentsOf' A A')
   }.
 
   Section AdjunctionInterface.
@@ -65,13 +66,14 @@ Section Adjunction.
     Definition AComponentsOf : forall (A : C) (A' : D),
       TypeCat.(Morphism) (HomFunctor D (F A, A')) (HomFunctor C (A, G A'))
       := Eval cbv beta delta [AComponentsOf'] in T.(AComponentsOf').
-    Definition AIsomorphism : forall (A : C) (A' : D), @CategoryIsomorphism _ _ TypeCat _ _ (@AComponentsOf A A')
+    Definition AIsomorphism : forall (A : C) (A' : D), @Isomorphism _ _ TypeCat _ _ (@AComponentsOf A A')
       := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism').
     Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
-      Compose (@AComponentsOf B B') (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) =
-      Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')) (@AComponentsOf A A')
+      Compose (@AComponentsOf B B') (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) =
+      Compose (MorphismOf (HomFunctor C) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')) (@AComponentsOf A A')
       := T.(ACommutes').
   End AdjunctionInterface.
+
   Global Coercion AComponentsOf : HomAdjunction >-> Funclass.
 
   Lemma ACommutes_Inverse (T : HomAdjunction) :
@@ -79,14 +81,36 @@ Section Adjunction.
       Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
       Compose (proj1_sig (T.(AIsomorphism) B B')) (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')).
     Opaque TypeCat HomFunctor.
+    Transparent Object Morphism.
     intros.
-    pose (T.(AIsomorphism) B B').
-    pose (T.(AIsomorphism) A A').
-    intro_proj2_sig_from_goal.
-    unfold InverseOf in *; destruct_hypotheses;
-      pre_compose_to_identity; post_compose_to_identity;
-      apply ACommutes.
-  Qed.
+    Local Ltac intro_T T A A' :=
+      let t := constr:(T.(AIsomorphism) A A') in
+        let H := fresh in assert (H := t);
+          let H0 := fresh in let H1 := fresh in
+            assert (H0 := proj2_sig t);
+              assert (H1 := proj3_sig t).
+    intro_T T B B'.
+    intro_T T A A'.
+    simpl in *.
+    match goal with
+      | [ H : Compose ?x (?T ?A ?A') = Identity _ |- Compose _ ?x = _ ]
+        => eapply (@iso_is_epi _ _ _ _ _ (T A A')); [
+          exists x; hnf; eauto
+          |
+            repeat rewrite Associativity; find_composition_to_identity (* slow, but I don't have a better way to do it *); rewrite RightIdentity
+        ]
+    end.
+    match goal with
+      | [ H : Compose (?T ?A ?A') ?x = Identity _ |- _ = Compose ?x _ ]
+        => eapply (@iso_is_mono _ _ _ _ _ (T A A')); [
+          exists x; hnf; eauto
+          |
+            repeat rewrite <- Associativity; find_composition_to_identity; rewrite LeftIdentity
+        ]
+    end.
+(*    pre_compose_to_identity; post_compose_to_identity; *) (* too slow *)
+    apply ACommutes.
+  Defined.
 End Adjunction.
 
 Arguments AComponentsOf {objC morC C objD morD D} [F G] T A A' _ : simpl nomatch.
@@ -108,6 +132,7 @@ Section AdjunctionEquivalences.
       (ProductFunctor (OppositeFunctor F) (IdentityFunctor D)))
     (ComposeFunctors (HomFunctor C)
       (ProductFunctor (IdentityFunctor (OppositeCategory C)) G)).
+    Local Transparent Morphism Object.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
@@ -117,15 +142,17 @@ Section AdjunctionEquivalences.
     end.
     abstract (
       simpl in *; intros;
-        apply functional_extensionality_dep; intro;
-          destruct A;
-            simpl in *;
-              fg_equal;
-              trivial
+        destruct A;
+          simpl in *;
+            destruct_hypotheses;
+            unfold Morphism, Object in *;
+              simpl in *;
+                trivial
     ).
   Defined.
 
   Definition HomAdjunction2Adjunction (A : HomAdjunction F G) : Adjunction F G.
+    constructor.
     exists (HomAdjunction2Adjunction_AMateOf A).
     intro x; hnf; simpl.
     exact (AIsomorphism A (fst x) (snd x)).
@@ -133,9 +160,9 @@ Section AdjunctionEquivalences.
 
   Definition Adjunction2HomAdjunction (A : Adjunction F G) : HomAdjunction F G.
     hnf; simpl.
-    exists (fun c d => ComponentsOf A.(AMateOf) (c, d));
+    exists (fun c d => ComponentsOf A (c, d));
       simpl;
-        [ exact (fun A0 A' => A.(AEquivalence) (A0, A')) |
+        [ exact (fun A0 A' => A.(NaturalIsomorphism_Isomorphism) (A0, A')) |
           exact (fun A0 A' B B' m m' => A.(Commutes') (A0, A') (B, B') (m, m')) ].
   Defined.
 
@@ -195,11 +222,12 @@ Section AdjunctionEquivalences.
     intros c d f.
     exists (proj1_sig (A.(AIsomorphism) c d) f).
     abstract (
-      destruct (proj2_sig (A.(AIsomorphism) c d)); simpl in *; fg_equal;
-        repeat split; intros;
-          t_with t';
-          repeat rewrite adjunction_naturality, RightIdentity;
-            auto
+      pose proof (proj2_sig (A.(AIsomorphism) c d));
+        pose proof (proj3_sig (A.(AIsomorphism) c d));
+          simpl in *; fg_equal;
+            repeat split; intros; [ | t_with t' ];
+              repeat rewrite adjunction_naturality, RightIdentity;
+                auto
     ).
     Grab Existential Variables.
     abstract (
@@ -223,11 +251,11 @@ Section AdjunctionEquivalences.
     intros c d f.
     exists (A.(AComponentsOf) c d f).
     abstract (
-      split; intros;
-        t_with t';
+      split; intros; [ | t_with t' ];
         repeat rewrite (adjunction_naturality' A), LeftIdentity;
-          intro_proj2_sig_from_goal;
-          unfold InverseOf in *; simpl in *; destruct_hypotheses; fg_equal; auto
+          simpl in *;
+            intro_proj2_sig_from_goal;
+            destruct_hypotheses; fg_equal; auto
     ).
     Grab Existential Variables.
     abstract (
@@ -242,6 +270,8 @@ Section AdjunctionEquivalences.
 End AdjunctionEquivalences.
 
 Section AdjunctionEquivalences'.
+  Local Transparent Morphism Object.
+
   Variables C D : Category.
   Variable F : Functor C D.
   Variable G : Functor D C.
@@ -249,18 +279,18 @@ Section AdjunctionEquivalences'.
   Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (projT1 T c)) |};
       try (intros; exists (fun f => proj1_sig (projT2 T _ _ f)));
-      abstract (
-        intros; destruct T as [ T s ]; repeat split; simpl in *;
-          apply functional_extensionality_dep; intros;
-          solve [
-              intro_proj2_sig_from_goal;
-              destruct_hypotheses;
+        abstract (
+          intros; destruct T as [ T s ]; repeat split; simpl in *;
+            apply functional_extensionality_dep; intros;
+              solve [
+                intro_proj2_sig_from_goal;
+                destruct_hypotheses;
                 auto
-            |
-              repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
-                simpl_do do_rewrite_rev (Commutes T); reflexivity
-          ]
-      ).
+                |
+                  repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
+                    simpl_do do_rewrite_rev (Commutes T); reflexivity
+              ]
+        ).
   Defined.
 
   Definition HomAdjunctionOfCounit (T : AdjunctionCounit F G) : HomAdjunction F G.
@@ -272,27 +302,25 @@ Section AdjunctionEquivalences'.
     )
     |};
     simpl; present_spnt';
-    try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
-      abstract (
-        destruct T as [ T s ]; repeat split; intros; simpl in *;
-          apply functional_extensionality_dep; intros; simpl;
-            intro_proj2_sig_from_goal;
-            destruct_hypotheses;
-            repeat match goal with
-                     | [ H : _ |- _ ] => rewrite (H _ (eq_refl _)); auto
-                   end;
-            repeat match goal with
-                     | [ H : _ |- _ ] => apply H; auto
-                   end;
-            intro_proj2_sig_from_goal;
-            destruct_hypotheses;
-            repeat rewrite FCompositionOf;
-              let H := fresh in assert (H := Commutes T); simpl in H; try_associativity ltac:(rewrite H);
-                repeat try_associativity ltac:(apply f_equal2; try reflexivity);
-                  intro_proj2_sig_from_goal;
-                  destruct_hypotheses;
-                  trivial
-      ).
+      try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
+        abstract (
+          elim T; clear T; intros T s; repeat split; intros; simpl in *;
+            apply functional_extensionality_dep; intros; simpl;
+              intro_proj2_sig_from_goal;
+              unfold unique in *;
+                split_and';
+              repeat match goal with
+                       | [ H : _ |- _ ] => rewrite (H _ (eq_refl _)); auto
+                     end;
+              repeat match goal with
+                       | [ H : _ |- _ ] => apply H; auto
+                     end;
+              intro_proj2_sig_from_goal;
+              destruct_hypotheses;
+              repeat rewrite FCompositionOf;
+                let H := fresh in assert (H := Commutes T); simpl in H; try_associativity ltac:(rewrite H);
+                  repeat try_associativity ltac:(apply f_equal2; trivial)
+        ).
   Defined.
 End AdjunctionEquivalences'.
 

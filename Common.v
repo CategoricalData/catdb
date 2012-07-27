@@ -186,7 +186,13 @@ Ltac split_in_context ident funl funr :=
          end.
 
 Ltac split_iff := split_in_context iff (fun a b : Prop => a -> b) (fun a b : Prop => b -> a).
-Ltac split_and := split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
+
+Ltac split_and' :=
+  repeat match goal with
+           | [ H : ?a /\ ?b |- _ ] => let H0 := fresh in let H1 := fresh in
+             assert (H0 := proj1 H); assert (H1 := proj2 H); clear H
+         end.
+Ltac split_and := split_and'; split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
 
 Ltac clear_hyp_of_type type :=
   repeat match goal with
@@ -346,16 +352,19 @@ Ltac eta_red :=
 Ltac intro_proj2_sig_from_goal' :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
          end.
 
 Ltac intro_proj2_sig_from_goal :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
          end; simpl in *.
 
 Ltac intro_projT2_from_goal :=
   repeat match goal with
            | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
          end; simpl in *.
 
 Ltac intro_proj2_sig :=
@@ -363,6 +372,9 @@ Ltac intro_proj2_sig :=
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
            | [ H : appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
            | [ H := appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
+           | [ H : appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
+           | [ H := appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
          end; simpl in *.
 
 Ltac intro_projT2 :=
@@ -370,6 +382,9 @@ Ltac intro_projT2 :=
            | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
            | [ H : appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
            | [ H := appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
+           | [ H : appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
+           | [ H := appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
          end; simpl in *.
 
 Ltac recr_destruct_with tac H :=

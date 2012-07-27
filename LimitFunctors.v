@@ -52,14 +52,14 @@ Section LimitFunctors.
 
   (* TODO: Perhaps there is a better way to define this, or a more automated way to define this. *)
   Definition LimitFunctor_morphism_of' (F G : C ^ D) (m : (C ^ D).(Morphism) F G) : C.(Morphism) (LimitOf F) (LimitOf G).
-    subst LimitOf ColimitOf.
+    subst_body.
     simpl in *.
     generalize (HL G) (HL F).
     define_limit_morphism'.
   Defined.
 
   Definition ColimitFunctor_morphism_of' (F G : C ^ D) (m : (C ^ D).(Morphism) F G) : C.(Morphism) (ColimitOf F) (ColimitOf G).
-    subst LimitOf ColimitOf.
+    subst_body.
     simpl in *.
     generalize (HC G) (HC F).
     define_limit_morphism'.
@@ -83,8 +83,9 @@ Section LimitFunctors.
     refine {| ObjectOf' := LimitOf;
       MorphismOf' := LimitFunctor_morphism_of
     |};
-    abstract (
-      subst LimitOf ColimitOf LimitFunctor_morphism_of ColimitFunctor_morphism_of; present_spnt;
+    subst_body; simpl;
+      abstract (
+        present_spnt;
         simpl; intros; autorewrite with core;
           repeat match goal with
                    | [ |- context[HL ?o] ] => generalize (HL o); intro
@@ -92,12 +93,13 @@ Section LimitFunctors.
           clear HL HC;
             unfold Limit, LimitObject, Colimit, ColimitObject in *;
               match goal with
-                | [ |- TerminalProperty_Morphism ?l0 ?Y ?f = _ ] => let H := fresh in pose (proj2 (TerminalProperty l0 Y f)) as H; simpl in H; apply H; clear H
+                | [ |- TerminalProperty_Morphism ?l0 ?Y ?f = _ ] =>
+                  simpl_do_clear ltac:(fun H => apply H) (proj2 (TerminalProperty l0 Y f))
               end;
               nt_eq;
               try solve [
                 autorewrite with core;
-                  try reflexivity
+                  reflexivity
               ];
               repeat rewrite Associativity;
                 match goal with
@@ -105,15 +107,15 @@ Section LimitFunctors.
                     eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
                       try_associativity ltac:(apply f_equal2; try reflexivity)
                 end;
-                intro_universal_properties;
-                unfold unique in *;
-                  split_and;
-                  repeat match goal with
-                           | [ H : forall Y f, @?a Y f = @?b Y f |- _ ] =>
-                             let H' := fresh in assert (H' := (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (H Y f))); simpl in H'; clear H
-                         end;
-                  etransitivity; solve [ t_with t' ]
-    ).
+                match goal with
+                  | [ |- appcontext[TerminalProperty_Morphism ?a ?b ?c] ] =>
+                    let H := constr:(TerminalProperty a) in
+                      let H' := fresh in
+                        pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
+                          simpl in H'
+                end;
+                etransitivity; solve [ t_with t' ]
+      ).
  (*
     rename s into F0. rename d into G0.  rename d' into H0.
     rename l into F.
@@ -145,7 +147,8 @@ Section LimitFunctors.
           clear HL HC;
             unfold Limit, LimitObject, Colimit, ColimitObject in *;
               match goal with
-                | [ |- InitialProperty_Morphism ?l0 ?Y ?f = _ ] => let H := fresh in pose (proj2 (InitialProperty l0 Y f)) as H; simpl in H; apply H; clear H
+                | [ |- InitialProperty_Morphism ?l0 ?Y ?f = _ ] =>
+                  simpl_do_clear ltac:(fun H => apply H) (proj2 (InitialProperty l0 Y f))
               end;
               nt_eq;
               try solve [
@@ -237,7 +240,7 @@ Section Adjoint.
   Defined.
 
   Lemma LimitAdjunction_AIsomorphism' (c : C) (F : C ^ D) :
-    InverseOf (@LimitAdjunction_AComponentsOf c F) (@LimitAdjunction_AComponentsOf_Inverse c F).
+    IsInverseOf (@LimitAdjunction_AComponentsOf c F) (@LimitAdjunction_AComponentsOf_Inverse c F).
     Transparent Compose.
     unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse;
       unfold LimitMorphism, LimitProperty_Morphism, LimitObject, Limit in *;
@@ -258,9 +261,9 @@ Section Adjoint.
               try specialized_assumption idtac.
   Qed.
 
-  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : CategoryIsomorphism (@LimitAdjunction_AComponentsOf c F).
-    exists (LimitAdjunction_AComponentsOf_Inverse _).
-    exact (@LimitAdjunction_AIsomorphism' _ _).
+  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : Isomorphism (@LimitAdjunction_AComponentsOf c F).
+    exists (LimitAdjunction_AComponentsOf_Inverse _);
+      eapply (@LimitAdjunction_AIsomorphism' _ _).
   Defined.
 
   Lemma LimitAdjunction_ACommutes (c : C) (F : C ^ D) (c' : C) (F' : C ^ D)
@@ -349,7 +352,7 @@ Section Adjoint.
   Defined.
 
   Lemma ColimitAdjunction_AIsomorphism' (F : C ^ D) (c : C) :
-    InverseOf (@ColimitAdjunction_AComponentsOf F c) (@ColimitAdjunction_AComponentsOf_Inverse F c).
+    IsInverseOf (@ColimitAdjunction_AComponentsOf F c) (@ColimitAdjunction_AComponentsOf_Inverse F c).
     unfold ColimitAdjunction_AComponentsOf, ColimitAdjunction_AComponentsOf_Inverse;
       unfold ColimitMorphism, ColimitProperty_Morphism, ColimitObject, Colimit in *;
         split; simpl in *;
@@ -369,9 +372,9 @@ Section Adjoint.
             try specialized_assumption idtac.
   Qed.
 
-  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : CategoryIsomorphism (@ColimitAdjunction_AComponentsOf F c).
-    exists (@ColimitAdjunction_AComponentsOf_Inverse _ _).
-    exact (@ColimitAdjunction_AIsomorphism' _ _).
+  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : Isomorphism (@ColimitAdjunction_AComponentsOf F c).
+    exists (@ColimitAdjunction_AComponentsOf_Inverse _ _);
+      eapply (@ColimitAdjunction_AIsomorphism' _ _).
   Defined.
 
   Lemma ColimitAdjunction_ACommutes_Inverse (F : C ^ D) (c : C) (F' : C ^ D) (c' : C)

@@ -54,12 +54,12 @@ Section FullSubcategory.
 
   Let Pmor (s d : obj) (_ : morC s d) := True.
 
-  Definition FullSubcategory := Subcategory C Pmor (fun _ _ _ _ _ => I) (fun _ => I).
+  Definition FullSubcategory' := Subcategory C Pmor (fun _ _ _ _ _ => I) (fun _ => I).
 
-  Definition FullSubcategory' : @SpecializedCategory obj (fun s d => morC s d).
+  Definition FullSubcategory : @SpecializedCategory obj (fun s d => morC s d).
     refine (@Build_SpecializedCategory obj (fun s d => morC s d)
-      (fun x => proj1_sig (FullSubcategory.(Identity') x))
-      (fun s d d' m1 m2 => proj1_sig (FullSubcategory.(Compose') _ _ _ (exist _ m1 I) (exist _ m2 I)))
+      (fun x => proj1_sig (FullSubcategory'.(Identity') x))
+      (fun s d d' m1 m2 => proj1_sig (FullSubcategory'.(Compose') _ _ _ (exist _ m1 I) (exist _ m2 I)))
       _
       _
       _
@@ -96,12 +96,12 @@ Section WideSubcategory.
   Let Pmor_compose' : forall s d d' (m1 : mor' d d') (m2 : mor' s d), Pmor' _ _ (Compose (C := C) m1 m2) := Pmor_compose.
   Let Pmor_identity' : forall x : obj, Pmor' _ _ (Identity (C := C) x) := Pmor_identity.
 
-  Definition WideSubcategory := Subcategory C Pmor' Pmor_compose' Pmor_identity'.
+  Definition WideSubcategory' := Subcategory C Pmor' Pmor_compose' Pmor_identity'.
 
-  Definition WideSubcategory' : @SpecializedCategory obj mor'.
+  Definition WideSubcategory : @SpecializedCategory obj mor'.
     refine (@Build_SpecializedCategory obj mor'
-      (fun x => WideSubcategory.(Identity') x)
-      (fun s d d' m1 m2 => WideSubcategory.(Compose') _ _ _ m1 m2)
+      (fun x => WideSubcategory'.(Identity') x)
+      (fun s d d' m1 m2 => WideSubcategory'.(Compose') _ _ _ m1 m2)
       _
       _
       _
