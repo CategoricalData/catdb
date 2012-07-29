@@ -1,6 +1,8 @@
-Require Import ProofIrrelevance.
+Require Import JMeq ProofIrrelevance.
 
 Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 Section sig.
   Definition sigT2_sigT A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
@@ -168,13 +170,31 @@ Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Ltac simpl_eq := repeat (
-  (
-    apply sig_eq ||
-      apply sig2_eq ||
-        apply injective_projections
-  );
-  simpl in *
+Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> (projT1 s = projT1 s' -> projT2 s == projT2 s') -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
+  projT1 s = projT1 s'
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s')
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s' -> projT3 s == projT3 s')
+  -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Ltac clear_refl_eq :=
+  repeat match goal with
+           | [ H : ?x = ?x |- _ ] => clear H
+         end.
+
+Ltac simpl_eq' :=
+  apply sig_eq ||
+    apply sig2_eq ||
+      ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq) ||
+        apply injective_projections.
+
+Ltac simpl_eq := intros; repeat (
+  simpl_eq'; simpl in *
 ).
 
 Ltac split_in_context ident funl funr :=
