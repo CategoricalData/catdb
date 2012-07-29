@@ -22,6 +22,11 @@ Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
   destruct x; reflexivity.
 Qed.
 
+Lemma prod_eta : forall (A B : Type) (x : A * B),
+  x = pair (fst x) (snd x).
+  destruct x; reflexivity.
+Qed.
+
 (* Silly predicate that we can use to get Ltac to help us manipulate terms *)
 Definition focus A (_ : A) := True.
 
@@ -34,6 +39,7 @@ Ltac simpl_definition_by_tac_and_exact defn tac :=
                | context[match ?E with exist2 _ _ _ => _ end] => rewrite (sig2_eta E) in Hf; simpl in Hf
                | context[match ?E with existT _ _ => _ end] => rewrite (sigT_eta E) in Hf; simpl in Hf
                | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
+               | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
              end;
       match type of Hf with
         | focus ?V => exact V
