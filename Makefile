@@ -21,6 +21,8 @@ MODULES    := Common \
 	SmallCat \
 	CommaCategory \
 	SpecializedCommaCategory \
+	LaxCommaCategory \
+	SpecializedLaxCommaCategory \
 	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
