@@ -148,10 +148,10 @@ Section LaxCosliceCategory.
 
   Variable C : Category.
 
-  Definition LaxCosliceCategory_Object := { X : I & Functor C X }.
+  Definition LaxCosliceCategory_Object := { X : I & Functor X C }.
   Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) :=
-    { F : Functor (projT1 XG) (projT1 X'G') &
-      NaturalTransformation (ComposeFunctors F (projT2 XG)) (projT2 X'G')
+    { F : Functor (projT1 X'G') (projT1 XG) &
+      NaturalTransformation (ComposeFunctors (projT2 XG) F) (projT2 X'G')
     }.
 
   Global Arguments LaxCosliceCategory_Object /.
@@ -160,13 +160,13 @@ Section LaxCosliceCategory.
   Definition LaxCosliceCategory_Compose' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'.
     Transparent Object Morphism.
-    exists (ComposeFunctors (projT1 Fα) (projT1 F'α')).
+    exists (ComposeFunctors (projT1 F'α') (projT1 Fα)).
     repeat match goal with
              | [ H : _ |- _ ] => unique_pose_with_body (projT1 H)
              | [ H : _ |- _ ] => unique_pose_with_body (projT2 H)
            end; simpl in *.
     repeat match goal with
-             | [ x : _, T : _ |- _ ] => unique_pose (NTComposeF (IdentityNaturalTransformation x) T)
+             | [ x : _, T : _ |- _ ] => unique_pose (NTComposeF T (IdentityNaturalTransformation x))
            end.
     match goal with
       | [ T0 : _, T1 : _ |- _ ] => eapply (NTComposeT (NTComposeT T0 T1) _)
@@ -206,7 +206,7 @@ Section LaxCosliceCategory.
     match goal with
       | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
-          (fun x => Identity (C := projT1 C) _)
+          (fun x => Identity (C := C) _)
           _
         )
     end.
@@ -233,11 +233,10 @@ Section LaxCosliceCategory.
       nt_eq (* slow; ~ 7s / goal *); clear_refl_eq;
       repeat rewrite ComposeFunctorsAssociativity;
         repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
-          repeat rewrite FCompositionOf;
-            repeat rewrite FIdentityOf;
-              repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                repeat rewrite Associativity;
-                  try reflexivity
+          repeat rewrite FIdentityOf;
+            repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+              repeat rewrite Associativity;
+                try reflexivity
   ).
   Defined.
 End LaxCosliceCategory.
