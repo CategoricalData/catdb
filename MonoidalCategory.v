@@ -370,9 +370,7 @@ Section MonoidalCategory.
   Record MonoidalCategory := {
     MonoidalUnderlyingCategory :> SpecializedCategory morC;
     TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
-      where "A ⊗ B" := (TensorProduct (A, B));
-    TensorProduct' := TensorProduct
-      where "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B));
+      where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B));
 
     IdentityObject : objC where "'I'" := IdentityObject;
 
