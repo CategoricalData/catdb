@@ -19,6 +19,7 @@ MODULES    := Common \
 	ProductCategory \
 	ProductFunctor \
 	MonoidalCategory \
+	EnrichedCategory \
 	SmallCat \
 	CommaCategory \
 	SpecializedCommaCategory \
