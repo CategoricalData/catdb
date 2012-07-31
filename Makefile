@@ -37,6 +37,7 @@ MODULES    := Common \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
+	InducedLimitFunctors \
 	Grothendieck \
 	SetLimits \
 	SetColimits \
