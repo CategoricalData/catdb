@@ -4,7 +4,7 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
+Local Open Scope category_scope.
 
 Section HomFunctor.
   Variable objC : Type.

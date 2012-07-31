@@ -4,9 +4,6 @@ Require Import Common Limits Functor NaturalTransformation FunctorCategory.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-Local Notation "C ^ D" := (FunctorCategory D C).
-
 Section SetLimits.
   Local Transparent Object Morphism Identity Compose.
 

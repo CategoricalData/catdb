@@ -1,6 +1,8 @@
-Require Import ProofIrrelevance.
+Require Import JMeq ProofIrrelevance.
 
 Set Implicit Arguments.
+
+Local Infix "==" := JMeq (at level 70).
 
 Section sig.
   Definition sigT2_sigT A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
@@ -14,7 +16,9 @@ Section sig.
     let (x0, _, h) as x0 return (Q (proj1_sig x0)) := x in h.
 End sig.
 
-Ltac not_tac tac := (tac; fail 1) || idtac.
+Tactic Notation "not_tac" tactic(tac) := (tac; fail 1) || idtac.
+
+Tactic Notation "test_tac" tactic(tac) := not_tac (not_tac tac).
 
 Ltac unique_pose defn :=
   let T := type of defn in
@@ -28,6 +32,12 @@ Ltac unique_pose_with_body defn :=
     | [ H := defn |- _ ] => fail 1
     | _ => pose defn
   end.
+
+Tactic Notation "has_no_body" hyp(H) :=
+  not_tac (let H' := fresh in pose H as H'; unfold H in H').
+
+Tactic Notation "has_body" hyp(H) :=
+  not_tac (has_no_body H).
 
 Ltac simpl_do tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
@@ -160,13 +170,31 @@ Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Ltac simpl_eq := repeat (
-  (
-    apply sig_eq ||
-      apply sig2_eq ||
-        apply injective_projections
-  );
-  simpl in *
+Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> (projT1 s = projT1 s' -> projT2 s == projT2 s') -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
+  projT1 s = projT1 s'
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s')
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s' -> projT3 s == projT3 s')
+  -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Ltac clear_refl_eq :=
+  repeat match goal with
+           | [ H : ?x = ?x |- _ ] => clear H
+         end.
+
+Ltac simpl_eq' :=
+  apply sig_eq ||
+    apply sig2_eq ||
+      ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq) ||
+        apply injective_projections.
+
+Ltac simpl_eq := intros; repeat (
+  simpl_eq'; simpl in *
 ).
 
 Ltac split_in_context ident funl funr :=
@@ -178,7 +206,13 @@ Ltac split_in_context ident funl funr :=
          end.
 
 Ltac split_iff := split_in_context iff (fun a b : Prop => a -> b) (fun a b : Prop => b -> a).
-Ltac split_and := split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
+
+Ltac split_and' :=
+  repeat match goal with
+           | [ H : ?a /\ ?b |- _ ] => let H0 := fresh in let H1 := fresh in
+             assert (H0 := proj1 H); assert (H1 := proj2 H); clear H
+         end.
+Ltac split_and := split_and'; split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
 
 Ltac clear_hyp_of_type type :=
   repeat match goal with
@@ -222,6 +256,11 @@ Ltac subst_mor x :=
 Ltac repeat_subst_mor_of_type type :=
   repeat match goal with
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
+         end.
+
+Ltac subst_body :=
+  repeat match goal with
+           | [ H := _ |- _ ] => subst H
          end.
 
 (* So we know the difference betwen the [sigT]s we're using and the [sigT]s others use *)
@@ -324,14 +363,28 @@ Ltac f_equal_in_r H k := let H' := uncurry H in let H'T := type of H' in
     end; clear H.
 Ltac f_equal_in f H := f_equal_in_r H ltac:(fun pf k => k (pf _ f)).
 
+Ltac eta_red :=
+  repeat match goal with
+           | [ H : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in H
+           | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
+         end.
+
+Ltac intro_proj2_sig_from_goal' :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
+         end.
+
 Ltac intro_proj2_sig_from_goal :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
          end; simpl in *.
 
 Ltac intro_projT2_from_goal :=
   repeat match goal with
            | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
          end; simpl in *.
 
 Ltac intro_proj2_sig :=
@@ -339,6 +392,9 @@ Ltac intro_proj2_sig :=
            | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
            | [ H : appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
            | [ H := appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
+           | [ H : appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
+           | [ H := appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
          end; simpl in *.
 
 Ltac intro_projT2 :=
@@ -346,6 +402,9 @@ Ltac intro_projT2 :=
            | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
            | [ H : appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
            | [ H := appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
+           | [ H : appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
+           | [ H := appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
          end; simpl in *.
 
 Ltac recr_destruct_with tac H :=
@@ -456,6 +515,24 @@ Ltac conv_rewrite H := conv_rewrite_with ltac:(fun h => rewrite h) H.
 Ltac conv_rewrite_rev H := conv_rewrite_rev_with ltac:(fun h => rewrite <- h) H.
 Ltac conv_repeat_rewrite H := repeat conv_rewrite_with ltac:(fun h => repeat rewrite h) H.
 Ltac conv_repeat_rewrite_rev H := repeat conv_rewrite_rev_with ltac:(fun h => repeat rewrite <- h) H.
+
+Ltac rewrite_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[x] in let ctx'' := context ctx[y] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite H; reflexivity
+          |
+        ]
+  end.
+
+Ltac rewrite_rev_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[y] in let ctx'' := context ctx[x] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite <- H; reflexivity
+          |
+        ]
+  end.
 
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.

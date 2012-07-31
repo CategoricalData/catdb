@@ -1,31 +1,12 @@
 Require Import FunctionalExtensionality JMeq.
-Require Export Category DiscreteCategory Functor.
+Require Export Category DiscreteCategory Functor ComputableCategory.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
 Section SmallCat.
-  Definition SmallCat : @SpecializedCategory SmallCategory (fun C D => SpecializedFunctor C D).
-    refine (@Build_SpecializedCategory SmallCategory (fun C D => SpecializedFunctor C D)
-      (fun o => IdentityFunctor o)
-      (fun C D E F G => ComposeFunctors F G)
-      _
-      _
-      _
-    );
-    abstract functor_eq.
-  Defined.
-
-  Definition LocallySmallCat : @SpecializedCategory LocallySmallCategory (fun C D => SpecializedFunctor C D).
-    refine (@Build_SpecializedCategory LocallySmallCategory (fun C D => SpecializedFunctor C D)
-      (fun o => IdentityFunctor o)
-      (fun C D E F G => ComposeFunctors F G)
-      _
-      _
-      _
-    );
-    abstract functor_eq.
-  Defined.
+  Definition SmallCat := ComputableCategory _ _ SUnderlyingCategory.
+  Definition LocallySmallCat := ComputableCategory _ _ LSUnderlyingCategory.
 End SmallCat.
 
 Section Objects.
@@ -33,8 +14,8 @@ Section Objects.
 
   Hint Unfold Morphism Object.
 
-  Local Arguments Object / [obj Morphism] s.
-  Local Arguments Morphism / [obj mor] C s d.
+  Local Arguments Object / {obj mor} C : rename.
+  Local Arguments Morphism / {obj mor} _ _ _.
 
   Hint Extern 1 (_ = _) => apply functional_extensionality_dep; intro.
   Hint Extern 1 (_ = _) => apply forall_extensionality_dep; intro.

@@ -42,6 +42,9 @@ Defined.
 
 Coercion GeneralizeLocallySmallCategory : LocallySmallSpecializedCategory >-> LocallySmallCategory.
 
+Bind Scope category_scope with Category.
+Bind Scope category_scope with SmallCategory.
+Bind Scope category_scope with LocallySmallCategory.
 
 
 

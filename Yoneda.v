@@ -4,8 +4,7 @@ Require Import Common ProductCategory SetCategory.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-Local Notation "C ^ D" := (FunctorCategory D C).
+Local Open Scope category_scope.
 
 Local Transparent Object.
 
@@ -86,7 +85,7 @@ Section YonedaLemma.
     ).
   Defined.
 
-  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : CategoryIsomorphism (@YonedaLemmaMorphism c X).
+  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
     Transparent Compose Morphism Identity.
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
@@ -128,7 +127,7 @@ Section CoYonedaLemma.
     ).
   Defined.
 
-  Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : CategoryIsomorphism (@CoYonedaLemmaMorphism c X).
+  Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     Transparent Compose Morphism Identity.
     exists (@CoYonedaLemmaMorphismInverse c X).
     split; simpl; nt_eq;

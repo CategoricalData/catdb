@@ -23,7 +23,8 @@ Section FunctorCategory.
   Defined.
 End FunctorCategory.
 
-Local Notation "C ^ D" := (FunctorCategory D C).
+Notation "C ^ D" := (FunctorCategory D C) : category_scope.
+Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
 
 Ltac unfold_FunctorCategory_of obj mor C D :=
   progress (

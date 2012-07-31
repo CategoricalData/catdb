@@ -95,8 +95,10 @@ Section equiv.
      the elements are equivalent to that [value]. *)
   Definition setOf (v : value) : EquivalenceSet equiv.
     exists (fun v' => if v ~= v' then true else false);
-      try exists v; repeat split; unfold InSet in *;
-        simpl_equiv.
+      abstract (
+        try exists v; repeat split; unfold InSet in *;
+          simpl_equiv
+      ).
   Defined.
 
   Lemma setOf_refl : forall v, InSet (setOf v) v.
@@ -128,7 +130,7 @@ Section equiv.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameSet_eq (C C' : EquivalenceSet equiv) : (sameSet C C') -> (C = C').
+  Lemma sameSet_eq (C C' : EquivalenceSet equiv) : sameSet C C' -> C = C'.
     clear equiv_Equivalence; intro H.
     cut (InSet' C = InSet' C');
       destruct C, C'; simpl;
@@ -150,11 +152,24 @@ Section equiv.
                     assumption || symmetry; assumption.
   Qed.
 
+  Lemma eq_sameSet (C C' : EquivalenceSet equiv) : C = C' -> sameSet C C'.
+    intro; subst; apply sameSet_refl.
+  Qed.
+
   Global Add Parametric Morphism : setOf
     with signature equiv ==> eq
       as setOf_mor.
     intros x y eqv;
       apply sameSet_eq; compute in *; intros; split; intros; simpl_equiv.
+  Qed.
+
+  Lemma setOf_eq x y : setOf x = setOf y <-> equiv x y.
+    split; intro H; try apply setOf_mor; trivial.
+    pose (setOf_refl x).
+    pose (setOf_refl y).
+    rewrite H in *;
+      compute in *;
+        simpl_equiv.
   Qed.
 
   Lemma disjointSets_differentSets (C C' : EquivalenceSet equiv) : (disjointSets C C') -> (differentSets C C').
@@ -203,22 +218,25 @@ Section InSet_setOf.
   Variable equiv : value -> value -> Prop.
   Variable C : EquivalenceSet equiv.
 
-  Let C_Equivalence : Equivalence equiv
-    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
-
   Hypothesis equiv_dec : forall v v', {equiv v v'} + {~ equiv v v'}.
 
-  Lemma InSet_setOf_eq v : InSet C v -> C = setOf C_Equivalence equiv_dec v.
+  Lemma InSet_setOf_eq eqv v : InSet C v -> C = setOf eqv equiv_dec v.
     intro H.
     apply sameSet_eq.
-    pose (setOf C_Equivalence equiv_dec v).
-    pose (setOf_refl C_Equivalence equiv_dec v).
+    pose (setOf eqv equiv_dec v).
+    pose (setOf_refl eqv equiv_dec v).
     pose (@SetContainsEquivalent _ equiv).
     pose (@SetElementsEquivalent _ equiv).
     specialize_all_ways.
     intro; split; intro;
       eauto.
   Qed.
+
+  Let C_Equivalence : Equivalence equiv
+    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
+
+  Definition InSet_setOf_eq' : forall v, InSet C v -> C = setOf C_Equivalence equiv_dec v
+    := InSet_setOf_eq C_Equivalence.
 End InSet_setOf.
 
 Ltac create_setOf_InSet :=
@@ -242,10 +260,16 @@ Ltac replace_InSet := create_setOf_InSet;
              end
          end.
 
-Ltac InSet2setOf :=
+Ltac InSet2setOf eqv :=
   repeat match goal with
            | [ equiv_dec : forall v v' : _, {?equiv v v'} + {~ ?equiv v v'}, H : InSet ?C ?x |- _ ] =>
-             apply (@InSet_setOf_eq _ _ C equiv_dec _) in H
+             apply (@InSet_setOf_eq _ _ C equiv_dec eqv _) in H
+         end.
+
+Ltac InSet2setOf' :=
+  repeat match goal with
+           | [ equiv_dec : forall v v' : _, {?equiv v v'} + {~ ?equiv v v'}, H : InSet ?C ?x |- _ ] =>
+             apply (@InSet_setOf_eq' _ _ C equiv_dec _) in H
          end.
 
 Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.

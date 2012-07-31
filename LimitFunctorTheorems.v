@@ -1,9 +1,7 @@
 Require Export LimitFunctors.
-Require Import Common Category Functor FunctorCategory SmallCategory SmallNaturalTransformation DefinitionSimplification.
+Require Import Common DefinitionSimplification SpecializedCategory Functor FunctorCategory NaturalTransformation.
 
 Set Implicit Arguments.
-
-Local Notation "C ^ D" := (FunctorCategory D C).
 
 Section InducedMaps.
   (** Quoting David:
@@ -30,35 +28,41 @@ Section InducedMaps.
      injects one set into its union with another and [lim G] projects a
      product of two sets onto one factor.
      *)
-  Variables C1 C2 : SmallCategory.
-  Variable D : Category.
-  Variable F1 : Functor C1 D.
-  Variable F2 : Functor C2 D.
-  Variable G : Functor C1 C2.
+  Variable objC1 : Type.
+  Variable morC1 : objC1 -> objC1 -> Type.
+  Variable objC2 : Type.
+  Variable morC2 : objC2 -> objC2 -> Type.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable C1 : SpecializedCategory morC1.
+  Variable C2 : SpecializedCategory morC2.
+  Variable D : SpecializedCategory morD.
+  Variable F1 : SpecializedFunctor C1 D.
+  Variable F2 : SpecializedFunctor C2 D.
+  Variable G : SpecializedFunctor C1 C2.
 
   Hypothesis TriangleCommutes : ComposeFunctors F2 G = F1.
 
   Section Limit.
-    Hypothesis F1_HasLimit : FunctorHasLimit F1.
-    Hypothesis F2_HasLimit : FunctorHasLimit F2.
+    Hypothesis F1_Limit : Limit F1.
+    Hypothesis F2_Limit : Limit F2.
 
-    Let limF1 := projT1 F1_HasLimit.
-    Let limF2 := projT1 F2_HasLimit.
+    Let limF1 := LimitObject F1_Limit.
+    Let limF2 := LimitObject F2_Limit.
 
-    Definition InducedLimitMap' : Morphism D limF2 limF1.
-      intro_projT2.
-      unfold Limit in *.
-      destruct_sig.
-      specialize_all_ways.
-      repeat match goal with
-               | [ t : _, F : _ |- _ ] => unique_pose (SNTComposeF t (IdentitySmallNaturalTransformation F))
-             end.
-      simpl in *.
+    Definition InducedLimitMap' : D.(Morphism) limF2 limF1.
+      Transparent Object Morphism.
+      unfold LimitObject, Limit in *.
+      intro_universal_morphisms.
+      match goal with
+        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
+      end.
       repeat match goal with
                | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
              end.
-      subst limF1 limF2.
-      specialized_assumption destruct_sig.
+      intro_universal_property_morphisms.
+      unfold Morphism in *; simpl in *.
+      specialized_assumption idtac.
     Defined.
 
     Definition InducedLimitMap'' : Morphism D limF2 limF1.
@@ -70,26 +74,25 @@ Section InducedMaps.
   End Limit.
 
   Section Colimit.
-    Hypothesis F1_HasColimit : FunctorHasColimit F1.
-    Hypothesis F2_HasColimit : FunctorHasColimit F2.
+    Hypothesis F1_Colimit : Colimit F1.
+    Hypothesis F2_Colimit : Colimit F2.
 
-    Let colimF1 := projT1 F1_HasColimit.
-    Let colimF2 := projT1 F2_HasColimit.
+    Let colimF1 := ColimitObject F1_Colimit.
+    Let colimF2 := ColimitObject F2_Colimit.
 
     Definition InducedColimitMap' : Morphism D colimF1 colimF2.
-      intro_projT2.
-      unfold Colimit in *.
-      destruct_sig.
-      specialize_all_ways.
-      repeat match goal with
-               | [ t : _, F : _ |- _ ] => unique_pose (SNTComposeF t (IdentitySmallNaturalTransformation F))
-             end.
-      simpl in *.
+      Transparent Object Morphism.
+      unfold ColimitObject, Colimit in *.
+      intro_universal_morphisms.
+      match goal with
+        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
+      end.
       repeat match goal with
                | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
              end.
-      subst colimF1 colimF2.
-      specialized_assumption destruct_sig.
+      intro_universal_property_morphisms.
+      unfold Morphism in *; simpl in *.
+      specialized_assumption idtac.
     Defined.
 
     Definition InducedColimitMap'' : Morphism D colimF1 colimF2.

@@ -3,6 +3,8 @@ MODULES    := Common \
 	StructureEquality \
 	DefinitionSimplification \
 	EquivalenceSet \
+	EquivalenceClass \
+	EquivalenceRelation \
 	EquivalenceRelationGenerator \
 	SpecializedCategory \
 	Category \
@@ -10,13 +12,20 @@ MODULES    := Common \
 	Functor \
 	NaturalTransformation \
 	NaturalEquivalence \
+	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
 	ProductCategory \
 	ProductFunctor \
+	MonoidalCategory \
+	EnrichedCategory \
 	SmallCat \
 	CommaCategory \
+	SpecializedCommaCategory \
+	LaxCommaCategory \
+	SpecializedLaxCommaCategory \
+	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
 	SetCategory \
@@ -26,16 +35,14 @@ MODULES    := Common \
 	AdjointUnit \
 	Adjoint \
 	Limits \
-	SetLimits \
-	SpecializedLimitFunctors \
-	SpecializedLimitFunctorTheorems \
-	Grothendieck \
-	Yoneda \
-	\
 	LimitFunctors \
 	LimitFunctorTheorems \
-	EquivalenceClass \
-	EquivalenceRelation \
+	Grothendieck \
+	SetLimits \
+	SetColimits \
+	SetCategoryFacts \
+	Yoneda \
+	\
 	Schema \
 	SmallSchema \
 	SetSchema \

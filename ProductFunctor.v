@@ -3,8 +3,6 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-
 Section ProductFunctor.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
@@ -29,3 +27,5 @@ Section ProductFunctor.
       |}; abstract (intros; unfold ProductCategory in *; destruct_type @prod; simpl in *; f_equal; auto).
   Defined.
 End ProductFunctor.
+
+Infix "*" := ProductFunctor : functor_scope.
