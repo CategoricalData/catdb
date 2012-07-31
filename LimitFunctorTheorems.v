@@ -1,5 +1,5 @@
 Require Export LimitFunctors.
-Require Import Common DefinitionSimplification SpecializedCategory Functor FunctorCategory NaturalTransformation.
+Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -30,76 +30,98 @@ Section InducedMaps.
      *)
   Variable objC1 : Type.
   Variable morC1 : objC1 -> objC1 -> Type.
+  Variable C1 : SpecializedCategory morC1.
   Variable objC2 : Type.
   Variable morC2 : objC2 -> objC2 -> Type.
+  Variable C2 : SpecializedCategory morC2.
   Variable objD : Type.
   Variable morD : objD -> objD -> Type.
-  Variable C1 : SpecializedCategory morC1.
-  Variable C2 : SpecializedCategory morC2.
   Variable D : SpecializedCategory morD.
   Variable F1 : SpecializedFunctor C1 D.
   Variable F2 : SpecializedFunctor C2 D.
   Variable G : SpecializedFunctor C1 C2.
 
-  Hypothesis TriangleCommutes : ComposeFunctors F2 G = F1.
-
   Section Limit.
+    Variable T : NaturalTransformation (ComposeFunctors F2 G) F1.
+
     Hypothesis F1_Limit : Limit F1.
     Hypothesis F2_Limit : Limit F2.
 
     Let limF1 := LimitObject F1_Limit.
     Let limF2 := LimitObject F2_Limit.
 
-    Definition InducedLimitMap' : D.(Morphism) limF2 limF1.
+    Definition InducedLimitMapNT' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
       Transparent Object Morphism.
-      unfold LimitObject, Limit in *.
-      intro_universal_morphisms.
+      unfold LimitObject, Limit in *;
+        intro_universal_morphisms.
+      subst_body.
       match goal with
-        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
+        | [ t : _, F : _, T : _ |- _ ] => eapply (NTComposeT (NTComposeT T (NTComposeF t (IdentityNaturalTransformation F))) _)
       end.
-      repeat match goal with
-               | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
-             end.
-      intro_universal_property_morphisms.
-      unfold Morphism in *; simpl in *.
-      specialized_assumption idtac.
+      Grab Existential Variables.
+      unfold ComposeFunctors at 1.
+      simpl.
+      match goal with
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun x => Identity _)
+            _
+          )
+      end.
+      simpl; reflexivity.
     Defined.
 
-    Definition InducedLimitMap'' : Morphism D limF2 limF1.
-      simpl_definition_by_exact InducedLimitMap'.
+    Definition InducedLimitMapNT'' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
+      simpl_definition_by_exact InducedLimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Definition InducedLimitMap := Eval cbv beta iota zeta delta [InducedLimitMap''] in InducedLimitMap''.
+    Definition InducedLimitMapNT : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1
+      := Eval cbv beta iota zeta delta [InducedLimitMapNT''] in InducedLimitMapNT''.
+
+    Definition InducedLimitMap : D.(Morphism) limF2 limF1
+      := TerminalProperty_Morphism F1_Limit _ InducedLimitMapNT.
   End Limit.
 
   Section Colimit.
+    Variable T : NaturalTransformation F1 (ComposeFunctors F2 G).
+
     Hypothesis F1_Colimit : Colimit F1.
     Hypothesis F2_Colimit : Colimit F2.
 
     Let colimF1 := ColimitObject F1_Colimit.
     Let colimF2 := ColimitObject F2_Colimit.
 
-    Definition InducedColimitMap' : Morphism D colimF1 colimF2.
+    Definition InducedColimitMapNT' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
       Transparent Object Morphism.
-      unfold ColimitObject, Colimit in *.
-      intro_universal_morphisms.
+      unfold ColimitObject, Colimit in *;
+        intro_universal_morphisms.
+      subst_body.
       match goal with
-        | [ t : _, F : _ |- _ ] => unique_pose (NTComposeF t (IdentityNaturalTransformation F))
+        | [ t : _, F : _, T : _ |- _ ] => eapply (NTComposeT _ (NTComposeT (NTComposeF t (IdentityNaturalTransformation F)) T))
       end.
-      repeat match goal with
-               | [ H : _ |- _ ] => rewrite TriangleCommutes in H; autorewrite with core in H
-             end.
-      intro_universal_property_morphisms.
-      unfold Morphism in *; simpl in *.
-      specialized_assumption idtac.
+      Grab Existential Variables.
+      unfold ComposeFunctors at 1.
+      simpl.
+      match goal with
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun x => Identity _)
+            _
+          )
+      end.
+      simpl; reflexivity.
     Defined.
 
-    Definition InducedColimitMap'' : Morphism D colimF1 colimF2.
-      simpl_definition_by_exact InducedColimitMap'.
+    Definition InducedColimitMapNT'' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
+      simpl_definition_by_exact InducedColimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Definition InducedColimitMap := Eval cbv beta iota zeta delta [InducedColimitMap''] in InducedColimitMap''.
+    Definition InducedColimitMapNT : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2)
+      := Eval cbv beta iota zeta delta [InducedColimitMapNT''] in InducedColimitMapNT''.
+
+    Definition InducedColimitMap : Morphism D colimF1 colimF2
+      := InitialProperty_Morphism F1_Colimit _ InducedColimitMapNT.
   End Colimit.
 End InducedMaps.
