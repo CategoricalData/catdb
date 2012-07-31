@@ -365,7 +365,6 @@ Section MonoidalCategory.
 
   Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in AssociatorCoherenceCondition.
   Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in UnitorCoherenceCondition.
-  Print AssociatorCoherenceCondition'.
 
   Record MonoidalCategory := {
     MonoidalUnderlyingCategory :> SpecializedCategory morC;
