@@ -269,3 +269,38 @@ Section IdentityNaturalTransformation.
 End IdentityNaturalTransformation.
 
 Hint Rewrite LeftIdentityNaturalTransformation RightIdentityNaturalTransformation.
+
+Section Associativity.
+  Variable objB : Type.
+  Variable morB : objB -> objB -> Type.
+  Variable B : SpecializedCategory morB.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variable objE : Type.
+  Variable morE : objE -> objE -> Type.
+  Variable E : SpecializedCategory morE.
+  Variable F : SpecializedFunctor D E.
+  Variable G : SpecializedFunctor C D.
+  Variable H : SpecializedFunctor B C.
+
+  Let F0 := ComposeFunctors (ComposeFunctors F G) H.
+  Let F1 := ComposeFunctors F (ComposeFunctors G H).
+
+  Definition ComposeFunctorsAssociator1 : SpecializedNaturalTransformation F0 F1.
+    refine (Build_SpecializedNaturalTransformation F0 F1
+      (fun _ => Identity (C := E) _)
+      _
+    ); simpl; abstract t.
+  Defined.
+
+  Definition ComposeFunctorsAssociator2 : SpecializedNaturalTransformation F1 F0.
+    refine (Build_SpecializedNaturalTransformation F1 F0
+      (fun _ => Identity (C := E) _)
+      _
+    ); simpl; abstract t.
+  Defined.
+End Associativity.
