@@ -97,20 +97,20 @@ Section SliceCategoryFunctor.
       exact (existT (fun _ => _) ((F ↓ d : LocallySmallSpecializedCategory _) : LocallySmallCategory, tt) (SliceCategoryProjection d F)).
     Defined.
 
-    Let SliceCategoryProjectionFunctor_Morphism_ObjectOf s d (m : Morphism D s d) :
+    Let SliceCategoryInducedFunctor_ObjectOf s d (m : Morphism D s d) :
       CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D s) ->
       CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D d).
       intro x; constructor.
       exact (existT _ (projT1 x) (Compose m (projT2 x))).
     Defined.
 
-    Let SliceCategoryProjectionFunctor_Morphism_MorphismOf s d (m : Morphism D s d) : forall
+    Let SliceCategoryInducedFunctor_MorphismOf s d (m : Morphism D s d) : forall
       (s0 d0 : CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D s))
       (m0 : CommaSpecializedCategory_Morphism s0 d0),
       CommaSpecializedCategory_Morphism
-      (@SliceCategoryProjectionFunctor_Morphism_ObjectOf s d m s0)
-      (@SliceCategoryProjectionFunctor_Morphism_ObjectOf s d m d0).
-      subst SliceCategoryProjectionFunctor_Morphism_ObjectOf.
+      (@SliceCategoryInducedFunctor_ObjectOf s d m s0)
+      (@SliceCategoryInducedFunctor_ObjectOf s d m d0).
+      subst SliceCategoryInducedFunctor_ObjectOf.
       intros s0 d0 m0.
       constructor; simpl in *.
       exists (projT1 m0).
@@ -124,10 +124,10 @@ Section SliceCategoryFunctor.
       ).
     Defined.
 
-    Let SliceCategoryProjectionFunctor_Morphism_Functor s d (m : Morphism D s d) :
+    Definition SliceCategoryInducedFunctor s d (m : Morphism D s d) :
       SpecializedFunctor (F ↓ s) (F ↓ d).
-      refine {| ObjectOf' := @SliceCategoryProjectionFunctor_Morphism_ObjectOf s d m;
-        MorphismOf' := @SliceCategoryProjectionFunctor_Morphism_MorphismOf s d m
+      refine {| ObjectOf' := @SliceCategoryInducedFunctor_ObjectOf s d m;
+        MorphismOf' := @SliceCategoryInducedFunctor_MorphismOf s d m
       |};
       subst_body; simpl; intros;
       abstract (
@@ -149,8 +149,8 @@ Section SliceCategoryFunctor.
       (SliceCategoryProjectionFunctor_ObjectOf d).
       Transparent Morphism.
       hnf; simpl.
-      exists (@SliceCategoryProjectionFunctor_Morphism_Functor s d m, tt).
-      subst_body; simpl; intros.
+      exists (@SliceCategoryInducedFunctor s d m, tt).
+      unfold SliceCategoryInducedFunctor in *; subst_body; simpl; intros.
       abstract (
         functor_eq;
         f_equal;
@@ -167,7 +167,7 @@ Section SliceCategoryFunctor.
         _
         _
       );
-      subst_body;
+      unfold SliceCategoryProjectionFunctor_MorphismOf, SliceCategoryInducedFunctor in *; subst_body;
       abstract slice_t.
     Defined.
   End Slice.
@@ -183,20 +183,20 @@ Section SliceCategoryFunctor.
       exact (existT (fun _ => _) ((d ↓ F : LocallySmallSpecializedCategory _) : LocallySmallCategory, tt) (CosliceCategoryProjection d F)).
     Defined.
 
-    Let CosliceCategoryProjectionFunctor_Morphism_ObjectOf s d (m : Morphism DOp s d) :
+    Let CosliceCategoryInducedFunctor_ObjectOf s d (m : Morphism DOp s d) :
       CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D s) F ->
       CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D d) F.
       intro x; constructor.
       exact (existT _ (projT1 x) (Compose (projT2 x) m)).
     Defined.
 
-    Let CosliceCategoryProjectionFunctor_Morphism_MorphismOf s d (m : Morphism DOp s d) : forall
+    Let CosliceCategoryInducedFunctor_MorphismOf s d (m : Morphism DOp s d) : forall
       (s0 d0 : CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D s) F)
       (m0 : CommaSpecializedCategory_Morphism s0 d0),
       CommaSpecializedCategory_Morphism
-      (@CosliceCategoryProjectionFunctor_Morphism_ObjectOf s d m s0)
-      (@CosliceCategoryProjectionFunctor_Morphism_ObjectOf s d m d0).
-      subst CosliceCategoryProjectionFunctor_Morphism_ObjectOf.
+      (@CosliceCategoryInducedFunctor_ObjectOf s d m s0)
+      (@CosliceCategoryInducedFunctor_ObjectOf s d m d0).
+      subst CosliceCategoryInducedFunctor_ObjectOf.
       intros s0 d0 m0.
       constructor; simpl in *.
       exists (projT1 m0).
@@ -210,11 +210,11 @@ Section SliceCategoryFunctor.
       ).
     Defined.
 
-    Let CosliceCategoryProjectionFunctor_Morphism_Functor (s d : D) (m : Morphism DOp s d) :
+    Definition CosliceCategoryInducedFunctor (s d : D) (m : Morphism DOp s d) :
       SpecializedFunctor (s ↓ F) (d ↓ F).
       refine (Build_SpecializedFunctor (s ↓ F) (d ↓ F)
-        (@CosliceCategoryProjectionFunctor_Morphism_ObjectOf s d m)
-        (@CosliceCategoryProjectionFunctor_Morphism_MorphismOf s d m)
+        (@CosliceCategoryInducedFunctor_ObjectOf s d m)
+        (@CosliceCategoryInducedFunctor_MorphismOf s d m)
         _
         _
       );
@@ -238,8 +238,8 @@ Section SliceCategoryFunctor.
       (CosliceCategoryProjectionFunctor_ObjectOf d).
       Transparent Morphism.
       hnf; simpl.
-      exists (@CosliceCategoryProjectionFunctor_Morphism_Functor s d m, tt).
-      subst_body; simpl; intros.
+      exists (@CosliceCategoryInducedFunctor s d m, tt).
+      unfold CosliceCategoryInducedFunctor in *; subst_body; simpl; intros.
       abstract (
         functor_eq;
         f_equal;
@@ -256,7 +256,7 @@ Section SliceCategoryFunctor.
         _
         _
       );
-      subst_body;
+      unfold CosliceCategoryProjectionFunctor_MorphismOf, CosliceCategoryInducedFunctor in *; subst_body;
       abstract slice_t.
     Defined.
   End Coslice.
