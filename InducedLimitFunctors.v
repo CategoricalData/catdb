@@ -6,6 +6,9 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section InducedFunctor.
+  (* The components of the functor can be useful even if we don't have
+     a category that we're coming from.  So prove them separately, so
+     we can use them elsewhere, without assuming a full [HasLimits]. *)
   Local Transparent Object Morphism.
 
   Variable I : Type.
@@ -22,124 +25,146 @@ Section InducedFunctor.
   Let DOp := OppositeCategory D.
 
   Section Limit.
+    Definition InducedLimitFunctor_MorphismOf (s d : Cat ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
+      (m : Morphism _ s d) :
+      Morphism D (LimitObject limS) (LimitObject limD)
+      := InducedLimitMap (projT2 m) _ _.
+
+    Lemma InducedLimitFunctor_FCompositionOf (s d d' : Cat ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
+      (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
+      InducedLimitFunctor_MorphismOf limS limD' (Compose m2 m1) =
+      Compose (InducedLimitFunctor_MorphismOf limD limD' m2) (InducedLimitFunctor_MorphismOf limS limD m1).
+    Proof.
+      unfold InducedLimitFunctor_MorphismOf.
+      unfold InducedLimitMap at 1; cbv zeta.
+      match goal with
+        | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
+      end (* 3 s *).
+      nt_eq (* 4 s *).
+      repeat rewrite RightIdentity (* putting this here shaves off 6 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      repeat rewrite Associativity (* 3 s *).
+      match goal with
+        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+          eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
+            try_associativity ltac:(apply f_equal2; try reflexivity)
+      end (* 13 s *);
+      unfold InducedLimitMap;
+      match goal with
+        | [ |- appcontext[TerminalProperty_Morphism ?a ?b ?c] ] =>
+          let H := constr:(TerminalProperty a) in
+            let H' := fresh in
+              pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
+                simpl in H';
+                  unfold Object, Morphism in *;
+                    simpl in *;
+                      rewrite H';
+                        clear H'
+      end (* 7 s *);
+      simpl;
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+            reflexivity. (* 7 s since [simpl] *)
+    Qed.
+
+    Lemma InducedLimitFunctor_FIdentityOf (x : Cat ⇑ D) (limX : Limit (projT2 x)) :
+      InducedLimitFunctor_MorphismOf limX limX (Identity x) =
+      Identity (LimitObject limX).
+    Proof.
+      unfold InducedLimitFunctor_MorphismOf.
+      unfold InducedLimitMap at 1; cbv zeta.
+      match goal with
+        | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
+      end (* 3 s *).
+      nt_eq (* 4 s *).
+      repeat rewrite RightIdentity (* putting this here shaves off 2 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      reflexivity.
+    Qed.
+
     Variable HasLimits : forall C : Cat ⇑ D, Limit (projT2 C).
 
-    Let lim (x : Cat ⇑ D) : D
-      := LimitObject (HasLimits x).
-
-    Definition InducedLimitFunctor_MorphismOf' (s d : Cat ⇑ D) (m : Morphism _ s d) : Morphism D (lim s) (lim d).
-      subst_body; hnf in * |- ; simpl in *.
-(*      hnf; change morD with (Morphism D). *)
-      apply (InducedLimitMap (G := projT1 m)).
-      exact (projT2 m).
-    Defined.
-
-    Definition InducedLimitFunctor_MorphismOf'' (s d : Cat ⇑ D) (m : Morphism _ s d) : Morphism D (lim s) (lim d).
-      simpl_definition_by_tac_and_exact (@InducedLimitFunctor_MorphismOf' s d m) ltac:(unfold InducedLimitFunctor_MorphismOf' in *).
-    Defined.
-
-    (* Then we clean up a bit with reduction. *)
-    Definition InducedLimitFunctor_MorphismOf (s d : Cat ⇑ D) (m : Morphism _ s d) : Morphism D (lim s) (lim d)
-      := Eval cbv beta iota zeta delta [InducedLimitFunctor_MorphismOf''] in @InducedLimitFunctor_MorphismOf'' s d m.
+    Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
     Definition InducedLimitFunctor : SpecializedFunctor (Cat ⇑ D) D.
-      refine {| ObjectOf' := lim;
-        MorphismOf' := @InducedLimitFunctor_MorphismOf
+      refine {| ObjectOf' := (fun x => LimitObject (HasLimits x));
+        MorphismOf' := (fun s d => @InducedLimitFunctor_MorphismOf s d (HasLimits s) (HasLimits d))
       |};
-      intros; unfold InducedLimitFunctor_MorphismOf; subst_body;
-        abstract (
-          present_spcategory;
-          unfold InducedLimitMap;
-            simpl;
-              match goal with
-                | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
-              end (* 9 s *);
-              nt_eq (* 5 s *);
-              repeat rewrite FIdentityOf;
-                repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                  try reflexivity;
-                    repeat rewrite Associativity; (* 27 s for this past block *)
-                      match goal with
-                        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
-                          eapply (@eq_trans _ _ (Compose a' (Compose _ c)) _);
-                            try_associativity ltac:(apply f_equal2; try reflexivity)
-                      end;
-                      match goal with
-                        | [ |- appcontext[TerminalProperty_Morphism ?a ?b ?c] ] =>
-                          let H := constr:(TerminalProperty a) in
-                            let H' := fresh in
-                              pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
-                                simpl in H';
-                                  unfold Object, Morphism in *;
-                                    simpl in *;
-                                      rewrite H'
-                      end;
-                      simpl;
-                        repeat rewrite FIdentityOf;
-                          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                            reflexivity (* 8 s *)
-        ).
+      abstract trivial.
     Defined.
   End Limit.
 
   Section Colimit.
+    Definition InducedColimitFunctor_MorphismOf (s d : Cat ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
+      (m : Morphism _ s d) :
+      Morphism D (ColimitObject colimS) (ColimitObject colimD)
+      := InducedColimitMap (projT2 m) _ _.
+
+    Lemma InducedColimitFunctor_FCompositionOf (s d d' : Cat ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
+      (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
+      InducedColimitFunctor_MorphismOf colimS colimD' (Compose m2 m1) =
+      Compose (InducedColimitFunctor_MorphismOf colimD colimD' m2) (InducedColimitFunctor_MorphismOf colimS colimD m1).
+    Proof.
+      unfold InducedColimitFunctor_MorphismOf.
+      unfold InducedColimitMap at 1; cbv zeta.
+      match goal with
+        | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
+      end (* 3 s *).
+      nt_eq (* 4 s *).
+      repeat rewrite LeftIdentity (* putting this here shaves off 6 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      repeat rewrite Associativity (* 3 s *).
+      match goal with
+        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
+          symmetry; eapply (@eq_trans _ _ (Compose a (Compose _ c')) _);
+            try_associativity ltac:(apply f_equal2; try reflexivity)
+      end (* 13 s *);
+      unfold InducedColimitMap;
+      match goal with
+        | [ |- appcontext[InitialProperty_Morphism ?a ?b ?c] ] =>
+          let H := constr:(InitialProperty a) in
+            let H' := fresh in
+              pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
+                simpl in H';
+                  unfold Object, Morphism in *;
+                    simpl in *;
+                      rewrite H';
+                        clear H'
+      end (* 7 s *);
+      simpl;
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+            reflexivity. (* 7 s since [simpl] *)
+    Qed.
+
+    Lemma InducedColimitFunctor_FIdentityOf (x : Cat ⇓ D) (colimX : Colimit (projT2 x)) :
+      InducedColimitFunctor_MorphismOf colimX colimX (Identity x) =
+      Identity (ColimitObject colimX).
+    Proof.
+      unfold InducedColimitFunctor_MorphismOf.
+      unfold InducedColimitMap at 1; cbv zeta.
+      match goal with
+        | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
+      end (* 3 s *).
+      nt_eq (* 4 s *).
+      repeat rewrite LeftIdentity (* putting this here shaves off 2 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      reflexivity.
+    Qed.
+
     Variable HasColimits : forall C : Cat ⇓ D, Colimit (projT2 C).
 
-    Let colim (x : Cat ⇓ D) : D
-      := ColimitObject (HasColimits x).
-
-    Definition InducedColimitFunctor_MorphismOf' (s d : Cat ⇓ D) (m : Morphism _ s d) : Morphism D (colim s) (colim d).
-      subst_body; hnf in * |- ; simpl in *.
-(*      hnf; change morD with (Morphism D). *)
-      apply (InducedColimitMap (G := projT1 m)).
-      exact (projT2 m).
-    Defined.
-
-    Definition InducedColimitFunctor_MorphismOf'' (s d : Cat ⇓ D) (m : Morphism _ s d) : Morphism D (colim s) (colim d).
-      simpl_definition_by_tac_and_exact (@InducedColimitFunctor_MorphismOf' s d m) ltac:(unfold InducedColimitFunctor_MorphismOf' in *).
-    Defined.
-
-    (* Then we clean up a bit with reduction. *)
-    Definition InducedColimitFunctor_MorphismOf (s d : Cat ⇓ D) (m : Morphism _ s d) : Morphism D (colim s) (colim d)
-      := Eval cbv beta iota zeta delta [InducedColimitFunctor_MorphismOf''] in @InducedColimitFunctor_MorphismOf'' s d m.
+    Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
     Definition InducedColimitFunctor : SpecializedFunctor (Cat ⇓ D) D.
-      refine {| ObjectOf' := colim;
-        MorphismOf' := @InducedColimitFunctor_MorphismOf
+      refine {| ObjectOf' := (fun x => ColimitObject (HasColimits x));
+        MorphismOf' := (fun s d => @InducedColimitFunctor_MorphismOf s d (HasColimits s) (HasColimits d))
       |};
-      intros; unfold InducedColimitFunctor_MorphismOf; subst_body;
-        abstract (
-          present_spcategory;
-          unfold InducedColimitMap;
-            simpl;
-              match goal with
-                | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
-              end (* 2 s *);
-              nt_eq (* 4 s *);
-              repeat rewrite FIdentityOf;
-                repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                  try reflexivity;
-                    repeat rewrite Associativity (* 19 s for this past block *);
-                      match goal with
-                        | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
-                          symmetry; eapply (@eq_trans _ _ (Compose a (Compose _ c')) _);
-                            try_associativity ltac:(apply f_equal2; try reflexivity)
-                      end (* 36 s *);
-                      match goal with
-                        | [ |- appcontext[InitialProperty_Morphism ?a ?b ?c] ] =>
-                          let H := constr:(InitialProperty a) in
-                            let H' := fresh in
-                              pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
-                                simpl in H';
-                                  unfold Object, Morphism in *;
-                                    simpl in *;
-                                      rewrite H'
-                      end (* 2 s *);
-                      simpl;
-                        repeat rewrite FIdentityOf;
-                          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                            reflexivity (* 8 s *)
-      ).
+      abstract trivial.
     Defined.
   End Colimit.
 End InducedFunctor.
