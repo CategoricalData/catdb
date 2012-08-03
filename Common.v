@@ -39,6 +39,14 @@ Tactic Notation "has_no_body" hyp(H) :=
 Tactic Notation "has_body" hyp(H) :=
   not_tac (has_no_body H).
 
+Ltac head expr :=
+  match expr with
+    | ?f _ => head f
+    | _ => expr
+  end.
+
+Ltac head_hnf expr := let expr' := eval hnf in expr in head expr'.
+
 Ltac simpl_do tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
 
@@ -369,43 +377,52 @@ Ltac eta_red :=
            | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
          end.
 
-Ltac intro_proj2_sig_from_goal' :=
+Ltac intro_proj2_sig_from_goal'_by tac :=
   repeat match goal with
-           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
-           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => tac (proj3_sig x)
          end.
 
-Ltac intro_proj2_sig_from_goal :=
+Ltac intro_proj2_sig_from_goal_by tac :=
   repeat match goal with
-           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
-           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => tac (proj3_sig x)
          end; simpl in *.
 
-Ltac intro_projT2_from_goal :=
+Ltac intro_projT2_from_goal_by tac :=
   repeat match goal with
-           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
-           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
+           | [ |- appcontext[projT1 ?x] ] => tac (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => tac (projT3 x)
          end; simpl in *.
 
-Ltac intro_proj2_sig :=
+Ltac intro_proj2_sig_by tac :=
   repeat match goal with
-           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
-           | [ H : appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
-           | [ H := appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
-           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => unique_pose (proj3_sig x)
-           | [ H : appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
-           | [ H := appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => unique_pose (proj3_sig x)
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ H : appcontext[proj1_sig ?x] |- _ ] => tac (proj2_sig x)
+           | [ H := appcontext[proj1_sig ?x] |- _ ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig2_sig ?x)] ] => tac (proj3_sig x)
+           | [ H : appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => tac (proj3_sig x)
+           | [ H := appcontext[proj1_sig (sig2_sig ?x)] |- _ ] => tac (proj3_sig x)
          end; simpl in *.
 
-Ltac intro_projT2 :=
+Ltac intro_projT2_by tac :=
   repeat match goal with
-           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
-           | [ H : appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
-           | [ H := appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
-           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => unique_pose (projT3 x)
-           | [ H : appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
-           | [ H := appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => unique_pose (projT3 x)
+           | [ |- appcontext[projT1 ?x] ] => tac (projT2 x)
+           | [ H : appcontext[projT1 ?x] |- _ ] => tac (projT2 x)
+           | [ H := appcontext[projT1 ?x] |- _ ] => tac (projT2 x)
+           | [ |- appcontext[projT1 (sigT2_sigT ?x)] ] => tac (projT3 x)
+           | [ H : appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => tac (projT3 x)
+           | [ H := appcontext[projT1 (sigT2_sigT ?x)] |- _ ] => tac (projT3 x)
          end; simpl in *.
+
+
+Ltac intro_proj2_sig_from_goal' := intro_proj2_sig_from_goal'_by unique_pose.
+Ltac intro_proj2_sig_from_goal := intro_proj2_sig_from_goal_by unique_pose.
+Ltac intro_projT2_from_goal := intro_projT2_from_goal_by unique_pose.
+Ltac intro_projT2_from_goal_with_body := intro_projT2_from_goal_by unique_pose_with_body.
+Ltac intro_proj2_sig := intro_proj2_sig_by unique_pose.
+Ltac intro_projT2 := intro_projT2_by unique_pose.
+Ltac intro_projT2_with_body := intro_projT2_by unique_pose_with_body.
 
 Ltac recr_destruct_with tac H :=
   let H0 := fresh in let H1 := fresh in
