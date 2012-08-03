@@ -98,16 +98,20 @@ Ltac eq2eq_refl :=
            | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by (apply proof_irrelevance); subst
          end.
 
-Ltac destruct_all_matches matcher :=
+Ltac destruct_all_matches_then matcher tac :=
   repeat match goal with
-           | [ H : ?T |- _ ] => matcher T; destruct H; simpl in *
+           | [ H : ?T |- _ ] => matcher T; destruct H; tac
          end.
+
+Ltac destruct_all_matches matcher := destruct_all_matches_then matcher ltac:(simpl in *).
+Ltac destruct_all_matches' matcher := destruct_all_matches_then matcher idtac.
 
 Ltac destruct_type_matcher T HT :=
   match HT with
     | context[T] => idtac
   end.
 Ltac destruct_type T := destruct_all_matches ltac:(destruct_type_matcher T).
+Ltac destruct_type' T := destruct_all_matches' ltac:(destruct_type_matcher T).
 
 Ltac destruct_hypotheses_matcher HT :=
   let HT' := eval hnf in HT in
@@ -117,6 +121,7 @@ Ltac destruct_hypotheses_matcher HT :=
       | prod _ _ => idtac
     end.
 Ltac destruct_hypotheses := destruct_all_matches destruct_hypotheses_matcher.
+Ltac destruct_hypotheses' := destruct_all_matches' destruct_hypotheses_matcher.
 
 Ltac destruct_sig_matcher HT :=
   let HT' := eval hnf in HT in
@@ -127,6 +132,7 @@ Ltac destruct_sig_matcher HT :=
       | @sigT2 _ _ _ => idtac
     end.
 Ltac destruct_sig := destruct_all_matches destruct_sig_matcher.
+Ltac destruct_sig' := destruct_all_matches' destruct_sig_matcher.
 
 Ltac destruct_all_hypotheses := destruct_all_matches ltac:(fun HT =>
   destruct_hypotheses_matcher HT || destruct_sig_matcher HT
