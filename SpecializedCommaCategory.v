@@ -142,7 +142,7 @@ Section CommaSpecializedCategory.
     comma_t.
   Qed.
 
-  Definition CommaSpecializedCategory : SpecializedCategory CommaSpecializedCategory_Morphism.
+  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object CommaSpecializedCategory_Morphism.
     match goal with
       | [ |- @SpecializedCategory ?obj ?mor ] =>
         refine (@Build_SpecializedCategory obj mor
