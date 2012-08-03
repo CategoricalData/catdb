@@ -218,9 +218,9 @@ Ltac intro_universal_objects :=
 
 Ltac intro_universal_morphisms :=
   repeat match goal with
-           | [ m : TerminalMorphism _ _ |- _ ] => unique_pose (TerminalMorphism_Morphism m)
-           | [ m : InitialMorphism _ _ |- _ ] => unique_pose (InitialMorphism_Morphism m)
-           | [ m : UniversalMorphism _ _ |- _ ] => unique_pose (UniversalMorphism_Morphism m)
+           | [ m : TerminalMorphism _ _ |- _ ] => unique_pose_with_body (TerminalMorphism_Morphism m)
+           | [ m : InitialMorphism _ _ |- _ ] => unique_pose_with_body (InitialMorphism_Morphism m)
+           | [ m : UniversalMorphism _ _ |- _ ] => unique_pose_with_body (UniversalMorphism_Morphism m)
          end.
 
 Ltac intro_universal_property_morphisms :=

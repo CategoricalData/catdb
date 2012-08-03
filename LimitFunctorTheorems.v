@@ -54,7 +54,7 @@ Section InducedMaps.
       Transparent Object Morphism.
       unfold LimitObject, Limit in *;
         intro_universal_morphisms.
-      subst_body.
+      subst limF1 limF2.
       match goal with
         | [ t : _, F : _, T : _ |- _ ] => eapply (NTComposeT (NTComposeT T (NTComposeF t (IdentityNaturalTransformation F))) _)
       end.
@@ -96,7 +96,7 @@ Section InducedMaps.
       Transparent Object Morphism.
       unfold ColimitObject, Colimit in *;
         intro_universal_morphisms.
-      subst_body.
+      subst colimF1 colimF2.
       match goal with
         | [ t : _, F : _, T : _ |- _ ] => eapply (NTComposeT _ (NTComposeT (NTComposeF t (IdentityNaturalTransformation F)) T))
       end.
