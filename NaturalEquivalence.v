@@ -24,6 +24,32 @@ Section NaturalIsomorphism.
   }.
 End NaturalIsomorphism.
 
+Section NaturalIsomorphismOfCategories.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+
+  Local Reserved Notation "'F'".
+  Local Reserved Notation "'G'".
+
+  Record NaturalIsomorphismOfCategories := {
+    NaturalIsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := NaturalIsomorphismOfCategories_F;
+    NaturalIsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := NaturalIsomorphismOfCategories_G;
+    NaturalIsomorphismOfCategories_Isomorphism_C :> NaturalIsomorphism (IdentityFunctor C) (ComposeFunctors G F);
+    NaturalIsomorphismOfCategories_Isomorphism_D : NaturalIsomorphism (IdentityFunctor D) (ComposeFunctors F G)
+  }.
+
+  Record IsomorphismOfCategories := {
+    IsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := IsomorphismOfCategories_F;
+    IsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := IsomorphismOfCategories_G;
+    IsomorphismOfCategories_Isomorphism_C : ComposeFunctors G F = IdentityFunctor C;
+    IsomorphismOfCategories_Isomorphism_D : ComposeFunctors F G = IdentityFunctor D
+  }.
+End NaturalIsomorphismOfCategories.
+
 Section NaturalEquivalence.
   Variable C D : Category.
   Variable F G : Functor C D.
