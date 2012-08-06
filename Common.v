@@ -566,12 +566,27 @@ Section unit.
     case u; case u'; reflexivity.
   Qed.
 
+  Lemma unit_JMeq (u u' : unit) : u == u'.
+    case u; case u'; reflexivity.
+  Qed.
+
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
+  Qed.
+
+  Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
+    destruct a.
+  Qed.
+
+  Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
+    destruct b.
   Qed.
 End unit.
 
 Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
 Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
+Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.
+Hint Extern 0 (@JMeq _ _ Empty_set _) => apply Empty_set_JMeqr.
