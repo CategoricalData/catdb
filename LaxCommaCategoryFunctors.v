@@ -110,7 +110,7 @@ Section LaxSliceCategoryFunctor.
       (LaxSliceCategoryProjectionFunctor_ObjectOf s)
       (LaxSliceCategoryProjectionFunctor_ObjectOf d).
       constructor.
-      exists (projT1 (MorphismOf (SliceCategoryProjectionFunctor C D F) m)).
+      exists (proj1_sig (MorphismOf (SliceCategoryProjectionFunctor C D F) m)).
       simpl.
       match goal with
         | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -135,38 +135,206 @@ Section LaxSliceCategoryFunctor.
         (@LaxSliceCategoryProjectionFunctor_MorphismOf)
         _
         _
-      );
-      repeat (let H := fresh in intro H; try destruct H).
-      slice_t.
-Print JMeq.
+      ).
+      intros; present_spnt.
+      match goal with
+        | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in let T'' := eval simpl in T' in change (@eq T'' a b)
+      end.
+      match goal with
+        | [ |- @eq (LaxSliceSpecializedCategory_Morphism _ _) ?a ?b ] =>
+          cut (LaxSliceSpecializedCategory_Morphism_Member a = LaxSliceSpecializedCategory_Morphism_Member b);
+            [
+              generalize a b;
+                let A := fresh in let B := fresh in
+                  intros A B; destruct A, B; simpl; intro; subst; reflexivity
+              | ]
+      end.
+      match goal with
+        | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in let T'' := eval simpl in T' in change (@eq T'' a b)
+      end.
+      simpl_eq'; unfold sigT_of_sig.
+      simpl.
+      simpl_eq'; simpl; trivial.
+      pose proof (FCompositionOf (SliceCategoryProjectionFunctor C D F) s d d' m1 m2).
+      match type of H with
+        | @eq ?T ?a ?b => let a' := eval hnf in a in let b' := eval hnf in b in change (a' = b') in H
+      end.
+      pose proof (f_equal (@CommaSpecializedCategory_Morphism_Member _ _ _ _ _ _ _ _ _ _ _ _ _) H).
+      pose proof (f_equal (@proj1_sig _ _) H0).
+      match type of H1 with
+        | @eq ?T ?a ?b => let a' := eval hnf in a in let b' := eval hnf in b in change (a' = b') in H1
+      end.
+      clear H H0.
+      present_spcategory.
+      apply (f_equal (@fst _ _)) in H1.
+      unfold fst at 1 in H1.
+      match goal with
+        | [ |- @eq ?T _ _ ] => pose T
+      end.
+      match type of H1 with
+        | @eq ?T _ _ => pose T
+      end.
+      match type of H1 with
+        | ?a = ?b => transitivity a; [ reflexivity | rewrite H1; reflexivity ]
+      end.
+      (***** HERE ******)
+      reflexivity.
+      rewrite H1.
+      simpl in H1 |-
+      rewrite H1.
+      unfold MorphismOf, SliceCategoryProjectionFunctor in H1.
+      cbv beta iota zeta in H1.
+      unfold proj1_sig, fst in H1.
+      unfold CommaSpecializedCategory_Morphism_Member in H1.
+      cbv beta in H1.
+
+      simpl
+      unfold MorphismOf at 1 in H.
+      simpl in *.
+      pose proof (f_equal (@proj1_sig _ _) H).
+      rewrite LeftIdentityFunctor in *.
+      simpl_eq.
       Local Ltac slice_t' :=
-  match goal with
-           | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq
-           | [ |- (_ -> _) = (_ -> _) ] => apply f_type_equal
-           | _ => progress (intros; simpl in *; trivial; subst_body)
-           | _ => progress simpl_eq
-           | _ => progress (repeat rewrite Associativity; repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
-           | _ => progress JMeq_eq
-           | _ => apply f_equal
-           | [ |- @eq (SpecializedFunctor _ _) _ _ ] => functor_eq
-           | [ |- @JMeq (SpecializedFunctor _ _) _ (SpecializedFunctor _ _) _ ] => functor_eq
-           | [ |- @eq (SpecializedNaturalTransformation _ _) _ _ ] => nt_eq
-           | [ |- @eq (SpecializedNaturalTransformation _ _) _ (SpecializedNaturalTransformation _ _) _ ] => nt_eq
-           | [ |- JMeq (?f ?x) (?f ?y) ] =>
-             apply (@f_equal1_JMeq _ _ x y f)
-           | [ |- JMeq (?f ?x) (?g ?y) ] =>
-             apply (@f_equal_JMeq _ _ _ _ x y f g) (*
-           | _ =>
-             progress (
-               destruct_type @CommaSpecializedCategory_Object;
-               destruct_type @CommaSpecializedCategory_Morphism;
-               destruct_sig;
-               present_spcategory
-             ) *)
-    | [ |- ?a = ?b ] => let a' := eval hnf in a in let b' := eval hnf in b in change (a' = b')
-  end.
-      slice_t'.
-      slice_t'.
+        match goal with
+          | _ => progress (intros; trivial)
+          | _ => progress subst_body
+          | _ => progress clear_refl_eq
+          | _ => progress cbv beta iota zeta in *
+          | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq
+          | [ |- (_ -> _) = (_ -> _) ] => apply f_type_equal
+          | _ => progress nt_eq
+          | _ => progress functor_eq
+          | _ => progress simpl_eq
+          | _ => progress (repeat rewrite LeftIdentity in *; repeat rewrite RightIdentity in *; repeat rewrite Associativity in *)
+          | _ => progress JMeq_eq
+          | _ => apply f_equal
+          | [ |- JMeq (?f ?x) (?f ?y) ] =>
+            apply (@f_equal1_JMeq _ _ x y f)
+          | [ |- JMeq (?f ?x) (?g ?y) ] =>
+            apply (@f_equal_JMeq _ _ _ _ x y f g)
+          | _ =>
+            progress (
+              destruct_type @CommaSpecializedCategory_Object;
+              destruct_type @CommaSpecializedCategory_Morphism;
+              destruct_sig;
+              present_spcategory
+            )
+          | [ |- ?a = ?b ] => let a' := eval hnf in a in let b' := eval hnf in b in change (a' = b')
+(*          | _ => progress simpl in * *)
+        end.
+      Time do 2 slice_t'.
+      Time do 2 slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
+      Time slice_t'.
       slice_t'.
       slice_t'.
       slice_t'.
