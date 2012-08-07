@@ -29,7 +29,7 @@ Section DCategory.
       | [ H : ~ _ |- _ ] => solve [ contradict H; etransitivity; eauto ]
     end.
 
-  Let DiscreteCategory_Morphism s d := if s == d then unit else Empty_set.
+  Let DiscreteCategory_Morphism s d : Set := if s == d then unit else Empty_set.
 
   Local Ltac simpl_eq_dec := subst_body; simpl in *; intros;
   (*    unfold eq_b in *;*)
@@ -44,11 +44,11 @@ Section DCategory.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategory_Identity o : (fun s d : O => if s == d then unit else Empty_set) o o.
+  Definition DiscreteCategory_Identity o : DiscreteCategory_Morphism o o.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategory : @SpecializedCategory O (fun s d => match s == d return Set with left _ => unit | right _ => Empty_set end).
+  Definition DiscreteCategory : @SpecializedCategory O DiscreteCategory_Morphism.
     refine {|
       Compose' := DiscreteCategory_Compose;
       Identity' := DiscreteCategory_Identity
