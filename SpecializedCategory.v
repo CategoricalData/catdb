@@ -110,9 +110,17 @@ Ltac present_spcategory := present_obj_mor @Identity' @Identity; present_obj_mor
 
 Ltac present_spcategory_all := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose;
   repeat match goal with
-           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress present_mor_all mor C
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress (present_mor_all mor C; sanitize_spcategory)
          end;
   sanitize_spcategory.
+
+Ltac present_spcategory_all_obj_mor := present_obj_mor @Identity' @Identity; present_obj_mor @Compose' @Compose;
+  repeat match goal with
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress (change_in_all mor with (@Morphism obj mor C); sanitize_spcategory)
+           | [ C : @SpecializedCategory ?obj ?mor |- _ ] => progress (change_in_all obj with (@Object obj mor C); sanitize_spcategory)
+         end;
+  sanitize_spcategory.
+
 
 Hint Rewrite LeftIdentity RightIdentity.
 
