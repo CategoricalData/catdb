@@ -557,6 +557,17 @@ Ltac rewrite_rev_by_context ctx H :=
         ]
   end.
 
+Ltac do_for_each_hyp' tac fail_if_seen :=
+  match goal with
+    | [ H : _ |- _ ] => fail_if_seen H; tac H; try do_for_each_hyp' tac ltac:(fun H' => fail_if_seen H'; match H' with | H => fail 1 | _ => idtac end)
+  end.
+Ltac do_for_each_hyp tac := do_for_each_hyp' tac ltac:(fun H => idtac).
+
+(* [change a with b in *] fails if it would create a self-referential hypothesis.
+   This version does not. *)
+Tactic Notation "change_in_all" constr(from) "with" constr(to) :=
+  change from with to; do_for_each_hyp ltac:(fun H => change from with to in H).
+
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.
