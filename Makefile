@@ -12,6 +12,12 @@ MODULES    := Common \
 	Functor \
 	NaturalTransformation \
 	NaturalEquivalence \
+	SigCategory \
+	SigTCategory \
+	SigTSigCategory \
+	SigSigTCategory \
+	SigTInducedFunctors \
+	SigTSigInducedFunctors \
 	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
