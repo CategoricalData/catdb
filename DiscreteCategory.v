@@ -29,7 +29,9 @@ Section DCategory.
       | [ H : ~ _ |- _ ] => solve [ contradict H; etransitivity; eauto ]
     end.
 
-  Local Ltac simpl_eq_dec := simpl in *; intros;
+  Let DiscreteCategory_Morphism s d := if s == d then unit else Empty_set.
+
+  Local Ltac simpl_eq_dec := subst_body; simpl in *; intros;
   (*    unfold eq_b in *;*)
     repeat match goal with
              | [ _ : context[eq_dec ?a ?b] |- _ ] => destruct (eq_dec a b); try contradict_by_transitivity
@@ -37,12 +39,8 @@ Section DCategory.
            end;
       auto.
 
-  Definition DiscreteCategory_Compose
-    (s d d' : O)
-    (m : (fun s d => if s == d then unit else Empty_set) d d')
-    (m' : (fun s d => if s == d then unit else Empty_set) s d)
-    :
-    (fun s d => if s == d then unit else Empty_set) s d'.
+  Definition DiscreteCategory_Compose (s d d' : O) (m : DiscreteCategory_Morphism d d') (m' : DiscreteCategory_Morphism s d) :
+    DiscreteCategory_Morphism s d'.
     simpl_eq_dec.
   Defined.
 
