@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance FunctionalExtensionality JMeq.
 Require Export SpecializedCommaCategory SmallCat Duals.
-Require Import Common DiscreteCategory FEqualDep DefinitionSimplification.
+Require Import Common DiscreteCategory FEqualDep DefinitionSimplification SigTSigCategory SigTSigInducedFunctors.
 
 Set Implicit Arguments.
 
@@ -14,6 +14,14 @@ Local Ltac slice_t :=
            | _ => progress simpl_eq
            | _ => progress (repeat rewrite Associativity; repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
            | _ => progress JMeq_eq
+           | [ |- @JMeq ?Ta ?a ?Tb ?b ] =>
+             match type of Ta with
+               Prop => match type of Tb with
+                         Prop =>
+                         cut (Ta = Tb);
+                           [ generalize b a; simpl in *; generalize Ta Tb; intros; subst; JMeq_eq; apply proof_irrelevance | ]
+                       end
+             end
            | _ => apply f_equal
            | [ |- JMeq (?f ?x) (?f ?y) ] =>
              apply (@f_equal1_JMeq _ _ x y f)
@@ -21,8 +29,6 @@ Local Ltac slice_t :=
              apply (@f_equal_JMeq _ _ _ _ x y f g)
            | _ =>
              progress (
-               destruct_type @CommaSpecializedCategory_Object;
-               destruct_type @CommaSpecializedCategory_Morphism;
                destruct_sig;
                present_spcategory
              )
@@ -46,16 +52,7 @@ Section CommaCategory.
 
   Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
 
-  Hint Resolve FCompositionOf FIdentityOf.
-
-  Definition CommaCategoryProjection : SpecializedFunctor (S ↓ T) (A * B).
-    refine (Build_SpecializedFunctor (S ↓ T) (A * B)
-      (@projT1 _ _)
-      (fun _ _ m => (proj1_sig m))
-      _
-      _
-    ); abstract trivial.
-  Defined.
+  Definition CommaCategoryProjection : SpecializedFunctor (S ↓ T) (A * B) := proj1_functor_sigT_sig _ _ _ _.
 End CommaCategory.
 
 Section SliceCategory.
@@ -92,67 +89,22 @@ Section SliceCategoryInducedFunctor.
   Variable D : SpecializedCategory morD.
   Variable F : SpecializedFunctor C D.
 
+  Local Ltac solve_slice := abstract (
+    simpl; intros; destruct_sig; simpl in *;
+      try rewrite LeftIdentity in *; try rewrite RightIdentity in *;
+        subst; repeat rewrite Associativity; reflexivity
+  ).
+
   Section Slice.
     Local Notation "F ↓ A" := (SliceSpecializedCategory A F) (at level 70, no associativity).
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
-    Let SliceCategoryInducedFunctor_ObjectOf s d (m : Morphism D s d) :
-      CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D s) ->
-      CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D d).
-      intro x; constructor.
-      exists (projT1 x).
-      exact (Compose m (projT2 x)).
-    Defined.
-
-    Let SliceCategoryInducedFunctor_MorphismOf s d (m : Morphism D s d) : forall
-      (s0 d0 : CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D s))
-      (m0 : CommaSpecializedCategory_Morphism s0 d0),
-      CommaSpecializedCategory_Morphism
-      (@SliceCategoryInducedFunctor_ObjectOf s d m s0)
-      (@SliceCategoryInducedFunctor_ObjectOf s d m d0).
-      subst_body.
-      intros s0 d0 m0.
-      constructor.
-      exists (projT1 m0); simpl.
-      abstract (
-        destruct m0 as [ [ ? ? ] ]; simpl in *;
-          rewrite LeftIdentity in *;
-            repeat rewrite Associativity;
-              apply f_equal;
-                assumption
-      ).
-    Defined.
-
-    Let SliceCategoryInducedFunctor' s d (m : Morphism D s d) :
-      SpecializedFunctor (F ↓ s) (F ↓ d).
-      refine (Build_SpecializedFunctor (F ↓ s) (F ↓ d)
-        (@SliceCategoryInducedFunctor_ObjectOf s d m)
-        (@SliceCategoryInducedFunctor_MorphismOf s d m)
-        _
-        _
-      );
-      subst_body; simpl; intros;
-      abstract (
-        present_spcategory;
-        subst_body;
-        simpl in *;
-          apply f_equal; simpl_eq; trivial;
-            present_spcategory;
-            repeat match goal with
-                     | [ H : CommaSpecializedCategory_Morphism _ _ |- _ ] => destruct H as [ [ ] ]; simpl in *
-                   end;
-            reflexivity
-      ).
-    Defined.
-
-    Let SliceCategoryInducedFunctor'' s d (m : Morphism D s d) :
-      SpecializedFunctor (F ↓ s) (F ↓ d).
-      simpl_definition_by_tac_and_exact (@SliceCategoryInducedFunctor' s d m) ltac:(subst_body; eta_red).
-    Defined.
-
     Definition SliceCategoryInducedFunctor s d (m : Morphism D s d) :
-      SpecializedFunctor (F ↓ s) (F ↓ d)
-      := Eval cbv beta iota zeta delta [SliceCategoryInducedFunctor''] in @SliceCategoryInducedFunctor'' s d m.
+      SpecializedFunctor (F ↓ s) (F ↓ d).
+      eapply (@InducedT2Functor_sigT_sig _ _ (C * TerminalCategory)).
+      instantiate (1 := fun _ m0 => Compose m m0).
+      solve_slice.
+    Defined.
   End Slice.
 
   Section Coslice.
@@ -161,66 +113,14 @@ Section SliceCategoryInducedFunctor.
 
     Let DOp := OppositeCategory D.
 
-    Let CosliceCategoryInducedFunctor_ObjectOf s d (m : Morphism DOp s d) :
-      CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D s) F ->
-      CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D d) F.
-      intro x; constructor.
-      exists (projT1 x).
-      exact (Compose (projT2 x) m).
-    Defined.
-
-    Let CosliceCategoryInducedFunctor_MorphismOf s d (m : Morphism DOp s d) : forall
-      (s0 d0 : CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D s) F)
-      (m0 : CommaSpecializedCategory_Morphism s0 d0),
-      CommaSpecializedCategory_Morphism
-      (@CosliceCategoryInducedFunctor_ObjectOf s d m s0)
-      (@CosliceCategoryInducedFunctor_ObjectOf s d m d0).
-      subst_body.
-      intros s0 d0 m0.
-      constructor; simpl.
-      exists (projT1 m0).
-      abstract (
-        destruct m0 as [ [ ? ? ] ]; simpl in *;
-          rewrite RightIdentity in *;
-            repeat rewrite <- Associativity;
-              f_equal;
-              assumption
-      ).
-    Defined.
-
-    Let CosliceCategoryInducedFunctor' (s d : D) (m : Morphism DOp s d) :
-      SpecializedFunctor (s ↓ F) (d ↓ F).
-      refine (Build_SpecializedFunctor (s ↓ F) (d ↓ F)
-        (@CosliceCategoryInducedFunctor_ObjectOf s d m)
-        (@CosliceCategoryInducedFunctor_MorphismOf s d m)
-        _
-        _
-      );
-      subst_body; simpl; intros;
-      abstract (
-        present_spcategory;
-        subst_body;
-        simpl in *;
-          apply f_equal; simpl_eq; trivial;
-            present_spcategory;
-            repeat match goal with
-                     | [ H : CommaSpecializedCategory_Morphism _ _ |- _ ] => destruct H as [ [ ] ]; simpl in *
-                   end;
-            reflexivity
-      ).
-    Defined.
-
-    Let CosliceCategoryInducedFunctor'' (s d : D) (m : Morphism DOp s d) :
-      SpecializedFunctor (s ↓ F) (d ↓ F).
-      simpl_definition_by_tac_and_exact (@CosliceCategoryInducedFunctor' s d m) ltac:(subst_body; eta_red).
-    Defined.
-
     Definition CosliceCategoryInducedFunctor (s d : D) (m : Morphism DOp s d) :
-      SpecializedFunctor (s ↓ F) (d ↓ F)
-      := Eval cbv beta iota zeta delta [CosliceCategoryInducedFunctor''] in @CosliceCategoryInducedFunctor'' s d m.
+      SpecializedFunctor (s ↓ F) (d ↓ F).
+      eapply (@InducedT2Functor_sigT_sig _ _ (TerminalCategory * C)).
+      instantiate (1 := fun _ m0 => Compose m m0).
+      solve_slice.
+    Defined.
   End Coslice.
 End SliceCategoryInducedFunctor.
-
 
 Section SliceCategoryProjectionFunctor.
   Local Transparent Object Morphism.
@@ -234,13 +134,12 @@ Section SliceCategoryProjectionFunctor.
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
     Let SliceCategoryProjectionFunctor_ObjectOf (d : D) : LocallySmallCat / C.
-      constructor.
       exists ((F ↓ d : LocallySmallSpecializedCategory _) : LocallySmallCategory, tt).
       exact (SliceCategoryProjection d F).
     Defined.
 
     Definition SliceCategoryProjectionFunctor_MorphismOf s d (m : Morphism D s d) :
-      CommaSpecializedCategory_MorphismT
+      Morphism (LocallySmallCat / C)
       (SliceCategoryProjectionFunctor_ObjectOf s)
       (SliceCategoryProjectionFunctor_ObjectOf d).
       subst_body;
@@ -282,13 +181,12 @@ Section SliceCategoryProjectionFunctor.
     Let DOp := OppositeCategory D.
 
     Let CosliceCategoryProjectionFunctor_ObjectOf (d : D) : LocallySmallCat / C.
-      constructor.
       exists ((d ↓ F : LocallySmallSpecializedCategory _) : LocallySmallCategory, tt).
       exact (CosliceCategoryProjection d F).
     Defined.
 
     Definition CosliceCategoryProjectionFunctor_MorphismOf (s d : D) (m : Morphism DOp s d) :
-      CommaSpecializedCategory_MorphismT
+      Morphism (LocallySmallCat / C)
       (CosliceCategoryProjectionFunctor_ObjectOf s)
       (CosliceCategoryProjectionFunctor_ObjectOf d).
       Transparent Morphism.

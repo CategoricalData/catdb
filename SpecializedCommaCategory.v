@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance.
-Require Export Category SpecializedCategory Functor ProductCategory.
+Require Export Category SpecializedCategory Functor ProductCategory SigTSigCategory.
 Require Import Common DiscreteCategory.
 
 Set Implicit Arguments.
@@ -54,117 +54,32 @@ Section CommaSpecializedCategory.
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & morC (S (fst αβ)) (T (snd αβ)) } }.
-
-  Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
-
-  Definition CommaSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_CommaSpecializedCategory_Object.
-  Global Identity Coercion CommaSpecializedCategory_Object_Id : CommaSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
-  Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
-
-  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
-    { gh : (morA (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (morB (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
-      Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
-    }
-  }.
-
-  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT) :=
-    Eval hnf in SortPolymorphic_Helper (@Build_CommaSpecializedCategory_Morphism αβf α'β'f').
-  Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
-  Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
-    @Build_CommaSpecializedCategory_Morphism _ _ mem.
-  Global Coercion Build_CommaSpecializedCategory_Morphism' : CommaSpecializedCategory_MorphismT >-> CommaSpecializedCategory_Morphism.
-
-  Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
-  Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
-
-  Definition CommaSpecializedCategory_Compose s d d'
-    (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
-    CommaSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
-    exists (@Compose _ _ (A * B) _ _ _ (proj1_sig gh) (proj1_sig g'h')).
-    hnf in *; simpl in *.
-    abstract (
-      present_spcategory;
-      destruct_all_hypotheses;
-      unfold Morphism in *;
-        destruct_hypotheses;
-        repeat rewrite FCompositionOf;
-          repeat rewrite <- Associativity;
-            t_rev_with t'
+  Definition CommaSpecializedCategory : @SpecializedCategory
+    { αβ : objA * objB & morC (S (fst αβ)) (T (snd αβ)) }
+    (fun αβf α'β'f' =>
+      { gh : (morA (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (morB (snd (projT1 αβf)) (snd (projT1 α'β'f'))) |
+        Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
+      }
     ).
-  Defined.
-
-  Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
-
-  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
-    exists (@Identity _ _ (A * B) (projT1 o)).
+    eapply (@SpecializedCategory_sigT_sig _ _ (A * B)
+      (fun αβ => morC (S (fst αβ)) (T (snd αβ)))
+      (fun αβf α'β'f' gh => (Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))))
+    );
     abstract (
-      simpl;
+      simpl; intros;
+        present_spcategory;
         repeat rewrite FIdentityOf;
           repeat rewrite LeftIdentity;
             repeat rewrite RightIdentity;
-              reflexivity
-    ).
-  Defined.
-
-  Global Arguments CommaSpecializedCategory_Identity _ /.
-
-  Local Ltac comma_t :=
-    repeat (
-      let H:= fresh in intro H; destruct H as [ [ ] ]
-    );
-    destruct_hypotheses;
-    simpl in *;
-      present_spcategory;
-      simpl_eq;
-      present_spcategory; autorewrite with core;
-        f_equal;
-        try reflexivity.
-
-  Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
-    CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
-    CommaSpecializedCategory_Compose m3 (CommaSpecializedCategory_Compose m2 m1).
-  Proof.
-    comma_t.
-  Qed.
-
-  Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
-    CommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
-  Proof.
-    comma_t.
-  Qed.
-
-  Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
-    CommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
-  Proof.
-    comma_t.
-  Qed.
-
-  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object CommaSpecializedCategory_Morphism.
-    match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
-          CommaSpecializedCategory_Identity
-          CommaSpecializedCategory_Compose
-          _ _ _
-        )
-    end;
-    abstract (
-      intros;
-        destruct_type' @CommaSpecializedCategory_Morphism;
-        unfold CommaSpecializedCategory_Morphism_Member, Build_CommaSpecializedCategory_Morphism';
-          try apply f_equal;
-            apply CommaSpecializedCategory_Associativity ||
-              apply CommaSpecializedCategory_LeftIdentity ||
-                apply CommaSpecializedCategory_RightIdentity
+              try reflexivity;
+                destruct_sig; destruct_type @prod;
+                repeat rewrite FCompositionOf;
+                  t_with t';
+                  try_associativity ltac:(apply f_equal2; try reflexivity; []);
+                  t_with t'
     ).
   Defined.
 End CommaSpecializedCategory.
-
-Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity.
-Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object.
 
 Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
 
