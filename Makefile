@@ -2,6 +2,7 @@ MODULES    := Common \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \
+	NatFacts \
 	EquivalenceSet \
 	EquivalenceClass \
 	EquivalenceRelation \
@@ -18,6 +19,7 @@ MODULES    := Common \
 	SigSigTCategory \
 	SigTInducedFunctors \
 	SigTSigInducedFunctors \
+	NatCategory \
 	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
