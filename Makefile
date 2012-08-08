@@ -40,6 +40,7 @@ MODULES    := Common \
 	SetCategory \
 	Hom \
 	FunctorAttributes \
+	Correspondences \
 	Groupoid \
 	AdjointUnit \
 	Adjoint \
