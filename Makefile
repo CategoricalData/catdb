@@ -48,6 +48,7 @@ MODULES    := Common \
 	LimitFunctors \
 	LimitFunctorTheorems \
 	InducedLimitFunctors \
+	Equalizer \
 	Grothendieck \
 	SetLimits \
 	SetColimits \
