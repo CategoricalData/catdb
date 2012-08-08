@@ -30,6 +30,9 @@ MODULES    := Common \
 	MonoidalCategory \
 	EnrichedCategory \
 	SmallCat \
+	SetCategory \
+	DecidableSmallCat \
+	DecidableSetCategory \
 	CommaCategory \
 	SpecializedCommaCategory \
 	LaxCommaCategory \
@@ -37,7 +40,6 @@ MODULES    := Common \
 	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
-	SetCategory \
 	Hom \
 	FunctorAttributes \
 	Correspondences \
