@@ -516,6 +516,23 @@ Ltac intro_fresh_unique :=
            | [ H : @is_unique ?T ?x |- _ ] => let x' := fresh in assert (x' := x); rewrite <- (H x') in *; generalize_is_unique_hyp H T
          end.
 
+Ltac specialize_with_evars_then_do E tac :=
+  match type of E with
+    | forall x : ?T, _ =>
+      let y := fresh in evar (y : T);
+        let y' := (eval unfold y in y) in clear y;
+          specialize_with_evars_then_do (E y') tac
+    | _ => tac E
+  end.
+
+Ltac specialize_hyp_with_evars E :=
+  repeat match type of E with
+           | forall x : ?T, _ =>
+             let y := fresh in evar (y : T);
+               let y' := (eval unfold y in y) in clear y;
+                 specialize (E y')
+         end.
+
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
   match type of E with
@@ -535,43 +552,43 @@ Ltac simultaneous_rewrite_rev' E :=
         end
   end.
 
-Ltac simultaneous_rewrite E :=
+Ltac simultaneous_rewrite E := specialize_with_evars_then_do E ltac:(fun E =>
   match type of E with
-    | forall x : ?T, _ =>
-      let y := fresh in evar (y : T);
-        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
     | ?T = _ => let H := fresh in
       match goal with
         | [ _ : context[?F] |- _ ] =>
           assert (H : T = F) by reflexivity; clear H
       end; simultaneous_rewrite' E
-  end.
+  end
+).
 
-Ltac simultaneous_rewrite_rev E :=
+Ltac simultaneous_rewrite_rev E := specialize_with_evars_then_do E ltac:(fun E =>
   match type of E with
-    | forall x : ?T, _ =>
-      let y := fresh in evar (y : T);
-        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
     | _ = ?T => let H := fresh in
       match goal with
         | [ _ : context[?F] |- _ ] =>
           assert (H : T = F) by reflexivity; clear H
       end; simultaneous_rewrite_rev' E
-  end.
+  end
+).
 
 (* rewrite by convertiblity rather than syntactic equality *)
-Ltac conv_rewrite_with rew_tac H :=
+Ltac conv_rewrite_with rew_tac H := specialize_with_evars_then_do H ltac:(fun H =>
   match type of H with
     | ?a = _ => match goal with
-                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                  | [ |- appcontext[?a'] ] => let H' := fresh in assert (H' : a = a') by reflexivity; clear H';
+                    change a' with a; rew_tac H
                 end
-  end.
-Ltac conv_rewrite_rev_with rew_tac H :=
+  end
+).
+Ltac conv_rewrite_rev_with rew_tac H := specialize_with_evars_then_do H ltac:(fun H =>
   match type of H with
     | _ = ?a => match goal with
-                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                  | [ |- appcontext[?a'] ] => let H' := fresh in assert (H' : a = a') by reflexivity; clear H';
+                    change a' with a; rew_tac H
                 end
-  end.
+  end
+).
 
 Ltac conv_rewrite H := conv_rewrite_with ltac:(fun h => rewrite h) H.
 Ltac conv_rewrite_rev H := conv_rewrite_rev_with ltac:(fun h => rewrite <- h) H.
