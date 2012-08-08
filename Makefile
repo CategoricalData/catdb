@@ -20,6 +20,7 @@ MODULES    := Common \
 	SigTInducedFunctors \
 	SigTSigInducedFunctors \
 	NatCategory \
+	BoolCategory \
 	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
