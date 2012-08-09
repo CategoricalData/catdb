@@ -1,6 +1,8 @@
 Require Export SpecializedCategory.
 Require Import Common.
 
+Set Implicit Arguments.
+
 Local Hint Extern 2 (_ = _) => simpl in *; tauto.
 
 Section DCategoryDec.

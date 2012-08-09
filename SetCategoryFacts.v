@@ -8,6 +8,7 @@ Section InitialTerminal.
   Local Transparent Object Morphism.
 
   Hint Extern 1 (_ = _) => apply (@functional_extensionality_dep _); intro.
+  Hint Extern 2 => destruct_to_empty_set.
 
   Local Ltac t := repeat (hnf in *; simpl in *; intros; try destruct_exists; try destruct_to_empty_set); auto.
 
