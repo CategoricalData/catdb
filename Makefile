@@ -29,12 +29,13 @@ MODULES    := Common \
 	ProductFunctor \
 	MonoidalCategory \
 	EnrichedCategory \
-	SmallCat \
 	SetCategory \
 	DecidableDiscreteCategory \
 	DecidableComputableCategory \
 	DecidableSmallCat \
 	DecidableSetCategory \
+	InitialTerminalCategory \
+	SmallCat \
 	CommaCategory \
 	SpecializedCommaCategory \
 	LaxCommaCategory \

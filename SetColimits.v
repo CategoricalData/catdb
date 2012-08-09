@@ -1,6 +1,6 @@
 Require Import Setoid ProofIrrelevance FunctionalExtensionality ClassicalEpsilon.
 Require Export SetCategory EquivalenceSet EquivalenceClass Grothendieck EquivalenceRelationGenerator.
-Require Import Common Limits Functor NaturalTransformation FunctorCategory DecidableDiscreteCategory.
+Require Import Common Limits Functor NaturalTransformation FunctorCategory InitialTerminalCategory.
 
 Set Implicit Arguments.
 
