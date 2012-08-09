@@ -1,5 +1,5 @@
 Require Import Setoid FunctionalExtensionality.
-Require Export SetCategory DiscreteCategory.
+Require Export SetCategory DecidableDiscreteCategory.
 Require Import Common Limits Functor NaturalTransformation FunctorCategory.
 
 Set Implicit Arguments.

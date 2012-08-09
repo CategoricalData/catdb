@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common DiscreteCategory.
+Require Import Common DecidableDiscreteCategory.
 
 Set Implicit Arguments.
 

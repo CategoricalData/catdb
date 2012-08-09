@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality JMeq ProofIrrelevance.
-Require Export Category DiscreteCategory Functor ComputableCategory.
+Require Export Category DecidableDiscreteCategory Functor ComputableCategory.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.

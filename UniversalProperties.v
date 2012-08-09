@@ -61,10 +61,9 @@ Section UniversalMorphism.
         destruct_all_hypotheses; simpl in *.
         repeat simultaneous_rewrite RightIdentity; repeat simultaneous_rewrite LeftIdentity.
         split; try (assumption || symmetry; assumption); intros.
-        destruct_hypotheses; destruct_type unit; subst.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
-            specialize (H (existT _ (eq_refl tt, m) pf));
+            specialize (H (existT _ (tt, m) pf));
               apply eq_sig_fst in H; apply (f_equal (@snd _ _)) in H;
                 solve [ intuition ]
         end.
@@ -120,11 +119,10 @@ Section UniversalMorphism.
         destruct_sig; simpl in *.
         repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
         split; try (assumption || symmetry; assumption); intros.
-        destruct_hypotheses; destruct_type unit; subst.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
             symmetry in pf;
-              specialize (H (existT _ (m, eq_refl tt) pf));
+              specialize (H (existT _ (m, tt) pf));
                 apply eq_sig_fst in H; apply (f_equal (@fst _ _)) in H;
                   solve [ intuition ]
         end.

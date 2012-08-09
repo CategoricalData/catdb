@@ -1,6 +1,8 @@
 Require Export SpecializedCategory.
 Require Import Common.
 
+Set Implicit Arguments.
+
 Section DCategory.
   Variable O : Type.
 
@@ -35,10 +37,3 @@ Section DCategory.
     ).
   Defined.
 End DCategory.
-
-Section InitialTerminal.
-  Definition InitialCategory : SmallSpecializedCategory _ :=
-    Eval unfold DiscreteCategory in DiscreteCategory Empty_set.
-  Definition TerminalCategory : SmallSpecializedCategory _ :=
-    Eval unfold DiscreteCategory in DiscreteCategory unit.
-End InitialTerminal.

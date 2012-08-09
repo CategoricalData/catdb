@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export Category Functor ProductCategory NaturalTransformation.
-Require Import Common DiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
+Require Import Common DecidableDiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
 
 Set Implicit Arguments.
 

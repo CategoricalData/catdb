@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common DiscreteCategory SpecializedCommaCategory DefinitionSimplification.
+Require Import Common DecidableDiscreteCategory SpecializedCommaCategory DefinitionSimplification.
 
 Set Implicit Arguments.
 
