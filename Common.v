@@ -624,6 +624,19 @@ Ltac do_for_each_hyp tac := do_for_each_hyp' tac ltac:(fun H => idtac).
 Tactic Notation "change_in_all" constr(from) "with" constr(to) :=
   change from with to; do_for_each_hyp ltac:(fun H => change from with to in H).
 
+Ltac destruct_to_empty_set :=
+  match goal with
+    | [ H : Empty_set |- _ ] => destruct H
+    | [ H : ?T -> Empty_set, a : ?T |- _ ] => destruct (H a)
+    | [ H : context[Empty_set] |- _ ] => solve [ destruct H; trivial; assumption ]
+  end.
+
+Ltac destruct_to_empty_set_in_match :=
+  match goal with
+    | [ |- appcontext[match ?x with end] ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
+    | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
+  end.
+
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.

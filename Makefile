@@ -31,6 +31,7 @@ MODULES    := Common \
 	EnrichedCategory \
 	SmallCat \
 	SetCategory \
+	DecidableDiscreteCategory \
 	DecidableComputableCategory \
 	DecidableSmallCat \
 	DecidableSetCategory \
