@@ -4,7 +4,7 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
+Local Open Scope category_scope.
 
 Section HomFunctor.
   Variable objC : Type.
@@ -22,21 +22,21 @@ Section HomFunctor.
     Definition CovariantHomFunctor : SpecializedFunctor C TypeCat.
       refine (Build_SpecializedFunctor C TypeCat
         (fun X : C => C.(Morphism) A X : TypeCat)
-        (fun X Y (f : C.(Morphism) X Y) => (fun g : C.(Morphism) A X => Compose f g))
+        (fun X Y f => (fun g : C.(Morphism) A X => Compose f g))
         _
         _
       );
-      abstract (simpl; intros; present_spfunctor; repeat (apply functional_extensionality_dep; intro); t_with t').
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
 
     Definition CovariantHomSetFunctor : SpecializedFunctor C' SetCat.
       refine (Build_SpecializedFunctor C' SetCat
         (fun X : C' => morC' A' X : SetCat)
-        (fun X Y (f : C'.(Morphism) X Y) => (fun g : C'.(Morphism) A' X => Compose f g))
+        (fun X Y f => (fun g : C'.(Morphism) A' X => Compose f g))
         _
         _
       );
-      abstract (simpl; intros; present_spfunctor; repeat (apply functional_extensionality_dep; intro); t_with t').
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
   End Covariant.
 
@@ -44,25 +44,19 @@ Section HomFunctor.
     Variable B : C.
     Variable B' : C'.
 
-    (* TODO: Figure out a better way to do this proof *)
     Definition ContravariantHomFunctor : SpecializedFunctor COp TypeCat.
-      clear morC' C' C'Op B'.
+      Transparent Morphism Object Compose Identity.
       refine (Build_SpecializedFunctor COp TypeCat
         (fun X : COp => COp.(Morphism) B X : TypeCat)
-        (fun (X Y : COp) (h : COp.(Morphism) X Y) => (fun g : COp.(Morphism) B X => Compose h g))
+        (fun X Y (h : COp.(Morphism) X Y) => (fun g : COp.(Morphism) B X => Compose h g))
         _
         _
       );
-      abstract (
-        subst COp; destruct C; clear C;
-          unfold OppositeCategory, Compose; simpl in *;
-            intros;
-              repeat (apply functional_extensionality_dep; intro); simpl in *;
-                auto
-      ).
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
 
     Definition ContravariantHomSetFunctor : SpecializedFunctor C'Op SetCat.
+      Transparent Morphism Object Compose Identity.
       clear morC C COp B.
       refine (Build_SpecializedFunctor C'Op SetCat
         (fun X : C'Op => morC' X B' : SetCat)
@@ -70,13 +64,7 @@ Section HomFunctor.
         _
         _
       );
-      abstract (
-        subst C'Op; destruct C'; clear C';
-          unfold OppositeCategory, Compose; simpl in *;
-            intros;
-              repeat (apply functional_extensionality_dep; intro); simpl in *;
-                auto
-      ).
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
   End Contravariant.
 
@@ -90,7 +78,7 @@ Section HomFunctor.
     destruct s's as [ s' s ], d'd as [ d' d ].
     destruct hf as [ h f ].
     intro g.
-    exact (Compose (C := C) f (Compose g h)).
+    exact (Compose f (Compose g h)).
   Defined.
 
   Definition hom_set_functor_morphism_of (s's : (C'Op * C')%type) (d'd : (C'Op * C')%type) (hf : (C'Op * C').(Morphism) s's d'd) :
@@ -101,7 +89,8 @@ Section HomFunctor.
     destruct hf as [ h f ].
     intro g.
     unfold LocallySmallSpecializedCategory in *.
-    exact (Compose (C := C') f (Compose (C := C') g h)).
+    present_spcategory_all.
+    exact (Compose f (Compose g h)).
   Defined.
 
   Definition HomFunctor : SpecializedFunctor (COp * C) TypeCat.
@@ -113,12 +102,13 @@ Section HomFunctor.
       _
     );
     abstract (
-      intros; simpl in *; destruct_hypotheses; subst COp; simpl in *; destruct C; simpl in *;
+      intros; simpl in *; destruct_hypotheses; simpl in *;
         repeat (apply functional_extensionality_dep; intro); t_with t'
     ).
   Defined.
 
   Definition HomSetFunctor : SpecializedFunctor (C'Op * C') SetCat.
+    Transparent Morphism Object Compose Identity.
     clear morC C COp.
     refine (Build_SpecializedFunctor (C'Op * C') SetCat
       (fun c'c : C'Op * C' => morC' (fst c'c) (snd c'c) : SetCat)
@@ -127,7 +117,7 @@ Section HomFunctor.
       _
     );
     abstract (
-      intros; simpl in *; destruct_hypotheses; subst C'Op; simpl in *; destruct C'; simpl in *;
+      intros; simpl in *; destruct_hypotheses; simpl in *;
         repeat (apply functional_extensionality_dep; intro); t_with t'
     ).
   Defined.
@@ -139,11 +129,11 @@ Section SplitHomFunctor.
   Variable C : SpecializedCategory morC.
   Let COp := OppositeCategory C.
 
-  Lemma SplitHom (X Y : C * C) : forall gh,
-    @MorphismOf' _ _ _ _ _ _ (HomFunctor C) X Y gh =
-    (Compose' _ _ _ _
-      (@MorphismOf' _ _ _ _ _ _ (HomFunctor C) (fst X, snd Y) Y (fst gh, @Identity' _ _ C _))
-      (@MorphismOf' _ _ _ _ _ _ (HomFunctor C) X (fst X, snd Y) (@Identity' _ _ C _, snd gh))).
+  Lemma SplitHom (X Y : COp * C) : forall gh,
+    @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
+    (Compose
+      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd Y)) (fst X) (fst Y) (fst gh))
+      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst X)) (snd X) (snd Y) (snd gh))).
   Proof.
     Transparent Object Morphism Identity Compose ObjectOf MorphismOf.
     destruct X, Y.
@@ -154,11 +144,11 @@ Section SplitHomFunctor.
     reflexivity.
   Qed.
 
-  Lemma SplitHom' (X Y : C * C) : forall gh,
+  Lemma SplitHom' (X Y : COp * C) : forall gh,
     @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
     (Compose
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (fst Y, snd X) Y (@Identity _ _ C _, snd gh))
-      (@MorphismOf _ _ _ _ _ _ (HomFunctor C) X (fst Y, snd X) (fst gh, @Identity _ _ C _))).
+      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst Y)) (snd X) (snd Y) (snd gh))
+      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd X)) (fst X) (fst Y) (fst gh))).
   Proof.
     Transparent Object Morphism Identity Compose ObjectOf MorphismOf.
     destruct X, Y.

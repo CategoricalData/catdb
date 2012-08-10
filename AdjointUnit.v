@@ -57,7 +57,7 @@ Section Adjunction.
     }.
 
   (**
-     Paraphrasing and quoting from Awody's "SpecializedCategory Theory",
+     Paraphrasing and quoting from Awody's "Category Theory",
      An adjunction between categories [C] and [D]
      consists of functors
      [F : C <-> D : G]

@@ -2,7 +2,10 @@ MODULES    := Common \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \
+	NatFacts \
 	EquivalenceSet \
+	EquivalenceClass \
+	EquivalenceRelation \
 	EquivalenceRelationGenerator \
 	SpecializedCategory \
 	Category \
@@ -10,31 +13,55 @@ MODULES    := Common \
 	Functor \
 	NaturalTransformation \
 	NaturalEquivalence \
+	SigCategory \
+	SigTCategory \
+	SigTSigCategory \
+	SigSigTCategory \
+	SigTInducedFunctors \
+	SigTSigInducedFunctors \
+	NatCategory \
+	BoolCategory \
+	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
 	ProductCategory \
 	ProductFunctor \
+	MonoidalCategory \
+	EnrichedCategory \
+	SetCategory \
+	DecidableDiscreteCategory \
+	DecidableComputableCategory \
+	DecidableSmallCat \
+	DecidableSetCategory \
+	InitialTerminalCategory \
 	SmallCat \
 	CommaCategory \
+	SpecializedCommaCategory \
+	LaxCommaCategory \
+	SpecializedLaxCommaCategory \
+	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
-	SetCategory \
 	Hom \
 	FunctorAttributes \
+	Correspondences \
 	Groupoid \
 	AdjointUnit \
 	Adjoint \
+	DiscreteCategoryFunctors \
+	DecidableDiscreteCategoryFunctors \
 	Limits \
-	SpecializedLimitFunctors \
-	SpecializedLimitFunctorTheorems \
-	Grothendieck \
-	Yoneda \
-	\
 	LimitFunctors \
 	LimitFunctorTheorems \
-	EquivalenceClass \
-	EquivalenceRelation \
+	InducedLimitFunctors \
+	Equalizer \
+	Grothendieck \
+	SetLimits \
+	SetColimits \
+	SetCategoryFacts \
+	Yoneda \
+	\
 	Schema \
 	SmallSchema \
 	SetSchema \

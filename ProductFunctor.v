@@ -3,8 +3,6 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
-
 Section ProductFunctor.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
@@ -26,6 +24,8 @@ Section ProductFunctor.
   Definition ProductFunctor : SpecializedFunctor  (C * C') (D * D').
     refine {| ObjectOf' := (fun c'c : Object (C * C') => (F (fst c'c), F' (snd c'c)) : Object (D * D'));
       MorphismOf' := (fun s d (m : Morphism (C * C') s d) => (F.(MorphismOf) (fst m), F'.(MorphismOf) (snd m)))
-      |}; abstract (intros; unfold ProductCategory in *; destruct_type @prod; present_spfunctor; simpl in *; f_equal; auto).
+      |}; abstract (intros; unfold ProductCategory in *; destruct_type @prod; simpl in *; f_equal; auto).
   Defined.
 End ProductFunctor.
+
+Infix "*" := ProductFunctor : functor_scope.

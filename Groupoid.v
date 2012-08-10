@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance.
-Require Export SpecializedCategory Category Functor.
+Require Export SpecializedCategory Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -34,7 +34,7 @@ Section GroupoidOf.
   Defined.
 
   Definition CategoryIsGroupoid : Prop :=
-    forall s d : C, forall m : Morphism C s d, IsCategoryIsomorphism m.
+    forall s d : C, forall m : Morphism C s d, IsIsomorphism m.
 End GroupoidOf.
 
 Hint Constructors GroupoidOf_Morphism.
@@ -45,7 +45,8 @@ Section Groupoid.
   Variable C : SpecializedCategory morC.
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
-    intros s d m; hnf; simpl in *; destruct m as [ m ]; induction m;
+    Transparent Morphism.
+    hnf; intros s d m; hnf; destruct m as [ m ]; induction m;
       repeat
         match goal with
           | [ H : exists _, _ |- _ ] => destruct H; destruct_type @inhabited

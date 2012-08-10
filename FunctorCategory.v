@@ -17,13 +17,14 @@ Section FunctorCategory.
      There is a category Fun(C, D) of functors from [C] to [D].
      *)
   Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D) (@SpecializedNaturalTransformation _ _ C _ _ D).
-    refine {| Compose' := NTComposeT (C := C) (D := D);
-      Identity' := IdentityNaturalTransformation (C := C) (D := D)
-      |}; abstract (present_spnt; nt_eq; autorewrite with core; auto).
+    refine {| Compose' := @NTComposeT _ _ C _ _ D;
+      Identity' := @IdentityNaturalTransformation _ _ C _ _ D
+      |}; abstract (nt_eq; auto).
   Defined.
 End FunctorCategory.
 
-Local Notation "C ^ D" := (FunctorCategory D C).
+Notation "C ^ D" := (FunctorCategory D C) : category_scope.
+Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
 
 Ltac unfold_FunctorCategory_of obj mor C D :=
   progress (

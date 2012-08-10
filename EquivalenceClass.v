@@ -1,4 +1,4 @@
-Require Import Program Setoid Ensembles.
+Require Import Setoid ProofIrrelevance FunctionalExtensionality Ensembles.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -14,10 +14,9 @@ Local Ltac specialize_with tac fin_tac :=
     | _ => fin_tac
   end.
 
-Section equiv.
+Section EquivalenceClass.
   Variable value : Type.
-  Variable equiv' : value -> value -> Prop.
-
+  Variable equiv : value -> value -> Prop.
   (* [E] is an equivalence class if it is non-empty and if all it consists
      of all values that are equivalent to some particular value.
      Because the equivalence relation is transitive, we can encode
@@ -25,154 +24,165 @@ Section equiv.
      for every member of the class, the class consists of exactly the
      values equivalent to that member. *)
   Record EquivalenceClass := {
-    UnderlyingClass :> Ensemble value;
-
-    InClass := fun v => In _ UnderlyingClass v;
+    InClass : value -> Prop;
 
     ClassInhabited : exists v, InClass v;
 
-    equiv := equiv';
+    ClassEquivalent : relation value := equiv;
+    ClassEquivalent_refl : Reflexive ClassEquivalent;
+    ClassEquivalent_sym : Symmetric ClassEquivalent;
+    ClassEquivalent_trans : Transitive ClassEquivalent;
 
-    ElementsEquivalent : forall v v', InClass v -> InClass v' -> equiv v v';
-    ContainsEquivalent : forall v v', InClass v -> equiv v v' -> InClass v';
-
-  (* Equivalence relations are reflexive, symmetric, and transitive. *)
-    equiv_refl : forall (v : value), equiv v v;
-    equiv_sym : forall (v v' : value), equiv v v' -> equiv v' v;
-    equiv_trans : forall (v v' v'' : value), equiv v v' -> equiv v' v'' -> equiv v v''
+    ClassElementsEquivalent : forall v, InClass v -> forall v', InClass v' -> ClassEquivalent v v';
+    ClassContainsEquivalent : forall v, InClass v -> forall v', ClassEquivalent v v' -> InClass v'
   }.
+End EquivalenceClass.
 
-  Global Add Parametric Relation (E : EquivalenceClass) : _ (equiv E)
-    reflexivity proved by (@equiv_refl _)
-    symmetry proved by (@equiv_sym _)
-    transitivity proved by (@equiv_trans _)
+Add Parametric Relation value equiv (E : @EquivalenceClass value equiv) : _ (ClassEquivalent E)
+  reflexivity proved by (@ClassEquivalent_refl _ _ _)
+  symmetry proved by (@ClassEquivalent_sym _ _ _)
+  transitivity proved by (@ClassEquivalent_trans _ _ _)
+    as ClassEquivalent_rel.
+
+Add Parametric Morphism value equiv (E : @EquivalenceClass value equiv) : (InClass E)
+  with signature equiv ==> iff
+    as InClass_mor.
+  intros x y eqv; split; intro inc;
+    eapply ClassContainsEquivalent; eauto; try symmetry; eauto.
+Qed.
+
+Section equiv.
+  Variable value : Type.
+  Variable equiv : value -> value -> Prop.
+
+  Hypothesis equiv_Equivalence : Equivalence equiv.
+
+  Local Add Parametric Relation : _ equiv
+    reflexivity proved by (Equivalence.equiv_reflexive _)
+    symmetry proved by (Equivalence.equiv_symmetric _)
+    transitivity proved by (Equivalence.equiv_transitive _)
       as equiv_equiv_rel.
 
-  Hypothesis equiv'_refl : forall (v : value), equiv' v v.
-  Hypothesis equiv'_sym : forall (v v' : value), equiv' v v' -> equiv' v' v.
-  Hypothesis equiv'_trans : forall (v v' v'' : value), equiv' v v' -> equiv' v' v'' -> equiv' v v''.
+  Local Infix "~=" := equiv (at level 70, no associativity).
 
-  Local Add Parametric Relation : _ equiv'
-    reflexivity proved by equiv'_refl
-    symmetry proved by equiv'_sym
-    transitivity proved by equiv'_trans
-      as equiv_equiv'_rel.
+  Local Ltac simpl_equiv := hnf; intros; trivial;
+    repeat match goal with
+             | _ => solve [ reflexivity ]
+             | _ => solve [ symmetry; trivial ]
+             | _ => solve [ etransitivity; eauto ]
+             | _ => solve [ symmetry; etransitivity; eauto ]
+             | _ => solve [ etransitivity; eauto; symmetry; eauto ]
+             | [ H : equiv _ _ -> False |- _ ] => contradict H; trivial
+             | [ H : ~ equiv _ _ |- _ ] => contradict H; trivial
+           end.
 
   (* The equivalence [classOf] a particular [value] is defined by the proposition that
      the elements are equivalent to that [value]. *)
-  Definition classOf (v : value) : EquivalenceClass.
-    exists (fun v' => equiv' v v');
-      repeat esplit; unfold In in *; eauto.
+  Definition classOf (v : value) : EquivalenceClass equiv.
+    exists (fun v' => v ~= v');
+      abstract (
+        repeat esplit; unfold InClass in *;
+          simpl_equiv
+      ).
   Defined.
 
   Lemma classOf_refl : forall v, InClass (classOf v) v.
     compute; intro; reflexivity.
   Qed.
 
-  Global Add Parametric Morphism C : (InClass C)
-    with signature (@equiv C) ==> iff
-      as InClass_mor.
-    intros x y eqv; split; intro inc;
-      eapply ContainsEquivalent; eauto; try symmetry; eauto.
-  Qed.
-
   (* Two equivalence classes are the same if they share all values *)
-  Definition sameClass (C C' : EquivalenceClass) := forall v, (InClass C v <-> InClass C' v).
+  Definition sameClass (C C' : EquivalenceClass equiv) := forall v, (InClass C v <-> InClass C' v).
 
-  Definition disjointClasses (C C' : EquivalenceClass) := forall v, ~InClass C v \/ ~InClass C' v.
+  Definition disjointClasses (C C' : EquivalenceClass equiv) := forall v, ~InClass C v \/ ~InClass C' v.
 
-  Definition differentClasses (C C' : EquivalenceClass) := exists v,
+  Definition differentClasses (C C' : EquivalenceClass equiv) := exists v,
     (InClass C v /\ ~InClass C' v) \/
     (~InClass C v /\ InClass C' v).
 
-  Definition notDisjointClasses (C C' : EquivalenceClass) := exists v, InClass C v /\ InClass C' v.
+  Definition notDisjointClasses (C C' : EquivalenceClass equiv) := exists v, InClass C v /\ InClass C' v.
 
-  Definition notDisjointClasses' (C C' : EquivalenceClass) := exists v v', InClass C v /\ InClass C' v' /\ equiv' v v'.
+  Definition notDisjointClasses' (C C' : EquivalenceClass equiv) := exists v v', InClass C v /\ InClass C' v' /\ equiv v v'.
 
-  Lemma sameClass_refl (C : EquivalenceClass) : sameClass C C.
-    firstorder.
+  Lemma sameClass_refl (C : EquivalenceClass equiv) : sameClass C C.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameClass_sym (C C' : EquivalenceClass) : sameClass C C' -> sameClass C' C.
-    firstorder.
+  Lemma sameClass_sym (C C' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameClass_trans (C C' C'' : EquivalenceClass) : sameClass C C' -> sameClass C' C'' -> sameClass C C''.
-    firstorder.
+  Lemma sameClass_trans (C C' C'' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C'' -> sameClass C C''.
+    clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma iff_eq_eq (A B : Prop) : (A <-> B) -> A = B.
-    intro H; destruct H.
-    pose (a := fun _ : unit => A).
-    pose (b := fun _ : unit => B).
-    cut (a = b).
-    intro H2.
-    cut (a tt = b tt); solve [ rewrite H2; reflexivity ] || solve [ compute; trivial ].
-    apply Extensionality_Ensembles; compute; tauto.
+  Lemma sameClass_eq (C C' : EquivalenceClass equiv) : (sameClass C C') -> (C = C').
+    clear equiv_Equivalence; intro H.
+    cut (InClass C = InClass C');
+      destruct C, C'; simpl;
+        intros;
+          unfold sameClass in *;
+            subst;
+              split_iff;
+              f_equal; try apply proof_irrelevance;
+                apply Extensionality_Ensembles;
+                  hnf; split; hnf; simpl;
+                    firstorder.
   Qed.
 
-  Lemma sameClass_eq (C C' : EquivalenceClass) : (sameClass C C') -> (C = C').
-    intro H; unfold sameClass, proj1_sig in H.
-    destruct C as [ x a b c d e ], C' as [ x' a' b' c' d' e' ].
-    subst a a' c c'.
-    generalize b b' d d' e e'.
-    cut (x = x').
-    intro; subst x.
-    intros.
-    f_equal; try apply proof_irrelevance.
-    apply Extensionality_Ensembles.
-    constructor; unfold Included; intro; specialize_with intuition trivial.
+  Lemma eq_sameClass (C C' : EquivalenceClass equiv) : C = C' -> sameClass C C'.
+    intro; subst; apply sameClass_refl.
   Qed.
 
   Global Add Parametric Morphism : classOf
-    with signature equiv' ==> eq
+    with signature equiv ==> eq
       as classOf_mor.
     intros x y eqv;
-      apply sameClass_eq; compute in *; eauto.
+      apply sameClass_eq; compute in *; intros; split; intros; simpl_equiv.
   Qed.
 
-  Lemma disjointClasses_differentClasses (C C' : EquivalenceClass) : (disjointClasses C C') -> (differentClasses C C').
-    unfold differentClasses, disjointClasses; intro H.
+  Lemma classOf_eq x y : classOf x = classOf y <-> equiv x y.
+    split; intro H; try apply classOf_mor; trivial.
+    pose (classOf_refl x).
+    pose (classOf_refl y).
+    rewrite H in *;
+      compute in *;
+        simpl_equiv.
+  Qed.
+
+  Lemma disjointClasses_differentClasses (C C' : EquivalenceClass equiv) : (disjointClasses C C') -> (differentClasses C C').
+    clear equiv_Equivalence; unfold differentClasses, disjointClasses; intro H.
     pose (ClassInhabited C) as H'; destruct H' as [ x H' ].
     exists x; specialize (H x); tauto.
   Qed.
 
-  Lemma notDisjointClasses_sameClass (C C' : EquivalenceClass) : (notDisjointClasses C C') -> (sameClass C C').
-    unfold notDisjointClasses, sameClass; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
+  Lemma notDisjointClasses_sameClass (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> (sameClass C C').
+    clear equiv_Equivalence; unfold notDisjointClasses, sameClass; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
       match goal with
         | [ H0 : InClass ?C ?x, H1 : InClass ?C ?y |- InClass ?C' ?x ]
           => let H := fresh in
-            assert (H : equiv' x y) by (apply (ElementsEquivalent C); assumption);
+            assert (H : equiv x y) by (apply (ClassElementsEquivalent C); assumption);
               rewrite H; assumption
       end.
   Qed.
 
-  Lemma notDisjointClasses_eq (C C' : EquivalenceClass) : (notDisjointClasses C C') -> C = C'.
-    intro; apply sameClass_eq; apply notDisjointClasses_sameClass; assumption.
+  Lemma notDisjointClasses_eq (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> C = C'.
+    clear equiv_Equivalence; intro; apply sameClass_eq; apply notDisjointClasses_sameClass; assumption.
   Qed.
 
-  Lemma forall_equiv__eq (C C' : EquivalenceClass) :
-    (forall v v', (InClass C v \/ InClass C' v') -> (InClass C v /\ InClass C' v' <-> equiv' v v')) ->
+  Lemma EquivalenceClass_forall_equiv__eq (C C' : EquivalenceClass equiv) :
+    (forall v v', (InClass C v \/ InClass C' v') -> (InClass C v /\ InClass C' v' <-> equiv v v')) ->
     C' = C.
-    intro H. apply sameClass_eq; unfold sameClass; intro v.
-    assert (equiv' v v) by reflexivity; firstorder.
+    clear equiv_Equivalence; intro H. apply sameClass_eq; unfold sameClass; intro v.
+    assert (equiv v v) by reflexivity; firstorder.
   Qed.
 
-  Lemma forall__eq (C C' : EquivalenceClass) :
+  Lemma EquivalenceClass_forall__eq (C C' : EquivalenceClass equiv) :
     (forall v, InClass C v <-> InClass C' v) ->
     C' = C.
-    intro H. apply sameClass_eq; unfold sameClass;
+    clear equiv_Equivalence; intro H. apply sameClass_eq; unfold sameClass;
     firstorder.
   Qed.
 End equiv.
-
-Implicit Arguments classOf [value equiv' equiv'_refl equiv'_sym equiv'_trans].
-
-Add Parametric Relation value equiv' (E : @EquivalenceClass value equiv') : _ (equiv E)
-    reflexivity proved by (equiv_refl _)
-    symmetry proved by (equiv_sym _)
-    transitivity proved by (equiv_trans _)
-      as equiv_rel.
 
 Add Parametric Relation value equiv : _ (@sameClass value equiv)
   reflexivity proved by (@sameClass_refl _ _)
@@ -180,34 +190,41 @@ Add Parametric Relation value equiv : _ (@sameClass value equiv)
   transitivity proved by (@sameClass_trans _ _)
     as sameClass_mor.
 
+Section InClass_classOf.
+  Variable value : Type.
+  Variable equiv : value -> value -> Prop.
+  Variable C : EquivalenceClass equiv.
+
+  Lemma InClass_classOf_eq eqv v : InClass C v -> C = classOf eqv v.
+    intro H.
+    apply sameClass_eq.
+    pose (classOf eqv v).
+    pose (classOf_refl eqv v).
+    pose (@ClassContainsEquivalent _ equiv).
+    pose (@ClassElementsEquivalent _ equiv).
+    specialize_all_ways.
+    intro; split; intro;
+      eauto.
+  Qed.
+
+  Let C_Equivalence : Equivalence equiv
+    := Build_Equivalence _ _ (ClassEquivalent_refl C) (ClassEquivalent_sym C) (ClassEquivalent_trans C).
+
+  Definition InClass_classOf_eq' : forall v, InClass C v -> C = classOf C_Equivalence v
+    := InClass_classOf_eq C_Equivalence.
+End InClass_classOf.
+
 Ltac create_classOf_InClass :=
   repeat match goal with
-           | [ H : InClass (@classOf ?v ?e ?r ?s ?t ?val) _ |- _ ] =>
-             let hyp := constr:(@classOf_refl v e r s t val) in
-               let T := type of hyp in
-                 match goal with
-                   | [ H' : T |- _ ] => fail 1 (* the hypothesis already exists *)
-                   | _ => let H' := fresh in assert (H' := hyp)
-                 end
-           | [ |- InClass (@classOf ?v ?e ?r ?s ?t ?val) _ ] =>
-             let hyp := constr:(@classOf_refl v e r s t val) in
-               let T := type of hyp in
-                 match goal with
-                   | [ H' : T |- _ ] => fail 1 (* the hypothesis already exists *)
-                   | _ => let H' := fresh in assert (H' := hyp)
-                 end
+           | [ H : InClass (@classOf ?v ?e ?eq ?val) _ |- _ ] => unique_pose (@classOf_refl v e eq val)
+           | [ |- InClass (@classOf ?v ?e ?eq ?val) _ ] => unique_pose (@classOf_refl v e eq val)
          end.
 
 Ltac replace_InClass := create_classOf_InClass;
   repeat match goal with
-           | [ H : InClass ?C ?x, H' : InClass ?C ?x' |- _ ] =>
-             let equiv := constr:(ElementsEquivalent C _ _ H H') in
-               let equivT := type of equiv in
-                 match goal with
-                   | [ H'' : equivT |- _ ] => fail 1 (* the hypothesis already exists *)
-                   | _ => let H'' := fresh in assert (H'' := equiv); try (clear H' || clear H) (* try, in case both appear in the conclusion *)
-                 end
-           | [ H : InClass ?C ?x |- InClass ?C ?x' ] => apply (ContainsEquivalent C x x' H)
+           | [ H : InClass ?C ?x, H' : InClass ?C ?x' |- _ ] => unique_pose (ClassElementsEquivalent C _ H _ H');
+             try (clear H' || clear H) (* try, in case both appear in the conclusion *)
+           | [ H : InClass ?C ?x |- InClass ?C ?x' ] => apply (ClassContainsEquivalent C x H x')
            | [ |- exists v : ?T, @?G v ] =>
              match G with
                | appcontext[InClass ?C ?v] => fail 1 (* [?v] cannot be the same as [v] above, so we fail *)
@@ -216,9 +233,22 @@ Ltac replace_InClass := create_classOf_InClass;
                  let v := fresh in let H := fresh in
                    destruct (ClassInhabited C) as [ v H ]; exists v
              end
+           | [ |- _ /\ _ ] => split; intros; create_classOf_InClass
          end.
 
-Hint Extern 1 (@eq (EquivalenceClass _ _) _ _) => apply forall__eq; replace_InClass.
+Ltac InClass2classOf eqv :=
+  repeat match goal with
+           | [ H : InClass ?C ?x |- _ ] =>
+             apply (@InClass_classOf_eq _ _ C eqv _) in H
+         end.
+
+Ltac InClass2classOf' :=
+  repeat match goal with
+           | [ H : InClass ?C ?x |- _ ] =>
+             apply (@InClass_classOf_eq' _ _ C _) in H
+         end.
+
+Hint Extern 1 (@eq (EquivalenceClass _ _) _ _) => apply EquivalenceClass_forall__eq; replace_InClass.
 
 Ltac clear_InClass' :=
   repeat match goal with
@@ -240,29 +270,32 @@ Section apply1.
   Variable E0 : EquivalenceClass equiv0.
 
   Local Add Parametric Relation : _ equiv0
-    reflexivity proved by (equiv_refl E0)
-    symmetry proved by (equiv_sym E0)
-    transitivity proved by (equiv_trans E0)
+    reflexivity proved by (ClassEquivalent_refl E0)
+    symmetry proved by (ClassEquivalent_sym E0)
+    transitivity proved by (ClassEquivalent_trans E0)
       as apply_equiv_rel.
 
-  Hypothesis equiv'_refl : forall (v : value'), equiv' v v.
-  Hypothesis equiv'_sym : forall (v v' : value'), equiv' v v' -> equiv' v' v.
-  Hypothesis equiv'_trans : forall (v v' v'' : value'), equiv' v v' -> equiv' v' v'' -> equiv' v v''.
+  Hypothesis equiv'_Equivalence : Equivalence equiv'.
 
   Local Add Parametric Relation : _ equiv'
-    reflexivity proved by equiv'_refl
-    symmetry proved by equiv'_sym
-    transitivity proved by equiv'_trans
+    reflexivity proved by (Equivalence.equiv_reflexive _)
+    symmetry proved by (Equivalence.equiv_symmetric _)
+    transitivity proved by (Equivalence.equiv_transitive _)
       as apply_equiv'_rel.
 
   Hint Resolve f_mor.
 
   Definition apply_to_class : EquivalenceClass equiv'.
-    refine {| UnderlyingClass := (fun v => exists v0, InClass E0 v0 /\ equiv' v (f v0)) |};
-      abstract (intros; try solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ];
-        solve [ (destruct (ClassInhabited E0) as [ v0 ]; exists (f v0); eexists; split; eauto; apply f_mor; reflexivity) ||
-          (unfold In in *; destruct_hypotheses; repeat esplit; clear_InClass; try reflexivity; etransitivity; eauto)
-        ]).
+    refine {| InClass := (fun v => exists v0, InClass E0 v0 /\ equiv' v (f v0)) |};
+      abstract (
+        intros;
+          solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ] ||
+            solve [ destruct (ClassInhabited E0) as [ v0 ]; exists (f v0); eexists; split; eauto; apply f_mor; reflexivity ] ||
+              solve [
+                destruct_hypotheses; repeat esplit; clear_InClass; repeat_subst_mor_of_type value'; try apply f_mor;
+                  reflexivity || assumption || etransitivity; eauto
+              ]
+      ).
   Defined.
 
   Lemma apply_to_class_f_inj : forall v, InClass E0 v -> InClass apply_to_class (f v).
@@ -276,17 +309,14 @@ End apply1.
 
 Hint Resolve apply_to_class_f_inj.
 
-Implicit Arguments apply_to_class [value0 equiv0
-  value' equiv' equiv'_refl equiv'_sym equiv'_trans].
-
-Lemma apply_to_classOf value0 equiv0 equiv0_refl equiv0_sym equiv0_trans value' equiv' equiv'_refl equiv'_sym equiv'_trans f f_mor e0 :
+Lemma apply_to_classOf value0 equiv0 equiv0_eqv value' equiv' equiv'_eqv f f_mor e0 :
   @apply_to_class value0 equiv0 value' equiv' f f_mor
-  (@classOf _ _ equiv0_refl equiv0_sym equiv0_trans e0)
-  equiv'_refl equiv'_sym equiv'_trans
-  = @classOf _ _ equiv'_refl equiv'_sym equiv'_trans (f e0).
+  (@classOf _ _ equiv0_eqv e0)
+  equiv'_eqv
+  = @classOf _ _ equiv'_eqv (f e0).
 Proof.
-  apply forall__eq; intros; split; intros;
-    hnf in *; destruct_hypotheses; clear_InClass; eauto.
+  apply EquivalenceClass_forall__eq; intros; split; intros;
+    hnf in *; destruct_hypotheses; replace_InClass; repeat_subst_mor_of_type value'; eauto; reflexivity.
 Qed.
 
 Section apply2.
@@ -299,17 +329,12 @@ Section apply2.
   Variable value' : Type.
   Variable equiv' : value' -> value' -> Prop.
 
-  (* Equivalence relations are reflexive, symmetric, and transitive. *)
-  Hypotheses equiv'_refl : forall (v : value'), equiv' v v.
-  Hypothesis equiv'_sym : forall (v v' : value'),
-    equiv' v v' -> equiv' v' v.
-  Hypothesis equiv'_trans : forall (v v' v'' : value'),
-    equiv' v v' -> equiv' v' v'' -> equiv' v v''.
+  Hypothesis equiv'_Equivalence : Equivalence equiv'.
 
-  Add Parametric Relation : _ equiv'
-    reflexivity proved by equiv'_refl
-    symmetry proved by equiv'_sym
-    transitivity proved by equiv'_trans
+  Local Add Parametric Relation : _ equiv'
+    reflexivity proved by (Equivalence.equiv_reflexive _)
+    symmetry proved by (Equivalence.equiv_symmetric _)
+    transitivity proved by (Equivalence.equiv_transitive _)
       as apply2_equiv'_rel.
 
   Variable f : value0 -> value1 -> value'.
@@ -319,24 +344,31 @@ Section apply2.
   Variable E1 : EquivalenceClass equiv1.
 
   Local Add Parametric Relation : _ equiv0
-    reflexivity proved by (equiv_refl E0)
-    symmetry proved by (equiv_sym E0)
-    transitivity proved by (equiv_trans E0)
+    reflexivity proved by (@ClassEquivalent_refl _ _ E0)
+    symmetry proved by (@ClassEquivalent_sym _ _ E0)
+    transitivity proved by (@ClassEquivalent_trans _ _ E0)
       as apply2_equiv0_rel.
 
   Local Add Parametric Relation : _ equiv1
-    reflexivity proved by (equiv_refl E1)
-    symmetry proved by (equiv_sym E1)
-    transitivity proved by (equiv_trans E1)
+    reflexivity proved by (@ClassEquivalent_refl _ _ E1)
+    symmetry proved by (@ClassEquivalent_sym _ _ E1)
+    transitivity proved by (@ClassEquivalent_trans _ _ E1)
       as apply2_equiv1_rel.
 
   Definition apply2_to_class : EquivalenceClass equiv'.
-    refine {| UnderlyingClass := (fun v => exists v0 v1, InClass E0 v0 /\ InClass E1 v1 /\ equiv' v (f v0 v1)) |};
-      abstract (intros; try solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ];
-        solve [
-          (destruct (ClassInhabited E0) as [ v0 ], (ClassInhabited E1) as [ v1 ]; exists (f v0 v1); repeat eexists; eauto) ||
-            (unfold In in *; destruct_hypotheses; repeat esplit; clear_InClass; try reflexivity; etransitivity; eauto)
-        ]).
+    refine {| InClass := (fun v => exists v0 v1, InClass E0 v0 /\ InClass E1 v1 /\ equiv' v (f v0 v1)) |};
+      abstract (
+        intros;
+          solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ] ||
+            solve [
+              destruct (ClassInhabited E0) as [ v0 ], (ClassInhabited E1) as [ v1 ]; exists (f v0 v1); repeat esplit;
+              eauto; apply f_mor; reflexivity
+            ] ||
+            solve [
+              destruct_hypotheses; repeat esplit; clear_InClass; repeat_subst_mor_of_type value'; try apply f_mor;
+                reflexivity || assumption || etransitivity; eauto
+            ]
+    ).
   Defined.
 
   Lemma apply2_to_class_f_inj : forall v0 v1, InClass E0 v0 -> InClass E1 v1 -> InClass apply2_to_class (f v0 v1).
@@ -350,24 +382,24 @@ End apply2.
 
 Hint Resolve apply2_to_class_f_inj.
 
-Implicit Arguments apply2_to_class [value0 equiv0
-  value1 equiv1
-  value' equiv' equiv'_refl equiv'_sym equiv'_trans].
-
 Lemma apply2_to_classOf
-  value0 equiv0 equiv0_refl equiv0_sym equiv0_trans
-  value1 equiv1 equiv1_refl equiv1_sym equiv1_trans
-  value' equiv' equiv'_refl equiv'_sym equiv'_trans
+  value0 equiv0 equiv0_eqv
+  value1 equiv1 equiv1_eqv
+  value' equiv' equiv'_eqv
   f f_mor e0 e1 :
   @apply2_to_class value0 equiv0 value1 equiv1 value' equiv'
-  equiv'_refl equiv'_sym equiv'_trans
+  equiv'_eqv
   f f_mor
-  (@classOf _ _ equiv0_refl equiv0_sym equiv0_trans e0)
-  (@classOf _ _ equiv1_refl equiv1_sym equiv1_trans e1)
-  = @classOf _ _ equiv'_refl equiv'_sym equiv'_trans (f e0 e1).
+  (@classOf _ _ equiv0_eqv e0)
+  (@classOf _ _ equiv1_eqv e1)
+  = @classOf _ _ equiv'_eqv (f e0 e1).
 Proof.
-  apply forall__eq; intros; split; intros;
+  apply EquivalenceClass_forall__eq; intros; split; intros;
     hnf in *; destruct_hypotheses;
       repeat (clear_InClass; eexists; repeat split);
-      clear_InClass; eauto; try reflexivity.
+        clear_InClass;
+        repeat_subst_mor_of_type value';
+        hnf in *;
+          try apply f_mor;
+            eauto; reflexivity || (symmetry; assumption).
 Qed.

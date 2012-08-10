@@ -1,48 +1,78 @@
-Require Import ProofIrrelevance.
+Require Import JMeq ProofIrrelevance.
 
 Set Implicit Arguments.
 
+Local Infix "==" := JMeq (at level 70).
+
+(* The standard library does not provide projections of [sigT2] or [sig2].
+   I define coercions to [sigT] and [sig], so that [projT1], [projT2],
+   [proj1_sig], and [proj2_sig] do the right thing, and I define [projT3],
+   [proj3_sig]. *)
 Section sig.
-  Definition sigT2_sigT A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
-  Global Coercion sigT2_sigT : sigT2 >-> sigT.
+  Definition sigT_of_sigT2 A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
+  Global Coercion sigT_of_sigT2 : sigT2 >-> sigT.
   Definition projT3 A P Q (x : @sigT2 A P Q) :=
     let (x0, _, h) as x0 return (Q (projT1 x0)) := x in h.
 
-  Definition sig2_sig A P Q (x : @sig2 A P Q) := let (a, h, _) := x in exist _ a h.
-  Global Coercion sig2_sig : sig2 >-> sig.
+  Definition sig_of_sig2 A P Q (x : @sig2 A P Q) := let (a, h, _) := x in exist _ a h.
+  Global Coercion sig_of_sig2 : sig2 >-> sig.
   Definition proj3_sig A P Q (x : @sig2 A P Q) :=
     let (x0, _, h) as x0 return (Q (proj1_sig x0)) := x in h.
 End sig.
 
+(* fail if [tac] succeeds, do nothing otherwise *)
 Tactic Notation "not_tac" tactic(tac) := (tac; fail 1) || idtac.
 
+(* fail if [tac] fails, but don't actually execute [tac] *)
 Tactic Notation "test_tac" tactic(tac) := not_tac (not_tac tac).
 
+(* [pose proof defn], but only if no hypothesis of the same type exists.
+   most useful for proofs of a proposition *)
 Ltac unique_pose defn :=
   let T := type of defn in
     match goal with
       | [ H : T |- _ ] => fail 1
-      | _ => let H := fresh in assert (H := defn)
+      | _ => pose proof defn
     end.
 
+(* [pose defn], but only if that hypothesis doesn't exist *)
 Ltac unique_pose_with_body defn :=
   match goal with
     | [ H := defn |- _ ] => fail 1
     | _ => pose defn
   end.
 
+(* check's if the given hypothesis has a body, i.e., if [clearbody]
+   could ever succeed.  We can't just do [test_tac (clearbody H)],
+   because maybe the correctness of the proof depends on the body
+   of H *)
 Tactic Notation "has_no_body" hyp(H) :=
   not_tac (let H' := fresh in pose H as H'; unfold H in H').
 
 Tactic Notation "has_body" hyp(H) :=
   not_tac (has_no_body H).
 
+(* find the head of the given expression *)
+Ltac head expr :=
+  match expr with
+    | ?f _ => head f
+    | _ => expr
+  end.
+
+Ltac head_hnf expr := let expr' := eval hnf in expr in head expr'.
+
+(* call [tac H], but first [simpl]ify [H].
+   This tactic leaves behind the simplified hypothesis. *)
 Ltac simpl_do tac H :=
   let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'.
 
-Ltac simpl_do_clear tac H :=
-  let H' := fresh in pose H as H'; simpl; simpl in H'; tac H'; try clear H'.
+(* clear the left-over hypothesis after [simpl_do]ing it *)
+Ltac simpl_do_clear tac H := simpl_do ltac:(fun H => tac H; try clear H) H.
 
+(* if progress can be made by [exists _], but it doesn't matter what
+   fills in the [_], assume that something exists, and leave the two
+   goals of finding a member of the apropriate type, and proving that
+   all members of the appropriate type prove the goal *)
 Ltac destruct_exists' T := cut T; try (let H := fresh in intro H; exists H).
 Ltac destruct_exists :=
   match goal with
@@ -53,6 +83,7 @@ Ltac destruct_exists :=
     | [ |- @sigT2 ?T _ _ ] => destruct_exists' T
   end.
 
+(* some simple tactics to solve the goal by rewriting *)
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
 
@@ -78,26 +109,33 @@ Ltac t_con_rev con := t_con_rev_with con t'; t_con_rev_with con t'_long.
 Ltac t := t_with t'; t_with t'_long.
 Ltac t_rev := t_rev_with t'; t_rev_with t'_long.
 
+(* solve simple setiod goals that can be solved by [transitivity] *)
 Ltac simpl_transitivity :=
   try solve [ match goal with
                 | [ _ : ?Rel ?a ?b, _ : ?Rel ?b ?c |- ?Rel ?a ?c ] => transitivity b; assumption
               end ].
 
-Ltac eq2eq_refl :=
+(* given a [matcher] that succeeds on some hypotheses and fails on
+   others, destruct any matching hypotheses, and then execute [tac]
+   after each [destruct].
+
+   The [tac] part exists so that you can, e.g., [simpl in *], to
+   speed things up. *)
+Ltac destruct_all_matches_then matcher tac :=
   repeat match goal with
-           | [ H : _ = ?a |- _ ] => assert (H = eq_refl _) by (apply proof_irrelevance); subst
+           | [ H : ?T |- _ ] => matcher T; destruct H; tac
          end.
 
-Ltac destruct_all_matches matcher :=
-  repeat match goal with
-           | [ H : ?T |- _ ] => matcher T; destruct H; simpl in *
-         end.
+Ltac destruct_all_matches matcher := destruct_all_matches_then matcher ltac:(simpl in *).
+Ltac destruct_all_matches' matcher := destruct_all_matches_then matcher idtac.
 
+(* matches anything whose type has a [T] in it *)
 Ltac destruct_type_matcher T HT :=
   match HT with
     | context[T] => idtac
   end.
 Ltac destruct_type T := destruct_all_matches ltac:(destruct_type_matcher T).
+Ltac destruct_type' T := destruct_all_matches' ltac:(destruct_type_matcher T).
 
 Ltac destruct_hypotheses_matcher HT :=
   let HT' := eval hnf in HT in
@@ -107,6 +145,7 @@ Ltac destruct_hypotheses_matcher HT :=
       | prod _ _ => idtac
     end.
 Ltac destruct_hypotheses := destruct_all_matches destruct_hypotheses_matcher.
+Ltac destruct_hypotheses' := destruct_all_matches' destruct_hypotheses_matcher.
 
 Ltac destruct_sig_matcher HT :=
   let HT' := eval hnf in HT in
@@ -117,33 +156,45 @@ Ltac destruct_sig_matcher HT :=
       | @sigT2 _ _ _ => idtac
     end.
 Ltac destruct_sig := destruct_all_matches destruct_sig_matcher.
+Ltac destruct_sig' := destruct_all_matches' destruct_sig_matcher.
 
 Ltac destruct_all_hypotheses := destruct_all_matches ltac:(fun HT =>
   destruct_hypotheses_matcher HT || destruct_sig_matcher HT
 ).
 
+(* if the goal can be solved by repeated specialization of some
+   hypothesis with other [specialized] hypotheses, solve the goal
+   by brute force *)
 Ltac specialized_assumption tac := tac;
   match goal with
     | [ x : ?T, H : forall _ : ?T, _ |- _ ] => specialize (H x); specialized_assumption tac
     | _ => assumption
   end.
 
+(* for each hypothesis of type [H : forall _ : ?T, _], if there is exactly
+   one hypothesis of type [H' : T], do [specialize (H H')]. *)
 Ltac specialize_uniquely :=
   repeat match goal with
-           | [ x : ?T, y : ?T, H : _ |- _ ] => fail 1
+           | [ x : ?T, y : ?T, H : _ |- _ ] => test_tac (specialize (H x)); fail 1
            | [ x : ?T, H : _ |- _ ] => specialize (H x)
          end.
 
+(* specialize all hypotheses of type [forall _ : ?T, _] with
+   appropriately typed hypotheses *)
 Ltac specialize_all_ways_forall :=
   repeat match goal with
            | [ x : ?T, H : forall _ : ?T, _ |- _ ] => unique_pose (H x)
          end.
 
+(* try to specialize all hypotheses with all other hypotheses.
+   This includes [specialize (H x)] where [H x] requires a coercion
+   from the type of [H] to Funclass. *)
 Ltac specialize_all_ways :=
   repeat match goal with
            | [ x : ?T, H : _ |- _ ] => unique_pose (H x)
          end.
 
+(* try to do [tac] after [repeat rewrite] on [rew_H], in both directions *)
 Ltac try_rewrite rew_H tac :=
   (repeat rewrite rew_H; tac) ||
     (repeat rewrite <- rew_H; tac).
@@ -160,12 +211,45 @@ Ltac solve_repeat_rewrite rew_H tac :=
   solve [ repeat (rewrite rew_H; tac) ] ||
     solve [ repeat (rewrite <- rew_H; tac) ].
 
-Lemma simpl_exist_helper A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
+Lemma sig_eq A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Ltac simpl_exist := apply simpl_exist_helper; simpl.
+Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
+  destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
+Qed.
 
+Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> (projT1 s = projT1 s' -> projT2 s == projT2 s') -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
+  projT1 s = projT1 s'
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s')
+  -> (projT1 s = projT1 s' -> projT2 s == projT2 s' -> projT3 s == projT3 s')
+  -> s = s'.
+  destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Ltac clear_refl_eq :=
+  repeat match goal with
+           | [ H : ?x = ?x |- _ ] => clear H
+         end.
+
+(* reduce the proving of equality of sigma types to proving equality
+   of their components *)
+Ltac simpl_eq' :=
+  apply sig_eq ||
+    apply sig2_eq ||
+      ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq) ||
+        apply injective_projections.
+
+Ltac simpl_eq := intros; repeat (
+  simpl_eq'; simpl in *
+).
+
+(* Coq's build in tactics don't work so well with things like [iff]
+   so split them up into multiple hypotheses *)
 Ltac split_in_context ident funl funr :=
   repeat match goal with
            | [ H : context p [ident] |- _ ] =>
@@ -175,7 +259,13 @@ Ltac split_in_context ident funl funr :=
          end.
 
 Ltac split_iff := split_in_context iff (fun a b : Prop => a -> b) (fun a b : Prop => b -> a).
-Ltac split_and := split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
+
+Ltac split_and' :=
+  repeat match goal with
+           | [ H : ?a /\ ?b |- _ ] => let H0 := fresh in let H1 := fresh in
+             assert (H0 := proj1 H); assert (H1 := proj2 H); clear H
+         end.
+Ltac split_and := split_and'; split_in_context and (fun a b : Prop => a) (fun a b : Prop => b).
 
 Ltac clear_hyp_of_type type :=
   repeat match goal with
@@ -219,6 +309,11 @@ Ltac subst_mor x :=
 Ltac repeat_subst_mor_of_type type :=
   repeat match goal with
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
+         end.
+
+Ltac subst_body :=
+  repeat match goal with
+           | [ H := _ |- _ ] => subst H
          end.
 
 (* So we know the difference betwen the [sigT]s we're using and the [sigT]s others use *)
@@ -321,29 +416,58 @@ Ltac f_equal_in_r H k := let H' := uncurry H in let H'T := type of H' in
     end; clear H.
 Ltac f_equal_in f H := f_equal_in_r H ltac:(fun pf k => k (pf _ f)).
 
-Ltac intro_proj2_sig_from_goal :=
+Ltac eta_red :=
   repeat match goal with
-           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
+           | [ H : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in H
+           | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
+         end.
+
+Ltac intro_proj2_sig_from_goal'_by tac :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig_of_sig2 ?x)] ] => tac (proj3_sig x)
+         end.
+
+Ltac intro_proj2_sig_from_goal_by tac :=
+  repeat match goal with
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig_of_sig2 ?x)] ] => tac (proj3_sig x)
          end; simpl in *.
 
-Ltac intro_projT2_from_goal :=
+Ltac intro_projT2_from_goal_by tac :=
   repeat match goal with
-           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 ?x] ] => tac (projT2 x)
+           | [ |- appcontext[projT1 (sigT_of_sigT2 ?x)] ] => tac (projT3 x)
          end; simpl in *.
 
-Ltac intro_proj2_sig :=
+Ltac intro_proj2_sig_by tac :=
   repeat match goal with
-           | [ |- appcontext[proj1_sig ?x] ] => unique_pose (proj2_sig x)
-           | [ H : appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
-           | [ H := appcontext[proj1_sig ?x] |- _ ] => unique_pose (proj2_sig x)
+           | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
+           | [ H : appcontext[proj1_sig ?x] |- _ ] => tac (proj2_sig x)
+           | [ H := appcontext[proj1_sig ?x] |- _ ] => tac (proj2_sig x)
+           | [ |- appcontext[proj1_sig (sig_of_sig2 ?x)] ] => tac (proj3_sig x)
+           | [ H : appcontext[proj1_sig (sig_of_sig2 ?x)] |- _ ] => tac (proj3_sig x)
+           | [ H := appcontext[proj1_sig (sig_of_sig2 ?x)] |- _ ] => tac (proj3_sig x)
          end; simpl in *.
 
-Ltac intro_projT2 :=
+Ltac intro_projT2_by tac :=
   repeat match goal with
-           | [ |- appcontext[projT1 ?x] ] => unique_pose (projT2 x)
-           | [ H : appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
-           | [ H := appcontext[projT1 ?x] |- _ ] => unique_pose (projT2 x)
+           | [ |- appcontext[projT1 ?x] ] => tac (projT2 x)
+           | [ H : appcontext[projT1 ?x] |- _ ] => tac (projT2 x)
+           | [ H := appcontext[projT1 ?x] |- _ ] => tac (projT2 x)
+           | [ |- appcontext[projT1 (sigT_of_sigT2 ?x)] ] => tac (projT3 x)
+           | [ H : appcontext[projT1 (sigT_of_sigT2 ?x)] |- _ ] => tac (projT3 x)
+           | [ H := appcontext[projT1 (sigT_of_sigT2 ?x)] |- _ ] => tac (projT3 x)
          end; simpl in *.
+
+
+Ltac intro_proj2_sig_from_goal' := intro_proj2_sig_from_goal'_by unique_pose.
+Ltac intro_proj2_sig_from_goal := intro_proj2_sig_from_goal_by unique_pose.
+Ltac intro_projT2_from_goal := intro_projT2_from_goal_by unique_pose.
+Ltac intro_projT2_from_goal_with_body := intro_projT2_from_goal_by unique_pose_with_body.
+Ltac intro_proj2_sig := intro_proj2_sig_by unique_pose.
+Ltac intro_projT2 := intro_projT2_by unique_pose.
+Ltac intro_projT2_with_body := intro_projT2_by unique_pose_with_body.
 
 Ltac recr_destruct_with tac H :=
   let H0 := fresh in let H1 := fresh in
@@ -392,9 +516,22 @@ Ltac intro_fresh_unique :=
            | [ H : @is_unique ?T ?x |- _ ] => let x' := fresh in assert (x' := x); rewrite <- (H x') in *; generalize_is_unique_hyp H T
          end.
 
-Lemma eq_exist T (P : T -> Prop) (a b : { x | P x }) : proj1_sig a = proj1_sig b -> a = b.
-  destruct a, b; simpl in *; intro; repeat subst; f_equal; apply proof_irrelevance.
-Qed.
+Ltac specialize_with_evars_then_do E tac :=
+  match type of E with
+    | forall x : ?T, _ =>
+      let y := fresh in evar (y : T);
+        let y' := (eval unfold y in y) in clear y;
+          specialize_with_evars_then_do (E y') tac
+    | _ => tac E
+  end.
+
+Ltac specialize_hyp_with_evars E :=
+  repeat match type of E with
+           | forall x : ?T, _ =>
+             let y := fresh in evar (y : T);
+               let y' := (eval unfold y in y) in clear y;
+                 specialize (E y')
+         end.
 
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
@@ -415,48 +552,90 @@ Ltac simultaneous_rewrite_rev' E :=
         end
   end.
 
-Ltac simultaneous_rewrite E :=
+Ltac simultaneous_rewrite E := specialize_with_evars_then_do E ltac:(fun E =>
   match type of E with
-    | forall x : ?T, _ =>
-      let y := fresh in evar (y : T);
-        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
     | ?T = _ => let H := fresh in
       match goal with
         | [ _ : context[?F] |- _ ] =>
           assert (H : T = F) by reflexivity; clear H
       end; simultaneous_rewrite' E
-  end.
+  end
+).
 
-Ltac simultaneous_rewrite_rev E :=
+Ltac simultaneous_rewrite_rev E := specialize_with_evars_then_do E ltac:(fun E =>
   match type of E with
-    | forall x : ?T, _ =>
-      let y := fresh in evar (y : T);
-        let y' := (eval unfold y in y) in clear y; simultaneous_rewrite (E y')
     | _ = ?T => let H := fresh in
       match goal with
         | [ _ : context[?F] |- _ ] =>
           assert (H : T = F) by reflexivity; clear H
       end; simultaneous_rewrite_rev' E
-  end.
+  end
+).
 
 (* rewrite by convertiblity rather than syntactic equality *)
-Ltac conv_rewrite_with rew_tac H :=
+Ltac conv_rewrite_with rew_tac H := specialize_with_evars_then_do H ltac:(fun H =>
   match type of H with
     | ?a = _ => match goal with
-                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                  | [ |- appcontext[?a'] ] => let H' := fresh in assert (H' : a = a') by reflexivity; clear H';
+                    change a' with a; rew_tac H
                 end
-  end.
-Ltac conv_rewrite_rev_with rew_tac H :=
+  end
+).
+Ltac conv_rewrite_rev_with rew_tac H := specialize_with_evars_then_do H ltac:(fun H =>
   match type of H with
     | _ = ?a => match goal with
-                  | [ |- appcontext[?a'] ] => change a' with a; rew_tac H
+                  | [ |- appcontext[?a'] ] => let H' := fresh in assert (H' : a = a') by reflexivity; clear H';
+                    change a' with a; rew_tac H
                 end
-  end.
+  end
+).
 
 Ltac conv_rewrite H := conv_rewrite_with ltac:(fun h => rewrite h) H.
 Ltac conv_rewrite_rev H := conv_rewrite_rev_with ltac:(fun h => rewrite <- h) H.
 Ltac conv_repeat_rewrite H := repeat conv_rewrite_with ltac:(fun h => repeat rewrite h) H.
 Ltac conv_repeat_rewrite_rev H := repeat conv_rewrite_rev_with ltac:(fun h => repeat rewrite <- h) H.
+
+Ltac rewrite_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[x] in let ctx'' := context ctx[y] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite H; reflexivity
+          |
+        ]
+  end.
+
+Ltac rewrite_rev_by_context ctx H :=
+  match type of H with
+    | ?x = ?y => let ctx' := context ctx[y] in let ctx'' := context ctx[x] in
+      cut ctx'; [ let H' := fresh in intro H'; simpl in H' |- *; exact H' | ];
+        cut ctx''; [ let H' := fresh in intro H'; etransitivity; try apply H'; rewrite <- H; reflexivity
+          |
+        ]
+  end.
+
+Ltac do_for_each_hyp' tac fail_if_seen :=
+  match goal with
+    | [ H : _ |- _ ] => fail_if_seen H; tac H; try do_for_each_hyp' tac ltac:(fun H' => fail_if_seen H'; match H' with | H => fail 1 | _ => idtac end)
+  end.
+Ltac do_for_each_hyp tac := do_for_each_hyp' tac ltac:(fun H => idtac).
+
+(* [change a with b in *] fails if it would create a self-referential hypothesis.
+   This version does not. *)
+Tactic Notation "change_in_all" constr(from) "with" constr(to) :=
+  change from with to; do_for_each_hyp ltac:(fun H => change from with to in H).
+
+Ltac destruct_to_empty_set :=
+  match goal with
+    | [ H : Empty_set |- _ ] => destruct H
+    | [ H : ?T -> Empty_set, a : ?T |- _ ] => destruct (H a)
+    | [ H : context[Empty_set] |- _ ] => solve [ destruct H; trivial; assumption ]
+  end.
+
+Ltac destruct_to_empty_set_in_match :=
+  match goal with
+    | [ |- appcontext[match ?x with end] ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
+    | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
+  end.
 
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
@@ -467,12 +646,27 @@ Section unit.
     case u; case u'; reflexivity.
   Qed.
 
+  Lemma unit_JMeq (u u' : unit) : u == u'.
+    case u; case u'; reflexivity.
+  Qed.
+
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
+  Qed.
+
+  Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
+    destruct a.
+  Qed.
+
+  Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
+    destruct b.
   Qed.
 End unit.
 
 Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
 Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
+Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.
+Hint Extern 0 (@JMeq _ _ Empty_set _) => apply Empty_set_JMeqr.

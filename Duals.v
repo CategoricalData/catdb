@@ -4,8 +4,9 @@ Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductCategory.
 Local Infix "==" := JMeq (at level 70).
+
+Local Open Scope category_scope.
 
 Section OppositeCategory.
   Variable objC : Type.
@@ -14,7 +15,7 @@ Section OppositeCategory.
 
   Definition OppositeCategory : @SpecializedCategory objC (fun s d => morC d s).
     refine (Build_SpecializedCategory (fun s d => morC d s)
-      (Identity (C := C))
+      (@Identity _ _ C)
       (fun (s d d' : C) (m1 : C.(Morphism) d' d) (m2 : C.(Morphism) d s) => Compose m2 m1)
       _ _ _);
     abstract (t; eauto).
@@ -69,15 +70,17 @@ End DualCategories.
 Hint Rewrite op_op_id op_distribute_prod.
 
 Section DualObjects.
-  Variable C : Category.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
 
   Lemma initial_opposite_terminal (o : C) :
-    InitialObject o -> TerminalObject (C := OppositeCategory C) o.
+    InitialObject o -> @TerminalObject _ _ (OppositeCategory C) o.
     t.
   Qed.
 
   Lemma terminal_opposite_initial (o : C) :
-    TerminalObject o -> InitialObject (C := OppositeCategory C) o.
+    TerminalObject o -> @InitialObject _ _ (OppositeCategory C) o.
     t.
   Qed.
 End DualObjects.
@@ -96,9 +99,9 @@ Section OppositeFunctor.
   Definition OppositeFunctor : SpecializedFunctor COp DOp.
     refine (Build_SpecializedFunctor COp DOp
       (fun c : COp => F c : DOp)
-      (fun (s d : COp) (m : C.(Morphism) d s) => @MorphismOf' _ _ _ _ _ _ F d s m)
-      (fun d' d s m1 m2 => @FCompositionOf' _ _ _ _ _ _ F s d d' m2 m1)
-      (@FIdentityOf' _ _ _ _ _ _ F)
+      (fun (s d : COp) (m : C.(Morphism) d s) => @MorphismOf _ _ _ _ _ _ F d s m)
+      (fun d' d s m1 m2 => @FCompositionOf _ _ _ _ _ _ F s d d' m2 m1)
+      (@FIdentityOf _ _ _ _ _ _ F)
     ).
   Defined.
 End OppositeFunctor.
@@ -137,7 +140,7 @@ Section OppositeNaturalTransformation.
   Definition OppositeNaturalTransformation : SpecializedNaturalTransformation GOp FOp.
     refine (Build_SpecializedNaturalTransformation GOp FOp
       (fun c : COp => T.(ComponentsOf) c : DOp.(Morphism) (GOp c) (FOp c))
-      (fun s d m => eq_sym (@Commutes' _ _ _ _ _ _ _ _ T d s m))
+      (fun s d m => eq_sym (@Commutes _ _ _ _ _ _ _ _ T d s m))
     ).
   Defined.
 End OppositeNaturalTransformation.

@@ -28,7 +28,7 @@ Section Grothendieck.
 
   Record GrothendieckPair := {
     GrothendieckC' : objC;
-    GrothendieckX' : F GrothendieckC'
+    GrothendieckX' : F.(ObjectOf') GrothendieckC'
   }.
 
   Section GrothendieckInterface.
@@ -37,6 +37,10 @@ Section Grothendieck.
     Definition GrothendieckC : C := G.(GrothendieckC').
     Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
   End GrothendieckInterface.
+
+  Lemma GrothendieckPair_eta (x : GrothendieckPair) : Build_GrothendieckPair (GrothendieckC x) (GrothendieckX x) = x.
+    destruct x; reflexivity.
+  Qed.
 
   Record SetGrothendieckPair := {
     SetGrothendieckC' : objC;
@@ -49,6 +53,10 @@ Section Grothendieck.
     Definition SetGrothendieckC : C := G.(SetGrothendieckC').
     Definition SetGrothendieckX : F' SetGrothendieckC := G.(SetGrothendieckX').
   End SetGrothendieckInterface.
+
+  Lemma SetGrothendieckPair_eta (x : SetGrothendieckPair) : Build_SetGrothendieckPair (SetGrothendieckC x) (SetGrothendieckX x) = x.
+    destruct x; reflexivity.
+  Qed.
 
   Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
@@ -64,7 +72,7 @@ Section Grothendieck.
     ).
   Defined.
 
-  Arguments GrothendieckCompose [cs xs cd xd cd' xd'] m2 m1.
+  Arguments GrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
   Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
     Transparent Identity.
@@ -77,7 +85,7 @@ Section Grothendieck.
   Defined.
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
-  Hint Extern 1 (exist _ _ _ = exist _ _ _) => simpl_exist.
+  Hint Extern 1 (@eq (sig _) _ _) => simpl_eq.
 
   Definition CategoryOfElements : @SpecializedCategory
     GrothendieckPair
@@ -89,7 +97,7 @@ Section Grothendieck.
     |};
     abstract (
       unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
-        intros; destruct_type GrothendieckPair; destruct_sig; simpl_exist; eauto
+        intros; destruct_type GrothendieckPair; destruct_sig; eauto
     ).
   Defined.
 
@@ -109,7 +117,7 @@ Section SetGrothendieckCoercion.
   Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
 
   Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'.
-    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.
+    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F'.(ObjectOf') _ |}.
   Defined.
 End SetGrothendieckCoercion.
 

@@ -4,7 +4,7 @@ Require Import Common Hom Duals ProductFunctor NaturalTransformation SetCategory
 
 Set Implicit Arguments.
 
-Local Infix "*" := ProductFunctor.
+Local Open Scope category_scope.
 
 Section FullFaithful.
   Variable objC : Type.
@@ -30,30 +30,32 @@ Section FullFaithful.
 
   Definition InducedHomNaturalTransformation :
     SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
-  (* Gahhh, type signatures and casting *)
-    refine {| ComponentsOf' := (fun sd : (ProductCategory COp C) =>
-      (fun m : Morphism C (fst sd) (snd sd) =>
-        F.(MorphismOf) m) : Morphism TypeCat ((HomFunctor C) _) ((ComposeFunctors (HomFunctor D) (FOp * F)) _))
-      |}; abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
+    refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
+      (fun sd : (COp * C) =>
+        @MorphismOf _ _ _ _ _ _ F _ _ )
+      _
+    );
+    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
   Defined.
 
   Definition InducedHomSetNaturalTransformation :
     SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F')).
     clear morC morD C D COp DOp FOp F.
-  (* Gahhh, type signatures and casting *)
-    refine {| ComponentsOf' := (fun sd : (ProductCategory C'Op C') =>
-      (fun m : morC' (fst sd) (snd sd) =>
-        F'.(MorphismOf) m) : Morphism SetCat (HomSetFunctor C' _) (ComposeFunctors (HomSetFunctor D') (F'Op * F') _))
-      |}; abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
+    refine (Build_SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F'))
+      (fun sd : (C'Op * C') =>
+        @MorphismOf _ _ _ _ _ _ F' _ _ )
+      _
+    );
+    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
   Defined.
 
   (* We really want surjective/injective here, but we only have epi/mono.
      They're equivalent in the category of sets.  Are they equivalent in the
      category of [Type]s? *)
-  Definition FunctorFull := forall x y : C, Epimorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
-  Definition FunctorFaithful := forall x y : C, Monomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFull := forall x y : C, IsEpimorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFaithful := forall x y : C, IsMonomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
 
-  Definition FunctorFullyFaithful := forall x y : C, CategoryIsomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
+  Definition FunctorFullyFaithful := forall x y : C, IsIsomorphism (InducedHomNaturalTransformation.(ComponentsOf) (x, y)).
 
   Lemma FunctorFullyFaithful_split : FunctorFullyFaithful -> FunctorFull /\ FunctorFaithful.
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful; intro H; split; intros;

@@ -12,7 +12,7 @@ Ltac structures_eq_simpl_step_with tac := intros; simpl;
     | [ |- (fun _ : ?A => _) == _ ] => apply (@functional_extensionality_dep_JMeq A); intro
     | [ |- (forall _ : ?A, _) = _ ] => apply (@forall_extensionality_dep A); intro
     | _ => tac
-  end; repeat simpl; JMeq_eq.
+  end; simpl; JMeq_eq.
 
 Ltac structures_eq_step_with_tac structures_equal_tac tac := intros; simpl;
   match goal with

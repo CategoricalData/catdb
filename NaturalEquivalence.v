@@ -9,23 +9,89 @@ Local Ltac intro_object_of :=
            | [ |- appcontext[ObjectOf ?G ?x] ] => unique_pose_with_body (ObjectOf G x)
          end.
 
+Section NaturalIsomorphism.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variables F G : SpecializedFunctor C D.
+
+  Record NaturalIsomorphism := {
+    NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
+    NaturalIsomorphism_Isomorphism : forall x : objC, IsomorphismOf (NaturalIsomorphism_Transformation x)
+  }.
+End NaturalIsomorphism.
+
+Section NaturalIsomorphismOfCategories.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+
+  Local Reserved Notation "'F'".
+  Local Reserved Notation "'G'".
+
+  Record NaturalIsomorphismOfCategories := {
+    NaturalIsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := NaturalIsomorphismOfCategories_F;
+    NaturalIsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := NaturalIsomorphismOfCategories_G;
+    NaturalIsomorphismOfCategories_Isomorphism_C :> NaturalIsomorphism (IdentityFunctor C) (ComposeFunctors G F);
+    NaturalIsomorphismOfCategories_Isomorphism_D : NaturalIsomorphism (IdentityFunctor D) (ComposeFunctors F G)
+  }.
+
+  Record IsomorphismOfCategories := {
+    IsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := IsomorphismOfCategories_F;
+    IsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := IsomorphismOfCategories_G;
+    IsomorphismOfCategories_Isomorphism_C : ComposeFunctors G F = IdentityFunctor C;
+    IsomorphismOfCategories_Isomorphism_D : ComposeFunctors F G = IdentityFunctor D
+  }.
+End NaturalIsomorphismOfCategories.
+
 Section NaturalEquivalence.
   Variable C D : Category.
   Variable F G : Functor C D.
 
-  Definition NaturalEquivalence (T : NaturalTransformation F G) :=
-    forall x : C.(Object), CategoryIsomorphism (T.(ComponentsOf) x).
+  Definition NaturalEquivalenceOf (T : NaturalTransformation F G) :=
+    forall x : C.(Object), Isomorphism (T.(ComponentsOf) x).
 
   Definition FunctorsNaturallyEquivalent : Prop :=
-    exists T : NaturalTransformation F G, exists TE : NaturalEquivalence T, True.
+    exists T : NaturalTransformation F G, exists NE : NaturalEquivalenceOf T, True.
 End NaturalEquivalence.
 
 (* grumble, grumble, grumble, [Functors] take [SpecializedCategories] and so we don't get type inference.
    Perhaps I should fix this?  But I don't like having to prefix so many things with [Specialized] and
    having duplicated code just so I get type inference.
    *)
-Arguments NaturalEquivalence [C D F G] T.
+Arguments NaturalEquivalenceOf [C D F G] T.
 Arguments FunctorsNaturallyEquivalent [C D] F G.
+
+Section Coercions.
+  Variable objC : Type.
+  Variable morC : objC -> objC -> Type.
+  Variable C : SpecializedCategory morC.
+  Variable objD : Type.
+  Variable morD : objD -> objD -> Type.
+  Variable D : SpecializedCategory morD.
+  Variables F G : SpecializedFunctor C D.
+
+  Variables C' D' : Category.
+  Variables F' G' : Functor C' D'.
+
+  Definition NaturalEquivalence_of_NaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalEquivalenceOf T
+    := fun x => NaturalIsomorphism_Isomorphism T x.
+
+  Definition NaturalIsomorphism_of_NaturalEquivalence (T : NaturalTransformation F' G') (NE : NaturalEquivalenceOf T) : NaturalIsomorphism F' G'.
+    exists T.
+    exact (fun x => NE x : IsomorphismOf _).
+  Defined.
+End Coercions.
+
+Coercion NaturalEquivalence_of_NaturalIsomorphism : NaturalIsomorphism >-> NaturalEquivalenceOf.
+Coercion NaturalIsomorphism_of_NaturalEquivalence : NaturalEquivalenceOf >-> NaturalIsomorphism.
+(* gives "Ambiguous paths"... Is this bad? *)
 
 Section NaturalEquivalenceOfCategories.
   Variable C D : Category.
@@ -49,7 +115,7 @@ Section NaturalTransformationInverse.
   Hint Resolve f_equal f_equal2 Commutes.
   Hint Rewrite LeftIdentity RightIdentity.
 
-  Definition NaturalEquivalenceInverse : NaturalEquivalence T -> NaturalTransformation G F.
+  Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
     refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
       abstract (
         intros; destruct (X s); destruct (X d);
@@ -61,10 +127,10 @@ Section NaturalTransformationInverse.
     (*morphisms 2*)
   Defined.
 
-  Hint Immediate InverseOf_sym.
+  Hint Immediate IsInverseOf_sym.
 
-  Lemma NaturalEquivalenceInverse_NaturalEquivalence (TE : NaturalEquivalence T) : NaturalEquivalence (NaturalEquivalenceInverse TE).
-    unfold NaturalEquivalence, CategoryIsomorphism in *; simpl in *;
+  Lemma NaturalEquivalenceInverse_NaturalEquivalence (TE : NaturalEquivalenceOf T) : NaturalEquivalenceOf (NaturalEquivalenceInverse TE).
+    unfold NaturalEquivalenceOf, Isomorphism in *; simpl in *;
       intro x; destruct (TE x); eauto.
   Qed.
 End NaturalTransformationInverse.
@@ -75,7 +141,7 @@ Section IdentityNaturalTransformation.
 
   Hint Resolve CategoryIdentityInverse.
 
-  Theorem IdentityNaturalEquivalence : NaturalEquivalence (IdentityNaturalTransformation F).
+  Theorem IdentityNaturalEquivalence : NaturalEquivalenceOf (IdentityNaturalTransformation F).
     hnf; intros; hnf; simpl; unfold InverseOf in *; eexists; t_with eauto.
   Qed.
 End IdentityNaturalTransformation.
@@ -98,7 +164,7 @@ Section FunctorNaturalEquivalenceRelation.
     destruct 1 as [ ? [ H ] ]; exists (NaturalEquivalenceInverse H); eauto.
   Qed.
 
-  Hint Resolve CategoryIsomorphismComposition.
+  Hint Resolve IsomorphismComposition.
 
   Lemma functors_naturally_equivalent_trans (F G H : Functor C D) :
     FunctorsNaturallyEquivalent F G -> FunctorsNaturallyEquivalent G H -> FunctorsNaturallyEquivalent F H.
@@ -116,9 +182,9 @@ Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
 
 (* XXX TODO: Automate this better *)
 Add Parametric Morphism (C D E : Category) :
-  (ComposeFunctors (C := C) (D := D) (E := E))
+  (@ComposeFunctors _ _ C _ _ D _ _ E)
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
-  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalence, CategoryIsomorphism, InverseOf in *;
+  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalenceOf, Isomorphism, InverseOf in *;
     destruct_hypotheses.
   match goal with
     | [ T1 : _ , T2 : _ |- _ ] => exists (NTComposeF T1 T2); try (constructor; trivial)
@@ -133,9 +199,9 @@ Add Parametric Morphism (C D E : Category) :
   Hint Rewrite <- FCompositionOf.
   Hint Rewrite FIdentityOf.
   eexists (Compose _ (MorphismOf _ _));
-    split; compose4associativity;
-      repeat (try find_composition_to_identity; autorewrite with core);
-        reflexivity.
+    compose4associativity;
+    repeat (try find_composition_to_identity; autorewrite with core);
+      reflexivity.
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
@@ -162,7 +228,7 @@ Section FunctorNaturalEquivalenceLemmas.
 
   Hint Rewrite LeftIdentity RightIdentity.
 
-  Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalence CategoryIsomorphism InverseOf.
+  Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalenceOf Isomorphism InverseOf.
 
   (* XXX TODO: Automate this better. *)
   Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
@@ -178,7 +244,7 @@ Section FunctorNaturalEquivalenceLemmas.
     eexists (MorphismOf G _);
       repeat (rewrite LeftIdentity || rewrite RightIdentity);
       repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf);
-        split; rewrite FIdentityOf; eauto 15.
+        rewrite FIdentityOf; eauto.
   Qed.
 
   Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
@@ -195,7 +261,7 @@ Section FunctorNaturalEquivalenceLemmas.
     repeat match goal with
              | [ H := _ |- _ ] => subst H
            end.
-    eexists; split; t_rev_with t'.
+    eexists; t_rev_with t'.
   Qed.
 
   Hint Resolve ComposeFunctorsAssociativity.
@@ -229,7 +295,7 @@ Section CategoryNaturalEquivalenceRelation.
     destruct 1 as [ F [ G [ ? ] ] ]; eexists; eauto.
   Qed.
 
-  Hint Resolve CategoryIsomorphismComposition.
+  Hint Resolve IsomorphismComposition.
 
   Ltac solve_4_associativity :=
     match goal with
