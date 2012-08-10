@@ -49,6 +49,8 @@ MODULES    := Common \
 	Groupoid \
 	AdjointUnit \
 	Adjoint \
+	DiscreteCategoryFunctors \
+	DecidableDiscreteCategoryFunctors \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
