@@ -83,6 +83,16 @@ Ltac destruct_exists :=
     | [ |- @sigT2 ?T _ _ ] => destruct_exists' T
   end.
 
+Ltac do_with_hyp tac :=
+  match goal with
+    | [ H : _ |- _ ] => tac H
+  end.
+
+Ltac rewrite_hyp' := do_with_hyp ltac:(fun H => rewrite H).
+Ltac rewrite_hyp := repeat rewrite_hyp'.
+Ltac rewrite_rev_hyp' := do_with_hyp ltac:(fun H => rewrite <- H).
+Ltac rewrite_rev_hyp := repeat rewrite_rev_hyp'.
+
 (* some simple tactics to solve the goal by rewriting *)
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
