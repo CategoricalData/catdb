@@ -69,20 +69,6 @@ Ltac simpl_do tac H :=
 (* clear the left-over hypothesis after [simpl_do]ing it *)
 Ltac simpl_do_clear tac H := simpl_do ltac:(fun H => tac H; try clear H) H.
 
-(* if progress can be made by [exists _], but it doesn't matter what
-   fills in the [_], assume that something exists, and leave the two
-   goals of finding a member of the apropriate type, and proving that
-   all members of the appropriate type prove the goal *)
-Ltac destruct_exists' T := cut T; try (let H := fresh in intro H; exists H).
-Ltac destruct_exists :=
-  match goal with
-    | [ |- @ex ?T _ ] => destruct_exists' T
-    | [ |- @sig ?T _ ] => destruct_exists' T
-    | [ |- @sigT ?T _ ] => destruct_exists' T
-    | [ |- @sig2 ?T _ _ ] => destruct_exists' T
-    | [ |- @sigT2 ?T _ _ ] => destruct_exists' T
-  end.
-
 Ltac do_with_hyp tac :=
   match goal with
     | [ H : _ |- _ ] => tac H
@@ -147,6 +133,20 @@ Ltac destruct_type_matcher T HT :=
 Ltac destruct_type T := destruct_all_matches ltac:(destruct_type_matcher T).
 Ltac destruct_type' T := destruct_all_matches' ltac:(destruct_type_matcher T).
 
+Ltac destruct_head_matcher T HT :=
+  match head HT with
+    | T => idtac
+  end.
+Ltac destruct_head T := destruct_all_matches ltac:(destruct_head_matcher T).
+Ltac destruct_head' T := destruct_all_matches' ltac:(destruct_head_matcher T).
+
+Ltac destruct_head_hnf_matcher T HT :=
+  match head_hnf HT with
+    | T => idtac
+  end.
+Ltac destruct_head_hnf T := destruct_all_matches ltac:(destruct_head_hnf_matcher T).
+Ltac destruct_head_hnf' T := destruct_all_matches' ltac:(destruct_head_hnf_matcher T).
+
 Ltac destruct_hypotheses_matcher HT :=
   let HT' := eval hnf in HT in
     match HT' with
@@ -171,6 +171,20 @@ Ltac destruct_sig' := destruct_all_matches' destruct_sig_matcher.
 Ltac destruct_all_hypotheses := destruct_all_matches ltac:(fun HT =>
   destruct_hypotheses_matcher HT || destruct_sig_matcher HT
 ).
+
+(* if progress can be made by [exists _], but it doesn't matter what
+   fills in the [_], assume that something exists, and leave the two
+   goals of finding a member of the apropriate type, and proving that
+   all members of the appropriate type prove the goal *)
+Ltac destruct_exists' T := cut T; try (let H := fresh in intro H; exists H).
+Ltac destruct_exists := destruct_head_hnf @ex;
+  match goal with
+    | [ |- @ex ?T _ ] => destruct_exists' T
+    | [ |- @sig ?T _ ] => destruct_exists' T
+    | [ |- @sigT ?T _ ] => destruct_exists' T
+    | [ |- @sig2 ?T _ _ ] => destruct_exists' T
+    | [ |- @sigT2 ?T _ _ ] => destruct_exists' T
+  end.
 
 (* if the goal can be solved by repeated specialization of some
    hypothesis with other [specialized] hypotheses, solve the goal
