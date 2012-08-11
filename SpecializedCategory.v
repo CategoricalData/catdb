@@ -46,10 +46,11 @@ Section SpecializedCategoryInterface.
   Lemma unfold_Compose : Compose = (C.(Compose') : forall (s d d' : C), Morphism d d' -> Morphism s d -> Morphism s d'). reflexivity. Qed.
 End SpecializedCategoryInterface.
 
+Arguments Object {obj mor} C : rename, simpl never.
+Arguments Morphism {obj mor} C s d : rename, simpl never.
 Arguments Compose {obj mor} [C s d d'] m m0 : simpl nomatch.
 Arguments Identity {obj mor} [C] o : simpl nomatch.
 
-Global Opaque Object Morphism.
 Global Opaque Associativity LeftIdentity RightIdentity.
 
 Ltac unfold_Object :=
@@ -124,6 +125,7 @@ Ltac present_spcategory_all_obj_mor := present_obj_mor @Identity' @Identity; pre
 
 Hint Rewrite LeftIdentity RightIdentity.
 Hint Resolve LeftIdentity RightIdentity.
+Hint Immediate Associativity.
 
 Definition LocallySmallSpecializedCategory (obj : Type) (mor : obj -> obj -> Set) := SpecializedCategory mor.
 Definition SmallSpecializedCategory (obj : Set) (mor : obj -> obj -> Set) := SpecializedCategory mor.
