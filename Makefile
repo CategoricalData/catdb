@@ -7,6 +7,7 @@ MODULES    := Common \
 	EquivalenceClass \
 	EquivalenceRelation \
 	EquivalenceRelationGenerator \
+	Morphisms \
 	SpecializedCategory \
 	Category \
 	CategoryEquality \
