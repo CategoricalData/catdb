@@ -123,6 +123,7 @@ Ltac present_spcategory_all_obj_mor := present_obj_mor @Identity' @Identity; pre
 
 
 Hint Rewrite LeftIdentity RightIdentity.
+Hint Resolve LeftIdentity RightIdentity.
 
 Definition LocallySmallSpecializedCategory (obj : Type) (mor : obj -> obj -> Set) := SpecializedCategory mor.
 Definition SmallSpecializedCategory (obj : Set) (mor : obj -> obj -> Set) := SpecializedCategory mor.
