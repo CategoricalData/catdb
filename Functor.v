@@ -185,6 +185,9 @@ Section IdentityFunctorLemmas.
   Qed.
 End IdentityFunctorLemmas.
 
+Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor.
+Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor.
+
 Section FunctorCompositionLemmas.
   Variable objB : Type.
   Variable morB : objB -> objB -> Type.

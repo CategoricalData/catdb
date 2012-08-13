@@ -12,6 +12,7 @@ MODULES    := Common \
 	CategoryEquality \
 	CategoryIsomorphisms \
 	Functor \
+	FunctorIsomorphisms \
 	NaturalTransformation \
 	NaturalEquivalence \
 	SigCategory \
