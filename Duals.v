@@ -1,5 +1,5 @@
 Require Import JMeq Eqdep.
-Require Export SpecializedCategory Functor ProductCategory NaturalTransformation.
+Require Export SpecializedCategory CategoryIsomorphisms Functor ProductCategory NaturalTransformation.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.

@@ -50,8 +50,8 @@ Section Adjunction.
     AComponentsOf' : forall A A', morD (F A) A' -> morC A (G A');
     (* [IsomorphismOf] is sort-polymorphic, but it picks up the type of morphisms in [TypeCat].  The [IsInverseOf']s don't *)
     AIsomorphism' : forall A A', { m' : _ |
-      IsInverseOf'1 TypeCat _ _ (@AComponentsOf' A A') m' &
-      IsInverseOf'2 TypeCat _ _ (@AComponentsOf' A A') m'
+      IsInverseOf'1 (C := TypeCat) _ _ (@AComponentsOf' A A') m' &
+      IsInverseOf'2 (C := TypeCat) _ _ (@AComponentsOf' A A') m'
     };
     ACommutes' : forall A A' B B' (m : morC B A) (m' : morD A' B'),
       Compose (C := TypeCat)
@@ -66,8 +66,8 @@ Section Adjunction.
     Definition AComponentsOf : forall (A : C) (A' : D),
       TypeCat.(Morphism) (HomFunctor D (F A, A')) (HomFunctor C (A, G A'))
       := Eval cbv beta delta [AComponentsOf'] in T.(AComponentsOf').
-    Definition AIsomorphism : forall (A : C) (A' : D), @Isomorphism _ _ TypeCat _ _ (@AComponentsOf A A')
-      := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism').
+    Definition AIsomorphism (A : C) (A' : D) : @IsomorphismOf _ _ TypeCat _ _ (@AComponentsOf A A')
+      := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism') A A' : IsomorphismOf_sig (@AComponentsOf A A').
     Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@AComponentsOf B B') (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) =
       Compose (MorphismOf (HomFunctor C) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')) (@AComponentsOf A A')

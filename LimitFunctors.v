@@ -261,7 +261,7 @@ Section Adjoint.
               try specialized_assumption idtac.
   Qed.
 
-  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : Isomorphism (@LimitAdjunction_AComponentsOf c F).
+  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : IsomorphismOf (@LimitAdjunction_AComponentsOf c F).
     exists (LimitAdjunction_AComponentsOf_Inverse _);
       eapply (@LimitAdjunction_AIsomorphism' _ _).
   Defined.
@@ -372,7 +372,7 @@ Section Adjoint.
             try specialized_assumption idtac.
   Qed.
 
-  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : Isomorphism (@ColimitAdjunction_AComponentsOf F c).
+  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : IsomorphismOf (@ColimitAdjunction_AComponentsOf F c).
     exists (@ColimitAdjunction_AComponentsOf_Inverse _ _);
       eapply (@ColimitAdjunction_AIsomorphism' _ _).
   Defined.
@@ -434,6 +434,7 @@ Section Adjoint.
     pose (@ColimitAdjunction_AIsomorphism' F c).
     pose (@ColimitAdjunction_AIsomorphism' F' c').
     unfold InverseOf in *; destruct_hypotheses.
+    present_spcategory.
     pre_compose_to_identity; post_compose_to_identity.
     apply ColimitAdjunction_ACommutes_Inverse.
   Qed.

@@ -10,6 +10,7 @@ MODULES    := Common \
 	SpecializedCategory \
 	Category \
 	CategoryEquality \
+	CategoryIsomorphisms \
 	Functor \
 	NaturalTransformation \
 	NaturalEquivalence \

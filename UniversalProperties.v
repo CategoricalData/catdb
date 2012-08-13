@@ -1,4 +1,4 @@
-Require Export CommaCategory.
+Require Export CommaCategory CategoryIsomorphisms.
 Require Import Common DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.

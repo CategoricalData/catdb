@@ -1,5 +1,5 @@
 Require Import Setoid.
-Require Export Category NaturalTransformation.
+Require Export Category NaturalTransformation CategoryIsomorphisms.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -55,7 +55,7 @@ Section NaturalEquivalence.
   Variable F G : Functor C D.
 
   Definition NaturalEquivalenceOf (T : NaturalTransformation F G) :=
-    forall x : C.(Object), Isomorphism (T.(ComponentsOf) x).
+    forall x : C.(Object), IsomorphismOf (T.(ComponentsOf) x).
 
   Definition FunctorsNaturallyEquivalent : Prop :=
     exists T : NaturalTransformation F G, exists NE : NaturalEquivalenceOf T, True.
@@ -130,8 +130,7 @@ Section NaturalTransformationInverse.
   Hint Immediate IsInverseOf_sym.
 
   Lemma NaturalEquivalenceInverse_NaturalEquivalence (TE : NaturalEquivalenceOf T) : NaturalEquivalenceOf (NaturalEquivalenceInverse TE).
-    unfold NaturalEquivalenceOf, Isomorphism in *; simpl in *;
-      intro x; destruct (TE x); eauto.
+    intro; apply InverseOf.
   Qed.
 End NaturalTransformationInverse.
 
@@ -139,10 +138,10 @@ Section IdentityNaturalTransformation.
   Variable C D : Category.
   Variable F : Functor C D.
 
-  Hint Resolve CategoryIdentityInverse.
-
   Theorem IdentityNaturalEquivalence : NaturalEquivalenceOf (IdentityNaturalTransformation F).
     hnf; intros; hnf; simpl; unfold InverseOf in *; eexists; t_with eauto.
+    Grab Existential Variables.
+    eauto.
   Qed.
 End IdentityNaturalTransformation.
 
@@ -164,14 +163,13 @@ Section FunctorNaturalEquivalenceRelation.
     destruct 1 as [ ? [ H ] ]; exists (NaturalEquivalenceInverse H); eauto.
   Qed.
 
-  Hint Resolve IsomorphismComposition.
+  Hint Resolve @ComposeIsmorphismOf.
 
   Lemma functors_naturally_equivalent_trans (F G H : Functor C D) :
     FunctorsNaturallyEquivalent F G -> FunctorsNaturallyEquivalent G H -> FunctorsNaturallyEquivalent F H.
     destruct 1 as [ T [ ] ]; destruct 1 as [ U [ ] ];
       exists (NTComposeT U T); eexists; hnf; simpl; eauto.
   Qed.
-
 End FunctorNaturalEquivalenceRelation.
 
 Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
@@ -184,7 +182,7 @@ Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
 Add Parametric Morphism (C D E : Category) :
   (@ComposeFunctors _ _ C _ _ D _ _ E)
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
-  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalenceOf, Isomorphism, InverseOf in *;
+  intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalenceOf, InverseOf in *;
     destruct_hypotheses.
   match goal with
     | [ T1 : _ , T2 : _ |- _ ] => exists (NTComposeF T1 T2); try (constructor; trivial)
@@ -198,6 +196,7 @@ Add Parametric Morphism (C D E : Category) :
          end.
   Hint Rewrite <- FCompositionOf.
   Hint Rewrite FIdentityOf.
+  destruct_type @IsomorphismOf.
   eexists (Compose _ (MorphismOf _ _));
     compose4associativity;
     repeat (try find_composition_to_identity; autorewrite with core);
@@ -228,7 +227,7 @@ Section FunctorNaturalEquivalenceLemmas.
 
   Hint Rewrite LeftIdentity RightIdentity.
 
-  Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalenceOf Isomorphism InverseOf.
+  Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalenceOf InverseOf.
 
   (* XXX TODO: Automate this better. *)
   Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
@@ -245,7 +244,11 @@ Section FunctorNaturalEquivalenceLemmas.
       repeat (rewrite LeftIdentity || rewrite RightIdentity);
       repeat (rewrite <- FIdentityOf || rewrite <- FCompositionOf);
         rewrite FIdentityOf; eauto.
+    Grab Existential Variables.
+    eauto.
   Qed.
+
+  Hint Resolve @ComposeIsmorphismOf.
 
   Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
     FunctorsNaturallyEquivalent G1 G2 -> FunctorsNaturallyEquivalent (ComposeFunctors G1 F) (ComposeFunctors G2 F).
@@ -262,6 +265,8 @@ Section FunctorNaturalEquivalenceLemmas.
              | [ H := _ |- _ ] => subst H
            end.
     eexists; t_rev_with t'.
+    Grab Existential Variables.
+    autorewrite with core; eauto.
   Qed.
 
   Hint Resolve ComposeFunctorsAssociativity.
@@ -294,8 +299,6 @@ Section CategoryNaturalEquivalenceRelation.
     CategoriesNaturallyEquivalent C D -> CategoriesNaturallyEquivalent D C.
     destruct 1 as [ F [ G [ ? ] ] ]; eexists; eauto.
   Qed.
-
-  Hint Resolve IsomorphismComposition.
 
   Ltac solve_4_associativity :=
     match goal with

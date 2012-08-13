@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality JMeq ProofIrrelevance.
-Require Export Category InitialTerminalCategory Functor ComputableCategory.
+Require Export Category CategoryIsomorphisms InitialTerminalCategory Functor ComputableCategory.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.

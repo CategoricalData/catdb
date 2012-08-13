@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export SpecializedCategory Functor.
-Require Import Common.
+Require Import Common CategoryIsomorphisms.
 
 Set Implicit Arguments.
 

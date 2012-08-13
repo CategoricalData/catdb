@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export Category SetCategory DiscreteCategory.
+Require Export Category SetCategory DiscreteCategory CategoryIsomorphisms.
 Require Import Common.
 
 Set Implicit Arguments.
