@@ -79,6 +79,11 @@ Ltac rewrite_hyp := repeat rewrite_hyp'.
 Ltac rewrite_rev_hyp' := do_with_hyp ltac:(fun H => rewrite <- H).
 Ltac rewrite_rev_hyp := repeat rewrite_rev_hyp'.
 
+Ltac apply_hyp' := do_with_hyp ltac:(fun H => apply H).
+Ltac apply_hyp := repeat apply_hyp'.
+Ltac eapply_hyp' := do_with_hyp ltac:(fun H => eapply H).
+Ltac eapply_hyp := repeat eapply_hyp'.
+
 (* some simple tactics to solve the goal by rewriting *)
 Ltac t' := repeat progress (simpl; intros; try split; trivial).
 Ltac t'_long := repeat progress (simpl; intuition).
