@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export DiscreteCategory Functor SetCategory ComputableCategory SmallCat.
+Require Export DiscreteCategory Functor SetCategory ComputableCategory SmallCat NaturalTransformation.
 Require Import Common Adjoint.
 
 Set Implicit Arguments.
@@ -108,6 +108,60 @@ End Mor.
 Arguments MorphismFunctor {I Index2Object Index2Morphism Index2Cat}.
 Arguments MorphismFunctorToSet {I Index2Object Index2Morphism Index2Cat}.
 Arguments MorphismFunctorToProp {I Index2Object Index2Morphism Index2Cat}.
+
+Section dom_cod.
+  Local Ltac build_dom_cod fst_snd :=
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+          (fun _ => (fun sdf => fst_snd _ _ (projT1 sdf)))
+          _
+        )
+    end;
+    reflexivity.
+
+  Section type.
+    Variable I : Type.
+    Variable Index2Object : I -> Type.
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+
+    Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ _ Index2Cat) ObjectFunctor.
+      build_dom_cod @fst.
+    Defined.
+
+    Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ _ Index2Cat) ObjectFunctor.
+      build_dom_cod @snd.
+    Defined.
+  End type.
+
+  Section set.
+    Variable I : Type.
+    Context `(Index2Cat : forall i : I, @SmallSpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+
+    Definition DomainNaturalTransformationInSet : SpecializedNaturalTransformation (@MorphismFunctorToSet _ _ _ Index2Cat) ObjectFunctorToSet.
+      build_dom_cod @fst.
+    Defined.
+
+    Definition CodomainNaturalTransformationInSet : SpecializedNaturalTransformation (@MorphismFunctorToSet _ _ _ Index2Cat) ObjectFunctorToSet.
+      build_dom_cod @snd.
+    Defined.
+  End set.
+
+  Section prop.
+    Variable I : Type.
+    Variable Index2Object : I -> Prop.
+    Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Prop.
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+
+    Definition DomainNaturalTransformationInProp : SpecializedNaturalTransformation (@MorphismFunctorToProp _ _ _ Index2Cat) ObjectFunctorToProp.
+      build_dom_cod @fst.
+    Defined.
+
+    Definition CodomainNaturalTransformationInProp : SpecializedNaturalTransformation (@MorphismFunctorToProp _ _ _ Index2Cat) ObjectFunctorToProp.
+      build_dom_cod @snd.
+    Defined.
+  End prop.
+End dom_cod.
 
 Section InducedFunctor.
   Variable O : Type.
