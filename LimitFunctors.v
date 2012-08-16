@@ -79,7 +79,6 @@ Section LimitFunctors.
 
   (* XXX TODO: Automate this better *)
   Definition LimitFunctor' : SpecializedFunctor (C ^ D) C.
-    Transparent Object Morphism Compose Identity.
     refine {| ObjectOf' := LimitOf;
       MorphismOf' := LimitFunctor_morphism_of
     |};
@@ -218,7 +217,6 @@ Section Adjoint.
 
   Definition LimitAdjunction_AComponentsOf_Inverse (c : C) (F : C ^ D)
     : TypeCat.(Morphism) (HomFunctor C (c, (LimitFunctor HL) F)) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)).
-    Transparent Morphism.
     simpl in *; intro f; hnf; simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?DF ?F ] =>
@@ -241,7 +239,6 @@ Section Adjoint.
 
   Lemma LimitAdjunction_AIsomorphism' (c : C) (F : C ^ D) :
     IsInverseOf (@LimitAdjunction_AComponentsOf c F) (@LimitAdjunction_AComponentsOf_Inverse c F).
-    Transparent Compose.
     unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse;
       unfold LimitMorphism, LimitProperty_Morphism, LimitObject, Limit in *;
         split; simpl in *;

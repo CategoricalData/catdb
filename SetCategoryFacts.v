@@ -5,8 +5,6 @@ Require Import Common.
 Set Implicit Arguments.
 
 Section InitialTerminal.
-  Local Transparent Object Morphism.
-
   Hint Extern 1 (_ = _) => apply (@functional_extensionality_dep _); intro.
   Hint Extern 2 => destruct_to_empty_set.
 

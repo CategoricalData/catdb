@@ -80,8 +80,7 @@ Section Adjunction.
     forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
       Compose (proj1_sig (T.(AIsomorphism) B B')) (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')).
-    Opaque TypeCat HomFunctor.
-    Transparent Object Morphism.
+    Local Opaque TypeCat HomFunctor.
     intros.
     Local Ltac intro_T T A A' :=
       let t := constr:(T.(AIsomorphism) A A') in
@@ -132,7 +131,6 @@ Section AdjunctionEquivalences.
       (ProductFunctor (OppositeFunctor F) (IdentityFunctor D)))
     (ComposeFunctors (HomFunctor C)
       (ProductFunctor (IdentityFunctor (OppositeCategory C)) G)).
-    Local Transparent Morphism Object.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
@@ -213,7 +211,6 @@ Section AdjunctionEquivalences.
      [η c = ϕ(1_{F c})]
      *)
   Definition UnitOf (A : HomAdjunction F G) : AdjunctionUnit F G.
-    Transparent Morphism Identity.
     eexists (Build_SpecializedNaturalTransformation (IdentityFunctor C) (ComposeFunctors G F)
       (fun c => A.(AComponentsOf) c (F c) (Identity _))
       _
@@ -242,7 +239,6 @@ Section AdjunctionEquivalences.
 
 
   Definition CounitOf (A : HomAdjunction F G) : AdjunctionCounit F G.
-    Transparent MorphismOf.
     eexists (Build_SpecializedNaturalTransformation (ComposeFunctors F G) (IdentityFunctor D)
       (fun d => proj1_sig (A.(AIsomorphism) (G d) d) (Identity _))
       _
@@ -270,8 +266,6 @@ Section AdjunctionEquivalences.
 End AdjunctionEquivalences.
 
 Section AdjunctionEquivalences'.
-  Local Transparent Morphism Object.
-
   Variables C D : Category.
   Variable F : Functor C D.
   Variable G : Functor D C.

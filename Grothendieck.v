@@ -61,7 +61,6 @@ Section Grothendieck.
   Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
     { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
-    Transparent Compose.
     intros m2 m1.
     exists (Compose (proj1_sig m2) (proj1_sig m1)).
     abstract (
@@ -75,7 +74,6 @@ Section Grothendieck.
   Arguments GrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
   Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
-    Transparent Identity.
     exists (Identity c).
     abstract (
       rewrite FIdentityOf;

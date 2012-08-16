@@ -110,7 +110,6 @@ Arguments MorphismFunctorToSet {I Index2Object Index2Morphism Index2Cat}.
 Arguments MorphismFunctorToProp {I Index2Object Index2Morphism Index2Cat}.
 
 Section InducedFunctor.
-  Local Transparent Object Morphism.
   Variable O : Type.
   Context `(O' : @SpecializedCategory obj mor).
   Variable f : O -> O'.
@@ -128,8 +127,6 @@ Section InducedFunctor.
 End InducedFunctor.
 
 Section disc.
-  Local Transparent Object Morphism.
-
   Local Ltac t := simpl; intros; functor_eq;
     repeat (apply functional_extensionality_dep; intro);
       hnf in *; subst;
@@ -157,8 +154,6 @@ Section disc.
 End disc.
 
 Section Adjoints.
-  Local Transparent Object Morphism.
-
   Lemma DiscreteObjectIdentity : ComposeFunctors ObjectFunctor DiscreteFunctor = IdentityFunctor _.
     functor_eq.
   Qed.

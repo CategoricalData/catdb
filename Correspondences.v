@@ -116,7 +116,6 @@ Section CorrespondenceCategory.
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
   Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type CorrespondenceCategory_Morphism.
-    Transparent Morphism.
     refine {| Identity' := CorrespondenceCategory_Identity; Compose' := CorrespondenceCategory_Compose |};
       abstract (
         intros; destruct_type @sum;
@@ -149,7 +148,6 @@ Section CorrespondenceCategory.
                 repeat rewrite FCompositionOf;
                   try solve [ simpl; trivial ]
       ).
-    Local Opaque Morphism.
   Defined.
 End CorrespondenceCategory.
 
@@ -160,7 +158,6 @@ Notation "C ★^{ M } D" := (@CorrespondenceCategory _ _ C _ _ D M) (at level 70
 Local Notation "[ 1 ]" := BoolCat : category_scope.
 
 Section Functor_to_1.
-  Local Transparent Object Morphism.
   (*
      For any correspondence [M : C → C'], there is an obvious functor
      [F : C ★^{M} C' → [1] ] (here [1] denotes the linearly ordered set

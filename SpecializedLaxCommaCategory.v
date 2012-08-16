@@ -78,7 +78,6 @@ Section LaxSliceSpecializedCategory.
 
   Definition LaxSliceSpecializedCategory_Compose' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
     LaxSliceSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
     exists (ComposeFunctors (fst (projT1 Fα)) (fst (projT1 F'α')), tt).
     repeat match goal with
              | [ H : _ |- _ ] => unique_pose_with_body (fst (projT1 H))
@@ -256,7 +255,6 @@ Section LaxCosliceSpecializedCategory.
 
   Definition LaxCosliceSpecializedCategory_Compose' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
     LaxCosliceSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
     exists (tt, ComposeFunctors (snd (projT1 F'α')) (snd (projT1 Fα))).
     repeat match goal with
              | [ H : _ |- _ ] => unique_pose_with_body (snd (projT1 H))

@@ -70,7 +70,6 @@ Section PreMonoidalCategory.
                | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
                | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
              end.
-  Transparent Object Morphism.
   unfold Morphism, Object in Hf.
   simpl in Hf.
   assert False.

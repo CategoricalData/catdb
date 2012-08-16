@@ -9,8 +9,6 @@ Generalizable All Variables.
 Local Infix "==" := JMeq (at level 70).
 
 Section sig_sigT_obj_mor.
-  Local Transparent Object Morphism.
-
   Context `(A : @SpecializedCategory objA morA).
   Variable Pobj : objA -> Prop.
   Variable Pmor : forall s d : sig Pobj, morA (proj1_sig s) (proj1_sig d) -> Type.

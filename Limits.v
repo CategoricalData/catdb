@@ -32,7 +32,6 @@ Section DiagonalFunctor.
   Defined.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
-    Transparent Object Morphism.
     simpl; unfold diagonal_functor_object_of; intro m.
     hnf.
     match goal with
@@ -46,7 +45,6 @@ Section DiagonalFunctor.
   Defined.
 
   Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).
-    Transparent Morphism.
     refine {| ObjectOf' := diagonal_functor_object_of;
       MorphismOf' := diagonal_functor_morphism_of
       |}; abstract nt_eq.

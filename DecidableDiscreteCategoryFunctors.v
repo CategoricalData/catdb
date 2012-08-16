@@ -12,8 +12,6 @@ Section eq_dec_prop.
   Qed.
 End eq_dec_prop.
 
-Local Transparent Object Morphism.
-
 Section Obj.
   Local Ltac build_ob_functor Index2Object :=
     match goal with
@@ -63,7 +61,6 @@ Arguments ObjectFunctorToSetDec {I Index2Object Index2Morphism Index2Cat}.
 Arguments ObjectFunctorToPropDec {I Index2Object Index2Morphism Index2Cat}.
 
 Section InducedFunctor.
-  Local Transparent Object Morphism.
   Variable O : Type.
   Context `(O' : @SpecializedCategory obj mor).
   Variable f : O -> O'.
@@ -130,8 +127,6 @@ Local Ltac t_dec := repeat (intros; simpl in *; autounfold with core in *; simpl
 ).
 
 Section disc.
-  Local Transparent Object Morphism.
-
   Hint Unfold DiscreteCategoryDec_Identity.
   Hint Unfold eq_rect_r eq_rect eq_sym.
 
@@ -233,8 +228,6 @@ Section disc.
 End disc.
 
 Section Adjoints.
-  Local Transparent Object Morphism.
-
   Local Ltac t :=
     repeat match goal with
              | _ => progress trivial

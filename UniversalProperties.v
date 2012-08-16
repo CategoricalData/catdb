@@ -48,7 +48,6 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        Transparent Morphism Object.
         Hint Unfold Morphism Object.
         unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
           simpl in *.
@@ -106,7 +105,6 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
-        Transparent Morphism Object.
         Hint Unfold Object Morphism.
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
           simpl in *.

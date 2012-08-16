@@ -51,7 +51,6 @@ Section InducedMaps.
     Let limF2 := LimitObject F2_Limit.
 
     Definition InducedLimitMapNT' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
-      Transparent Object Morphism.
       unfold LimitObject, Limit in *;
         intro_universal_morphisms.
       subst limF1 limF2.
@@ -93,7 +92,6 @@ Section InducedMaps.
     Let colimF2 := ColimitObject F2_Colimit.
 
     Definition InducedColimitMapNT' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
-      Transparent Object Morphism.
       unfold ColimitObject, Colimit in *;
         intro_universal_morphisms.
       subst colimF1 colimF2.

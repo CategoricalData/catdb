@@ -13,7 +13,6 @@ Section Categories_Equal.
     -> @Identity _ _ A == @Identity _ _ B
     -> @Compose _ _ A == @Compose _ _ B
     -> A = B.
-    Transparent Object Morphism Identity Compose.
     unfold Identity, Compose, Morphism, Object.
     intros.
     destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
@@ -26,7 +25,6 @@ Section Categories_Equal.
     -> @Identity _ _ A == @Identity _ _ B
     -> @Compose _ _ A == @Compose _ _ B
     -> A = B.
-    Transparent SObject SMorphism Object Morphism Identity Compose.
     unfold Identity, Compose, Morphism, Object, SObject, SMorphism.
     intros.
     destruct_type @SmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;
@@ -39,7 +37,6 @@ Section Categories_Equal.
     -> @Identity _ _ A == @Identity _ _ B
     -> @Compose _ _ A == @Compose _ _ B
     -> A = B.
-    Transparent LSObject LSMorphism Object Morphism Identity Compose.
     unfold Identity, Compose, Morphism, Object, LSObject, LSMorphism.
     intros.
     destruct_type @LocallySmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;

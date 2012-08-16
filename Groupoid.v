@@ -45,7 +45,6 @@ Section Groupoid.
   Variable C : SpecializedCategory morC.
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
-    Transparent Morphism.
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;
       repeat
         match goal with

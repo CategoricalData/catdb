@@ -113,7 +113,6 @@ Section sig_obj.
   Defined.
 
   Lemma sig_obj_eq : ComposeFunctors sig_functor_obj sig_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sig_functor_obj_inv sig_functor_obj = IdentityFunctor _.
-    Local Transparent Morphism.
     split; functor_eq; simpl_eq; trivial.
   Qed.
 
@@ -189,7 +188,6 @@ Section sig_mor.
   Defined.
 
   Lemma sig_mor_eq : ComposeFunctors sig_functor_mor sig_functor_mor_inv = IdentityFunctor _ /\ ComposeFunctors sig_functor_mor_inv sig_functor_mor = IdentityFunctor _.
-    Local Transparent Object.
     split; functor_eq; simpl_eq; trivial.
   Qed.
 

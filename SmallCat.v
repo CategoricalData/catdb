@@ -10,8 +10,6 @@ Section SmallCat.
 End SmallCat.
 
 Section Objects.
-  Local Transparent Object Morphism.
-
   Hint Unfold Morphism Object.
 
   Local Arguments Object / {obj mor} C : rename.

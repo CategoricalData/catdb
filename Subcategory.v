@@ -3,8 +3,6 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Local Transparent Object Morphism.
-
 Section Subcategory.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.

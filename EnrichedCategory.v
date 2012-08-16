@@ -213,7 +213,6 @@ Section EnrichedCategory.
 End EnrichedCategory.
 (*
 Section nCategories.
-  Local Transparent Morphism Object.
   Check @EnrichedCategory.
   Require Import DiscreteCategory.
   Definition TerminalMonoidalCategory : @MonoidalCategory unit (fun _ _ => unit).

@@ -6,8 +6,6 @@ Set Implicit Arguments.
 
 Local Open Scope category_scope.
 
-Local Transparent Object.
-
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
   repeat (apply functional_extensionality_dep; intro);
     match goal with
@@ -25,7 +23,6 @@ Section Yoneda.
 
   Section Yoneda.
     Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
-      Transparent Morphism Compose Identity.
       refine {| ObjectOf' := (fun c : COp => CovariantHomFunctor C c : TypeCat ^ C);
         MorphismOf' := (fun s d (f : COp.(Morphism) s d) =>
           Build_SpecializedNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d)
@@ -40,7 +37,6 @@ Section Yoneda.
 
   Section CoYoneda.
     Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
-      Transparent Morphism Compose Identity.
       refine {| ObjectOf' := (fun c : C => ContravariantHomFunctor C c : TypeCat ^ COp);
         MorphismOf' := (fun s d (f : C.(Morphism) s d) =>
           Build_SpecializedNaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d)
@@ -62,7 +58,6 @@ Section YonedaLemma.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
   Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
-    Transparent Morphism.
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
@@ -86,7 +81,6 @@ Section YonedaLemma.
   Defined.
 
   Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
-    Transparent Compose Morphism Identity.
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
     pose (FIdentityOf X).
@@ -104,7 +98,6 @@ Section CoYonedaLemma.
   Let COp := OppositeCategory C.
 
   Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
-    Transparent Morphism.
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
@@ -128,7 +121,6 @@ Section CoYonedaLemma.
   Defined.
 
   Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
-    Transparent Compose Morphism Identity.
     exists (@CoYonedaLemmaMorphismInverse c X).
     split; simpl; nt_eq;
       pose (FIdentityOf X);
@@ -144,7 +136,6 @@ Section FullyFaithful.
   Variable C : SpecializedCategory morC.
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
-    Transparent Morphism Compose.
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@YonedaLemma _ _ C c (CovariantHomFunctor C c')) as [ m i ].
@@ -154,7 +145,6 @@ Section FullyFaithful.
   Qed.
 
   Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
-    Transparent Morphism Compose Identity.
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@CoYonedaLemma _ _ C c (ContravariantHomFunctor C c')) as [ m i ].

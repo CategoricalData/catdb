@@ -223,8 +223,6 @@ End SliceCategoryInducedFunctor.
 
 
 Section SliceCategoryProjectionFunctor.
-  Local Transparent Object Morphism.
-
   Variable C : LocallySmallCategory.
   Variable D : Category.
   Variable F : SpecializedFunctor C D. (* [SpecializedFunctor], not [Functor], because otherwise Sort-poylmorphism won't work *)
@@ -291,7 +289,6 @@ Section SliceCategoryProjectionFunctor.
       CommaSpecializedCategory_MorphismT
       (CosliceCategoryProjectionFunctor_ObjectOf s)
       (CosliceCategoryProjectionFunctor_ObjectOf d).
-      Transparent Morphism.
       subst_body; hnf; simpl.
       exists (@CosliceCategoryInducedFunctor _ _ C _ _ D F s d m, tt).
       simpl; intros.

@@ -9,8 +9,6 @@ Section InducedFunctor.
   (* The components of the functor can be useful even if we don't have
      a category that we're coming from.  So prove them separately, so
      we can use them elsewhere, without assuming a full [HasLimits]. *)
-  Local Transparent Object Morphism.
-
   Variable I : Type.
   Variable Index2Object : I -> Type.
   Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.

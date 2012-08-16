@@ -82,7 +82,6 @@ Section CommaSpecializedCategory.
   Definition CommaSpecializedCategory_Compose s d d'
     (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
     CommaSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
     exists (@Compose _ _ (A * B) _ _ _ (proj1_sig gh) (proj1_sig g'h')).
     hnf in *; simpl in *.
     abstract (
