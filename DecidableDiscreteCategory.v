@@ -1,5 +1,5 @@
 Require Export SpecializedCategory.
-Require Import Common.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
@@ -10,8 +10,8 @@ Section DCategoryDec.
 
   Variable eq_dec : forall a b : O, {a = b} + {~a = b}.
 
-  Local Notation "x == y" := (eq_dec x y) (at level 70, no associativity).
-  Local Notation "x == y == z" := (orb (x == y) (y == z)) (at level 70, no associativity, y at next level).
+  Local Infix "==" := eq_dec.
+  Local Notation "x == y == z" := (orb (x == y) (y == z)).
 
   Local Ltac contradict_by_transitivity :=
     match goal with

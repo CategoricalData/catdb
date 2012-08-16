@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance FunctionalExtensionality.
 Require Export SpecializedCategory Functor SetCategory ProductCategory Duals BoolCategory.
-Require Import Common Subcategory.
+Require Import Common Notations Subcategory.
 
 Set Implicit Arguments.
 
@@ -151,7 +151,8 @@ Section CorrespondenceCategory.
   Defined.
 End CorrespondenceCategory.
 
-Notation "C ★^ M D" := (@CorrespondenceCategory _ _ C _ _ D M) (at level 70, no associativity) : category_scope.
+Notation "C ★^ M D" := (@CorrespondenceCategory _ _ C _ _ D M) : category_scope.
+(* XXX: [Reserved Notation] doesn't work here? *)
 Notation "C ★^{ M } D" := (@CorrespondenceCategory _ _ C _ _ D M) (at level 70, no associativity) : category_scope.
 
 (* We use {false, true} instead of {0, 1}, because it's more convenient, and slightly faster *)

@@ -1,10 +1,10 @@
 Require Import Bool Omega Setoid FunctionalExtensionality ProofIrrelevance JMeq.
-Require Import Common EquivalenceRelation FEqualDep.
+Require Import Common Notations EquivalenceRelation FEqualDep.
 Require Export Schema.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section Schemas.
   Variables C D : Schema.

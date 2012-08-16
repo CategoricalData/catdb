@@ -1,10 +1,10 @@
 Require Import JMeq ProofIrrelevance.
-Require Export Functor.
+Require Export Notations Functor.
 Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section SpecializedNaturalTransformation.
   Variable objC : Type.
@@ -39,7 +39,6 @@ Section SpecializedNaturalTransformation.
   }.
 End SpecializedNaturalTransformation.
 
-Delimit Scope natural_transformation_scope with natural_transformation.
 Bind Scope natural_transformation_scope with SpecializedNaturalTransformation.
 
 Section NaturalTransformationInterface.

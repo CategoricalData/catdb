@@ -1,4 +1,5 @@
-MODULES    := Common \
+MODULES    := Notations \
+	Common \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \

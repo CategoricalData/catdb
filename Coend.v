@@ -1,5 +1,5 @@
 Require Export Equalizer Duals ProductFunctor DiscreteCategoryFunctors.
-Require Import Common Products LimitFunctorTheorems.
+Require Import Common Notations Products LimitFunctorTheorems.
 
 Set Implicit Arguments.
 
@@ -56,4 +56,4 @@ Section Coend.
 End Coend.
 
 (* TODO: Figure out why the notation for this is the same as the notation for the Grothendieck construction *)
-(*Notation "∫ F" := (Coend F) (at level 0).*)
+(*Notation "∫ F" := (Coend F).*)

@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance FunctionalExtensionality JMeq.
 Require Export SpecializedCommaCategory SmallCat Duals.
-Require Import Common DiscreteCategory FEqualDep DefinitionSimplification.
+Require Import Common Notations DiscreteCategory FEqualDep DefinitionSimplification.
 
 Set Implicit Arguments.
 
@@ -44,7 +44,7 @@ Section CommaCategory.
 
   Let AOp := OppositeCategory A.
 
-  Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
+  Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
   Hint Resolve FCompositionOf FIdentityOf.
 
@@ -69,14 +69,14 @@ Section SliceCategory.
   Variable S : SpecializedFunctor A C.
 
   Section Slice.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
 
     Definition SliceCategoryProjection : SpecializedFunctor (S ↓ a) A
       := ComposeFunctors fst_Functor (CommaCategoryProjection S (SliceSpecializedCategory_Functor C a)).
   End Slice.
 
   Section Coslice.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
 
     Definition CosliceCategoryProjection : SpecializedFunctor (a ↓ S) A
       := ComposeFunctors snd_Functor (CommaCategoryProjection (SliceSpecializedCategory_Functor C a) S).
@@ -93,7 +93,7 @@ Section SliceCategoryInducedFunctor.
   Variable F : SpecializedFunctor C D.
 
   Section Slice.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
     Let SliceCategoryInducedFunctor_ObjectOf s d (m : Morphism D s d) :
@@ -156,7 +156,7 @@ Section SliceCategoryInducedFunctor.
   End Slice.
 
   Section Coslice.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
     Let DOp := OppositeCategory D.
@@ -228,7 +228,7 @@ Section SliceCategoryProjectionFunctor.
   Variable F : SpecializedFunctor C D. (* [SpecializedFunctor], not [Functor], because otherwise Sort-poylmorphism won't work *)
 
   Section Slice.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
     Let SliceCategoryProjectionFunctor_ObjectOf (d : D) : LocallySmallCat / C.
@@ -274,7 +274,7 @@ Section SliceCategoryProjectionFunctor.
   End Slice.
 
   Section Coslice.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F) (at level 70, no associativity).
+    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
     Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
 
     Let DOp := OppositeCategory D.

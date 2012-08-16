@@ -1,4 +1,5 @@
 Require Import ProofIrrelevance.
+Require Export Notations.
 Require Import Common StructureEquality.
 
 Set Implicit Arguments.
@@ -15,7 +16,6 @@ Record SpecializedCategory (obj : Type) (Morphism : obj -> obj -> Type) := {
   RightIdentity' : forall a b (f : Morphism a b), Compose' f (Identity' a) = f
 }.
 
-Delimit Scope category_scope with category.
 Bind Scope category_scope with SpecializedCategory.
 
 Arguments Object {obj%type mor} C%category : rename.

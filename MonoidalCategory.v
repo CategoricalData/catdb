@@ -1,11 +1,8 @@
 Require Import ProofIrrelevance.
 Require Export SpecializedCategory Functor ProductCategory ProductFunctor NaturalTransformation NaturalEquivalence.
-Require Import Common StructureEquality DefinitionSimplification.
+Require Import Common Notations StructureEquality DefinitionSimplification.
 
 Set Implicit Arguments.
-
-Reserved Notation "A ⊗ B" (at level 40, left associativity).
-Reserved Notation "A ⊗m B" (at level 40, left associativity).
 
 Section PreMonoidalCategory.
   (* It's too hard to implement it all inside a record, so first we
@@ -357,7 +354,6 @@ Section MonoidalCategory.
   Local Reserved Notation "'α'".
   Local Reserved Notation "'λ'".
   Local Reserved Notation "'ρ'".
-  Local Reserved Notation "A ⊗m B" (at level 40, left associativity).
 
   Let src (C : SpecializedCategory morC) s d (_ : Morphism C s d) := s.
   Let dst (C : SpecializedCategory morC) s d (_ : Morphism C s d) := d.

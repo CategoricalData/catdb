@@ -1,9 +1,9 @@
 Require Import FunctionalExtensionality JMeq.
-Require Import Common.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section f_equal_dep.
   Theorem f_type_equal {A B A' B'} : A = A' -> B = B' -> (A -> B) = (A' -> B').

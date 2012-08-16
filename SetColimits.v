@@ -1,6 +1,6 @@
 Require Import Setoid ProofIrrelevance FunctionalExtensionality ClassicalEpsilon.
 Require Export SetCategory EquivalenceSet EquivalenceClass Grothendieck EquivalenceRelationGenerator.
-Require Import Common Limits Functor NaturalTransformation FunctorCategory InitialTerminalCategory.
+Require Import Common Notations Limits Functor NaturalTransformation FunctorCategory InitialTerminalCategory.
 
 Set Implicit Arguments.
 
@@ -23,7 +23,7 @@ Section SetColimits.
   Definition SetColimit_Object_equiv_Equivalence :=
     proj2_sig SetColimit_Object_equiv_sig.
 
-  Local Infix "~=" := SetColimit_Object_equiv (at level 70, no associativity).
+  Local Infix "~=" := SetColimit_Object_equiv.
 
   Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) c x c' x'
     (a := Build_SetGrothendieckPair F c x) (b := Build_SetGrothendieckPair F c' x') :
@@ -212,7 +212,7 @@ Section TypeColimits.
   Definition TypeColimit_Object_equiv_Equivalence :=
     proj2_sig TypeColimit_Object_equiv_sig.
 
-  Local Infix "~=" := TypeColimit_Object_equiv (at level 70, no associativity).
+  Local Infix "~=" := TypeColimit_Object_equiv.
 
   Lemma TypeColimit_Property_Morphism_respectful (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) c x c' x'
     (a := Build_GrothendieckPair F c x) (b := Build_GrothendieckPair F c' x') :

@@ -1,5 +1,5 @@
 Require Export CommaCategory CategoryIsomorphisms.
-Require Import Common DefinitionSimplification Eqdep.
+Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
 
@@ -13,7 +13,7 @@ Section UniversalMorphism.
   Variables C D : Category.
 
   Section InitialMorphism.
-    Local Notation "A ↓ F" := (CosliceCategory A F) (at level 70, no associativity).
+    Local Notation "A ↓ F" := (CosliceCategory A F).
     Variable X : C.
     Variable U : Functor D C.
     (**
@@ -71,7 +71,7 @@ Section UniversalMorphism.
   End InitialMorphism.
 
   Section TerminalMorphism.
-    Local Notation "F ↓ A" := (SliceCategory A F) (at level 70, no associativity).
+    Local Notation "F ↓ A" := (SliceCategory A F).
     Variable U : Functor D C.
     Variable X : C.
     (**

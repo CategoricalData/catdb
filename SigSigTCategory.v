@@ -1,12 +1,12 @@
 Require Import JMeq.
 Require Export SpecializedCategory Functor SigTCategory.
-Require Import Common.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
   Context `(A : @SpecializedCategory objA morA).

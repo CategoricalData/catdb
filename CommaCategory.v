@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common InitialTerminalCategory SpecializedCommaCategory DefinitionSimplification.
+Require Import Common Notations InitialTerminalCategory SpecializedCommaCategory DefinitionSimplification.
 
 Set Implicit Arguments.
 
@@ -117,7 +117,7 @@ Hint Unfold CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism 
 
 Arguments CommaCategory [A B C] S T.
 
-Local Notation "S ↓ T" := (CommaCategory S T) (at level 70, no associativity).
+Local Notation "S ↓ T" := (CommaCategory S T).
 
 Section SliceCategory.
   Variables A C : Category.

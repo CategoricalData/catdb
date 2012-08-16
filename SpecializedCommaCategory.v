@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common InitialTerminalCategory.
+Require Import Common Notations InitialTerminalCategory.
 
 Set Implicit Arguments.
 
@@ -165,7 +165,7 @@ End CommaSpecializedCategory.
 Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity.
 Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object.
 
-Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
+Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
 Section SliceSpecializedCategory.
   Variable objA : Type.

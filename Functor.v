@@ -1,10 +1,10 @@
 Require Import JMeq ProofIrrelevance.
-Require Export SpecializedCategory Category.
+Require Export Notations SpecializedCategory Category.
 Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section SpecializedFunctor.
   Variable objC : Type.
@@ -33,7 +33,6 @@ Section SpecializedFunctor.
   }.
 End SpecializedFunctor.
 
-Delimit Scope functor_scope with functor.
 Bind Scope functor_scope with SpecializedFunctor.
 
 Section FunctorInterface.

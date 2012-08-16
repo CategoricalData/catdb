@@ -1,10 +1,10 @@
 Require Import JMeq Eqdep.
 Require Export SpecializedCategory CategoryIsomorphisms Functor ProductCategory NaturalTransformation.
-Require Import Common FEqualDep.
+Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Local Open Scope category_scope.
 

@@ -1,5 +1,5 @@
 Require Export SpecializedCategory MonoidalCategory.
-Require Import Common DefinitionSimplification.
+Require Import Common Notations DefinitionSimplification.
 
 Set Implicit Arguments.
 
@@ -132,10 +132,9 @@ Section EnrichedCategory.
 
   Local Reserved Notation "'C' ( a , b )".
   Local Reserved Notation "'id'".
-  Local Reserved Notation "f ○ g" (at level 70, right associativity).
   Local Reserved Notation "○_{ a , b , c }".
 
-  Local Notation "x ~> y" := (morM x y) (at level 99, right associativity, y at level 200).
+  Local Notation "x ~> y" := (morM x y).
 
   Record EnrichedCategory (objC : Type) := {
     EnrichedObject :> _ := objC;

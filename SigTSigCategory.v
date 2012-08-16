@@ -1,12 +1,12 @@
 Require Import JMeq ProofIrrelevance.
 Require Export SpecializedCategory Functor SigTCategory.
-Require Import Common FEqualDep.
+Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
 Section sigT_sig_obj_mor.
   Context `(A : @SpecializedCategory objA morA).

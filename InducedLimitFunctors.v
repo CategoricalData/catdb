@@ -16,19 +16,19 @@ Section InducedFunctor.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Local Notation "'Cat' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ _ Index2Cat _ _ D) (at level 70, no associativity).
-  Local Notation "'Cat' ⇓ D" := (@LaxSliceSpecializedCategory _ _ _ Index2Cat _ _ D) (at level 70, no associativity).
+  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ _ Index2Cat _ _ D).
+  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ _ Index2Cat _ _ D).
 
   Context `(D : @SpecializedCategory objD morD).
   Let DOp := OppositeCategory D.
 
   Section Limit.
-    Definition InducedLimitFunctor_MorphismOf (s d : Cat ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
+    Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
       (m : Morphism _ s d) :
       Morphism D (LimitObject limS) (LimitObject limD)
       := InducedLimitMap (projT2 m) _ _.
 
-    Lemma InducedLimitFunctor_FCompositionOf (s d d' : Cat ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
+    Lemma InducedLimitFunctor_FCompositionOf (s d d' : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedLimitFunctor_MorphismOf limS limD' (Compose m2 m1) =
       Compose (InducedLimitFunctor_MorphismOf limD limD' m2) (InducedLimitFunctor_MorphismOf limS limD m1).
@@ -66,7 +66,7 @@ Section InducedFunctor.
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
-    Lemma InducedLimitFunctor_FIdentityOf (x : Cat ⇑ D) (limX : Limit (projT2 x)) :
+    Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
       InducedLimitFunctor_MorphismOf limX limX (Identity x) =
       Identity (LimitObject limX).
     Proof.
@@ -82,11 +82,11 @@ Section InducedFunctor.
       reflexivity.
     Qed.
 
-    Variable HasLimits : forall C : Cat ⇑ D, Limit (projT2 C).
+    Variable HasLimits : forall C : CAT ⇑ D, Limit (projT2 C).
 
     Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
-    Definition InducedLimitFunctor : SpecializedFunctor (Cat ⇑ D) D.
+    Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
       refine {| ObjectOf' := (fun x => LimitObject (HasLimits x));
         MorphismOf' := (fun s d => @InducedLimitFunctor_MorphismOf s d (HasLimits s) (HasLimits d))
       |};
@@ -95,12 +95,12 @@ Section InducedFunctor.
   End Limit.
 
   Section Colimit.
-    Definition InducedColimitFunctor_MorphismOf (s d : Cat ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
+    Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
       (m : Morphism _ s d) :
       Morphism D (ColimitObject colimS) (ColimitObject colimD)
       := InducedColimitMap (projT2 m) _ _.
 
-    Lemma InducedColimitFunctor_FCompositionOf (s d d' : Cat ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
+    Lemma InducedColimitFunctor_FCompositionOf (s d d' : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedColimitFunctor_MorphismOf colimS colimD' (Compose m2 m1) =
       Compose (InducedColimitFunctor_MorphismOf colimD colimD' m2) (InducedColimitFunctor_MorphismOf colimS colimD m1).
@@ -138,7 +138,7 @@ Section InducedFunctor.
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
-    Lemma InducedColimitFunctor_FIdentityOf (x : Cat ⇓ D) (colimX : Colimit (projT2 x)) :
+    Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
       InducedColimitFunctor_MorphismOf colimX colimX (Identity x) =
       Identity (ColimitObject colimX).
     Proof.
@@ -154,11 +154,11 @@ Section InducedFunctor.
       reflexivity.
     Qed.
 
-    Variable HasColimits : forall C : Cat ⇓ D, Colimit (projT2 C).
+    Variable HasColimits : forall C : CAT ⇓ D, Colimit (projT2 C).
 
     Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
-    Definition InducedColimitFunctor : SpecializedFunctor (Cat ⇓ D) D.
+    Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
       refine {| ObjectOf' := (fun x => ColimitObject (HasColimits x));
         MorphismOf' := (fun s d => @InducedColimitFunctor_MorphismOf s d (HasColimits s) (HasColimits d))
       |};
