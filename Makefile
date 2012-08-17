@@ -6,7 +6,6 @@ MODULES    := Notations \
 	NatFacts \
 	EquivalenceSet \
 	EquivalenceClass \
-	EquivalenceRelation \
 	EquivalenceRelationGenerator \
 	SpecializedCategory \
 	Category \
