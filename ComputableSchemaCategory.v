@@ -54,7 +54,7 @@ Section ComputableSchema.
         repeat_subst_mor_of_type @SmallTranslation; autorewrite with core in *; eauto; try reflexivity;
           clear_InClass; unfold equiv in *.
           ). *)
-  Admitted.
+  Defined.
 End ComputableSchema.
 
 (*Definition Sch := @ComputableSchemaCategory Schema id.*)
