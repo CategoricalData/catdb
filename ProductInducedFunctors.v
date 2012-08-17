@@ -5,19 +5,19 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Local Ltac t :=
+  simpl; intros; present_spfunctor;
+    repeat rewrite <- FCompositionOf || rewrite <- FIdentityOf;
+      f_equal; simpl_eq;
+      autorewrite with core;
+        reflexivity.
+
 Section ProductInducedFunctors.
   Context `(C : @SpecializedCategory objC morC).
   Context `(D : @SpecializedCategory objD morD).
   Context `(E : @SpecializedCategory objE morE).
 
   Variable F : SpecializedFunctor (C * D) E.
-
-  Local Ltac t :=
-    simpl; intros; present_spfunctor;
-      rewrite <- FCompositionOf || rewrite <- FIdentityOf;
-        f_equal; simpl_eq;
-        autorewrite with core;
-          reflexivity.
 
   Definition InducedProductFstFunctor (d : D) : SpecializedFunctor C E.
     refine {| ObjectOf' := (fun c => F (c, d));
@@ -43,13 +43,6 @@ Section ProductInducedNaturalTransformations.
   Context `(E : @SpecializedCategory objE morE).
 
   Variable F : SpecializedFunctor (C * D) E.
-
-  Local Ltac t :=
-    simpl; intros; present_spfunctor;
-      repeat rewrite <- FCompositionOf;
-        f_equal; simpl_eq;
-        autorewrite with core;
-          reflexivity.
 
   Definition InducedProductFstNaturalTransformation {s d} (m : Morphism C s d) : SpecializedNaturalTransformation (F [s, - ]) (F [d, - ]).
     match goal with
