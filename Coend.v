@@ -12,6 +12,27 @@ Local Ltac t := simpl in *; subst_body;
         try reflexivity.
 
 Section Coend.
+  (* Quoting David Spivak:
+     Given [F : COp * C -> D], the coend of [F] is an object [∫ F] of
+     [D]; it is the coequalizer of the diagram
+     [[
+                                 dom
+                           Mor C ---> Ob C
+                             \ F(f, 1) /
+                  (f : c₀ → c₁) \ ==> /  c ↦ F(c, c)
+                    ↦ F(c₁, c₀)   ↘ ↙
+                                  D
+         ∐        F(c₁, c₀) -------------->       ∐     F(c, c)
+     (c₀, c₁, f)            -------------->    c ∈ Ob C
+     f : c₀ → c₁                  cod
+                           Mor C ---> Ob C
+                             \ F(1, f) /
+                  (f : c₀ → c₁) \ ==> /  c ↦ F(c, c)
+                    ↦ F(c₀, c₁)   ↘ ↙
+                                  D
+     ]]
+     where the triangles denote induced colimit morphisms.
+     *)
   Context `(C : @SpecializedCategory objC morC).
   Context `(D : @SpecializedCategory objD morD).
 
