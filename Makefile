@@ -29,6 +29,7 @@ MODULES    := Notations \
 	DiscreteCategory \
 	ProductCategory \
 	ProductFunctor \
+	ProductNaturalTransformation \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
