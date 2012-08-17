@@ -1,5 +1,6 @@
-Require Import Bool Omega Setoid ProofIrrelevance.
-Require Import Common EquivalenceRelation.
+Require Import Setoid.
+Require Export Relations.
+Require Import Common Eqdep.
 
 Set Implicit Arguments.
 
@@ -116,41 +117,37 @@ Record Schema := {
   Vertex :> Type;
   Edge : Vertex -> Vertex -> Type;
 
-  PathsEquivalent' : forall s d, (path' Edge s d) -> (path' Edge s d) -> Prop;
-  PathsEquivalent : EquivalenceRelation PathsEquivalent';
+  PathsEquivalent : forall s d, relation (path' Edge s d);
+  PathsEquivalent_Equivalence : forall s d, equivalence _ (@PathsEquivalent s d);
 
   PreCompose : forall s d (E : Edge s d) d' (p1 p2 : path' _ d d'),
-    PathsEquivalent' p1 p2 -> PathsEquivalent' (prepend p1 E) (prepend p2 E);
+    PathsEquivalent p1 p2 -> PathsEquivalent (prepend p1 E) (prepend p2 E);
   PostCompose : forall s d (p1 p2 : path' _ s d) d' (E : Edge d d'),
-    PathsEquivalent' p1 p2 -> PathsEquivalent' (AddEdge p1 E) (AddEdge p2 E)
+    PathsEquivalent p1 p2 -> PathsEquivalent (AddEdge p1 E) (AddEdge p2 E)
 }.
 
 Hint Resolve PreCompose PostCompose.
 
 Theorem PreCompose' : forall S s d (E : S.(Edge) s d) d' (p1 p2 : path' _ d d'),
-  PathsEquivalent _ _ _ p1 p2 -> PathsEquivalent _ _ _ (prepend p1 E) (prepend p2 E).
+  PathsEquivalent _ p1 p2 -> PathsEquivalent _ (prepend p1 E) (prepend p2 E).
   intros; auto.
 Qed.
 
 Theorem PostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(Edge) d d'),
-  PathsEquivalent _ _ _ p1 p2
-  -> PathsEquivalent _ _ _ (AddEdge p1 E) (AddEdge p2 E).
+  PathsEquivalent _ p1 p2
+  -> PathsEquivalent _ (AddEdge p1 E) (AddEdge p2 E).
   intros; auto.
 Qed.
 
 Hint Resolve PreCompose' PostCompose'.
 
-Add Parametric Relation S s d : _ (PathsEquivalent S s d)
-  reflexivity proved by (Reflexive _ _ _)
-  symmetry proved by (Symmetric _ _ _)
-  transitivity proved by (Transitive _ _ _)
+Add Parametric Relation S s d : _ (@PathsEquivalent S s d)
+  reflexivity proved by (equiv_refl _ _ (@PathsEquivalent_Equivalence _ _ _))
+  symmetry proved by (equiv_sym _ _ (@PathsEquivalent_Equivalence _ _ _))
+  transitivity proved by (equiv_trans _ _ (@PathsEquivalent_Equivalence _ _ _))
     as paths_eq.
 
-Lemma paths_equivalence_equivalent S : relations_equivalence_equivalent S.(PathsEquivalent).
-  hnf; trivial.
-Qed.
-
-Hint Rewrite paths_equivalence_equivalent.
+Hint Resolve paths_eq_Reflexive paths_eq_Symmetric.
 
 (* It's not true that [(p1 = p2 -> p3 = p4) -> (PathsEquivalent p1 p2 -> PathsEquivalent p3 p4)]
    Consider a case where p1 = NoEdges and p2 is a path containing an edge and its inverse,
@@ -160,13 +157,13 @@ Hint Rewrite paths_equivalence_equivalent.
 Section path'_Equivalence_Theorems.
   Variable S : Schema.
 
-  Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent S _ _ p p'
-    -> forall e : Edge _ d d', PathsEquivalent S _ _ (AddEdge p e) (AddEdge p' e).
+  Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent S p p'
+    -> forall e : Edge _ d d', PathsEquivalent S (AddEdge p e) (AddEdge p' e).
     t.
   Qed.
 
-  Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S _ _ p p'
-    -> forall e : Edge _ s' s, PathsEquivalent S _ _ (prepend p e) (prepend p' e).
+  Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S p p'
+    -> forall e : Edge _ s' s, PathsEquivalent S (prepend p e) (prepend p' e).
     t.
   Qed.
 
@@ -175,12 +172,12 @@ Section path'_Equivalence_Theorems.
   Hint Resolve prepend_equivalent addedge_equivalent.
 
   Lemma pre_concatenate_equivalent : forall s' s d (p1 : path' _ s' s) (p p' : path' _ s d),
-    PathsEquivalent S _ _ p p' -> PathsEquivalent S _ _ (concatenate p1 p) (concatenate p1 p').
+    PathsEquivalent S p p' -> PathsEquivalent S (concatenate p1 p) (concatenate p1 p').
     induction p1; t.
   Qed.
 
   Lemma post_concatenate_equivalent : forall s d d' (p p' : path' _ s d) (p2 : path' _ d d'),
-    PathsEquivalent S _ _ p p' -> PathsEquivalent S _ _ (concatenate p p2) (concatenate p' p2).
+    PathsEquivalent S p p' -> PathsEquivalent S (concatenate p p2) (concatenate p' p2).
     induction p2; t.
   Qed.
 
@@ -188,21 +185,19 @@ Section path'_Equivalence_Theorems.
 
   Add Parametric Morphism s d d' p:
     (@concatenate _ S.(Edge) s d d' p)
-    with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_pre_mor.
+    with signature (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) as concatenate_pre_mor.
     t.
   Qed.
 
   Add Parametric Morphism s d d' p:
     (fun p' => (@concatenate _ S.(Edge) s d d' p' p))
-    with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_post_mor.
+    with signature (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) as concatenate_post_mor.
     t.
   Qed.
 
-  Hint Resolve Transitive.
-
   Lemma concatenate_equivalent : forall s d d' (p1 p1' : path' _ s d) (p2 p2' : path' _ d d'),
-    PathsEquivalent S _ _ p1 p1' -> PathsEquivalent S _ _ p2 p2' -> PathsEquivalent S _ _ (concatenate p1 p2) (concatenate p1' p2').
-    t; eauto.
+    PathsEquivalent S p1 p1' -> PathsEquivalent S p2 p2' -> PathsEquivalent S (concatenate p1 p2) (concatenate p1' p2').
+    t; etransitivity; eauto.
   Qed.
 End path'_Equivalence_Theorems.
 
@@ -210,25 +205,25 @@ Hint Resolve concatenate_equivalent.
 
 Add Parametric Morphism S s d d' :
   (@concatenate _ S.(Edge) s d d')
-  with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate_mor.
+  with signature (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) as concatenate_mor.
   t.
 Qed.
 
 Add Parametric Morphism S s d d' :
   (@AddEdge S _ s d d')
-  with signature (PathsEquivalent S _ _) ==> (@eq _) ==> (PathsEquivalent S _ _) as AddEdge_mor.
+  with signature (@PathsEquivalent S _ _) ==> (@eq _) ==> (@PathsEquivalent S _ _) as AddEdge_mor.
   t.
 Qed.
 
 Add Parametric Morphism S s d d' :
   (fun p => @concatenate' S _ s d p d')
-  with signature (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) ==> (PathsEquivalent S _ _) as concatenate'_mor.
+  with signature (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) ==> (@PathsEquivalent S _ _) as concatenate'_mor.
   intros; repeat rewrite <- concatenate_prepend_equivalent; t.
 Qed.
 
 Add Parametric Morphism S s' s d :
   (fun p => @prepend S _ s d p s')
-  with signature (PathsEquivalent S _ _) ==> (@eq _) ==> (PathsEquivalent S _ _) as prepend_mor.
+  with signature (@PathsEquivalent S _ _) ==> (@eq _) ==> (@PathsEquivalent S _ _) as prepend_mor.
   t.
 Qed.
 
@@ -250,17 +245,17 @@ Section Schema.
     monomorphism in the dual category [OppositeCategory C]).
     *)
   Definition SEpimorphism x y (p : path C x y) : Prop :=
-    forall z (p1 p2 : path C y z), PathsEquivalent _ _ _ (concatenate p p1) (concatenate p p2) ->
-      PathsEquivalent _ _ _ p1 p2.
+    forall z (p1 p2 : path C y z), PathsEquivalent _ (concatenate p p1) (concatenate p p2) ->
+      PathsEquivalent _ p1 p2.
   Definition SMonomorphism x y (p : path C x y) : Prop :=
-    forall z (p1 p2 : path C z x), PathsEquivalent _ _ _ (concatenate p1 p) (concatenate p2 p) ->
-      PathsEquivalent _ _ _ p1 p2.
+    forall z (p1 p2 : path C z x), PathsEquivalent _ (concatenate p1 p) (concatenate p2 p) ->
+      PathsEquivalent _ p1 p2.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   Definition SInverseOf s d (p : path C s d) (p' : path C d s) : Prop :=
-    PathsEquivalent _ _ _ (concatenate p p') NoEdges /\
-    PathsEquivalent _ _ _ (concatenate p' p) NoEdges.
+    PathsEquivalent _ (concatenate p p') NoEdges /\
+    PathsEquivalent _ (concatenate p' p) NoEdges.
 
   Lemma SInverseOf_sym s d m m' : @SInverseOf s d m m' -> @SInverseOf d s m' m.
     firstorder.
@@ -275,12 +270,12 @@ Section Schema.
   Hint Unfold SInverseOf SchemaIsomorphism' SchemaIsomorphism.
 
   Lemma SInverseOf1 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
-    -> PathsEquivalent _ _ _ (concatenate p p') NoEdges.
+    -> PathsEquivalent _ (concatenate p p') NoEdges.
     firstorder.
   Qed.
 
   Lemma SInverseOf2 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
-    -> PathsEquivalent _ _ _ (concatenate p p') NoEdges.
+    -> PathsEquivalent _ (concatenate p p') NoEdges.
     firstorder.
   Qed.
 
@@ -300,7 +295,7 @@ Section Schema.
 
   Lemma SInverseOf1' : forall x y z (p : path C x y) (p' : path C y x) (p'' : path C z _),
     SInverseOf p p'
-    -> PathsEquivalent _ _ _ (concatenate (concatenate p'' p) p') p''.
+    -> PathsEquivalent _ (concatenate (concatenate p'' p) p') p''.
     unfold SInverseOf; intros; destruct_hypotheses; repeat rewrite concatenate_associative; t_con @PathsEquivalent.
   Qed.
 
@@ -349,19 +344,19 @@ Section SchemaIsomorphismEquivalenceRelation.
   Qed.
 End SchemaIsomorphismEquivalenceRelation.
 
-Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ _ _ x' x.
+Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ x' x.
 
 Section GeneralizedPathEquivalence.
   Variable S : Schema.
 
   Inductive GeneralizedPathsEquivalent s d (p : path S s d) : forall s' d' (p' : path S s' d'), Prop :=
-    | GPathsEquivalent (p' : path S s d) : PathsEquivalent _ _ _ p p' -> GeneralizedPathsEquivalent p p'.
+    | GPathsEquivalent (p' : path S s d) : PathsEquivalent _ p p' -> GeneralizedPathsEquivalent p p'.
 
   Lemma GeneralizedPathsEquivalent_PathsEquivalent s d (p p' : path S s d) :
-    GeneralizedPathsEquivalent p p' -> PathsEquivalent _ _ _ p p'.
+    GeneralizedPathsEquivalent p p' -> PathsEquivalent _ p p'.
     intro H; inversion H.
     repeat match goal with
-             | [ H : _ |- _ ] => repeat apply inj_pair2 in H
+             | [ H : _ |- _ ] => apply inj_pair2 in H
            end.
     repeat subst.
     assumption.

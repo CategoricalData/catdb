@@ -1,6 +1,6 @@
 Require Import Bool Omega Setoid Program.
 Require Export Schema Category SmallSchema SmallCategory.
-Require Import Common EquivalenceRelation EquivalenceClass.
+Require Import Common EquivalenceClass.
 Require Import NaturalEquivalence ComputableCategory SNaturalEquivalence ComputableSchemaCategory SmallFunctor SmallTranslation.
 
 Set Implicit Arguments.

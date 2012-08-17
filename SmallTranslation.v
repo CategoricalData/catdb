@@ -1,6 +1,6 @@
-Require Import Bool Omega Setoid FunctionalExtensionality ProofIrrelevance JMeq.
-Require Export SmallSchema.
-Require Import Common Notations EquivalenceRelation FEqualDep Translation.
+Require Import Setoid FunctionalExtensionality ProofIrrelevance JMeq.
+Require Export SmallSchema Translation.
+Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
@@ -9,41 +9,13 @@ Local Infix "==" := JMeq.
 Section SmallSchemas.
   Variables C D : SmallSchema.
 
-  Section stransferPath.
-    Variable svertexOf : C -> D.
-    Variable spathOf : forall s d, C.(SEdge) s d -> spath D (svertexOf s) (svertexOf d).
-
-    Fixpoint stransferPath s d (p : spath C s d) : spath D (svertexOf s) (svertexOf d) :=
-      match p with
-        | SNoEdges => SNoEdges
-        | SAddEdge _ _ p' E => sconcatenate (stransferPath p') (spathOf _ _ E)
-      end.
-
-    Hint Rewrite sconcatenate_noedges_p sconcatenate_p_noedges.
-    Hint Rewrite <- sconcatenate_associative.
-
-    Lemma sconcatenate_stransferPath s d d' (p : spath C s d) (p' : spath C d d') :
-      stransferPath (sconcatenate p p') = sconcatenate (stransferPath p) (stransferPath p').
-      induction p'; t_with t'.
-    Qed.
-
-    Hint Rewrite sconcatenate2concatenate spath_roundtrip spath_roundtrip'.
-
-    Lemma stransferPath_transferPath s d (p : spath C s d) :
-      spath'2path' (stransferPath p) = transferPath (svertexOf : C.(Vertex) -> D.(Vertex)) spathOf p.
-      induction p; simpl in *; t_with t';
-        autorewrite with core; simpl;
-          t_with t'.
-    Qed.
-  End stransferPath.
-
   Record SmallTranslation := {
     SVertexOf :> C -> D;
     SPathOf : forall s d, C.(SEdge) s d -> spath D (SVertexOf s) (SVertexOf d);
-    STransferPath := (fun s d (p : spath C s d) => stransferPath SVertexOf SPathOf p);
+    STransferPath := (fun s d (p : spath C s d) => (@transferPath C D) SVertexOf SPathOf _ _ p);
     STEquivalenceOf : forall s d (p1 p2 : spath C s d),
-      SPathsEquivalent C _ _ p1 p2
-      -> SPathsEquivalent D _ _ (STransferPath _ _ p1) (STransferPath _ _ p2)
+      SPathsEquivalent C p1 p2
+      -> SPathsEquivalent D (STransferPath _ _ p1) (STransferPath _ _ p2)
   }.
 
   Global Add Parametric Morphism s d T :
@@ -53,19 +25,19 @@ Section SmallSchemas.
     exact (@STEquivalenceOf T s d).
   Qed.
 
-  Lemma sconcatenate_STransferPath s d d' (p : spath C s d) (p' : spath C d d') T :
-      STransferPath T (sconcatenate p p') = sconcatenate (STransferPath T p) (STransferPath T p').
+  Lemma concatenate_STransferPath s d d' (p : spath C s d) (p' : spath C d d') T :
+      STransferPath T (concatenate p p') = concatenate (STransferPath T p) (STransferPath T p').
     unfold STransferPath; simpl.
-    apply sconcatenate_stransferPath.
+    apply concatenate_transferPath.
   Qed.
 
   Lemma STransferPath_SNoEdges o T :
-    STransferPath T (@SNoEdges _ _ o) = SNoEdges.
+    STransferPath T (@NoEdges _ _ o) = NoEdges.
     reflexivity.
   Qed.
 End SmallSchemas.
 
-Hint Rewrite sconcatenate_stransferPath sconcatenate_STransferPath.
+Hint Rewrite concatenate_STransferPath.
 
 Section SmallTranslations_Equal.
   Lemma stranslations_equal : forall C D (F G : SmallTranslation C D),
@@ -101,18 +73,9 @@ Ltac stranslation_eq := stranslation_eq_with idtac.
 Section SmallTranslationComposition.
   Variable B C D E : SmallSchema.
 
-  Hint Resolve sconcatenate_stransferPath.
+  Hint Resolve concatenate_transferPath.
 
-  Lemma compose_stransferPath (svertexOf : C -> D) spathOf (svertexOf' : D -> E) spathOf' : forall s d (p : spath C s d),
-    (stransferPath (fun c : C => svertexOf' (svertexOf c))
-      (fun (s0 d0 : C) (e : Edge C s0 d0) =>
-        stransferPath svertexOf' spathOf' (spathOf s0 d0 e)) p) =
-    stransferPath svertexOf' spathOf' (stransferPath svertexOf spathOf p).
-  Proof.
-    intros; simpl; induction p; reflexivity || symmetry; t_with t'.
-  Qed.
-
-  Hint Rewrite compose_stransferPath.
+  Hint Rewrite compose_transferPath.
   Hint Resolve STEquivalenceOf.
 
   Definition ComposeSmallTranslations (G : SmallTranslation D E) (F : SmallTranslation C D) : SmallTranslation C E.
@@ -130,7 +93,7 @@ Section SmallSchema.
   (* There is an identity stranslation.  It does the obvious thing. *)
   Definition IdentitySmallTranslation : SmallTranslation C C.
     refine {| SVertexOf := (fun x => x);
-      SPathOf := (fun _ _ x => SAddEdge SNoEdges x)
+      SPathOf := (fun _ _ x => AddEdge NoEdges x)
     |}; abstract (
       intros ? ? p1 p2 ?;
         transitivity p1;
@@ -175,7 +138,7 @@ Section SmallTranslationsEquivalent.
     exists vo po po' eo eo',
       F = {| SVertexOf := vo; SPathOf := po; STEquivalenceOf := eo |} /\
       G = {| SVertexOf := vo; SPathOf := po'; STEquivalenceOf := eo' |} /\
-      forall s d (e : C.(SEdge) s d), SPathsEquivalent _ _ _ (po _ _ e) (po' _ _ e).
+      forall s d (e : C.(SEdge) s d), SPathsEquivalent _ (po _ _ e) (po' _ _ e).
 
   Lemma stranslations_equivalent :
     SVertexOf F = SVertexOf G
@@ -238,14 +201,14 @@ Section SmallTranslationsEquivalent_Relation.
     intro H; destruct H; stranslation_eqv_with ltac:(destruct_hypotheses; eauto).
   Qed.
 
-  Hint Resolve sconcatenate_mor.
+  Hint Resolve concatenate_mor.
 
   Lemma PostComposeSmallTranslationsEquivalent (T : SmallTranslation C D) (U U' : SmallTranslation D E) :
     SmallTranslationsEquivalent U U' -> SmallTranslationsEquivalent (ComposeSmallTranslations U T) (ComposeSmallTranslations U' T).
     intro H; destruct H; stranslation_eqv_with ltac:(destruct_hypotheses; eauto).
     destruct T; unfold STransferPath; stranslation_eqv.
     match goal with
-      | [ |- ?Rel (stransferPath _ _ ?p) (stransferPath _ _ ?p) ] => induction p; simpl; try reflexivity
+      | [ |- ?Rel (transferPath _ _ ?p) (transferPath _ _ ?p) ] => induction p; simpl; try reflexivity
     end; eauto.
   Qed.
 End SmallTranslationsEquivalent_Relation.
@@ -264,6 +227,8 @@ Add Parametric Morphism C D E : (@ComposeSmallTranslations C D E)
     apply PreComposeSmallTranslationsEquivalent; eauto.
 Qed.
 
+Hint Resolve ComposeSmallTranslations_mor.
+
 (*
 Section Small2Large.
   Variables C D : SmallSchema.
@@ -271,7 +236,7 @@ Section Small2Large.
 
   Hint Resolve STEquivalenceOf.
 
-  Hint Rewrite sconcatenate2concatenate spath_roundtrip spath_roundtrip'.
+  Hint Rewrite concatenate2concatenate spath_roundtrip spath_roundtrip'.
 
   Ltac equiv_by_equal :=
     match goal with

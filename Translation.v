@@ -1,5 +1,5 @@
-Require Import Bool Omega Setoid FunctionalExtensionality ProofIrrelevance JMeq.
-Require Import Common Notations EquivalenceRelation FEqualDep.
+Require Import Setoid FunctionalExtensionality ProofIrrelevance JMeq.
+Require Import Common Notations FEqualDep.
 Require Export Schema.
 
 Set Implicit Arguments.
@@ -33,8 +33,8 @@ Section Schemas.
     PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
     TransferPath := (fun s d (p : path C s d) => transferPath VertexOf PathOf p);
     TEquivalenceOf : forall s d (p1 p2 : path C s d),
-      PathsEquivalent C _ _ p1 p2
-      -> PathsEquivalent D _ _ (TransferPath _ _ p1) (TransferPath _ _ p2)
+      PathsEquivalent C p1 p2
+      -> PathsEquivalent D (TransferPath _ _ p1) (TransferPath _ _ p2)
   }.
 
   Global Add Parametric Morphism s d T :
@@ -166,7 +166,7 @@ Section TranslationsEquivalent.
     exists vo po po' eo eo',
       F = {| VertexOf := vo; PathOf := po; TEquivalenceOf := eo |} /\
       G = {| VertexOf := vo; PathOf := po'; TEquivalenceOf := eo' |} /\
-      forall s d (e : C.(Edge) s d), PathsEquivalent _ _ _ (po _ _ e) (po' _ _ e).
+      forall s d (e : C.(Edge) s d), PathsEquivalent _ (po _ _ e) (po' _ _ e).
 
   Lemma translations_equivalent :
     VertexOf F = VertexOf G

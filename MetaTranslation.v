@@ -1,6 +1,6 @@
 Require Import Setoid.
 Require Export Translation.
-Require Import Common EquivalenceRelation.
+Require Import Common.
 
 Set Implicit Arguments.
 
@@ -12,13 +12,13 @@ Section MetaTranslation.
   Record MetaTranslation := {
     SComponentsOf :> forall c : C, path D (F c) (G c);
     SCommutes : forall s d (e : C.(Edge) s d),
-      PathsEquivalent _ _ _ (concatenate (F.(PathOf) _ _ e) (SComponentsOf d)) (concatenate (SComponentsOf s) (G.(PathOf) _ _ e))
+      PathsEquivalent _ (concatenate (F.(PathOf) _ _ e) (SComponentsOf d)) (concatenate (SComponentsOf s) (G.(PathOf) _ _ e))
   }.
 
   Hint Rewrite SCommutes.
 
   Lemma SCommutes_TransferPath MT : forall s d (p : path C s d),
-    PathsEquivalent _ _ _ (concatenate (F.(TransferPath) p) (MT.(SComponentsOf) d)) (concatenate (MT.(SComponentsOf) s) (G.(TransferPath) p)).
+    PathsEquivalent _ (concatenate (F.(TransferPath) p) (MT.(SComponentsOf) d)) (concatenate (MT.(SComponentsOf) s) (G.(TransferPath) p)).
     intros s d p; induction p; t.
     repeat rewrite concatenate_associative.
     rewrite SCommutes.
@@ -49,18 +49,21 @@ Section MetaTranslationComposition.
 
   Ltac strip_concatenate' :=
     match goal with
-      | [ |- @RelationsEquivalent _ _ _ _ _ _ (concatenate _ _) (concatenate _ _) ] => apply pre_concatenate_equivalent || apply post_concatenate_equivalent
+      | [ |- ?Rel (concatenate _ _) (concatenate _ _) ] => apply pre_concatenate_equivalent || apply post_concatenate_equivalent
     end.
   Ltac strip_concatenate :=
     repeat (repeat strip_concatenate';
       repeat (rewrite concatenate_associative; try strip_concatenate'); repeat strip_concatenate';
         repeat (rewrite <- concatenate_associative; try strip_concatenate'); repeat strip_concatenate').
 
-  Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ _ _) => strip_concatenate.
+  Hint Extern 1 => strip_concatenate.
 
-  Hint Extern 1 (@RelationsEquivalent _ _ _ _ _ _ (concatenate (TransferPath _ ?p) _) (concatenate _ (TransferPath _ ?p))) =>
-    induction p; simpl; try rewrite concatenate_noedges_p; try reflexivity;
-      repeat rewrite concatenate_associative; rewrite SCommutes; strip_concatenate; auto.
+  Hint Extern 1 =>
+    match goal with
+      | [ |- ?Rel (concatenate (TransferPath _ ?p) _) (concatenate _ (TransferPath _ ?p)) ] =>
+        induction p; simpl; try rewrite concatenate_noedges_p; try reflexivity;
+          repeat rewrite concatenate_associative; rewrite SCommutes; strip_concatenate; auto
+    end.
 
   Definition MTComposeT (U : MetaTranslation G G') (T : MetaTranslation F F'):
     MetaTranslation (ComposeTranslations G F) (ComposeTranslations G' F').

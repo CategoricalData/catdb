@@ -1,6 +1,6 @@
-Require Import FunctionalExtensionality Bool Omega Setoid.
+Require Import FunctionalExtensionality Setoid.
 Require Export Schema.
-Require Import Common EquivalenceRelation Translation SetSchema.
+Require Import Common Translation SetSchema.
 
 Set Implicit Arguments.
 
@@ -10,7 +10,7 @@ Section Schema.
   Record Instance := {
     TypeOf :> S -> Type;
     FunctionOf : forall s d (E : S.(Edge) s d), TypeOf s -> TypeOf d;
-    EquivalenceOf : forall s d (p1 p2 : path S s d), S.(PathsEquivalent) _ _ p1 p2
+    EquivalenceOf : forall s d (p1 p2 : path S s d), S.(PathsEquivalent) p1 p2
       -> forall x, compose TypeOf FunctionOf p1 x = compose TypeOf FunctionOf p2 x
   }.
 

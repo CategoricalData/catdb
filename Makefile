@@ -76,7 +76,7 @@ MODULES    := Notations \
 	MetaTranslation \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory \
-	SNaturalEquivalence \
+	MetaEquivalence \
 	Examples \
 	Theorems
 VS         := $(MODULES:%=%.v)
