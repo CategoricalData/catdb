@@ -30,6 +30,7 @@ MODULES    := Notations \
 	ProductCategory \
 	ProductFunctor \
 	ProductNaturalTransformation \
+	ProductInducedFunctors \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
