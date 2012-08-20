@@ -31,6 +31,7 @@ MODULES    := Notations \
 	ProductFunctor \
 	ProductNaturalTransformation \
 	ProductInducedFunctors \
+	SumCategory \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
