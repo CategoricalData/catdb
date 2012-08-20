@@ -23,6 +23,9 @@ Reserved Notation "f ○ g" (at level 70, right associativity).
 
 Reserved Notation "x ~> y" (at level 99, right associativity, y at level 200).
 
+Reserved Notation "x ∏ y" (at level 40, left associativity).
+Reserved Notation "x ∐ y" (at level 50, left associativity).
+
 Reserved Notation "∏_{ x } f" (at level 0, x at level 99).
 Reserved Notation "∏_{ x : A } f" (at level 0, x at level 99).
 Reserved Notation "∐_{ x } f" (at level 0, x at level 99).
