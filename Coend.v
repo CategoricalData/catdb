@@ -1,5 +1,5 @@
-Require Export Equalizer Duals ProductFunctor DiscreteCategoryFunctors.
-Require Import Common Notations Products LimitFunctorTheorems.
+Require Export Equalizer Duals ProductFunctor DiscreteCategoryFunctors Products.
+Require Import Common Notations LimitFunctorTheorems.
 
 Set Implicit Arguments.
 

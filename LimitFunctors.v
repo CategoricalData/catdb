@@ -302,7 +302,8 @@ Section Adjoint.
                          first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
                            repeat rewrite FCompositionOf; repeat rewrite Associativity;
                              simpl; f_equal
-                     end.
+                     end;
+              try (intros; reflexivity).
     Local Transparent FunctorCategory.
   Qed.
 
@@ -413,7 +414,8 @@ Section Adjoint.
                      first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
                          repeat rewrite FCompositionOf; repeat rewrite <- Associativity;
                            simpl; f_equal
-                 end.
+                 end;
+          try (intros; present_spcategory; apply f_equal2; trivial).
     Local Transparent FunctorCategory.
   Qed.
 

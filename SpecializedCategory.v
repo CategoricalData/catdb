@@ -4,7 +4,7 @@ Require Import Common StructureEquality.
 
 Set Implicit Arguments.
 
-Record SpecializedCategory (obj : Type) (Morphism : obj -> obj -> Type) := {
+Record SpecializedCategory (obj : Type) (Morphism : obj -> obj -> Type) := Build_SpecializedCategory' {
   Object :> _ := obj;
 
   Identity' : forall o, Morphism o o;
@@ -12,6 +12,9 @@ Record SpecializedCategory (obj : Type) (Morphism : obj -> obj -> Type) := {
 
   Associativity' : forall o1 o2 o3 o4 (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
     Compose' (Compose' m3 m2) m1 = Compose' m3 (Compose' m2 m1);
+  (* ask for [eq_sym (Associativity' ...)], so that C^{op}^{op} is convertible with C *)
+  Associativity'_sym : forall o1 o2 o3 o4 (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
+    Compose' m3 (Compose' m2 m1) = Compose' (Compose' m3 m2) m1;
   LeftIdentity' : forall a b (f : Morphism a b), Compose' (Identity' b) f = f;
   RightIdentity' : forall a b (f : Morphism a b), Compose' f (Identity' a) = f
 }.
@@ -25,6 +28,22 @@ Arguments Compose' {obj%type mor} C%category s d d' _ _ : rename.
 Section SpecializedCategoryInterface.
   Variable obj : Type.
   Variable mor : obj -> obj -> Type.
+
+  Definition Build_SpecializedCategory
+    (Identity' : forall o : obj, mor o o)
+    (Compose' : forall s d d' : obj, mor d d' -> mor s d -> mor s d')
+    (Associativity' : forall (o1 o2 o3 o4 : obj) (m1 : mor o1 o2) (m2 : mor o2 o3) (m3 : mor o3 o4),
+      Compose' o1 o2 o4 (Compose' o2 o3 o4 m3 m2) m1 = Compose' o1 o3 o4 m3 (Compose' o1 o2 o3 m2 m1))
+    (LeftIdentity' : forall (a b : obj) (f : mor a b), Compose' a b b (Identity' b) f = f)
+    (RightIdentity' : forall (a b : obj) (f : mor a b), Compose' a a b f (Identity' a) = f) :
+    SpecializedCategory mor
+    := @Build_SpecializedCategory' obj mor
+    Identity' Compose'
+    Associativity'
+    (fun _ _ _ _ _ _ _ => eq_sym (Associativity' _ _ _ _ _ _ _))
+    LeftIdentity'
+    RightIdentity'.
+
   Variable C : @SpecializedCategory obj mor.
 
   Definition Morphism : forall s d : C, _ := mor.

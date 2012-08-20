@@ -4,22 +4,23 @@ Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Infix "==" := JMeq.
 
 Local Open Scope category_scope.
 
 Section OppositeCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC morC).
 
-  Definition OppositeCategory : @SpecializedCategory objC (fun s d => morC d s).
-    refine (Build_SpecializedCategory (fun s d => morC d s)
-      (@Identity _ _ C)
-      (fun (s d d' : C) (m1 : C.(Morphism) d' d) (m2 : C.(Morphism) d s) => Compose m2 m1)
-      _ _ _);
-    abstract (t; eauto).
-  Defined.
+  Definition OppositeCategory : @SpecializedCategory objC (fun s d => morC d s) :=
+    @Build_SpecializedCategory' objC (fun s d => morC d s)
+    (Identity' C)
+    (fun _ _ _ m1 m2 => Compose' C _ _ _ m2 m1)
+    (fun _ _ _ _ _ _ _ => Associativity'_sym C _ _ _ _ _ _ _)
+    (fun _ _ _ _ _ _ _ => Associativity' C _ _ _ _ _ _ _)
+    (fun _ _ => RightIdentity' C _ _)
+    (fun _ _ => LeftIdentity' C _ _).
 End OppositeCategory.
 
 Ltac unOppositeCategory C :=
@@ -51,15 +52,13 @@ Ltac unfold_OppositeCategory :=
 (*Hint Extern 1 => unfold_OppositeCategory.*)
 
 Section DualCategories.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC morC).
+  Context `(D : @SpecializedCategory objD morD).
 
   Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
-    spcat_eq.
+    unfold OppositeCategory; simpl.
+    repeat change (fun a => ?f a) with f.
+    destruct C; simpl; reflexivity.
   Qed.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
@@ -67,7 +66,7 @@ Section DualCategories.
   Qed.
 End DualCategories.
 
-Hint Rewrite op_op_id op_distribute_prod.
+Hint Rewrite @op_op_id @op_distribute_prod.
 
 Section DualObjects.
   Variable objC : Type.
