@@ -6,6 +6,23 @@ Set Implicit Arguments.
 
 Local Open Scope category_scope.
 
+(*
+   We could do covariant and contravariant as
+
+Section covariant_contravariant.
+  Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
+  Definition CovariantHomFunctor `(C : @SpecializedCategory objC morC) (A : OppositeCategory C) :=
+    Eval simpl in ((HomFunctor C) [ A, - ])%functor.
+  Definition ContravariantHomFunctor `(C : @SpecializedCategory objC morC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+
+  Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
+  Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
+End covariant_contravariant.
+
+but that would introduce an extra identity morphism which some tactics
+have a bit of trouble with.  *sigh*
+*)
+
 Section HomFunctor.
   Variable objC : Type.
   Variable morC : objC -> objC -> Type.
