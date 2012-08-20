@@ -207,6 +207,16 @@ Section UniversalMorphism.
   End UniversalMorphism.
 End UniversalMorphism.
 
+Ltac intro_from_universal_objects :=
+  repeat match goal with
+           | [ |- appcontext[TerminalMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[TerminalMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+           | [ |- appcontext[InitialMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[InitialMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+           | [ |- appcontext[UniversalMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[UniversalMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+         end.
+
 Ltac intro_universal_objects :=
   repeat match goal with
            | [ m : TerminalMorphism _ _ |- _ ] => unique_pose_with_body (TerminalMorphism_Object m)
@@ -214,7 +224,7 @@ Ltac intro_universal_objects :=
            | [ m : UniversalMorphism _ _ |- _ ] => unique_pose_with_body (UniversalMorphism_Object m)
          end.
 
-Ltac intro_universal_morphisms :=
+Ltac intro_universal_morphisms := intro_from_universal_objects;
   repeat match goal with
            | [ m : TerminalMorphism _ _ |- _ ] => unique_pose_with_body (TerminalMorphism_Morphism m)
            | [ m : InitialMorphism _ _ |- _ ] => unique_pose_with_body (InitialMorphism_Morphism m)
