@@ -1,5 +1,6 @@
 MODULES    := Notations \
 	Common \
+	GetArguments \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \
