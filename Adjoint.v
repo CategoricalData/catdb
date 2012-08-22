@@ -4,13 +4,11 @@ Require Import Common Hom ProductCategory ProductFunctor Duals.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section Adjunction.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `{C : @SpecializedCategory objC}.
+  Context `{D : @SpecializedCategory objD}.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
@@ -47,13 +45,13 @@ Section Adjunction.
      ]]
      *)
   Record HomAdjunction := {
-    AComponentsOf' : forall A A', morD (F A) A' -> morC A (G A');
+    AComponentsOf' : forall A A', D.(Morphism') (F A) A' -> C.(Morphism') A (G A');
     (* [IsomorphismOf] is sort-polymorphic, but it picks up the type of morphisms in [TypeCat].  The [IsInverseOf']s don't *)
     AIsomorphism' : forall A A', { m' : _ |
       IsInverseOf'1 (C := TypeCat) _ _ (@AComponentsOf' A A') m' &
       IsInverseOf'2 (C := TypeCat) _ _ (@AComponentsOf' A A') m'
     };
-    ACommutes' : forall A A' B B' (m : morC B A) (m' : morD A' B'),
+    ACommutes' : forall A A' B B' (m : C.(Morphism') B A) (m' : D.(Morphism') A' B'),
       Compose (C := TypeCat)
       (@AComponentsOf' B B') ((HomFunctor D).(MorphismOf) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m'))
       = Compose (C := TypeCat)
@@ -66,7 +64,7 @@ Section Adjunction.
     Definition AComponentsOf : forall (A : C) (A' : D),
       TypeCat.(Morphism) (HomFunctor D (F A, A')) (HomFunctor C (A, G A'))
       := Eval cbv beta delta [AComponentsOf'] in T.(AComponentsOf').
-    Definition AIsomorphism (A : C) (A' : D) : @IsomorphismOf _ _ TypeCat _ _ (@AComponentsOf A A')
+    Definition AIsomorphism (A : C) (A' : D) : IsomorphismOf (C := TypeCat) (@AComponentsOf A A')
       := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism') A A' : IsomorphismOf_sig (@AComponentsOf A A').
     Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@AComponentsOf B B') (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) =
@@ -78,8 +76,8 @@ Section Adjunction.
 
   Lemma ACommutes_Inverse (T : HomAdjunction) :
     forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
-      Compose (@MorphismOf _ _ _ _ _ _ (HomFunctor D) (F A, A') (F B, B') (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
-      Compose (proj1_sig (T.(AIsomorphism) B B')) (@MorphismOf _ _ _ _ _ _ (HomFunctor C) (A, G A') (B, G B') (m, G.(MorphismOf) m')).
+      Compose (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
+      Compose (proj1_sig (T.(AIsomorphism) B B')) (MorphismOf (HomFunctor C) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')).
     Local Opaque TypeCat HomFunctor.
     intros.
     Local Ltac intro_T T A A' :=
@@ -90,10 +88,12 @@ Section Adjunction.
               assert (H1 := proj3_sig t).
     intro_T T B B'.
     intro_T T A A'.
+    (* XXX Figure out how to remove this *)
+    Local Opaque AIsomorphism.
     simpl in *.
     match goal with
       | [ H : Compose ?x (?T ?A ?A') = Identity _ |- Compose _ ?x = _ ]
-        => eapply (@iso_is_epi _ _ _ _ _ (T A A')); [
+        => eapply (@iso_is_epi _ _ _ _ (T A A')); [
           exists x; hnf; eauto
           |
             repeat rewrite Associativity; find_composition_to_identity (* slow, but I don't have a better way to do it *); rewrite RightIdentity
@@ -101,7 +101,7 @@ Section Adjunction.
     end.
     match goal with
       | [ H : Compose (?T ?A ?A') ?x = Identity _ |- _ = Compose ?x _ ]
-        => eapply (@iso_is_mono _ _ _ _ _ (T A A')); [
+        => eapply (@iso_is_mono _ _ _ _ (T A A')); [
           exists x; hnf; eauto
           |
             repeat rewrite <- Associativity; find_composition_to_identity; rewrite LeftIdentity
@@ -112,16 +112,12 @@ Section Adjunction.
   Defined.
 End Adjunction.
 
-Arguments AComponentsOf {objC morC C objD morD D} [F G] T A A' _ : simpl nomatch.
-Arguments AIsomorphism {objC morC C objD morD D} [F G] T A A' : simpl nomatch.
+Arguments AComponentsOf {objC C objD D} [F G] T A A' _ : simpl nomatch.
+Arguments AIsomorphism {objC C objD D} [F G] T A A' : simpl nomatch.
 
 Section AdjunctionEquivalences.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
@@ -164,10 +160,10 @@ Section AdjunctionEquivalences.
           exact (fun A0 A' B B' m m' => A.(Commutes') (A0, A') (B, B') (m, m')) ].
   Defined.
 
-  Hint Rewrite FIdentityOf.
+  Hint Rewrite @FIdentityOf.
 
   Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
-    @Compose _ _ C _ _ _ (G.(MorphismOf) g) (A.(AComponentsOf) _ _ f) =
+    Compose (C := C) (G.(MorphismOf) g) (A.(AComponentsOf) _ _ f) =
     A.(AComponentsOf) _ _ (Compose g f).
     assert (H := fg_equal (A.(ACommutes) _ _ _ _ (Identity c) g) f).
     simpl in *; autorewrite with core in *.
@@ -175,7 +171,7 @@ Section AdjunctionEquivalences.
   Qed.
 
   Lemma adjunction_naturality'_pre (A : HomAdjunction F G) c' c d (f : C.(Morphism) c (G d)) (h : C.(Morphism) c' c) :
-    @Compose _ _ D _ _ _ (proj1_sig (A.(AIsomorphism) _ _) f) (F.(MorphismOf) h) =
+    Compose (C := D) (proj1_sig (A.(AIsomorphism) _ _) f) (F.(MorphismOf) h) =
     proj1_sig (A.(AIsomorphism) _ _) (Compose f h).
     assert (H := fg_equal (ACommutes_Inverse A _ _ _ _ h (Identity d)) f).
     simpl in *; autorewrite with core in *.
@@ -295,7 +291,7 @@ Section AdjunctionEquivalences'.
             inverseOf _ _ AComponentsOf_Inverse
     )
     |};
-    simpl; present_spnt';
+    simpl; present_spnt;
       try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
         abstract (
           elim T; clear T; intros T s; repeat split; intros; simpl in *;

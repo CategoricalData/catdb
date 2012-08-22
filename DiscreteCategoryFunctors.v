@@ -22,9 +22,9 @@ Section Obj.
   Section type.
     Variable I : Type.
     Variable Index2Object : I -> Type.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctor : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) TypeCat.
+    Definition ObjectFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
       build_ob_functor Index2Object.
     Defined.
   End type.
@@ -32,9 +32,9 @@ Section Obj.
   Section set.
     Variable I : Type.
     Variable Index2Object : I -> Set.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctorToSet : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) SetCat.
+    Definition ObjectFunctorToSet : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) SetCat.
       build_ob_functor Index2Object.
     Defined.
   End set.
@@ -42,26 +42,26 @@ Section Obj.
   Section prop.
     Variable I : Type.
     Variable Index2Object : I -> Prop.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctorToProp : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) PropCat.
+    Definition ObjectFunctorToProp : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) PropCat.
       build_ob_functor Index2Object.
     Defined.
   End prop.
 End Obj.
 
-Arguments ObjectFunctor {I Index2Object Index2Morphism Index2Cat}.
-Arguments ObjectFunctorToSet {I Index2Object Index2Morphism Index2Cat}.
-Arguments ObjectFunctorToProp {I Index2Object Index2Morphism Index2Cat}.
+Arguments ObjectFunctor {I Index2Object Index2Cat}.
+Arguments ObjectFunctorToSet {I Index2Object Index2Cat}.
+Arguments ObjectFunctorToProp {I Index2Object Index2Cat}.
 
 Section Mor.
-  Local Ltac build_mor_functor Index2Object Index2Morphism :=
+  Local Ltac build_mor_functor Index2Object Index2Cat :=
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
-          (fun C' => { sd : Index2Object C' * Index2Object C' & @Index2Morphism _ (fst sd) (snd sd) } )
+          (fun C' => { sd : Index2Object C' * Index2Object C' & (Index2Cat C').(Morphism') (fst sd) (snd sd) } )
           (fun _ _ F => (fun sdm =>
-            existT (fun sd => @Index2Morphism _ (fst sd) (snd sd))
+            existT (fun sd => Morphism' _ (fst sd) (snd sd))
             (F (fst (projT1 sdm)), F (snd (projT1 sdm)))
             (MorphismOf' F (fst (projT1 sdm)) (snd (projT1 sdm)) (projT2 sdm))
           ))
@@ -77,37 +77,15 @@ Section Mor.
   Section type.
     Variable I : Type.
     Variable Index2Object : I -> Type.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition MorphismFunctor : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) TypeCat.
-      build_mor_functor Index2Object @Index2Morphism.
+    Definition MorphismFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
+      build_mor_functor Index2Object Index2Cat.
     Defined.
   End type.
-
-  Section set.
-    Variable I : Type.
-    Context `(Index2Cat : forall i : I, @SmallSpecializedCategory (@Index2Object i) (@Index2Morphism i)).
-
-    Definition MorphismFunctorToSet : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) SetCat.
-      build_mor_functor Index2Object @Index2Morphism.
-    Defined.
-  End set.
-
-  Section prop.
-    Variable I : Type.
-    Variable Index2Object : I -> Prop.
-    Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Prop.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
-
-    Definition MorphismFunctorToProp : SpecializedFunctor (@ComputableCategory _ _ _ Index2Cat) PropCat.
-      build_mor_functor Index2Object @Index2Morphism.
-    Defined.
-  End prop.
 End Mor.
 
-Arguments MorphismFunctor {I Index2Object Index2Morphism Index2Cat}.
-Arguments MorphismFunctorToSet {I Index2Object Index2Morphism Index2Cat}.
-Arguments MorphismFunctorToProp {I Index2Object Index2Morphism Index2Cat}.
+Arguments MorphismFunctor {I Index2Object Index2Cat}.
 
 Section dom_cod.
   Local Ltac build_dom_cod fst_snd :=
@@ -123,60 +101,39 @@ Section dom_cod.
   Section type.
     Variable I : Type.
     Variable Index2Object : I -> Type.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ _ Index2Cat) ObjectFunctor.
+    Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
       build_dom_cod @fst.
     Defined.
 
-    Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ _ Index2Cat) ObjectFunctor.
+    Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
       build_dom_cod @snd.
     Defined.
   End type.
-
-  Section set.
-    Variable I : Type.
-    Context `(Index2Cat : forall i : I, @SmallSpecializedCategory (@Index2Object i) (@Index2Morphism i)).
-
-    Definition DomainNaturalTransformationInSet : SpecializedNaturalTransformation (@MorphismFunctorToSet _ _ _ Index2Cat) ObjectFunctorToSet.
-      build_dom_cod @fst.
-    Defined.
-
-    Definition CodomainNaturalTransformationInSet : SpecializedNaturalTransformation (@MorphismFunctorToSet _ _ _ Index2Cat) ObjectFunctorToSet.
-      build_dom_cod @snd.
-    Defined.
-  End set.
-
-  Section prop.
-    Variable I : Type.
-    Variable Index2Object : I -> Prop.
-    Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Prop.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
-
-    Definition DomainNaturalTransformationInProp : SpecializedNaturalTransformation (@MorphismFunctorToProp _ _ _ Index2Cat) ObjectFunctorToProp.
-      build_dom_cod @fst.
-    Defined.
-
-    Definition CodomainNaturalTransformationInProp : SpecializedNaturalTransformation (@MorphismFunctorToProp _ _ _ Index2Cat) ObjectFunctorToProp.
-      build_dom_cod @snd.
-    Defined.
-  End prop.
 End dom_cod.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : @SpecializedCategory obj mor).
+  Context `(O' : @SpecializedCategory obj).
   Variable f : O -> O'.
 
-
   Definition InducedDiscreteFunctor : SpecializedFunctor (DiscreteCategory O) O'.
-    refine {| ObjectOf' := f; MorphismOf' := (fun s d_ m => match m return _ with eq_refl => Identity (f s) end) |};
-      abstract (
-        intros; simpl in *; repeat subst; trivial;
-          repeat rewrite RightIdentity; repeat rewrite LeftIdentity;
-            repeat rewrite Associativity;
-              reflexivity
-      ).
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          f
+          (fun s d_ m => match m return _ with eq_refl => Identity (f s) end)
+          _
+          _
+        )
+    end;
+    abstract (
+      intros; simpl in *; repeat subst; trivial;
+        repeat rewrite RightIdentity; repeat rewrite LeftIdentity;
+          repeat rewrite Associativity;
+            reflexivity
+    ).
   Defined.
 End InducedFunctor.
 

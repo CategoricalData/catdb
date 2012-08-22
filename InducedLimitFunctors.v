@@ -10,16 +10,14 @@ Section InducedFunctor.
      a category that we're coming from.  So prove them separately, so
      we can use them elsewhere, without assuming a full [HasLimits]. *)
   Variable I : Type.
-  Variable Index2Object : I -> Type.
-  Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (@Index2Morphism i).
+  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ _ Index2Cat _ _ D).
-  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ _ Index2Cat _ _ D).
+  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
 
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(D : @SpecializedCategory objD).
   Let DOp := OppositeCategory D.
 
   Section Limit.
@@ -87,9 +85,15 @@ Section InducedFunctor.
     Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
     Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
-      refine {| ObjectOf' := (fun x => LimitObject (HasLimits x));
-        MorphismOf' := (fun s d => @InducedLimitFunctor_MorphismOf s d (HasLimits s) (HasLimits d))
-      |};
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            (fun x => LimitObject (HasLimits x))
+            (fun s d => @InducedLimitFunctor_MorphismOf s d (HasLimits s) (HasLimits d))
+            _
+            _
+          )
+      end;
       abstract trivial.
     Defined.
   End Limit.
@@ -111,10 +115,10 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite LeftIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
-      repeat rewrite Associativity (* 3 s *).
+      repeat rewrite @LeftIdentity (* putting this here shaves off 6 s *);
+        repeat rewrite @FIdentityOf;
+          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      repeat rewrite @Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
           symmetry; eapply (@eq_trans _ _ (Compose a (Compose _ c')) _);
@@ -127,14 +131,13 @@ Section InducedFunctor.
             let H' := fresh in
               pose proof (fun x Y f => f_equal (fun T => T.(ComponentsOf) x) (proj1 (H Y f))) as H';
                 simpl in H';
-                  unfold Object, Morphism in *;
+                  unfold Object in *;
                     simpl in *;
-                      rewrite H';
-                        clear H'
+                      try (rewrite H'; clear H')
       end (* 7 s *);
       simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+        repeat rewrite @FIdentityOf;
+          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
@@ -148,9 +151,9 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite LeftIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      repeat rewrite @LeftIdentity (* putting this here shaves off 2 s *);
+        repeat rewrite @FIdentityOf;
+          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
       reflexivity.
     Qed.
 
@@ -159,9 +162,15 @@ Section InducedFunctor.
     Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
     Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
-      refine {| ObjectOf' := (fun x => ColimitObject (HasColimits x));
-        MorphismOf' := (fun s d => @InducedColimitFunctor_MorphismOf s d (HasColimits s) (HasColimits d))
-      |};
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            (fun x => ColimitObject (HasColimits x))
+            (fun s d => @InducedColimitFunctor_MorphismOf s d (HasColimits s) (HasColimits d))
+            _
+            _
+          )
+      end;
       abstract trivial.
     Defined.
   End Colimit.

@@ -11,10 +11,10 @@ Local Infix "==" := JMeq.
 Local Open Scope category_scope.
 
 Section OppositeCategory.
-  Context `(C : @SpecializedCategory objC morC).
+  Context `(C : @SpecializedCategory objC).
 
-  Definition OppositeCategory : @SpecializedCategory objC (fun s d => morC d s) :=
-    @Build_SpecializedCategory' objC (fun s d => morC d s)
+  Definition OppositeCategory : @SpecializedCategory objC :=
+    @Build_SpecializedCategory' objC (fun s d => Morphism' C d s)
     (Identity' C)
     (fun _ _ _ m1 m2 => Compose' C _ _ _ m2 m1)
     (fun _ _ _ _ _ _ _ => Associativity'_sym C _ _ _ _ _ _ _)
@@ -23,42 +23,14 @@ Section OppositeCategory.
     (fun _ _ => LeftIdentity' C _ _).
 End OppositeCategory.
 
-Ltac unOppositeCategory C :=
-  match eval unfold C in C with
-    @OppositeCategory ?obj ?mor ?C' => C'
-  end.
-
-Ltac unfold_OppositeCategory_of obj mor C :=
-  let C' := unOppositeCategory C in
-    progress (
-      change (@Object obj mor C) with (Object C') in *; simpl in *;
-        change (@Morphism obj mor C) with (fun s d => Morphism C' d s) in *; simpl in *;
-          change (@Identity obj mor C) with (fun o => Identity C' o) in *; simpl in *;
-            change (@Compose obj mor C) with (fun s d d' m1 m2 => Morphism C' m2 m1) in *; simpl in *
-    ).
-
-Ltac unfold_OppositeCategory :=
-  repeat match goal with
-           | [ _ : appcontext[@Object ?obj ?mor ?C] |- _ ] => unfold_OppositeCategory_of obj mor C
-           | [ _ : appcontext[@Morphism ?obj ?mor ?C] |- _ ] => unfold_OppositeCategory_of obj mor C
-           | [ _ : appcontext[@Identity ?obj ?mor ?C] |- _ ] => unfold_OppositeCategory_of obj mor C
-           | [ _ : appcontext[@Compose ?obj ?mor ?C] |- _ ] => unfold_OppositeCategory_of obj mor C
-           | [ |- appcontext[@Object ?obj ?mor ?C] ] => unfold_OppositeCategory_of obj mor C
-           | [ |- appcontext[@Morphism ?obj ?mor ?C] ] => unfold_OppositeCategory_of obj mor C
-           | [ |- appcontext[@Identity ?obj ?mor ?C] ] => unfold_OppositeCategory_of obj mor C
-           | [ |- appcontext[@Compose ?obj ?mor ?C] ] => unfold_OppositeCategory_of obj mor C
-         end.
-
-(*Hint Extern 1 => unfold_OppositeCategory.*)
-
 Section DualCategories.
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
     unfold OppositeCategory; simpl.
     repeat change (fun a => ?f a) with f.
-    destruct C; simpl; reflexivity.
+    case C; simpl; reflexivity.
   Qed.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
@@ -69,28 +41,22 @@ End DualCategories.
 Hint Rewrite @op_op_id @op_distribute_prod.
 
 Section DualObjects.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Lemma initial_opposite_terminal (o : C) :
-    InitialObject o -> @TerminalObject _ _ (OppositeCategory C) o.
+    InitialObject o -> TerminalObject (C := OppositeCategory C) o.
     t.
   Qed.
 
   Lemma terminal_opposite_initial (o : C) :
-    TerminalObject o -> @InitialObject _ _ (OppositeCategory C) o.
+    TerminalObject o -> InitialObject (C := OppositeCategory C) o.
     t.
   Qed.
 End DualObjects.
 
 Section OppositeFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
   Let COp := OppositeCategory C.
   Let DOp := OppositeCategory D.
@@ -98,20 +64,16 @@ Section OppositeFunctor.
   Definition OppositeFunctor : SpecializedFunctor COp DOp.
     refine (Build_SpecializedFunctor COp DOp
       (fun c : COp => F c : DOp)
-      (fun (s d : COp) (m : C.(Morphism) d s) => @MorphismOf _ _ _ _ _ _ F d s m)
-      (fun d' d s m1 m2 => @FCompositionOf _ _ _ _ _ _ F s d d' m2 m1)
-      (@FIdentityOf _ _ _ _ _ _ F)
+      (fun (s d : COp) (m : C.(Morphism) d s) => MorphismOf F (s := d) (d := s) m)
+      (fun d' d s m1 m2 => FCompositionOf F s d d' m2 m1)
+      (FIdentityOf F)
     ).
   Defined.
 End OppositeFunctor.
 
 Section OppositeFunctor_Id.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
 
   Lemma op_op_functor_id : OppositeFunctor (OppositeFunctor F) == F.
@@ -123,12 +85,8 @@ End OppositeFunctor_Id.
 (*Hint Rewrite op_op_functor_id.*)
 
 Section OppositeNaturalTransformation.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F G.
   Let COp := OppositeCategory C.
@@ -139,18 +97,14 @@ Section OppositeNaturalTransformation.
   Definition OppositeNaturalTransformation : SpecializedNaturalTransformation GOp FOp.
     refine (Build_SpecializedNaturalTransformation GOp FOp
       (fun c : COp => T.(ComponentsOf) c : DOp.(Morphism) (GOp c) (FOp c))
-      (fun s d m => eq_sym (@Commutes _ _ _ _ _ _ _ _ T d s m))
+      (fun s d m => eq_sym (Commutes T d s m))
     ).
   Defined.
 End OppositeNaturalTransformation.
 
 Section OppositeNaturalTransformation_Id.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F G.
 

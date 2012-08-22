@@ -4,6 +4,8 @@ Require Import Common Notations DiscreteCategory FEqualDep DefinitionSimplificat
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 Local Ltac slice_t :=
@@ -30,15 +32,9 @@ Local Ltac slice_t :=
          end.
 
 Section CommaCategory.
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objB : Type.
-  Variable morB : objB -> objB -> Type.
-  Variable B : SpecializedCategory morB.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(B : @SpecializedCategory objB).
+  Context `(C : @SpecializedCategory objC).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
 
@@ -59,12 +55,8 @@ Section CommaCategory.
 End CommaCategory.
 
 Section SliceCategory.
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(C : @SpecializedCategory objC).
   Variable a : C.
   Variable S : SpecializedFunctor A C.
 
@@ -84,12 +76,8 @@ Section SliceCategory.
 End SliceCategory.
 
 Section SliceCategoryInducedFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
 
   Section Slice.
@@ -116,7 +104,7 @@ Section SliceCategoryInducedFunctor.
       exists (projT1 m0); simpl.
       abstract (
         destruct m0 as [ [ ? ? ] ]; simpl in *;
-          rewrite LeftIdentity in *;
+          rewrite @LeftIdentity in *;
             repeat rewrite Associativity;
               apply f_equal;
                 assumption
@@ -181,7 +169,7 @@ Section SliceCategoryInducedFunctor.
       exists (projT1 m0).
       abstract (
         destruct m0 as [ [ ? ? ] ]; simpl in *;
-          rewrite RightIdentity in *;
+          rewrite @RightIdentity in *;
             repeat rewrite <- Associativity;
               f_equal;
               assumption
@@ -229,7 +217,7 @@ Section SliceCategoryProjectionFunctor.
 
   Section Slice.
     Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
-    Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
+    Local Notation "C / c" := (SliceSpecializedCategoryOver C c).
 
     Let SliceCategoryProjectionFunctor_ObjectOf (d : D) : LocallySmallCat / C.
       constructor.
@@ -243,7 +231,7 @@ Section SliceCategoryProjectionFunctor.
       (SliceCategoryProjectionFunctor_ObjectOf d).
       subst_body;
       hnf; simpl.
-      exists (@SliceCategoryInducedFunctor _ _ C _ _ D F s d m, tt).
+      exists (SliceCategoryInducedFunctor (C := C) (D := D) F s d m, tt).
       unfold SliceCategoryInducedFunctor in *; simpl; intros.
       abstract (
         functor_eq;
@@ -275,7 +263,7 @@ Section SliceCategoryProjectionFunctor.
 
   Section Coslice.
     Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
-    Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
+    Local Notation "C / c" := (SliceSpecializedCategoryOver C c).
 
     Let DOp := OppositeCategory D.
 
@@ -290,7 +278,7 @@ Section SliceCategoryProjectionFunctor.
       (CosliceCategoryProjectionFunctor_ObjectOf s)
       (CosliceCategoryProjectionFunctor_ObjectOf d).
       subst_body; hnf; simpl.
-      exists (@CosliceCategoryInducedFunctor _ _ C _ _ D F s d m, tt).
+      exists (CosliceCategoryInducedFunctor (C := C) (D := D) F s d m, tt).
       simpl; intros.
       abstract (
         functor_eq;

@@ -12,8 +12,8 @@ Section FunctorIsomorphism.
   (* Copy definitions from CategoryIsomorphisms.v *)
 
   Section FunctorIsInverseOf.
-    Context `{C : @SpecializedCategory objC morC}.
-    Context `{D : @SpecializedCategory objD morD}.
+    Context `{C : @SpecializedCategory objC}.
+    Context `{D : @SpecializedCategory objD}.
 
     Definition FunctorIsInverseOf1 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
       ComposeFunctors G F = IdentityFunctor C.
@@ -27,14 +27,14 @@ Section FunctorIsomorphism.
       FunctorIsInverseOf1 F G /\ FunctorIsInverseOf2 F G.
   End FunctorIsInverseOf.
 
-  Lemma FunctorIsInverseOf_sym `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD}
+  Lemma FunctorIsInverseOf_sym `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD}
     (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) :
     FunctorIsInverseOf F G -> FunctorIsInverseOf G F.
     firstorder.
   Qed.
 
   Section FunctorIsomorphismOf.
-    Record FunctorIsomorphismOf `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} (F : SpecializedFunctor C D) := {
+    Record FunctorIsomorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) := {
       FunctorIsomorphismOf_Functor :> _ := F;
       InverseFunctor : SpecializedFunctor D C;
       LeftInverseFunctor : ComposeFunctors InverseFunctor F = IdentityFunctor C;
@@ -43,16 +43,16 @@ Section FunctorIsomorphism.
 
     Hint Resolve RightInverseFunctor LeftInverseFunctor.
 
-    Definition FunctorIsomorphismOf_Identity `(C : @SpecializedCategory objC morC) : FunctorIsomorphismOf (IdentityFunctor C).
+    Definition FunctorIsomorphismOf_Identity `(C : @SpecializedCategory objC) : FunctorIsomorphismOf (IdentityFunctor C).
       exists (IdentityFunctor _); eauto.
     Defined.
 
-    Definition InverseOfFunctor `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} (F : SpecializedFunctor C D)
+    Definition InverseOfFunctor `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D)
       (i : FunctorIsomorphismOf F) : FunctorIsomorphismOf (InverseFunctor i).
       exists i; auto.
     Defined.
 
-    Definition ComposeFunctorIsmorphismOf `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} `{E : @SpecializedCategory objE morE}
+    Definition ComposeFunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} `{E : @SpecializedCategory objE}
       {F : SpecializedFunctor D E} {G : SpecializedFunctor C D} (i1 : FunctorIsomorphismOf F) (i2 : FunctorIsomorphismOf G) :
       FunctorIsomorphismOf (ComposeFunctors F G).
       exists (ComposeFunctors (InverseFunctor i2) (InverseFunctor i1));
@@ -68,7 +68,7 @@ Section FunctorIsomorphism.
   End FunctorIsomorphismOf.
 
   Section IsomorphismOfCategories.
-    Record IsomorphismOfCategories `(C : @SpecializedCategory objC morC) `(D : @SpecializedCategory objD morD) := {
+    Record IsomorphismOfCategories `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) := {
       IsomorphismOfCategories_Functor : SpecializedFunctor C D;
       IsomorphismOfCategories_Of :> FunctorIsomorphismOf IsomorphismOfCategories_Functor
     }.
@@ -77,10 +77,10 @@ Section FunctorIsomorphism.
   End IsomorphismOfCategories.
 
   Section FunctorIsIsomorphism.
-    Definition FunctorIsIsomorphism `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} (F : SpecializedFunctor C D) : Prop :=
+    Definition FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) : Prop :=
       exists G, FunctorIsInverseOf F G.
 
-    Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
       FunctorIsomorphismOf F -> FunctorIsIsomorphism F.
       intro i; hnf.
       exists (InverseFunctor i);
@@ -89,7 +89,7 @@ Section FunctorIsomorphism.
             assumption.
     Qed.
 
-    Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : @SpecializedCategory objC morC} `{D : @SpecializedCategory objD morD} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
       FunctorIsIsomorphism F -> exists _ : FunctorIsomorphismOf F, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
@@ -101,7 +101,7 @@ Section FunctorIsomorphism.
     Definition CategoriesIsomorphic (C D : Category) : Prop :=
       exists (F : SpecializedFunctor C D) (G : SpecializedFunctor D C), FunctorIsInverseOf F G.
 
-    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : @SpecializedCategory objC morC) `(D : @SpecializedCategory objD morD) :
+    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
       IsomorphismOfCategories C D -> CategoriesIsomorphic C D.
       intro i; destruct i as [ m i ].
       exists m.

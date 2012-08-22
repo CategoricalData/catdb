@@ -37,8 +37,9 @@ Section DCategoryDec.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategoryDec : @SpecializedCategory O DiscreteCategoryDec_Morphism.
+  Definition DiscreteCategoryDec : @SpecializedCategory O.
     refine {|
+      Morphism' := DiscreteCategoryDec_Morphism;
       Compose' := DiscreteCategoryDec_Compose;
       Identity' := DiscreteCategoryDec_Identity
     |};

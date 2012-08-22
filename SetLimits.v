@@ -4,10 +4,10 @@ Require Import Common Limits Functor NaturalTransformation FunctorCategory Initi
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section SetLimits.
-  Variable objC : Set.
-  Variable morC : objC -> objC -> Set.
-  Variable C : SmallSpecializedCategory morC.
+  Context `(C : @SmallSpecializedCategory objC).
   Variable F : SpecializedFunctor C SetCat.
 
   (* Quoting David:
@@ -48,7 +48,7 @@ Section SetLimits.
       tt
     ).
     abstract (
-      simpl in *; intros;
+      simpl in *; intros; unfold FunctorCategory in *; simpl in *;
         destruct_type @SpecializedNaturalTransformation; simpl in *;
           fg_equal;
           symmetry;
@@ -75,7 +75,7 @@ Section SetLimits.
           trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
-              rewrite LeftIdentityNaturalTransformation in *;
+              rewrite @LeftIdentityNaturalTransformation in *;
                 subst;
                   unfold Morphism;
                     trivial
@@ -84,9 +84,7 @@ Section SetLimits.
 End SetLimits.
 
 Section TypeLimits.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C TypeCat.
 
   (* Quoting David:
@@ -127,7 +125,7 @@ Section TypeLimits.
       tt
     ).
     abstract (
-      simpl in *; intros;
+      simpl in *; intros; unfold FunctorCategory in *; simpl in *;
         destruct_type @SpecializedNaturalTransformation; simpl in *;
           fg_equal;
           symmetry;
@@ -154,7 +152,7 @@ Section TypeLimits.
           trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
-              rewrite LeftIdentityNaturalTransformation in *;
+              rewrite @LeftIdentityNaturalTransformation in *;
                 subst;
                   unfold Morphism;
                     trivial

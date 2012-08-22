@@ -9,9 +9,9 @@ Generalizable All Variables.
 Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
-  Context `(A : @SpecializedCategory objA morA).
+  Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Prop.
-  Variable Pmor : forall s d : sig Pobj, morA (proj1_sig s) (proj1_sig d) -> Type.
+  Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Type.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
@@ -30,10 +30,11 @@ Section sig_sigT_obj_mor.
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
 
-  Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj) (fun s d => sigT (@Pmor s d)).
+  Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => sigT (@Pmor s d))
           (fun x => existT _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
           (fun s d d' m1 m2 => existT _ (Compose (C := A) (projT1 m1) (projT1 m2)) (Pcompose (projT2 m1) (projT2 m2)))
           _
@@ -47,7 +48,7 @@ Section sig_sigT_obj_mor.
   Let sig_of_sigT' (A : Type) (P : A -> Prop) (X : sigT P) := exist P (projT1 X) (projT2 X).
   Let sigT_of_sig' (A : Type) (P : A -> Prop) (X : sig P) := existT P (proj1_sig X) (proj2_sig X).
 
-  Let Pmor' (s d : sigT Pobj) : morA (projT1 s) (projT1 d) -> Type := @Pmor (sig_of_sigT' s) (sig_of_sigT' d).
+  Let Pmor' (s d : sigT Pobj) : A.(Morphism) (projT1 s) (projT1 d) -> Type := @Pmor (sig_of_sigT' s) (sig_of_sigT' d).
   Let Pidentity' x : @Pmor' x x (Identity (C := A) _) := Pidentity (sig_of_sigT' x).
   Let Pcompose' s d d' : forall m1 m2, @Pmor' d d' m1 -> @Pmor' s d m2 -> @Pmor' s d' (Compose (C := A) m1 m2)
     := @Pcompose (sig_of_sigT' s) (sig_of_sigT' d) (sig_of_sigT' d').
@@ -64,8 +65,8 @@ Section sig_sigT_obj_mor.
     f'
     := P_RightIdentity f'.
 
-  Let SpecializedCategory_sig_sigT_as_sigT : @SpecializedCategory (sigT Pobj) (fun s d => sigT (@Pmor' s d)).
-    eapply (@SpecializedCategory_sigT _ _ A
+  Let SpecializedCategory_sig_sigT_as_sigT : @SpecializedCategory (sigT Pobj).
+    eapply (@SpecializedCategory_sigT _ A
       Pobj
       Pmor'
       Pidentity'

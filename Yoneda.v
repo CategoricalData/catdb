@@ -4,6 +4,8 @@ Require Import Common ProductCategory SetCategory.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
@@ -16,20 +18,25 @@ Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
     end.
 
 Section Yoneda.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
   Section Yoneda.
     Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
-      refine {| ObjectOf' := (fun c : COp => CovariantHomFunctor C c : TypeCat ^ C);
-        MorphismOf' := (fun s d (f : COp.(Morphism) s d) =>
-          Build_SpecializedNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d)
-          (fun c : C => (fun m : C.(Morphism) _ _ => Compose m f))
-          _
-        )
-      |}; simpl; nt_eq; abstract t.
+      match goal with
+        | [ |- SpecializedFunctor ?C0 ?D0 ] =>
+          refine (Build_SpecializedFunctor C0 D0
+            (fun c : COp => CovariantHomFunctor C c : TypeCat ^ C)
+            (fun s d (f : COp.(Morphism) s d) =>
+              Build_SpecializedNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d)
+              (fun c : C => (fun m : C.(Morphism) _ _ => Compose m f))
+              _
+            )
+            _
+            _
+          )
+      end;
+      simpl; nt_eq; abstract t.
       Grab Existential Variables.
       abstract (intros; simpl; apply functional_extensionality_dep; t).
     Defined.
@@ -37,13 +44,20 @@ Section Yoneda.
 
   Section CoYoneda.
     Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
-      refine {| ObjectOf' := (fun c : C => ContravariantHomFunctor C c : TypeCat ^ COp);
-        MorphismOf' := (fun s d (f : C.(Morphism) s d) =>
-          Build_SpecializedNaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d)
-          (fun c : C => (fun m : COp.(Morphism) _ _ => Compose m f))
-          _
-        )
-      |}; simpl; nt_eq; abstract t.
+      match goal with
+        | [ |- SpecializedFunctor ?C0 ?D0 ] =>
+          refine (Build_SpecializedFunctor C0 D0
+            (fun c : C => ContravariantHomFunctor C c : TypeCat ^ COp)
+            (fun s d (f : C.(Morphism) s d) =>
+              Build_SpecializedNaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d)
+              (fun c : C => (fun m : COp.(Morphism) _ _ => Compose m f))
+              _
+            )
+            _
+            _
+          )
+      end;
+      simpl; nt_eq; abstract t.
       Grab Existential Variables.
       abstract (intros; simpl; apply functional_extensionality_dep; t).
     Defined.
@@ -51,9 +65,7 @@ Section Yoneda.
 End Yoneda.
 
 Section YonedaLemma.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C : SpecializedCategory _.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
@@ -76,9 +88,12 @@ Section YonedaLemma.
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
           simpl in *;
+            fg_equal;
             t_with t'
     ).
   Defined.
+
+  Hint Rewrite @FIdentityOf.
 
   Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
@@ -92,9 +107,7 @@ Section YonedaLemma.
 End YonedaLemma.
 
 Section CoYonedaLemma.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
   Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
@@ -116,9 +129,12 @@ Section CoYonedaLemma.
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
         pose (FCompositionOf X);
           simpl in *;
+            fg_equal;
             t_with t'
     ).
   Defined.
+
+  Hint Rewrite @FIdentityOf.
 
   Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     exists (@CoYonedaLemmaMorphismInverse c X).
@@ -127,18 +143,18 @@ Section CoYonedaLemma.
         pose (FCompositionOf X);
           simpl in *; t_with t'.
     apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
+    fg_equal.
+    t_with t'.
   Qed.
 End CoYonedaLemma.
 
 Section FullyFaithful.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@YonedaLemma _ _ C c (CovariantHomFunctor C c')) as [ m i ].
+    destruct (@YonedaLemma _ C c (CovariantHomFunctor C c')) as [ m i ].
     exists (YonedaLemmaMorphism (X := CovariantHomFunctor C c')).
     t_with t'; nt_eq; t_with t'.
     apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').
@@ -147,7 +163,7 @@ Section FullyFaithful.
   Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@CoYonedaLemma _ _ C c (ContravariantHomFunctor C c')) as [ m i ].
+    destruct (@CoYonedaLemma _ C c (ContravariantHomFunctor C c')) as [ m i ].
     exists (CoYonedaLemmaMorphism (X := ContravariantHomFunctor C c')).
     t_with t'; nt_eq; t_with t'.
     apply_commutes_by_transitivity_and_solve_with ltac:(t_with t').

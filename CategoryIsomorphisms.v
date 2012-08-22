@@ -7,20 +7,20 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section Category.
-  Context `{C : @SpecializedCategory obj mor}.
+  Context `{C : @SpecializedCategory obj}.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   (* [Definitions] don't get sort-polymorphism :-(  *)
-  Definition IsInverseOf'1 (s d : obj) (m : mor s d) (m' : mor d s) : Prop :=
+  Definition IsInverseOf'1 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
     C.(Compose') _ _ _ m' m = C.(Identity') s.
-  Definition IsInverseOf'2 (s d : obj) (m : mor s d) (m' : mor d s) : Prop :=
+  Definition IsInverseOf'2 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
     C.(Compose') _ _ _ m m' = C.(Identity') d.
 
   Global Arguments IsInverseOf'1 / _ _ _ _.
   Global Arguments IsInverseOf'2 / _ _ _ _.
 
-  Definition IsInverseOf' {s d : obj} (m : mor s d) (m' : mor d s) : Prop := Eval simpl in
+  Definition IsInverseOf' {s d : obj} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
     @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
   Definition IsInverseOf {s d} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
     @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
@@ -47,8 +47,8 @@ Section Category.
   Section IsomorphismOf.
     (* A morphism is an isomorphism if it has an inverse *)
     Record IsomorphismOf {s d : C} (m : C.(Morphism) s d) := {
-      IsomorphismOf_Morphism :> mor s d := m;
-      Inverse : mor d s;
+      IsomorphismOf_Morphism :> C.(Morphism) s d := m;
+      Inverse : C.(Morphism) d s;
       LeftInverse : Compose Inverse m = Identity s;
       RightInverse : Compose m Inverse = Identity d
     }.
@@ -79,10 +79,10 @@ Section Category.
     Defined.
 
     Definition InverseOf {s d : C} (m : C.(Morphism) s d) (i : IsomorphismOf m) : IsomorphismOf (Inverse i).
-      exists i; auto.
+      exists (i : Morphism C _ _); auto.
     Defined.
 
-    Definition ComposeIsmorphismOf {s d d' : C} {m1 : Morphism C d d'} {m2 : Morphism C s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
+    Definition ComposeIsmorphismOf {s d d' : C} {m1 : C.(Morphism) d d'} {m2 : C.(Morphism) s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
       IsomorphismOf (Compose m1 m2).
       exists (Compose (Inverse i2) (Inverse i1));
         abstract (
@@ -94,7 +94,7 @@ Section Category.
 
   Section Isomorphism.
     Record Isomorphism (s d : C) := {
-      Isomorphism_Morphism : mor s d;
+      Isomorphism_Morphism : C.(Morphism) s d;
       Isomorphism_Of :> IsomorphismOf Isomorphism_Morphism
     }.
 
@@ -105,7 +105,7 @@ Section Category.
     Definition IsIsomorphism {s d : C} (m : C.(Morphism) s d) : Prop :=
       exists m', IsInverseOf m m'.
 
-    Lemma IsmorphismOf_IsIsomorphism {s d : C} (m : Morphism C s d) : IsomorphismOf m -> IsIsomorphism m.
+    Lemma IsmorphismOf_IsIsomorphism {s d : C} (m : C.(Morphism) s d) : IsomorphismOf m -> IsIsomorphism m.
       intro i; hnf.
       exists (Inverse i);
         destruct i; simpl;
@@ -113,7 +113,7 @@ Section Category.
             assumption.
     Qed.
 
-    Lemma IsIsomorphism_IsmorphismOf {s d : C} (m : Morphism C s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
+    Lemma IsIsomorphism_IsmorphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
       eexists; eassumption.
@@ -122,7 +122,7 @@ Section Category.
 
   Section Isomorphic.
     Definition Isomorphic (s d : C) : Prop :=
-      exists (m : Morphism C s d) (m' : Morphism C d s), IsInverseOf m m'.
+      exists (m : C.(Morphism) s d) (m' : C.(Morphism) d s), IsInverseOf m m'.
 
     Lemma Ismorphism_Isomorphic s d : Isomorphism s d -> Isomorphic s d.
       intro i; destruct i as [ m i ].
@@ -227,7 +227,7 @@ Ltac pre_compose_to_identity :=
   [ solve_isomorphism | ].
 
 Section CategoryObjects1.
-  Context `{C : @SpecializedCategory obj mor}.
+  Context `{C : @SpecializedCategory obj}.
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
@@ -251,9 +251,7 @@ Section CategoryObjects1.
 End CategoryObjects1.
 
 Section CategoryObjects2.
-  Variable obj : Type.
-  Variable mor : obj -> obj -> Type.
-  Variable C : SpecializedCategory mor.
+  Context `(C : @SpecializedCategory obj).
 
   Ltac unique := hnf; intros; specialize_all_ways; destruct_sig;
     unfold is_unique, unique, uniqueness in *;
@@ -263,12 +261,12 @@ Section CategoryObjects2.
              end; eauto; try split; try solve [ etransitivity; eauto ].
 
   (* The terminal object is unique up to unique isomorphism. *)
-  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject _ _ C).
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (TerminalObject (C := C)).
     unique.
   Qed.
 
   (* The initial object is unique up to unique isomorphism. *)
-  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (@InitialObject _ _ C).
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (InitialObject (C := C)).
     unique.
   Qed.
 End CategoryObjects2.

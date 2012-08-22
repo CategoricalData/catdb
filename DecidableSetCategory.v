@@ -7,7 +7,7 @@ Set Implicit Arguments.
 Section CSet.
   Let eq_dec_on T := forall x y : T, {x = y} + {x <> y}.
 
-  Definition TypeCatDec := @SpecializedCategory_sigT_obj _ _ TypeCat eq_dec_on.
-  Definition SetCatDec := @SpecializedCategory_sigT_obj _ _ SetCat eq_dec_on.
-  Definition PropCatDec := @SpecializedCategory_sigT_obj _ _ PropCat eq_dec_on.
+  Definition TypeCatDec := SpecializedCategory_sigT_obj TypeCat eq_dec_on.
+  Definition SetCatDec := SpecializedCategory_sigT_obj SetCat eq_dec_on.
+  Definition PropCatDec := SpecializedCategory_sigT_obj PropCat eq_dec_on.
 End CSet.

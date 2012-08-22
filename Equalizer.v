@@ -6,9 +6,9 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section Equalizer.
-  Context `(C : @SpecializedCategory objC morC).
+  Context `(C : @SpecializedCategory objC).
   Variables A B : objC.
-  Variables f g : morC A B.
+  Variables f g : C.(Morphism) A B.
 
   Inductive EqualizerTwo := EqualizerA | EqualizerB.
 
@@ -27,8 +27,10 @@ Section Equalizer.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition EqualizerDiagram : SpecializedCategory EqualizerDiagram_Morphism.
-    refine {| Identity' := (fun x => match x with EqualizerA => tt | EqualizerB => tt end);
+  Definition EqualizerDiagram : @SpecializedCategory EqualizerTwo.
+    refine {|
+      Morphism' := EqualizerDiagram_Morphism;
+      Identity' := (fun x => match x with EqualizerA => tt | EqualizerB => tt end);
       Compose' := EqualizerDiagram_Compose
     |};
     abstract (
@@ -55,14 +57,20 @@ Section Equalizer.
   Defined.
 
   Definition EqualizerFunctor : SpecializedFunctor EqualizerDiagram C.
-    refine {| ObjectOf' := EqualizerFunctor_ObjectOf;
-      MorphismOf' := EqualizerFunctor_MorphismOf
-    |};
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          EqualizerFunctor_ObjectOf
+          EqualizerFunctor_MorphismOf
+          _
+          _
+        )
+    end;
     abstract (
       unfold EqualizerFunctor_MorphismOf; simpl; intros;
         destruct_type EqualizerTwo;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
+        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+          trivial; try destruct_to_empty_set
     ).
   Defined.
 

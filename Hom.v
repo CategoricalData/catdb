@@ -4,6 +4,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 (*
@@ -11,9 +13,9 @@ Local Open Scope category_scope.
 
 Section covariant_contravariant.
   Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
-  Definition CovariantHomFunctor `(C : @SpecializedCategory objC morC) (A : OppositeCategory C) :=
+  Definition CovariantHomFunctor `(C : @SpecializedCategory objC) (A : OppositeCategory C) :=
     Eval simpl in ((HomFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomFunctor `(C : @SpecializedCategory objC morC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+  Definition ContravariantHomFunctor `(C : @SpecializedCategory objC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
 
   Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
   Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
@@ -24,17 +26,11 @@ have a bit of trouble with.  *sigh*
 *)
 
 Section HomFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable morC' : objC -> objC -> Set.
-  Variable C : SpecializedCategory morC.
-  Variable C' : LocallySmallSpecializedCategory morC'.
+  Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
-  Let C'Op := OppositeCategory C' : LocallySmallSpecializedCategory _.
 
   Section Covariant.
     Variable A : COp.
-    Variable A' : C'Op.
 
     Definition CovariantHomFunctor : SpecializedFunctor C TypeCat.
       refine (Build_SpecializedFunctor C TypeCat
@@ -45,21 +41,10 @@ Section HomFunctor.
       );
       abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
-
-    Definition CovariantHomSetFunctor : SpecializedFunctor C' SetCat.
-      refine (Build_SpecializedFunctor C' SetCat
-        (fun X : C' => morC' A' X : SetCat)
-        (fun X Y f => (fun g : C'.(Morphism) A' X => Compose f g))
-        _
-        _
-      );
-      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
-    Defined.
   End Covariant.
 
   Section Contravariant.
     Variable B : C.
-    Variable B' : C'.
 
     Definition ContravariantHomFunctor : SpecializedFunctor COp TypeCat.
       refine (Build_SpecializedFunctor COp TypeCat
@@ -70,21 +55,9 @@ Section HomFunctor.
       );
       abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
     Defined.
-
-    Definition ContravariantHomSetFunctor : SpecializedFunctor C'Op SetCat.
-      clear morC C COp B.
-      refine (Build_SpecializedFunctor C'Op SetCat
-        (fun X : C'Op => morC' X B' : SetCat)
-        (fun X Y (h : C'Op.(Morphism) X Y) => (fun g : C'Op.(Morphism) B' X => Compose h g))
-        _
-        _
-      );
-      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
-    Defined.
   End Contravariant.
 
   Definition hom_functor_object_of (c'c : COp * C) := C.(Morphism) (fst c'c) (snd c'c) : TypeCat.
-  Definition hom_set_functor_object_of (c'c : C'Op * C') := morC' (fst c'c) (snd c'c) : SetCat.
 
   Definition hom_functor_morphism_of (s's : (COp * C)%type) (d'd : (COp * C)%type) (hf : (COp * C).(Morphism) s's d'd) :
     TypeCat.(Morphism) (hom_functor_object_of s's) (hom_functor_object_of d'd).
@@ -92,17 +65,6 @@ Section HomFunctor.
     destruct s's as [ s' s ], d'd as [ d' d ].
     destruct hf as [ h f ].
     intro g.
-    exact (Compose f (Compose g h)).
-  Defined.
-
-  Definition hom_set_functor_morphism_of (s's : (C'Op * C')%type) (d'd : (C'Op * C')%type) (hf : (C'Op * C').(Morphism) s's d'd) :
-    SetCat.(Morphism) (hom_set_functor_object_of s's) (hom_set_functor_object_of d'd).
-    unfold hom_set_functor_object_of in *.
-    destruct s's as [ s' s ], d'd as [ d' d ].
-    destruct hf as [ h f ].
-    intro g.
-    unfold LocallySmallSpecializedCategory in *.
-    present_spcategory_all.
     exact (Compose f (Compose g h)).
   Defined.
 
@@ -118,33 +80,17 @@ Section HomFunctor.
         repeat (apply functional_extensionality_dep; intro); t_with t'
     ).
   Defined.
-
-  Definition HomSetFunctor : SpecializedFunctor (C'Op * C') SetCat.
-    clear morC C COp.
-    refine (Build_SpecializedFunctor (C'Op * C') SetCat
-      (fun c'c : C'Op * C' => morC' (fst c'c) (snd c'c) : SetCat)
-      (fun X Y (hf : (C'Op * C').(Morphism) X Y) => hom_set_functor_morphism_of hf)
-      _
-      _
-    );
-    abstract (
-      intros; simpl in *; destruct_hypotheses; simpl in *;
-        repeat (apply functional_extensionality_dep; intro); t_with t'
-    ).
-  Defined.
 End HomFunctor.
 
 Section SplitHomFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
   Lemma SplitHom (X Y : COp * C) : forall gh,
-    @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
+    MorphismOf (HomFunctor C) (s := X) (d := Y) gh =
     (Compose
-      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd Y)) (fst X) (fst Y) (fst gh))
-      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst X)) (snd X) (snd Y) (snd gh))).
+      (MorphismOf (ContravariantHomFunctor C (snd Y)) (s := fst X) (d := fst Y) (fst gh))
+      (MorphismOf (CovariantHomFunctor C (fst X)) (s := snd X) (d := snd Y) (snd gh))).
   Proof.
     destruct X, Y.
     intro gh; destruct gh.
@@ -155,10 +101,10 @@ Section SplitHomFunctor.
   Qed.
 
   Lemma SplitHom' (X Y : COp * C) : forall gh,
-    @MorphismOf _ _ _ _ _ _ (HomFunctor C) X Y gh =
+    MorphismOf (HomFunctor C) (s := X) (d := Y) gh =
     (Compose
-      (@MorphismOf _ _ _ _ _ _ (CovariantHomFunctor C (fst Y)) (snd X) (snd Y) (snd gh))
-      (@MorphismOf _ _ _ _ _ _ (ContravariantHomFunctor C (snd X)) (fst X) (fst Y) (fst gh))).
+      (MorphismOf (CovariantHomFunctor C (fst Y)) (s := snd X) (d := snd Y) (snd gh))
+      (MorphismOf (ContravariantHomFunctor C (snd X)) (s := fst X) (d := fst Y) (fst gh))).
   Proof.
     destruct X, Y.
     intro gh; destruct gh.

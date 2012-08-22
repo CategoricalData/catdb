@@ -25,8 +25,8 @@ Section BoolCat.
   Global Arguments BoolCat_Compose [s d d'] m1 m2 : simpl never.
   Global Arguments BoolCat_Identity x : simpl never.
 
-  Definition BoolCat : @SpecializedCategory bool mor.
-    refine {| Identity' := BoolCat_Identity; Compose' := BoolCat_Compose |};
+  Definition BoolCat : @SpecializedCategory bool.
+    refine {| Morphism' := mor; Identity' := BoolCat_Identity; Compose' := BoolCat_Compose |};
       t.
   Defined.
 End BoolCat.

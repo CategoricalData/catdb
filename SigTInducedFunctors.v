@@ -8,11 +8,11 @@ Generalizable All Variables.
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)
-  Context `(dummy0 : @SpecializedCategory_sigT objA morA A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0).
-  Context `(dummy1 : @SpecializedCategory_sigT objA morA A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1).
+  Context `(dummy0 : @SpecializedCategory_sigT objA A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0).
+  Context `(dummy1 : @SpecializedCategory_sigT objA A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1).
 
-  Let sigT_cat0 := @SpecializedCategory_sigT objA morA A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0.
-  Let sigT_cat1 := @SpecializedCategory_sigT objA morA A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1.
+  Let sigT_cat0 := @SpecializedCategory_sigT objA A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0.
+  Let sigT_cat1 := @SpecializedCategory_sigT objA A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1.
 
   Variable P_ObjectOf : forall x, Pobj0 x -> Pobj1 x.
 
@@ -37,11 +37,19 @@ Section T2.
     Pidentity1 (InducedT2Functor_sigT_ObjectOf o).
 
   Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
-    refine {| ObjectOf' := InducedT2Functor_sigT_ObjectOf; MorphismOf' := InducedT2Functor_sigT_MorphismOf |};
-      subst_body;
-      abstract (
-        present_spcategory; simpl in *; intros; simpl_eq; try reflexivity; JMeq_eq;
-          apply P_CompositionOf || apply P_IdentityOf
-      ).
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          InducedT2Functor_sigT_ObjectOf
+          InducedT2Functor_sigT_MorphismOf
+          _
+          _
+        )
+    end;
+    subst_body;
+    abstract (
+      present_spcategory; simpl in *; intros; unfold Morphism; simpl_eq; try reflexivity; JMeq_eq;
+        apply @P_CompositionOf || apply @P_IdentityOf
+    ).
   Defined.
 End T2.

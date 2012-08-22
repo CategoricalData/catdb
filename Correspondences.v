@@ -68,8 +68,8 @@ Section CorrespondenceCategory.
      is a functor
      [[M: C^{op} × C' → Set.]]
      *)
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(C' : @SpecializedCategory objC' morC').
+  Context `(C : @SpecializedCategory objC).
+  Context `(C' : @SpecializedCategory objC').
 
   Let COp := OppositeCategory C.
 
@@ -115,45 +115,49 @@ Section CorrespondenceCategory.
 
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
-  Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type CorrespondenceCategory_Morphism.
-    refine {| Identity' := CorrespondenceCategory_Identity; Compose' := CorrespondenceCategory_Compose |};
-      abstract (
-        intros; destruct_type @sum;
-          unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
-            destruct_type @Empty_set; trivial; t_with t';
-              try match goal with
-                    | [ |- appcontext[(Compose (C := ?A) ?a ?b, Identity (C := ?B) ?c)] ] =>
-                      replace (Compose a b, Identity c) with
-                        (Compose (C := A * B) (s := (_, c)) (d := (_, c)) (d' := (_, c)) (a, Identity c) (b, Identity c));
-                        [
-                          let H := fresh in
-                            pose proof (FCompositionOf' M (_, c) (_, c) (_, c) (a, Identity c) (b, Identity c)) as H; present_spfunctor;
-                              conv_rewrite H
-                          | simpl; repeat rewrite LeftIdentity; try reflexivity
-                        ]
-                    | [ |- appcontext[(Identity (C := ?B) ?c, Compose (C := ?A) ?a ?b)] ] =>
-                      replace (Identity c, Compose a b) with
-                        (Compose (C := B * A) (s := (c, _)) (d := (c, _)) (d' := (c, _)) (Identity c, a) (Identity c, b));
-                        [
-                          let H := fresh in
-                            pose proof (FCompositionOf' M (c, _) (c, _) (c, _) (Identity c, b) (Identity c, a)) as H;
-                              conv_rewrite H
-                          | simpl; repeat rewrite LeftIdentity; try reflexivity
-                        ]
-                    | [ |- ?f (?g ?x) = ?f' (?g' ?x') ] => change (Compose f g x = Compose f' g' x');
-                      repeat rewrite <- FCompositionOf; simpl; present_spcategory;
-                        repeat rewrite LeftIdentity; repeat rewrite RightIdentity
-                  end;
-              repeat rewrite FIdentityOf;
-                repeat rewrite FCompositionOf;
-                  try solve [ simpl; trivial ]
-      ).
+  Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type.
+    refine {|
+      Morphism' := CorrespondenceCategory_Morphism;
+      Identity' := CorrespondenceCategory_Identity;
+      Compose' := CorrespondenceCategory_Compose
+    |};
+    abstract (
+      intros; destruct_type @sum;
+        unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
+          destruct_type @Empty_set; trivial; t_with t';
+            try match goal with
+                  | [ |- appcontext[(Compose (C := ?A) ?a ?b, Identity (C := ?B) ?c)] ] =>
+                    replace (Compose a b, Identity c) with
+                      (Compose (C := A * B) (s := (_, c)) (d := (_, c)) (d' := (_, c)) (a, Identity c) (b, Identity c));
+                      [
+                        let H := fresh in
+                          pose proof (FCompositionOf' M (_, c) (_, c) (_, c) (a, Identity c) (b, Identity c)) as H; present_spfunctor;
+                            conv_rewrite H
+                        | simpl; repeat rewrite LeftIdentity; try reflexivity
+                      ]
+                  | [ |- appcontext[(Identity (C := ?B) ?c, Compose (C := ?A) ?a ?b)] ] =>
+                    replace (Identity c, Compose a b) with
+                      (Compose (C := B * A) (s := (c, _)) (d := (c, _)) (d' := (c, _)) (Identity c, a) (Identity c, b));
+                      [
+                        let H := fresh in
+                          pose proof (FCompositionOf' M (c, _) (c, _) (c, _) (Identity c, b) (Identity c, a)) as H;
+                            conv_rewrite H
+                        | simpl; repeat rewrite LeftIdentity; try reflexivity
+                      ]
+                  | [ |- ?f (?g ?x) = ?f' (?g' ?x') ] => change (Compose f g x = Compose f' g' x');
+                    repeat rewrite <- FCompositionOf; simpl; present_spcategory;
+                      repeat rewrite LeftIdentity; repeat rewrite RightIdentity
+                end;
+            repeat rewrite FIdentityOf;
+              repeat rewrite FCompositionOf;
+                try solve [ simpl; trivial ]
+    ).
   Defined.
 End CorrespondenceCategory.
 
-Notation "C ★^ M D" := (@CorrespondenceCategory _ _ C _ _ D M) : category_scope.
+Notation "C ★^ M D" := (CorrespondenceCategory (C := C) (C' := D) M) : category_scope.
 (* XXX: [Reserved Notation] doesn't work here? *)
-Notation "C ★^{ M } D" := (@CorrespondenceCategory _ _ C _ _ D M) (at level 70, no associativity) : category_scope.
+Notation "C ★^{ M } D" := (CorrespondenceCategory (C := C) (C' := D) M) (at level 70, no associativity) : category_scope.
 
 (* We use {false, true} instead of {0, 1}, because it's more convenient, and slightly faster *)
 Local Notation "[ 1 ]" := BoolCat : category_scope.
@@ -165,7 +169,7 @@ Section Functor_to_1.
      {0, 1}, regarded as a category in the obvious way), uniquely
      determined by the condition that [F⁻¹ {0} = C] and [F⁻¹ {1} = C'].
      *)
-  Context `(dummy : @CorrespondenceCategory objC morC C objC' morC' C' M).
+  Context `(dummy : @CorrespondenceCategory objC C objC' C' M).
 
   Let CorrespondenceCategoryFunctor_ObjectOf (x : C + C') : Object [1] := if x then false else true. (*
     match x with
@@ -180,9 +184,15 @@ Section Functor_to_1.
   Defined.
 
   Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') [1].
-    refine {| ObjectOf' := CorrespondenceCategoryFunctor_ObjectOf;
-      MorphismOf' := CorrespondenceCategoryFunctor_MorphismOf
-    |};
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          CorrespondenceCategoryFunctor_ObjectOf
+          CorrespondenceCategoryFunctor_MorphismOf
+          _
+          _
+        )
+    end;
     unfold CorrespondenceCategoryFunctor_MorphismOf; subst_body;
       abstract (
         repeat (let H := fresh in intro H; destruct H; simpl in *);
@@ -198,7 +208,7 @@ Section From_Functor_to_1.
      [F : M → [1] ], we can define [C = F⁻¹ {0}], [C' = F⁻¹ {1}], and a
      correspondence [M : C → C'] by the formula
      [M (X, Y) = Hom_{M} (X, Y)]. *)
-  Context `(M : @SpecializedCategory objM morM).
+  Context `(M : @SpecializedCategory objM).
   Variable F : SpecializedFunctor M [1].
 
   (* Comments after these two are for if we want to use [NatCategory] instead of [BoolCat]. *)
@@ -209,17 +219,13 @@ Section From_Functor_to_1.
   Let C' := CorrespondenceCategory1.
   Let COp := OppositeCategory C.
 
-  Let Correspondence_ObjectOf (cc' : COp * C') := Morphism M (proj1_sig (fst cc')) (proj1_sig (snd cc')).
-  Let Correspondence_MorphismOf s d (m : Morphism (COp * C') s d) : Correspondence_ObjectOf s -> Correspondence_ObjectOf d
-    := fun m0 => Compose (snd m) (Compose m0 (fst m)).
-
   Definition Correspondence : SpecializedFunctor (COp * C') TypeCat.
     subst_body.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
           (fun cc' => Morphism M (proj1_sig (fst cc')) (proj1_sig (snd cc')))
-          (fun s d m => fun m0 => Compose (snd m) (Compose m0 (fst m)))
+          (fun s d m => fun m0 => Compose (C := M) (snd m) (Compose m0 (fst m)))
           _
           _
         )

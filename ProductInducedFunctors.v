@@ -9,13 +9,14 @@ Local Ltac t :=
   simpl; intros; present_spfunctor;
     repeat rewrite <- FCompositionOf || rewrite <- FIdentityOf;
       f_equal; simpl_eq;
-      autorewrite with core;
-        reflexivity.
+      unfold ProductCategory; simpl;
+        autorewrite with core;
+          reflexivity.
 
 Section ProductInducedFunctors.
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
-  Context `(E : @SpecializedCategory objE morE).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(E : @SpecializedCategory objE).
 
   Variable F : SpecializedFunctor (C * D) E.
 
@@ -38,9 +39,9 @@ Notation "F [ c , - ]" := (InducedProductSndFunctor F c) : functor_scope.
 Notation "F [ - , d ]" := (InducedProductFstFunctor F d) : functor_scope.
 
 Section ProductInducedNaturalTransformations.
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
-  Context `(E : @SpecializedCategory objE morE).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(E : @SpecializedCategory objE).
 
   Variable F : SpecializedFunctor (C * D) E.
 
