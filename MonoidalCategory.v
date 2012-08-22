@@ -4,6 +4,8 @@ Require Import Common Notations StructureEquality DefinitionSimplification.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section PreMonoidalCategory.
   (* It's too hard to implement it all inside a record, so first we
      define everything, then we put it in a record *)
@@ -11,20 +13,18 @@ Section PreMonoidalCategory.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      *)
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   (**
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
          monoidal product,
     *)
   Variable TensorProduct : SpecializedFunctor (C * C) C.
 
-  Let src (C : SpecializedCategory morC) s d (_ : Morphism C s d) := s.
-  Let dst (C : SpecializedCategory morC) s d (_ : Morphism C s d) := d.
+  Let src {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := s.
+  Let dst {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := d.
 
   Local Notation "A ⊗ B" := (TensorProduct (A, B)).
-  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B)).
+  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism).
 
   Let TriMonoidalProductL_ObjectOf (abc : C * C * C) : C :=
     (fst (fst abc) ⊗ snd (fst abc)) ⊗ snd abc.
@@ -296,8 +296,6 @@ End PreMonoidalCategory.
 
 Section MonoidalCategory.
   Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
@@ -355,16 +353,16 @@ Section MonoidalCategory.
   Local Reserved Notation "'λ'".
   Local Reserved Notation "'ρ'".
 
-  Let src (C : SpecializedCategory morC) s d (_ : Morphism C s d) := s.
-  Let dst (C : SpecializedCategory morC) s d (_ : Morphism C s d) := d.
+  Let src (C : @SpecializedCategory objC) {s d} (_ : Morphism C s d) := s.
+  Let dst (C : @SpecializedCategory objC) s d (_ : Morphism C s d) := d.
 
-  Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in AssociatorCoherenceCondition.
-  Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in UnitorCoherenceCondition.
+  Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in @AssociatorCoherenceCondition.
+  Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in @UnitorCoherenceCondition.
 
   Record MonoidalCategory := {
-    MonoidalUnderlyingCategory :> SpecializedCategory morC;
+    MonoidalUnderlyingCategory :> @SpecializedCategory objC;
     TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
-      where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B));
+      where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism);
 
     IdentityObject : objC where "'I'" := IdentityObject;
 

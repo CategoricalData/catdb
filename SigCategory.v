@@ -9,19 +9,19 @@ Generalizable All Variables.
 Local Infix "==" := JMeq.
 
 Section sig_obj_mor.
-  Context `(A : @SpecializedCategory objA morA).
+  Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Prop.
-  Variable Pmor : forall s d : sig Pobj, morA (proj1_sig s) (proj1_sig d) -> Prop.
-
+  Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Prop.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
+  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
 
-  Definition SpecializedCategory_sig : @SpecializedCategory (sig Pobj) (fun s d => sig (@Pmor s d)).
+  Definition SpecializedCategory_sig : @SpecializedCategory (sig Pobj).
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => sig (@Pmor s d))
           (fun x => exist _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
           (fun s d d' m1 m2 => exist _ (Compose (proj1_sig m1) (proj1_sig m2)) (Pcompose (proj2_sig m1) (proj2_sig m2)))
           _
@@ -43,18 +43,19 @@ Section sig_obj_mor.
   Defined.
 End sig_obj_mor.
 
-Arguments proj1_sig_functor {objA morA A Pobj Pmor Pidentity Pcompose}.
+Arguments proj1_sig_functor {objA A Pobj Pmor Pidentity Pcompose}.
 
 Section sig_obj.
-  Context `(A : @SpecializedCategory objA morA).
+  Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Prop.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
+  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
 
-  Definition SpecializedCategory_sig_obj : @SpecializedCategory (sig Pobj) (fun s d => morA (proj1_sig s) (proj1_sig d)).
+  Definition SpecializedCategory_sig_obj : @SpecializedCategory (sig Pobj).
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => A.(Morphism) (proj1_sig s) (proj1_sig d))
           (fun x => Identity (C := A) (proj1_sig x))
           (fun s d d' m1 m2 => Compose (C := A) m1 m2)
           _
@@ -81,8 +82,8 @@ Section sig_obj.
     intros; reflexivity.
   Defined.
 
-  Definition SpecializedCategory_sig_obj_as_sig : @SpecializedCategory (sig Pobj) (fun s d => { _ : morA (proj1_sig s) (proj1_sig d) | True }).
-    apply (@SpecializedCategory_sig _ _ A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I));
+  Definition SpecializedCategory_sig_obj_as_sig : @SpecializedCategory (sig Pobj).
+    apply (@SpecializedCategory_sig _ A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I));
       abstract (simpl; intros; trivial).
   Defined.
 
@@ -113,7 +114,7 @@ Section sig_obj.
   Defined.
 
   Lemma sig_obj_eq : ComposeFunctors sig_functor_obj sig_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sig_functor_obj_inv sig_functor_obj = IdentityFunctor _.
-    split; functor_eq; simpl_eq; trivial.
+    split; functor_eq; unfold Morphism; simpl_eq; trivial.
   Qed.
 
   Lemma sig_obj_compat : ComposeFunctors proj1_sig_obj_functor sig_functor_obj = proj1_sig_functor.
@@ -121,21 +122,22 @@ Section sig_obj.
   Qed.
 End sig_obj.
 
-Arguments proj1_sig_obj_functor {objA morA A Pobj}.
+Arguments proj1_sig_obj_functor {objA A Pobj}.
 
 Section sig_mor.
-  Context `(A : @SpecializedCategory objA morA).
-  Variable Pmor : forall s d, morA s d -> Prop.
+  Context `(A : @SpecializedCategory objA).
+  Variable Pmor : forall s d, A.(Morphism) s d -> Prop.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
 
-  Definition SpecializedCategory_sig_mor : @SpecializedCategory objA (fun s d => sig (@Pmor s d)).
+  Definition SpecializedCategory_sig_mor : @SpecializedCategory objA.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => sig (@Pmor s d))
           (fun x => exist _ (Identity (C := A) x) (Pidentity x))
           (fun s d d' m1 m2 => exist _ (Compose (proj1_sig m1) (proj1_sig m2)) (Pcompose (proj2_sig m1) (proj2_sig m2)))
           _
@@ -156,8 +158,8 @@ Section sig_mor.
     intros; reflexivity.
   Defined.
 
-  Definition SpecializedCategory_sig_mor_as_sig : @SpecializedCategory (sig (fun _ : objA => True)) (fun s d => sig (@Pmor (proj1_sig s) (proj1_sig d))).
-    apply (@SpecializedCategory_sig _ _ A _ (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2));
+  Definition SpecializedCategory_sig_mor_as_sig : @SpecializedCategory (sig (fun _ : objA => True)).
+    apply (@SpecializedCategory_sig _ A _ (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2));
       abstract (intros; trivial).
   Defined.
 
@@ -196,4 +198,4 @@ Section sig_mor.
   Qed.
 End sig_mor.
 
-Arguments proj1_sig_mor_functor {objA morA A Pmor Pidentity Pcompose}.
+Arguments proj1_sig_mor_functor {objA A Pmor Pidentity Pcompose}.

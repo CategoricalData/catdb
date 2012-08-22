@@ -28,9 +28,9 @@ Section Obj.
   Section type.
     Variable I : Type.
     Variable Index2Object : I -> Type.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ _ _ Index2Cat) TypeCatDec.
+    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) TypeCatDec.
       build_ob_functor Index2Object.
     Defined.
   End type.
@@ -38,9 +38,9 @@ Section Obj.
   Section set.
     Variable I : Type.
     Variable Index2Object : I -> Set.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctorToSetDec : SpecializedFunctor (@ComputableCategoryDec _ _ _ Index2Cat) SetCatDec.
+    Definition ObjectFunctorToSetDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) SetCatDec.
       build_ob_functor Index2Object.
     Defined.
   End set.
@@ -48,25 +48,25 @@ Section Obj.
   Section prop.
     Variable I : Type.
     Variable Index2Object : I -> Prop.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i) (@Index2Morphism i)).
+    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Definition ObjectFunctorToPropDec : SpecializedFunctor (@ComputableCategoryDec _ _ _ Index2Cat) PropCatDec.
+    Definition ObjectFunctorToPropDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) PropCatDec.
       build_ob_functor Index2Object.
     Defined.
   End prop.
 End Obj.
 
-Arguments ObjectFunctorDec {I Index2Object Index2Morphism Index2Cat}.
-Arguments ObjectFunctorToSetDec {I Index2Object Index2Morphism Index2Cat}.
-Arguments ObjectFunctorToPropDec {I Index2Object Index2Morphism Index2Cat}.
+Arguments ObjectFunctorDec {I Index2Object Index2Cat}.
+Arguments ObjectFunctorToSetDec {I Index2Object Index2Cat}.
+Arguments ObjectFunctorToPropDec {I Index2Object Index2Cat}.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : @SpecializedCategory obj mor).
+  Context `(O' : @SpecializedCategory obj).
   Variable f : O -> O'.
   Variable eq_dec : forall x y : O, {x = y} + {x <> y}.
 
-  Hint Unfold Object Morphism.
+  Hint Unfold Object.
 
   Local Ltac t' := intros; simpl in *; autounfold with core in *; repeat subst; trivial.
   Local Ltac t := t';
@@ -83,6 +83,7 @@ Section InducedFunctor.
              | [ |- _ = _ ] => progress (repeat rewrite RightIdentity; repeat rewrite LeftIdentity; repeat rewrite Associativity)
              | [ H : ?a = ?a |- _ ] => pose proof (UIP_refl _ _ H); subst H
              | [ H : _ |- _ ] => unique_pose (H eq_refl)
+             | [ H : Morphism _ _ _ |- _ ] => hnf in H
            end.
 
   Definition InducedDiscreteFunctorDec_MorphismOf s d (m : Morphism (DiscreteCategoryDec eq_dec) s d) :
@@ -94,11 +95,19 @@ Section InducedFunctor.
   Hint Unfold DiscreteCategoryDec_Compose.
   Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Local Arguments Compose {obj mor} [C s d d'] / _ _ : simpl nomatch.
+  Local Arguments Compose {obj} [C s d d'] / _ _ : simpl nomatch.
 
   Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
-    refine {| ObjectOf' := f; MorphismOf' := InducedDiscreteFunctorDec_MorphismOf |};
-      t.
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          f
+          InducedDiscreteFunctorDec_MorphismOf
+          _
+          _
+        )
+    end;
+    t.
   Defined.
 End InducedFunctor.
 

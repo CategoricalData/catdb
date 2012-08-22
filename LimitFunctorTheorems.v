@@ -3,6 +3,8 @@ Require Import Common DefinitionSimplification SpecializedCategory Functor Natur
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section InducedMaps.
   (** Quoting David:
      Given a commutative triangle consisting of
@@ -28,15 +30,9 @@ Section InducedMaps.
      injects one set into its union with another and [lim G] projects a
      product of two sets onto one factor.
      *)
-  Variable objC1 : Type.
-  Variable morC1 : objC1 -> objC1 -> Type.
-  Variable C1 : SpecializedCategory morC1.
-  Variable objC2 : Type.
-  Variable morC2 : objC2 -> objC2 -> Type.
-  Variable C2 : SpecializedCategory morC2.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C1 : @SpecializedCategory objC1).
+  Context `(C2 : @SpecializedCategory objC2).
+  Context `(D : @SpecializedCategory objD).
   Variable F1 : SpecializedFunctor C1 D.
   Variable F2 : SpecializedFunctor C2 D.
   Variable G : SpecializedFunctor C1 C2.

@@ -6,10 +6,10 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section ProductNaturalTransformation.
-  Context `{A : @SpecializedCategory objA morA}.
-  Context `{B : @SpecializedCategory objB morB}.
-  Context `{C : @SpecializedCategory objC morC}.
-  Context `{D : @SpecializedCategory objD morD}.
+  Context `{A : @SpecializedCategory objA}.
+  Context `{B : @SpecializedCategory objB}.
+  Context `{C : @SpecializedCategory objC}.
+  Context `{D : @SpecializedCategory objD}.
   Variables F F' : SpecializedFunctor A B.
   Variables G G' : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F F'.

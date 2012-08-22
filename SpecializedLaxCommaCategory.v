@@ -4,6 +4,8 @@ Require Import Common DecidableDiscreteCategory ComputableCategory DefinitionSim
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 Section LaxSliceSpecializedCategory.
@@ -11,17 +13,13 @@ Section LaxSliceSpecializedCategory.
 
   Variable I : Type.
   Variable Index2Object : I -> Type.
-  Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (@Index2Morphism i).
+  Variable Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i).
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Morphism Index2Cat.
+  Let Cat := ComputableCategory Index2Object Index2Cat.
 
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-
+  Context `(C : @SpecializedCategory objC).
 
   Hint Resolve Associativity RightIdentity LeftIdentity.
 
@@ -182,10 +180,11 @@ Section LaxSliceSpecializedCategory.
     abstract lax_slice_t.
   Qed.
 
-  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object LaxSliceSpecializedCategory_Morphism.
+  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          LaxSliceSpecializedCategory_Morphism
           LaxSliceSpecializedCategory_Identity
           LaxSliceSpecializedCategory_Compose
           _
@@ -214,17 +213,13 @@ Section LaxCosliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
 
   Variable I : Type.
-  Variable Index2Object : I -> Type.
-  Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (@Index2Morphism i).
+  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Morphism Index2Cat.
+  Let Cat := ComputableCategory Index2Object Index2Cat.
 
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : unit * I & SpecializedFunctor (snd X) C } }.
 
@@ -359,10 +354,11 @@ Section LaxCosliceSpecializedCategory.
     abstract lax_coslice_t.
   Qed.
 
-  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object LaxCosliceSpecializedCategory_Morphism.
+  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          LaxCosliceSpecializedCategory_Morphism
           LaxCosliceSpecializedCategory_Identity
           LaxCosliceSpecializedCategory_Compose
           _

@@ -33,14 +33,14 @@ Section Coend.
      ]]
      where the triangles denote induced colimit morphisms.
      *)
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Let COp := OppositeCategory C.
 
   Variable F : SpecializedFunctor (COp * C) D.
 
-  Let MorC := @MorphismFunctor _ _ _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
+  Let MorC := @MorphismFunctor _ _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
 
   Variable Fmor : ∐_{ c0c1f : MorC } (F (snd (projT1 c0c1f), fst (projT1 c0c1f))).
   Variable Fob : ∐_{ c } (F (c, c)).

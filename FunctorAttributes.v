@@ -4,19 +4,15 @@ Require Import Common Hom Duals ProductFunctor NaturalTransformation SetCategory
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 Section FullFaithful.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable morC' : objC -> objC -> Set.
-  Variable C : SpecializedCategory morC.
-  Variable C' : LocallySmallSpecializedCategory morC'.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable morD' : objD -> objD -> Set.
-  Variable D : SpecializedCategory morD.
-  Variable D' : LocallySmallSpecializedCategory morD'.
+  Context `(C : @SpecializedCategory objC).
+  Context `(C' : @LocallySmallSpecializedCategory objC').
+  Context `(D : @SpecializedCategory objD).
+  Context `(D' : @LocallySmallSpecializedCategory objD').
   Variable F : SpecializedFunctor C D.
   Variable F' : SpecializedFunctor C' D'.
   Let COp := OppositeCategory C.
@@ -26,24 +22,13 @@ Section FullFaithful.
   Let D'Op := OppositeCategory D'.
   Let F'Op := OppositeFunctor F'.
 
-  Hint Rewrite FCompositionOf.
+  Hint Rewrite @FCompositionOf.
 
   Definition InducedHomNaturalTransformation :
     SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
     refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
       (fun sd : (COp * C) =>
-        @MorphismOf _ _ _ _ _ _ F _ _ )
-      _
-    );
-    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
-  Defined.
-
-  Definition InducedHomSetNaturalTransformation :
-    SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F')).
-    clear morC morD C D COp DOp FOp F.
-    refine (Build_SpecializedNaturalTransformation (HomSetFunctor C') (ComposeFunctors (HomSetFunctor D') (F'Op * F'))
-      (fun sd : (C'Op * C') =>
-        @MorphismOf _ _ _ _ _ _ F' _ _ )
+        MorphismOf F (s := _) (d := _))
       _
     );
     abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').

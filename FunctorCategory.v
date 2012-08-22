@@ -3,47 +3,25 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section FunctorCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
 
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
      *)
-  Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D) (@SpecializedNaturalTransformation _ _ C _ _ D).
-    refine {| Compose' := @NTComposeT _ _ C _ _ D;
-      Identity' := @IdentityNaturalTransformation _ _ C _ _ D
-      |}; abstract (nt_eq; auto).
+  Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
+    refine {|
+      Morphism' := SpecializedNaturalTransformation (C := C) (D := D);
+      Compose' := NTComposeT (C := C) (D := D);
+      Identity' := IdentityNaturalTransformation (C := C) (D := D)
+    |}; abstract (nt_eq; auto).
   Defined.
 End FunctorCategory.
 
 Notation "C ^ D" := (FunctorCategory D C) : category_scope.
 Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
-
-Ltac unfold_FunctorCategory_of obj mor C D :=
-  progress (
-    change (@Object obj mor (D ^ C)) with obj in *; simpl in *;
-      change (@Morphism obj mor (D ^ C)) with mor in *; simpl in *;
-        change (@Identity obj mor (D ^ C)) with (@IdentityNaturalTransformation _ _ C _ _ D) in *; simpl in *;
-          change (@Compose obj mor (D ^ C)) with (@NTComposeT _ _ C _ _ D) in *; simpl in *
-  ).
-
-Ltac unfold_FunctorCategory :=
-  repeat match goal with
-           | [ _ : appcontext[@Object ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_FunctorCategory_of obj mor D C
-           | [ _ : appcontext[@Morphism ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_FunctorCategory_of obj mor D C
-           | [ _ : appcontext[@Identity ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_FunctorCategory_of obj mor D C
-           | [ _ : appcontext[@Compose ?obj ?mor (?C ^ ?D)] |- _ ] => unfold_FunctorCategory_of obj mor D C
-           | [ |- appcontext[@Object ?obj ?mor (?C ^ ?D)] ] => unfold_FunctorCategory_of obj mor D C
-           | [ |- appcontext[@Morphism ?obj ?mor (?C ^ ?D)] ] => unfold_FunctorCategory_of obj mor D C
-           | [ |- appcontext[@Identity ?obj ?mor (?C ^ ?D)] ] => unfold_FunctorCategory_of obj mor D C
-           | [ |- appcontext[@Compose ?obj ?mor (?C ^ ?D)] ] => unfold_FunctorCategory_of obj mor D C
-         end.
-
-(*Hint Extern 1 => unfold_FunctorCategory.*)

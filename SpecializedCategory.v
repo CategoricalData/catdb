@@ -25,15 +25,15 @@ Record SpecializedCategory (obj : Type) := Build_SpecializedCategory' {
 }.
 
 Bind Scope category_scope with SpecializedCategory.
+Bind Scope object_scope with Object.
+Bind Scope morphism_scope with Morphism'.
 
 Arguments Object {obj%type} C%category : rename.
 Arguments Identity' {obj%type} C%category o%object : rename.
 Arguments Compose' {obj%type} C%category s%object d%object d'%object m1%morphism m2%morphism : rename.
 
 Section SpecializedCategoryInterface.
-  Variable obj : Type.
-
-  Definition Build_SpecializedCategory
+  Definition Build_SpecializedCategory (obj : Type)
     (Morphism' : obj -> obj -> Type)
     (Identity' : forall o : obj, Morphism' o o)
     (Compose' : forall s d d' : obj, Morphism' d d' -> Morphism' s d -> Morphism' s d')
@@ -50,7 +50,7 @@ Section SpecializedCategoryInterface.
     LeftIdentity'
     RightIdentity'.
 
-  Variable C : @SpecializedCategory obj.
+  Context `(C : @SpecializedCategory obj).
 
   Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
   Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
@@ -66,8 +66,10 @@ Section SpecializedCategoryInterface.
     := C.(RightIdentity').
 End SpecializedCategoryInterface.
 
+Bind Scope morphism_scope with Morphism.
+
 Arguments Object {obj} C : rename, simpl never.
-Arguments Morphism {obj} C s d : rename, simpl never.
+Arguments Morphism {obj} C s d : rename, simpl nomatch.
 Arguments Compose {obj} [C s d d'] m m0 : simpl nomatch.
 Arguments Identity {obj} [C] o : simpl nomatch.
 
@@ -95,9 +97,9 @@ Ltac present_spcategory_all := present_spcategory;
          end;
   sanitize_spcategory.
 
-Hint Rewrite LeftIdentity RightIdentity.
-Hint Resolve LeftIdentity RightIdentity.
-Hint Immediate Associativity.
+Hint Rewrite @LeftIdentity @RightIdentity.
+Hint Resolve @LeftIdentity @RightIdentity.
+Hint Immediate @Associativity.
 
 (* eh, I'm not terribly happy.  meh. *)
 Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.

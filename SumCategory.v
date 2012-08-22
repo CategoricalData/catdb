@@ -6,13 +6,13 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section SumCategory.
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Definition SumCategory_Morphism (s d : objC + objD) : Type
     := match (s, d) with
-         | (inl s, inl d) => morC s d
-         | (inr s, inr d) => morD s d
+         | (inl s, inl d) => C.(Morphism) s d
+         | (inr s, inr d) => D.(Morphism) s d
          | _ => Empty_set
        end.
 
@@ -34,8 +34,9 @@ Section SumCategory.
 
   Global Arguments SumCategory_Compose [_ _ _] _ _ /.
 
-  Definition SumCategory : @SpecializedCategory (objC + objD)%type SumCategory_Morphism.
+  Definition SumCategory : @SpecializedCategory (objC + objD)%type.
     refine {|
+      Morphism' := SumCategory_Morphism;
       Identity' := SumCategory_Identity;
       Compose' := SumCategory_Compose
     |};
@@ -52,8 +53,8 @@ End SumCategory.
 Infix "+" := SumCategory : category_scope.
 
 Section SumCategoryFunctors.
-  Context `(C : @SpecializedCategory objC morC).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Definition inl_Functor : SpecializedFunctor C (C + D).
     match goal with

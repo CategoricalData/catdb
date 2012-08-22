@@ -4,19 +4,15 @@ Require Import Common Notations InitialTerminalCategory.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
 
 Section CommaSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objB : Type.
-  Variable morB : objB -> objB -> Type.
-  Variable B : SpecializedCategory morB.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(B : @SpecializedCategory objB).
+  Context `(C : @SpecializedCategory objC).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
 
@@ -54,7 +50,7 @@ Section CommaSpecializedCategory.
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & morC (S (fst αβ)) (T (snd αβ)) } }.
+  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
@@ -64,7 +60,7 @@ Section CommaSpecializedCategory.
   Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
 
   Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
-    { gh : (morA (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (morB (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
+    { gh : (A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
       Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }
   }.
@@ -82,7 +78,7 @@ Section CommaSpecializedCategory.
   Definition CommaSpecializedCategory_Compose s d d'
     (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
     CommaSpecializedCategory_MorphismT s d'.
-    exists (@Compose _ _ (A * B) _ _ _ (proj1_sig gh) (proj1_sig g'h')).
+    exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
     hnf in *; simpl in *.
     abstract (
       present_spcategory;
@@ -98,7 +94,7 @@ Section CommaSpecializedCategory.
   Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
 
   Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
-    exists (@Identity _ _ (A * B) (projT1 o)).
+    exists (Identity (C := A * B) (projT1 o)).
     abstract (
       simpl;
         repeat rewrite FIdentityOf;
@@ -141,10 +137,11 @@ Section CommaSpecializedCategory.
     comma_t.
   Qed.
 
-  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object CommaSpecializedCategory_Morphism.
+  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          CommaSpecializedCategory_Morphism
           CommaSpecializedCategory_Identity
           CommaSpecializedCategory_Compose
           _ _ _
@@ -168,12 +165,8 @@ Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Obj
 Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
 Section SliceSpecializedCategory.
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(C : @SpecializedCategory objC).
   Variable a : C.
   Variable S : SpecializedFunctor A C.
   Let B := TerminalCategory.
@@ -189,9 +182,7 @@ Section SliceSpecializedCategory.
 End SliceSpecializedCategory.
 
 Section SliceSpecializedCategoryOver.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Variable a : C.
 
   Definition SliceSpecializedCategoryOver := SliceSpecializedCategory a (IdentityFunctor C).
@@ -199,9 +190,7 @@ Section SliceSpecializedCategoryOver.
 End SliceSpecializedCategoryOver.
 
 Section ArrowSpecializedCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowSpecializedCategory.

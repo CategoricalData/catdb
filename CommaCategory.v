@@ -7,10 +7,9 @@ Set Implicit Arguments.
 Local Open Scope category_scope.
 
 Local Ltac fold_functor :=
-  change CMorphism with (fun C => @Morphism (CObject C) (CMorphism C) C) in *;
-    change CObject with (fun C => @Object (CObject C) (CMorphism C) C) in *;
-      present_spcategory;
-      change (@SpecializedFunctor) with (fun objC morC (C : @SpecializedCategory objC morC) objD morD (D : @SpecializedCategory objD morD) => @Functor C D) in *.
+  change CObject with (fun C => @Object (CObject C) C) in *;
+    present_spcategory;
+    change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *.
 
 Section CommaCategory.
   (* [Definition]s are not sort-polymorphic, and it's too slow to not use
@@ -144,9 +143,7 @@ Section SliceCategoryOver.
 End SliceCategoryOver.
 
 Section ArrowCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Variable C : Category.
 
   Definition ArrowCategory := CommaCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowCategory.

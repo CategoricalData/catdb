@@ -4,18 +4,16 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Ltac intro_object_of :=
   repeat match goal with
            | [ |- appcontext[ObjectOf ?G ?x] ] => unique_pose_with_body (ObjectOf G x)
          end.
 
 Section NaturalIsomorphism.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
 
   Record NaturalIsomorphism := {
@@ -25,12 +23,8 @@ Section NaturalIsomorphism.
 End NaturalIsomorphism.
 
 Section NaturalIsomorphismOfCategories.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Local Reserved Notation "'F'".
   Local Reserved Notation "'G'".
@@ -69,14 +63,9 @@ Arguments NaturalEquivalenceOf [C D F G] T.
 Arguments FunctorsNaturallyEquivalent [C D] F G.
 
 Section Coercions.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
-
   Variables C' D' : Category.
   Variables F' G' : Functor C' D'.
 
@@ -112,8 +101,8 @@ Section NaturalTransformationInverse.
   Variable T : NaturalTransformation F G.
 
   Hint Unfold InverseOf.
-  Hint Resolve f_equal f_equal2 Commutes.
-  Hint Rewrite LeftIdentity RightIdentity.
+  Hint Resolve f_equal f_equal2 @Commutes.
+  Hint Rewrite @LeftIdentity @RightIdentity.
 
   Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
     refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
@@ -180,7 +169,7 @@ Add Parametric Relation (C D : Category) : _ (@FunctorsNaturallyEquivalent C D)
 
 (* XXX TODO: Automate this better *)
 Add Parametric Morphism (C D E : Category) :
-  (@ComposeFunctors _ _ C _ _ D _ _ E)
+  (ComposeFunctors (C := C) (D := D) (E := E))
   with signature (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) ==> (@FunctorsNaturallyEquivalent _ _) as functor_n_eq_mor.
   intros F F' NEF G G' NEG; unfold FunctorsNaturallyEquivalent, NaturalEquivalenceOf, InverseOf in *;
     destruct_hypotheses.
@@ -194,8 +183,8 @@ Add Parametric Morphism (C D E : Category) :
   repeat match goal with
            | [ H := _ |- _ ] => subst H
          end.
-  Hint Rewrite <- FCompositionOf.
-  Hint Rewrite FIdentityOf.
+  Hint Rewrite <- @FCompositionOf.
+  Hint Rewrite @FIdentityOf.
   destruct_type @IsomorphismOf.
   eexists (Compose _ (MorphismOf _ _));
     compose4associativity;
@@ -220,12 +209,12 @@ Section FunctorNaturalEquivalenceLemmas.
     end.
   Qed.
 
-  Hint Resolve FCompositionOf FIdentityOf.
-  Hint Rewrite FIdentityOf.
+  Hint Resolve @FCompositionOf @FIdentityOf.
+  Hint Rewrite @FIdentityOf.
 
   Hint Resolve f_equal f_equal2.
 
-  Hint Rewrite LeftIdentity RightIdentity.
+  Hint Rewrite @LeftIdentity @RightIdentity.
 
   Hint Unfold FunctorsNaturallyEquivalent ComposeFunctors NaturalEquivalenceOf InverseOf.
 

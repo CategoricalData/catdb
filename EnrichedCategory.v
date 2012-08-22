@@ -9,16 +9,16 @@ Section EnrichedCategory.
   (** Quoting Wikipedia:
      Let [(M, ⊗, I, α, λ, ρ)] be a monoidal category.
      *)
-  Context `(M : @MonoidalCategory objM morM).
+  Context `(M : @MonoidalCategory objM).
 
-  Let src `{C : @SpecializedCategory objC morC} s d (_ : Morphism C s d) := s.
-  Let dst `{C : @SpecializedCategory objC morC} s d (_ : Morphism C s d) := d.
+  Let src `{C : @SpecializedCategory objC} s d (_ : Morphism C s d) := s.
+  Let dst `{C : @SpecializedCategory objC} s d (_ : Morphism C s d) := d.
 
-  Arguments src [objC morC C s d] _.
-  Arguments dst [objC morC C s d] _.
+  Arguments src [objC C s d] _.
+  Arguments dst [objC C s d] _.
 
   Local Notation "A ⊗ B" := (M.(TensorProduct) (A, B)).
-  Local Notation "A ⊗m B" := (M.(TensorProduct).(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B)).
+  Local Notation "A ⊗m B" := (M.(TensorProduct).(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B)%morphism).
   Let I : M := M.(IdentityObject).
   Let α := M.(Associator).
   Let λ := M.(LeftUnitor).
@@ -134,7 +134,7 @@ Section EnrichedCategory.
   Local Reserved Notation "'id'".
   Local Reserved Notation "○_{ a , b , c }".
 
-  Local Notation "x ~> y" := (morM x y).
+  Local Notation "x ~> y" := (M.(Morphism) x y).
 
   Record EnrichedCategory (objC : Type) := {
     EnrichedObject :> _ := objC;
@@ -163,9 +163,9 @@ Section EnrichedCategory.
      ]]
      *)
     EnrichedAssociativity : forall a b c d, (
-      (Compose ○_{a, b, d} (○_{b, c, d} ⊗m @Identity _ _ M C(a, b))) =
+      (Compose ○_{a, b, d} (○_{b, c, d} ⊗m @Identity _ M C(a, b))) =
       (Compose ○_{a, c, d}
-        (Compose ((@Identity _ _ M C(c, d)) ⊗m ○_{a, b, c})
+        (Compose ((@Identity _ M C(c, d)) ⊗m ○_{a, b, c})
           (α (C(c, d), C(b, c), C(a, b)))
         )
       )
@@ -186,7 +186,7 @@ Section EnrichedCategory.
      ]]
      *)
     EnrichedLeftIdentity : forall a b, (
-      Compose ○_{a, b, b} ((id b) ⊗m (@Identity _ _ M C(a, b))) =
+      Compose ○_{a, b, b} ((id b) ⊗m (@Identity _ M C(a, b))) =
       λ C(a, b)
     );
     (*
@@ -205,7 +205,7 @@ Section EnrichedCategory.
      ]]
      *)
     EnrichedRightIdentity : forall a b, (
-      Compose ○_{a, a, b} ((@Identity _ _ M C(a, b)) ⊗m (id a)) =
+      Compose ○_{a, a, b} ((@Identity _ M C(a, b)) ⊗m (id a)) =
       ρ C(a, b)
     )
   }.
