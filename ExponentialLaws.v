@@ -6,9 +6,9 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Section Law1.
-  Context `(D : @SpecializedCategory objD morD).
-  Context `(C1 : @SpecializedCategory objC1 morC1).
-  Context `(C2 : @SpecializedCategory objC2 morC2).
+  Context `(D : @SpecializedCategory objD).
+  Context `(C1 : @SpecializedCategory objC1).
+  Context `(C2 : @SpecializedCategory objC2).
 
   Definition ExponentialLaw1Functor : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2)).
   Admitted.
@@ -22,9 +22,9 @@ Section Law1.
 End Law1.
 
 Section Law2.
-  Context `(C1 : @SpecializedCategory objC1 morC1).
-  Context `(C2 : @SpecializedCategory objC2 morC2).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C1 : @SpecializedCategory objC1).
+  Context `(C2 : @SpecializedCategory objC2).
+  Context `(D : @SpecializedCategory objD).
 
   Definition ExponentialLaw2Functor : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
   Admitted.
@@ -38,9 +38,9 @@ Section Law2.
 End Law2.
 
 Section Law3.
-  Context `(C1 : @SpecializedCategory objC1 morC1).
-  Context `(C2 : @SpecializedCategory objC2 morC2).
-  Context `(D : @SpecializedCategory objD morD).
+  Context `(C1 : @SpecializedCategory objC1).
+  Context `(C2 : @SpecializedCategory objC2).
+  Context `(D : @SpecializedCategory objD).
 
   Definition ExponentialLaw3Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
   Admitted.
