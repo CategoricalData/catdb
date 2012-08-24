@@ -30,7 +30,7 @@ Section FunctorIsomorphism.
   Lemma FunctorIsInverseOf_sym `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD}
     (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) :
     FunctorIsInverseOf F G -> FunctorIsInverseOf G F.
-    firstorder.
+    intros; hnf in *; split_and; split; trivial.
   Qed.
 
   Section FunctorIsomorphismOf.
@@ -60,9 +60,9 @@ Section FunctorIsomorphism.
           match goal with
             | [ |- context[ComposeFunctors (ComposeFunctors ?F ?G) (ComposeFunctors ?H ?I)] ] =>
               transitivity (ComposeFunctors (ComposeFunctors F (ComposeFunctors G H)) I);
-                try solve [ repeat rewrite ComposeFunctorsAssociativity; reflexivity ]
+                try solve [ repeat rewrite ComposeFunctorsAssociativity; reflexivity ]; []
           end;
-          destruct i1, i2; t
+          destruct i1, i2; t_with t'
         ).
     Defined.
   End FunctorIsomorphismOf.

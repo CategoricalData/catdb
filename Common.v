@@ -85,8 +85,8 @@ Ltac eapply_hyp' := do_with_hyp ltac:(fun H => eapply H).
 Ltac eapply_hyp := repeat eapply_hyp'.
 
 (* some simple tactics to solve the goal by rewriting *)
-Ltac t' := repeat progress (simpl; intros; try split; trivial).
-Ltac t'_long := repeat progress (simpl; intuition).
+Ltac t' := repeat progress (simpl in *; intros; try split; trivial).
+Ltac t'_long := repeat progress (simpl in *; intuition).
 
 Ltac t_con_with con tac := tac;
   repeat (match goal with

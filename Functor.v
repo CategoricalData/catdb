@@ -63,10 +63,20 @@ Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor
 Definition GeneralizeFunctor objC C objD D (F : @SpecializedFunctor objC C objD D) : Functor C D := F.
 Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
 
+(* try to always unfold [GeneralizeFunctor]; it's in there
+   only for coercions *)
+Arguments GeneralizeFunctor [objC C objD D] F /.
+Hint Extern 0 => unfold GeneralizeFunctor.
+
 Arguments SpecializedFunctor {objC} C {objD} D.
 Arguments Functor C D.
 Arguments ObjectOf {objC C objD D} F c : simpl nomatch.
 Arguments MorphismOf {objC} [C] {objD} [D] F [s d] m : simpl nomatch.
+
+Arguments FCompositionOf [objC C objD D] F _ _ _ _ _.
+Arguments FIdentityOf [objC C objD D] F _.
+
+Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf'.
 
 Ltac present_obj_obj from to :=
   repeat match goal with

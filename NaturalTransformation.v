@@ -69,6 +69,16 @@ Definition GeneralizeNaturalTransformation `(T : @SpecializedNaturalTransformati
   NaturalTransformation F G := T.
 Global Coercion GeneralizeNaturalTransformation : SpecializedNaturalTransformation >-> NaturalTransformation.
 
+Arguments GeneralizeNaturalTransformation [objC C objD D F G] T /.
+Hint Extern 0 => unfold GeneralizeNaturalTransformation.
+Ltac fold_NT :=
+  change @SpecializedNaturalTransformation with
+    (fun objC (C : SpecializedCategory objC) objD (D : SpecializedCategory objD) => @NaturalTransformation C D) in *; simpl in *.
+
+Arguments Commutes [objC C objD D F G] T _ _ _.
+
+Hint Resolve @Commutes @Commutes'.
+
 Ltac present_spnt := present_spcategory; present_spfunctor;
   present_obj_obj @ComponentsOf' @ComponentsOf(*;
   repeat match goal with
