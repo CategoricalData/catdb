@@ -1,5 +1,5 @@
-Require Export SpecializedCategory.
-Require Import Common DiscreteCategory.
+Require Export SpecializedCategory DiscreteCategory.
+Require Import Common.
 
 Fixpoint CardinalityRepresentative (n : nat) : Type :=
   match n with
@@ -10,6 +10,6 @@ Fixpoint CardinalityRepresentative (n : nat) : Type :=
 
 Coercion CardinalityRepresentative : nat >-> Sortclass.
 
-Definition NatCategory (n : nat) := DiscreteCategory n.
+Definition NatCategory (n : nat) := Eval unfold DiscreteCategory, DiscreteCategory_Identity in DiscreteCategory n.
 
 Coercion NatCategory : nat >-> SpecializedCategory.
