@@ -24,6 +24,7 @@ MODULES    := Notations \
 	SigTSigInducedFunctors \
 	ChainCategory \
 	BoolCategory \
+	NatCategory \
 	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
