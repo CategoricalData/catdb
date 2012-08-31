@@ -211,7 +211,7 @@ Section From_Functor_to_1.
   Context `(M : @SpecializedCategory objM).
   Variable F : SpecializedFunctor M [1].
 
-  (* Comments after these two are for if we want to use [NatCategory] instead of [BoolCat]. *)
+  (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)
   Definition CorrespondenceCategory0 := FullSubcategory M (fun x => F x = false). (* proj1_sig (F x) = 0).*)
   Definition CorrespondenceCategory1 := FullSubcategory M (fun x => F x = true). (* proj1_sig (F x) = 1).*)
 

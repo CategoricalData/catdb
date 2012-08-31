@@ -22,7 +22,7 @@ MODULES    := Notations \
 	SigSigTCategory \
 	SigTInducedFunctors \
 	SigTSigInducedFunctors \
-	NatCategory \
+	ChainCategory \
 	BoolCategory \
 	Subcategory \
 	FunctorCategory \

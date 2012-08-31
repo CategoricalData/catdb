@@ -4,7 +4,7 @@ Require Import NatFacts Subcategory DefinitionSimplification.
 
 Set Implicit Arguments.
 
-Section NatCat.
+Section ChainCat.
   Definition OmegaCategory : @SpecializedCategory nat.
     refine {|
       Morphism' := le;
@@ -14,12 +14,12 @@ Section NatCat.
     abstract (intros; apply proof_irrelevance).
   Defined.
 
-  Let NatCategory' n : @SpecializedCategory { m | m <= n }.
+  Let ChainCategory' n : @SpecializedCategory { m | m <= n }.
     simpl_definition_by_tac_and_exact (FullSubcategory OmegaCategory (fun m => m <= n)) ltac:(unfold Subcategory in *).
   Defined.
-  Definition NatCategory n := Eval cbv beta iota zeta delta [NatCategory'] in NatCategory' n.
-End NatCat.
+  Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.
+End ChainCat.
 
-Notation "[ n ]" := (NatCategory n) : category_scope.
+Notation "[ n ]" := (ChainCategory n) : category_scope.
 Notation "[ ∞ ]" := (OmegaCategory) : category_scope.
 Notation "[ 'ω' ]" := (OmegaCategory) : category_scope.
