@@ -6,6 +6,27 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Section FunctorFromDiscrete.
+  Variable O : Type.
+  Context `(D : @SpecializedCategory objD).
+  Variable objOf : O -> objD.
+
+  Let FunctorFromDiscrete_MorphismOf s d (m : Morphism' (DiscreteCategory O) s d) : Morphism' D (objOf s) (objOf d)
+    := match m with
+         | eq_refl => Identity _
+       end.
+
+  Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
+  Proof.
+    refine {| ObjectOf' := objOf; MorphismOf' := FunctorFromDiscrete_MorphismOf |};
+      present_spcategory;
+      abstract (
+        intros; hnf in *; subst; simpl;
+          auto
+      ).
+  Defined.
+End FunctorFromDiscrete.
+
 Section Obj.
   Local Ltac build_ob_functor Index2Object :=
     match goal with
