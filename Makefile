@@ -79,11 +79,11 @@ MODULES    := Notations \
 	Translation \
 	SmallTranslation \
 	MetaTranslation \
-	CategorySchemaEquivalence \
-	ComputableSchemaCategory \
 	MetaEquivalence \
 	Examples \
-	Theorems
+	Theorems # \
+	CategorySchemaEquivalence \
+	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
 
 .PHONY: coq clean
