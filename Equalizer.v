@@ -12,7 +12,7 @@ Section Equalizer.
 
   Inductive EqualizerTwo := EqualizerA | EqualizerB.
 
-  Definition EqualizerDiagram_Morphism (a b : EqualizerTwo) : Set :=
+  Definition EqualizerIndex_Morphism (a b : EqualizerTwo) : Set :=
     match (a, b) with
       | (EqualizerA, EqualizerA) => unit
       | (EqualizerB, EqualizerB) => unit
@@ -20,34 +20,34 @@ Section Equalizer.
       | (EqualizerA, EqualizerB) => EqualizerTwo
     end.
 
-  Global Arguments EqualizerDiagram_Morphism a b /.
+  Global Arguments EqualizerIndex_Morphism a b /.
 
-  Definition EqualizerDiagram_Compose s d d' (m1 : EqualizerDiagram_Morphism d d') (m2 : EqualizerDiagram_Morphism s d) :
-    EqualizerDiagram_Morphism s d'.
+  Definition EqualizerIndex_Compose s d d' (m1 : EqualizerIndex_Morphism d d') (m2 : EqualizerIndex_Morphism s d) :
+    EqualizerIndex_Morphism s d'.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition EqualizerDiagram : @SpecializedCategory EqualizerTwo.
+  Definition EqualizerIndex : @SpecializedCategory EqualizerTwo.
     refine {|
-      Morphism' := EqualizerDiagram_Morphism;
+      Morphism' := EqualizerIndex_Morphism;
       Identity' := (fun x => match x with EqualizerA => tt | EqualizerB => tt end);
-      Compose' := EqualizerDiagram_Compose
+      Compose' := EqualizerIndex_Compose
     |};
     abstract (
       intros; destruct_type EqualizerTwo; simpl in *; destruct_type Empty_set; trivial
     ).
   Defined.
 
-  Definition EqualizerFunctor_ObjectOf x :=
+  Definition EqualizerDiagram_ObjectOf x :=
     match x with
       | EqualizerA => A
       | EqualizerB => B
     end.
 
-  Global Arguments EqualizerFunctor_ObjectOf x /.
+  Global Arguments EqualizerDiagram_ObjectOf x /.
 
-  Definition EqualizerFunctor_MorphismOf s d (m : Morphism EqualizerDiagram s d) :
-    Morphism C (EqualizerFunctor_ObjectOf s) (EqualizerFunctor_ObjectOf d).
+  Definition EqualizerDiagram_MorphismOf s d (m : Morphism EqualizerIndex s d) :
+    Morphism C (EqualizerDiagram_ObjectOf s) (EqualizerDiagram_ObjectOf d).
     destruct s, d; simpl in *; try apply Identity;
       try solve [ destruct m ];
         exact match m with
@@ -56,24 +56,24 @@ Section Equalizer.
               end.
   Defined.
 
-  Definition EqualizerFunctor : SpecializedFunctor EqualizerDiagram C.
+  Definition EqualizerDiagram : SpecializedFunctor EqualizerIndex C.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
-          EqualizerFunctor_ObjectOf
-          EqualizerFunctor_MorphismOf
+          EqualizerDiagram_ObjectOf
+          EqualizerDiagram_MorphismOf
           _
           _
         )
     end;
     abstract (
-      unfold EqualizerFunctor_MorphismOf; simpl; intros;
+      unfold EqualizerDiagram_MorphismOf; simpl; intros;
         destruct_type EqualizerTwo;
         repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
           trivial; try destruct_to_empty_set
     ).
   Defined.
 
-  Definition Equalizer := Limit EqualizerFunctor.
-  Definition Coequalizer := Colimit EqualizerFunctor.
+  Definition Equalizer := Limit EqualizerDiagram.
+  Definition Coequalizer := Colimit EqualizerDiagram.
 End Equalizer.
