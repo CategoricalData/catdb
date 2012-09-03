@@ -30,7 +30,7 @@ MODULES    := Notations \
 	ComputableCategory \
 	DiscreteCategory \
 	ProductCategory \
-	ProductFunctor \
+	FunctorProduct \
 	ProductNaturalTransformation \
 	ProductInducedFunctors \
 	SumCategory \

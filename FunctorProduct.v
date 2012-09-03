@@ -5,7 +5,7 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Section ProductFunctor.
+Section FunctorProduct.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
   Context `(C' : @SpecializedCategory objC').
@@ -15,7 +15,7 @@ Section ProductFunctor.
 
   Hint Resolve @FCompositionOf @FIdentityOf.
 
-  Definition ProductFunctor : SpecializedFunctor  (C * C') (D * D').
+  Definition FunctorProduct : SpecializedFunctor  (C * C') (D * D').
     match goal with
       | [ |- SpecializedFunctor ?C0 ?D0 ] =>
         refine (Build_SpecializedFunctor C0 D0
@@ -27,6 +27,6 @@ Section ProductFunctor.
     end;
     abstract (intros; unfold ProductCategory in *; destruct_type @prod; simpl in *; f_equal; auto).
   Defined.
-End ProductFunctor.
+End FunctorProduct.
 
-Infix "*" := ProductFunctor : functor_scope.
+Infix "*" := FunctorProduct : functor_scope.

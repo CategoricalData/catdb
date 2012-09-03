@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export Limits.
-Require Import Common DefinitionSimplification NaturalTransformation FunctorCategory Adjoint Hom SetCategory Duals ProductFunctor.
+Require Import Common DefinitionSimplification NaturalTransformation FunctorCategory Adjoint Hom SetCategory Duals FunctorProduct.
 
 Set Implicit Arguments.
 

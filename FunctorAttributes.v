@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export Functor.
-Require Import Common Hom Duals ProductFunctor NaturalTransformation SetCategory.
+Require Import Common Hom Duals FunctorProduct NaturalTransformation SetCategory.
 
 Set Implicit Arguments.
 

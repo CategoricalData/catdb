@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance.
-Require Export SpecializedCategory Functor ProductCategory ProductFunctor NaturalTransformation NaturalEquivalence.
+Require Export SpecializedCategory Functor ProductCategory FunctorProduct NaturalTransformation NaturalEquivalence.
 Require Import Common Notations StructureEquality DefinitionSimplification.
 
 Set Implicit Arguments.

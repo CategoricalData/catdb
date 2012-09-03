@@ -1,4 +1,4 @@
-Require Export ProductCategory ProductFunctor NaturalTransformation.
+Require Export ProductCategory FunctorProduct NaturalTransformation.
 Require Import Common Notations.
 
 Set Implicit Arguments.

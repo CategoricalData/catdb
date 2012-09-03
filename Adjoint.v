@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export SpecializedCategory Category Functor NaturalTransformation NaturalEquivalence AdjointUnit.
-Require Import Common Hom ProductCategory ProductFunctor Duals.
+Require Import Common Hom ProductCategory FunctorProduct Duals.
 
 Set Implicit Arguments.
 
@@ -124,9 +124,9 @@ Section AdjunctionEquivalences.
   Definition HomAdjunction2Adjunction_AMateOf (A : HomAdjunction F G) :
     SpecializedNaturalTransformation
     (ComposeFunctors (HomFunctor D)
-      (ProductFunctor (OppositeFunctor F) (IdentityFunctor D)))
+      (OppositeFunctor F * IdentityFunctor D))
     (ComposeFunctors (HomFunctor C)
-      (ProductFunctor (IdentityFunctor (OppositeCategory C)) G)).
+      (IdentityFunctor (OppositeCategory C) * G)).
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
