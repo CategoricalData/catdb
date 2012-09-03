@@ -66,6 +66,7 @@ MODULES    := Notations \
 	Equalizer \
 	EqualizerFunctor \
 	Products \
+	ProductFunctors \
 	Coend \
 	Grothendieck \
 	SetLimits \
