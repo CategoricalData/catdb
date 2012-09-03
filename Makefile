@@ -64,6 +64,7 @@ MODULES    := Notations \
 	LimitFunctorTheorems \
 	InducedLimitFunctors \
 	Equalizer \
+	EqualizerFunctor \
 	Products \
 	Coend \
 	Grothendieck \
