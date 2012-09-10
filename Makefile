@@ -68,6 +68,7 @@ MODULES    := Notations \
 	Products \
 	ProductFunctors \
 	Coend \
+	CoendFunctor \
 	Grothendieck \
 	SetLimits \
 	SetColimits \
