@@ -40,13 +40,6 @@ Section Coend.
 
   Global Arguments CoendFunctor_Index_Identity x /.
 
-  Local Ltac atomic x :=
-    match x with
-      | ?f _ => fail 1
-      | (fun _ => _) => fail 1
-      | _ => idtac
-    end.
-
   Local Ltac simpl_identity :=
     repeat match goal with
              | _ => apply proof_irrelevance
