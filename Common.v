@@ -26,6 +26,16 @@ Tactic Notation "not_tac" tactic(tac) := (tac; fail 1) || idtac.
 (* fail if [tac] fails, but don't actually execute [tac] *)
 Tactic Notation "test_tac" tactic(tac) := not_tac (not_tac tac).
 
+(* fail if [x] is a function application, a dependent product ([fun _ => _]),
+   or a sigma type ([forall _, _]) *)
+Ltac atomic x :=
+  match x with
+    | ?f _ => fail 1 x "is not atomic"
+    | (fun _ => _) => fail 1 x "is not atomic"
+    | forall _, _ => fail 1 x "is not atomic"
+    | _ => idtac
+  end.
+
 (* [pose proof defn], but only if no hypothesis of the same type exists.
    most useful for proofs of a proposition *)
 Ltac unique_pose defn :=
