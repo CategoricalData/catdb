@@ -1,0 +1,131 @@
+Require Import FunctionalExtensionality.
+Require Export Functor SetCategory SmallCat FunctorCategory.
+Require Import Common FEqualDep.
+
+Set Implicit Arguments.
+
+Generalizable All Variables.
+
+Section GraphObj.
+  Context `(C : @SpecializedCategory objC).
+
+  Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
+
+  Definition GraphIndex_Morphism (a b : GraphIndex) : Set :=
+    match (a, b) with
+      | (GraphIndexSource, GraphIndexSource) => unit
+      | (GraphIndexTarget, GraphIndexTarget) => unit
+      | (GraphIndexTarget, GraphIndexSource) => Empty_set
+      | (GraphIndexSource, GraphIndexTarget) => GraphIndex
+    end.
+
+  Global Arguments GraphIndex_Morphism a b /.
+
+  Definition GraphIndex_Compose s d d' (m1 : GraphIndex_Morphism d d') (m2 : GraphIndex_Morphism s d) :
+    GraphIndex_Morphism s d'.
+    destruct s, d, d'; simpl in *; trivial.
+  Defined.
+
+  Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
+    refine {|
+      Morphism' := GraphIndex_Morphism;
+      Identity' := (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end);
+      Compose' := GraphIndex_Compose
+    |};
+    abstract (
+      intros; destruct_type GraphIndex; simpl in *; destruct_type Empty_set; trivial
+    ).
+  Defined.
+
+  Definition UnderlyingGraph_ObjectOf x :=
+    match x with
+      | GraphIndexSource => { sd : objC * objC & C.(Morphism) (fst sd) (snd sd) }
+      | GraphIndexTarget => objC
+    end.
+
+  Global Arguments UnderlyingGraph_ObjectOf x /.
+
+  Definition UnderlyingGraph_MorphismOf s d (m : Morphism GraphIndexingCategory s d) :
+    UnderlyingGraph_ObjectOf s -> UnderlyingGraph_ObjectOf d :=
+    match (s, d) as sd return
+      Morphism GraphIndexingCategory (fst sd) (snd sd) ->
+      UnderlyingGraph_ObjectOf (fst sd) -> UnderlyingGraph_ObjectOf (snd sd)
+      with
+      | (GraphIndexSource, GraphIndexSource) => fun _ => @id _
+      | (GraphIndexSource, GraphIndexTarget) => fun m' =>
+        match m' with
+          | GraphIndexSource => fun sdm => fst (projT1 sdm)
+          | GraphIndexTarget => fun sdm => snd (projT1 sdm)
+        end
+      | (GraphIndexTarget, GraphIndexSource) => fun m' => match m' with end
+      | (GraphIndexTarget, GraphIndexTarget) => fun _ => @id _
+    end m.
+
+  Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
+  Proof.
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          UnderlyingGraph_ObjectOf
+          UnderlyingGraph_MorphismOf
+          _
+          _
+        )
+    end;
+    abstract (
+      unfold UnderlyingGraph_MorphismOf; simpl; intros;
+        destruct_type GraphIndex;
+        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+          trivial; try destruct_to_empty_set
+    ).
+  Defined.
+End GraphObj.
+
+Section GraphFunctor.
+  Let UnderlyingGraphFunctor_ObjectOf (C : SmallCat) : SpecializedFunctor GraphIndexingCategory TypeCat :=
+    UnderlyingGraph C.
+
+  Local Ltac t :=
+    intros; destruct_head GraphIndex;
+      repeat match goal with
+               | [ H : Empty_set |- _ ] => destruct H
+               | _  => reflexivity
+               | _ => progress destruct_head GraphIndex; simpl in *
+               | _ => progress repeat (apply functional_extensionality_dep; intro)
+               | _ => progress simpl_eq
+               | _ => progress destruct_sig; simpl in *
+             end.
+
+  Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
+    Morphism (TypeCat ^ GraphIndexingCategory) (UnderlyingGraph C) (UnderlyingGraph D).
+  Proof.
+    exists (fun c => match c as c return (UnderlyingGraph C) c -> (UnderlyingGraph D) c with
+                       | GraphIndexSource => fun sdm => existT _ (F (fst (projT1 sdm)), F (snd (projT1 sdm))) (F.(MorphismOf) (projT2 sdm))
+                       | GraphIndexTarget => ObjectOf F
+                     end);
+    abstract t.
+  Defined.
+
+  Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
+  Proof.
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          UnderlyingGraphFunctor_ObjectOf
+          UnderlyingGraphFunctor_MorphismOf
+          _
+          _
+        )
+    end;
+    abstract (
+      repeat match goal with
+               | _ => progress simpl in *
+               | _ => progress functor_eq
+               | _ => progress nt_eq
+               | _ => progress t
+               | _ => progress unfold ComponentsOf
+               | [ |- appcontext[match ?x with _ => _ end] ] => destruct x
+             end
+    ).
+  Defined.
+End GraphFunctor.

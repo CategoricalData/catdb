@@ -63,6 +63,7 @@ MODULES    := Notations \
 	LimitFunctors \
 	LimitFunctorTheorems \
 	InducedLimitFunctors \
+	Graphs \
 	Equalizer \
 	EqualizerFunctor \
 	Products \
