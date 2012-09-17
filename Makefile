@@ -8,6 +8,7 @@ MODULES    := Notations \
 	EquivalenceSet \
 	EquivalenceClass \
 	EquivalenceRelationGenerator \
+	Paths \
 	SpecializedCategory \
 	Category \
 	CategoryEquality \
@@ -16,6 +17,7 @@ MODULES    := Notations \
 	FunctorIsomorphisms \
 	NaturalTransformation \
 	NaturalEquivalence \
+	Graph \
 	SigCategory \
 	SigTCategory \
 	SigTSigCategory \

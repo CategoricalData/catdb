@@ -43,3 +43,7 @@ Delimit Scope morphism_scope with morphism.
 Delimit Scope category_scope with category.
 Delimit Scope functor_scope with functor.
 Delimit Scope natural_transformation_scope with natural_transformation.
+
+Delimit Scope graph_scope with graph.
+Delimit Scope vertex_scope with vertex.
+Delimit Scope edge_scope with edge.

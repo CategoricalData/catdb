@@ -129,3 +129,14 @@ Section GraphFunctor.
     ).
   Defined.
 End GraphFunctor.
+
+Section FreeCategory.
+  Variable F : SpecializedFunctor GraphIndexingCategory TypeCat.
+
+  Let vertices := F GraphIndexTarget.
+
+  Definition FreeCategory : SpecializedCategory vertices.
+  Proof.
+    (* morphisms are paths *)
+  Admitted.
+End FreeCategory.
