@@ -66,6 +66,7 @@ MODULES    := Notations \
 	Adjoint \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
+	PathsCategoryFunctors \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
