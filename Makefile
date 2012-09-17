@@ -17,8 +17,11 @@ MODULES    := Notations \
 	FunctorIsomorphisms \
 	NaturalTransformation \
 	NaturalEquivalence \
+	\
 	Graph \
 	GraphTranslation \
+	ComputableGraphCategory \
+	\
 	SigCategory \
 	SigTCategory \
 	SigTSigCategory \
