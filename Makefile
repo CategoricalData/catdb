@@ -35,6 +35,7 @@ MODULES    := Notations \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
+	PathsCategory \
 	ProductCategory \
 	FunctorProduct \
 	ProductNaturalTransformation \
