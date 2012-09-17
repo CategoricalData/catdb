@@ -18,6 +18,7 @@ MODULES    := Notations \
 	NaturalTransformation \
 	NaturalEquivalence \
 	Graph \
+	GraphTranslation \
 	SigCategory \
 	SigTCategory \
 	SigTSigCategory \
