@@ -1,15 +1,13 @@
 Require Import Setoid FunctionalExtensionality.
-Require Export SetCategory DiscreteCategory.
-Require Import Common Limits Functor NaturalTransformation FunctorCategory.
+Require Export SetCategory.
+Require Import Common Limits Functor NaturalTransformation FunctorCategory InitialTerminalCategory.
 
 Set Implicit Arguments.
 
-Section SetLimits.
-  Local Transparent Object Morphism Identity Compose.
+Generalizable All Variables.
 
-  Variable objC : Set.
-  Variable morC : objC -> objC -> Set.
-  Variable C : SmallSpecializedCategory morC.
+Section SetLimits.
+  Context `(C : @SmallSpecializedCategory objC).
   Variable F : SpecializedFunctor C SetCat.
 
   (* Quoting David:
@@ -50,7 +48,7 @@ Section SetLimits.
       tt
     ).
     abstract (
-      simpl in *; intros;
+      simpl in *; intros; unfold FunctorCategory in *; simpl in *;
         destruct_type @SpecializedNaturalTransformation; simpl in *;
           fg_equal;
           symmetry;
@@ -67,7 +65,6 @@ Section SetLimits.
   Defined.
 
   Definition SetLimit : Limit F.
-    Transparent Object Morphism Compose Identity.
     exists (existT _ SetLimit_Object SetLimit_Morphism).
     hnf; intros.
     exists (SetLimit_Property_Morphism _).
@@ -78,7 +75,7 @@ Section SetLimits.
           trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
-              rewrite LeftIdentityNaturalTransformation in *;
+              rewrite @LeftIdentityNaturalTransformation in *;
                 subst;
                   unfold Morphism;
                     trivial
@@ -87,11 +84,7 @@ Section SetLimits.
 End SetLimits.
 
 Section TypeLimits.
-  Local Transparent Object Morphism Identity Compose.
-
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C TypeCat.
 
   (* Quoting David:
@@ -132,7 +125,7 @@ Section TypeLimits.
       tt
     ).
     abstract (
-      simpl in *; intros;
+      simpl in *; intros; unfold FunctorCategory in *; simpl in *;
         destruct_type @SpecializedNaturalTransformation; simpl in *;
           fg_equal;
           symmetry;
@@ -149,7 +142,6 @@ Section TypeLimits.
   Defined.
 
   Definition TypeLimit : Limit F.
-    Transparent Object Morphism Compose Identity.
     exists (existT _ TypeLimit_Object TypeLimit_Morphism).
     hnf; intros.
     exists (TypeLimit_Property_Morphism _).
@@ -160,7 +152,7 @@ Section TypeLimits.
           trivial;
             repeat (apply functional_extensionality_dep; intro; try simpl_eq);
               destruct_sig;
-              rewrite LeftIdentityNaturalTransformation in *;
+              rewrite @LeftIdentityNaturalTransformation in *;
                 subst;
                   unfold Morphism;
                     trivial

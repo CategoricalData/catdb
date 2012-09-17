@@ -1,25 +1,55 @@
-MODULES    := Common \
+MODULES    := Notations \
+	Common \
+	GetArguments \
 	FEqualDep \
 	StructureEquality \
 	DefinitionSimplification \
+	NatFacts \
 	EquivalenceSet \
 	EquivalenceClass \
-	EquivalenceRelation \
 	EquivalenceRelationGenerator \
+	Paths \
 	SpecializedCategory \
 	Category \
 	CategoryEquality \
+	CategoryIsomorphisms \
 	Functor \
+	FunctorIsomorphisms \
 	NaturalTransformation \
 	NaturalEquivalence \
+	\
+	Graph \
+	GraphTranslation \
+	ComputableGraphCategory \
+	\
+	SigCategory \
+	SigTCategory \
+	SigTSigCategory \
+	SigSigTCategory \
+	SigTInducedFunctors \
+	SigTSigInducedFunctors \
+	ChainCategory \
+	BoolCategory \
+	NatCategory \
 	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
+	PathsCategory \
 	ProductCategory \
-	ProductFunctor \
+	FunctorProduct \
+	ProductNaturalTransformation \
+	ProductInducedFunctors \
+	SumCategory \
+	ExponentialLaws \
 	MonoidalCategory \
 	EnrichedCategory \
+	SetCategory \
+	DecidableDiscreteCategory \
+	DecidableComputableCategory \
+	DecidableSmallCat \
+	DecidableSetCategory \
+	InitialTerminalCategory \
 	SmallCat \
 	CommaCategory \
 	SpecializedCommaCategory \
@@ -28,15 +58,25 @@ MODULES    := Common \
 	CommaCategoryFunctors \
 	UniversalProperties \
 	Duals \
-	SetCategory \
 	Hom \
 	FunctorAttributes \
+	Correspondences \
 	Groupoid \
 	AdjointUnit \
 	Adjoint \
+	DiscreteCategoryFunctors \
+	DecidableDiscreteCategoryFunctors \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
+	InducedLimitFunctors \
+	Graphs \
+	Equalizer \
+	EqualizerFunctor \
+	Products \
+	ProductFunctors \
+	Coend \
+	CoendFunctor \
 	Grothendieck \
 	SetLimits \
 	SetColimits \
@@ -50,11 +90,11 @@ MODULES    := Common \
 	Translation \
 	SmallTranslation \
 	MetaTranslation \
-	CategorySchemaEquivalence \
-	ComputableSchemaCategory \
-	SNaturalEquivalence \
+	MetaEquivalence \
 	Examples \
-	Theorems
+	Theorems # \
+	CategorySchemaEquivalence \
+	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
 
 .PHONY: coq clean

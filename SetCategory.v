@@ -3,34 +3,31 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
-  Definition TypeCat : @SpecializedCategory Type (fun s d => s -> d).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
+  Local Ltac build_set_cat :=
+    match goal with
+      | [ |- SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => s -> d)
+          (fun _ => (fun x => x))
+          (fun _ _ _ f g => (fun x => f (g x)))
+          _
+          _
+          _
+        )
+    end;
+    abstract (firstorder; etransitivity; eauto; t).
 
-  Definition SetCat : @SpecializedCategory Set (fun s d => s -> d).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
-
-  Definition PropCat : @SpecializedCategory Prop (fun s d => s -> d).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
+  Definition TypeCat : @SpecializedCategory Type. build_set_cat. Defined.
+  Definition SetCat : @SpecializedCategory Set. build_set_cat. Defined.
+  Definition PropCat : @SpecializedCategory Prop. build_set_cat. Defined.
 End CSet.
 
 Section SetCoercionsDefinitions.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Definition SpecializedFunctorToProp := SpecializedFunctor C PropCat.
   Definition SpecializedFunctorToSet := SpecializedFunctor C SetCat.
@@ -49,9 +46,7 @@ Identity Coercion SpecializedFunctorFromSet_Id : SpecializedFunctorFromSet >-> S
 Identity Coercion SpecializedFunctorFromType_Id : SpecializedFunctorFromType >-> SpecializedFunctor.
 
 Section SetCoercions.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Local Ltac build_functor := hnf in *;
     match goal with
@@ -82,42 +77,36 @@ Coercion SpecializedFunctorFrom_Type2Set : SpecializedFunctorFromType >-> Specia
 
 (* There is a category [Set*], where the objects are sets with a distinguished elements and the morphisms are set morphisms *)
 Section PointedSet.
-  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } (fun s d => (projT1 s) -> (projT1 d)).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
+  Local Ltac build_pointed_set_cat :=
+    match goal with
+      | [ |- SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          (fun s d => (projT1 s) -> (projT1 d))
+          (fun _ => (fun x => x))
+          (fun _ _ _ f g => (fun x => f (g x)))
+          _
+          _
+          _
+        )
+    end;
+    abstract (firstorder; etransitivity; eauto; t).
 
-  Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat.
-    refine {| ObjectOf' := (fun c => projT1 c);
-      MorphismOf' := (fun s d (m : (projT1 s) -> (projT1 d)) => m)
-    |}; abstract t.
-  Defined.
+  Local Ltac build_pointed_set_cat_projection :=
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          (fun c => projT1 c)
+          (fun s d (m : (projT1 s) -> (projT1 d)) => m)
+          _
+          _
+        )
+    end;
+    abstract t.
 
-  Definition PointedSetCat : @SpecializedCategory { A : Set & A } (fun s d => (projT1 s) -> (projT1 d)).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
-
-  Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat.
-    refine {| ObjectOf' := (fun c : { A : Set & A } => projT1 c);
-      MorphismOf' := (fun s d (m : (projT1 s) -> (projT1 d)) => m)
-    |}; abstract t.
-  Defined.
-
-  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } (fun s d => (projT1 s) -> (projT1 d)).
-    refine {|
-      Compose' := fun _ _ _ f g => (fun x => f (g x));
-      Identity' := fun _ => (fun x => x)
-    |}; abstract (firstorder; etransitivity; eauto; t).
-  Defined.
-
-  Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat.
-    refine {| ObjectOf' := (fun c : { A : Prop & A } => projT1 c);
-      MorphismOf' := (fun s d (m : (projT1 s) -> (projT1 d)) => m)
-    |}; abstract t.
-  Defined.
+  Definition PointedTypeCat : @SpecializedCategory { A : Type & A }. build_pointed_set_cat. Defined.
+  Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat. build_pointed_set_cat_projection. Defined.
+  Definition PointedSetCat : @SpecializedCategory { A : Set & A }. build_pointed_set_cat. Defined.
+  Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat. build_pointed_set_cat_projection. Defined.
+  Definition PointedPropCat : @SpecializedCategory { A : Prop & A }. build_pointed_set_cat. Defined.
+  Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat. build_pointed_set_cat_projection. Defined.
 End PointedSet.

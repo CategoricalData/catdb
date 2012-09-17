@@ -1,33 +1,33 @@
 Require Import Setoid Eqdep.
 Import Eq_rect_eq.
 Require Export MetaTranslation.
-Require Import Common EquivalenceRelation.
+Require Import Common.
 
 Set Implicit Arguments.
 
-Section SNaturalEquivalence.
+Section MetaEquivalence.
   Variable C D : Schema.
   Variable F G : Translation C D.
 
-  Definition SNaturalEquivalence (T : MetaTranslation F G) :=
+  Definition MetaEquivalence (T : MetaTranslation F G) :=
     forall x : C.(Vertex), SchemaIsomorphism (T.(SComponentsOf) x).
 
   Definition TranslationsNaturallyEquivalent : Prop :=
-    exists T : MetaTranslation F G, exists TE : SNaturalEquivalence T, True.
-End SNaturalEquivalence.
+    exists T : MetaTranslation F G, exists TE : MetaEquivalence T, True.
+End MetaEquivalence.
 
-Section SNaturalEquivalenceOfSchemas.
+Section MetaEquivalenceOfSchemas.
   Variable C D : Schema.
 
-  Definition SNaturalEquivalenceOfSchemas (F : Translation C D) (G : Translation D C) : Prop :=
+  Definition MetaEquivalenceOfSchemas (F : Translation C D) (G : Translation D C) : Prop :=
     (TranslationsNaturallyEquivalent (IdentityTranslation C) (ComposeTranslations G F)) /\
     (TranslationsNaturallyEquivalent (IdentityTranslation D) (ComposeTranslations F G)).
 
   Definition SchemasNaturallyEquivalent : Prop :=
-    exists F : Translation C D, exists G : Translation D C, SNaturalEquivalenceOfSchemas F G.
-End SNaturalEquivalenceOfSchemas.
+    exists F : Translation C D, exists G : Translation D C, MetaEquivalenceOfSchemas F G.
+End MetaEquivalenceOfSchemas.
 
-Section SNaturalEquivalenceInverse.
+Section MetaEquivalenceInverse.
   Variable C D : Schema.
   Variable F G : Translation C D.
   Variable T : MetaTranslation F G.
@@ -35,7 +35,7 @@ Section SNaturalEquivalenceInverse.
   Hint Unfold SInverseOf.
   Hint Resolve f_equal f_equal2 SCommutes.
 
-  Definition SNaturalEquivalenceInverse : SNaturalEquivalence T -> MetaTranslation G F.
+  Definition MetaEquivalenceInverse : MetaEquivalence T -> MetaTranslation G F.
     refine (fun X => {| SComponentsOf := (fun c => proj1_sig (X c)) |});
       abstract (intros; destruct (X s); destruct (X d); simpl; firstorder;
         eapply s_iso_is_epi; [ eauto | ]; eapply s_iso_is_mono; [ eauto | ];
@@ -50,11 +50,11 @@ Section SNaturalEquivalenceInverse.
 
   Hint Immediate SInverseOf_sym.
 
-  Lemma SNaturalEquivalenceInverse_SNaturalEquivalence (TE : SNaturalEquivalence T) : SNaturalEquivalence (SNaturalEquivalenceInverse TE).
-    unfold SNaturalEquivalence, SchemaIsomorphism in *; simpl in *;
+  Lemma MetaEquivalenceInverse_MetaEquivalence (TE : MetaEquivalence T) : MetaEquivalence (MetaEquivalenceInverse TE).
+    unfold MetaEquivalence, SchemaIsomorphism in *; simpl in *;
       intro x; destruct (TE x); eauto.
   Qed.
-End SNaturalEquivalenceInverse.
+End MetaEquivalenceInverse.
 
 Section IdentityMetaTranslation.
   Variable C D : Schema.
@@ -66,25 +66,25 @@ Section IdentityMetaTranslation.
 
   Hint Resolve SInverseOf_Identity.
 
-  Theorem IdentitySNaturalEquivalence : SNaturalEquivalence (IdentityMetaTranslation F).
+  Theorem IdentityMetaEquivalence : MetaEquivalence (IdentityMetaTranslation F).
     hnf; intros; hnf; simpl; eauto.
   Qed.
 End IdentityMetaTranslation.
 
-Section TranslationSNaturalEquivalenceRelation.
+Section TranslationMetaEquivalenceRelation.
   Variable C D : Schema.
 
-  Hint Resolve IdentitySNaturalEquivalence.
+  Hint Resolve IdentityMetaEquivalence.
 
   Lemma translations_naturally_equivalent_refl (F : Translation C D) : TranslationsNaturallyEquivalent F F.
     exists (IdentityMetaTranslation F); eauto.
   Qed.
 
-  Hint Resolve SNaturalEquivalenceInverse_SNaturalEquivalence.
+  Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
 
   Lemma translations_naturally_equivalent_sym (F G : Translation C D) :
     TranslationsNaturallyEquivalent F G -> TranslationsNaturallyEquivalent G F.
-    destruct 1 as [ ? [ H ] ]; exists (SNaturalEquivalenceInverse H); eauto.
+    destruct 1 as [ ? [ H ] ]; exists (MetaEquivalenceInverse H); eauto.
   Qed.
 
   Hint Resolve SchemaIsomorphismComposition.
@@ -95,7 +95,7 @@ Section TranslationSNaturalEquivalenceRelation.
       exists (MTComposeMT U T); eexists; hnf; simpl; eauto.
   Qed.
 
-End TranslationSNaturalEquivalenceRelation.
+End TranslationMetaEquivalenceRelation.
 
 Add Parametric Relation (C D : Schema) : _ (@TranslationsNaturallyEquivalent C D)
   reflexivity proved by (@translations_naturally_equivalent_refl _ _)
@@ -107,7 +107,7 @@ Add Parametric Relation (C D : Schema) : _ (@TranslationsNaturallyEquivalent C D
 Add Parametric Morphism C D E :
   (@ComposeTranslations C D E)
   with signature (@TranslationsNaturallyEquivalent _ _) ==> (@TranslationsNaturallyEquivalent _ _) ==> (@TranslationsNaturallyEquivalent _ _) as functor_n_eq_mor.
-  intros F F' NEF G G' NEG; unfold TranslationsNaturallyEquivalent, SNaturalEquivalence, SchemaIsomorphism, SInverseOf in *;
+  intros F F' NEF G G' NEG; unfold TranslationsNaturallyEquivalent, MetaEquivalence, SchemaIsomorphism, SInverseOf in *;
     destruct_hypotheses.
   match goal with
     | [ T1 : _ , T2 : _ |- _ ] => exists (MTComposeT T1 T2); try (constructor; trivial)
@@ -126,7 +126,7 @@ Add Parametric Morphism C D E :
   end; split; concatenate4associativity; repeat (try rewrite <- concatenate_TransferPath; t_con @PathsEquivalent).
 Qed.
 
-Section TranslationSNaturalEquivalenceLemmas.
+Section TranslationMetaEquivalenceLemmas.
   Variable B C D E : Schema.
 
   Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
@@ -143,7 +143,7 @@ Section TranslationSNaturalEquivalenceLemmas.
     end.
   Qed.
 
-  Hint Unfold TranslationsNaturallyEquivalent ComposeTranslations SNaturalEquivalence SchemaIsomorphism SInverseOf.
+  Hint Unfold TranslationsNaturallyEquivalent ComposeTranslations MetaEquivalence SchemaIsomorphism SInverseOf.
 
   (* XXX TODO: Automate this better. *)
   Lemma PreComposeTranslationsNE (G : Translation D E) (F1 F2 : Translation C D) :
@@ -185,12 +185,12 @@ Section TranslationSNaturalEquivalenceLemmas.
       | [ |- TranslationsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite H'; trivial || reflexivity ]
     end; eauto.
   Qed.
-End TranslationSNaturalEquivalenceLemmas.
+End TranslationMetaEquivalenceLemmas.
 
-Section SchemaSNaturalEquivalenceRelation.
-  Hint Unfold SNaturalEquivalenceOfSchemas.
+Section SchemaMetaEquivalenceRelation.
+  Hint Unfold MetaEquivalenceOfSchemas.
 
-  Hint Resolve IdentitySNaturalEquivalence IdentityTranslation.
+  Hint Resolve IdentityMetaEquivalence IdentityTranslation.
 
   Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
 
@@ -201,7 +201,7 @@ Section SchemaSNaturalEquivalenceRelation.
       end; eauto.
   Qed.
 
-  Hint Resolve SNaturalEquivalenceInverse_SNaturalEquivalence.
+  Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
 
   Lemma schemas_naturally_equivalent_sym C D :
     SchemasNaturallyEquivalent C D -> SchemasNaturallyEquivalent D C.
@@ -230,7 +230,7 @@ Section SchemaSNaturalEquivalenceRelation.
       | [ H : _ |- _ ] => rewrite <- H
     end; t.
   Qed.
-End SchemaSNaturalEquivalenceRelation.
+End SchemaMetaEquivalenceRelation.
 
 Add Parametric Relation : _ SchemasNaturallyEquivalent
   reflexivity proved by schemas_naturally_equivalent_refl

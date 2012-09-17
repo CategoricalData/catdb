@@ -1,22 +1,18 @@
 Require Import ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common DiscreteCategory.
+Require Import Common Notations InitialTerminalCategory.
 
 Set Implicit Arguments.
+
+Generalizable All Variables.
 
 Local Open Scope category_scope.
 
 Section CommaSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objB : Type.
-  Variable morB : objB -> objB -> Type.
-  Variable B : SpecializedCategory morB.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(B : @SpecializedCategory objB).
+  Context `(C : @SpecializedCategory objC).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
 
@@ -54,7 +50,7 @@ Section CommaSpecializedCategory.
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & morC (S (fst αβ)) (T (snd αβ)) } }.
+  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
@@ -63,13 +59,13 @@ Section CommaSpecializedCategory.
   Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
   Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
 
-  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_Object) := { CommaSpecializedCategory_Morphism_Member :>
-    { gh : (morA (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (morB (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
+  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
+    { gh : (A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
       Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }
   }.
 
-  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_Object) :=
+  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT) :=
     Eval hnf in SortPolymorphic_Helper (@Build_CommaSpecializedCategory_Morphism αβf α'β'f').
   Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
   Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
@@ -79,28 +75,26 @@ Section CommaSpecializedCategory.
   Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
   Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
 
-  Definition CommaSpecializedCategory_Compose s d d' (gh : CommaSpecializedCategory_Morphism d d') (g'h' : CommaSpecializedCategory_Morphism s d) :
-    CommaSpecializedCategory_Morphism s d'.
-    Transparent Object Morphism.
-    constructor.
-    exists (@Compose _ _ (A * B) _ _ _ (proj1_sig gh) (proj1_sig g'h')).
+  Definition CommaSpecializedCategory_Compose s d d'
+    (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
+    CommaSpecializedCategory_MorphismT s d'.
+    exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
+    hnf in *; simpl in *.
     abstract (
-      destruct_type @CommaSpecializedCategory_Object; simpl in *;
-        destruct_type @CommaSpecializedCategory_Morphism; simpl in *;
-          destruct_all_hypotheses;
-          unfold Morphism in *;
-            destruct_hypotheses;
-            repeat rewrite FCompositionOf;
-              repeat rewrite <- Associativity;
-                t_rev_with t'
+      present_spcategory;
+      destruct_all_hypotheses;
+      unfold Morphism in *;
+        destruct_hypotheses;
+        repeat rewrite FCompositionOf;
+          repeat rewrite <- Associativity;
+            t_rev_with t'
     ).
   Defined.
 
   Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
 
-  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_Morphism o o.
-    constructor.
-    exists (@Identity _ _ (A * B) (projT1 o)).
+  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
+    exists (Identity (C := A * B) (projT1 o)).
     abstract (
       simpl;
         repeat rewrite FIdentityOf;
@@ -112,28 +106,55 @@ Section CommaSpecializedCategory.
 
   Global Arguments CommaSpecializedCategory_Identity _ /.
 
-  Definition CommaSpecializedCategory : SpecializedCategory CommaSpecializedCategory_Morphism.
+  Local Ltac comma_t :=
+    repeat (
+      let H:= fresh in intro H; destruct H as [ [ ] ]
+    );
+    destruct_hypotheses;
+    simpl in *;
+      present_spcategory;
+      simpl_eq;
+      present_spcategory; autorewrite with core;
+        f_equal;
+        try reflexivity.
+
+  Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
+    CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
+    CommaSpecializedCategory_Compose m3 (CommaSpecializedCategory_Compose m2 m1).
+  Proof.
+    comma_t.
+  Qed.
+
+  Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+    CommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
+  Proof.
+    comma_t.
+  Qed.
+
+  Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+    CommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
+  Proof.
+    comma_t.
+  Qed.
+
+  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          CommaSpecializedCategory_Morphism
           CommaSpecializedCategory_Identity
           CommaSpecializedCategory_Compose
-          _
-          _
-          _
+          _ _ _
         )
     end;
     abstract (
-      repeat (
-        let H:= fresh in intro H; destruct H as [ [ [ ] ? ] ];
-          unfold fst, snd, projT1, projT2, CommaSpecializedCategory_Object_Member, CommaSpecializedCategory_Morphism_Member in *
-      );
-      simpl;
-        apply f_equal;
-          simpl_eq;
-          present_spcategory; autorewrite with core;
-            f_equal;
-            try reflexivity
+      intros;
+        destruct_type' @CommaSpecializedCategory_Morphism;
+        unfold CommaSpecializedCategory_Morphism_Member, Build_CommaSpecializedCategory_Morphism';
+          try apply f_equal;
+            apply CommaSpecializedCategory_Associativity ||
+              apply CommaSpecializedCategory_LeftIdentity ||
+                apply CommaSpecializedCategory_RightIdentity
     ).
   Defined.
 End CommaSpecializedCategory.
@@ -141,15 +162,11 @@ End CommaSpecializedCategory.
 Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity.
 Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object.
 
-Local Notation "S ↓ T" := (CommaSpecializedCategory S T) (at level 70, no associativity).
+Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
 Section SliceSpecializedCategory.
-  Variable objA : Type.
-  Variable morA : objA -> objA -> Type.
-  Variable A : SpecializedCategory morA.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(A : @SpecializedCategory objA).
+  Context `(C : @SpecializedCategory objC).
   Variable a : C.
   Variable S : SpecializedFunctor A C.
   Let B := TerminalCategory.
@@ -165,9 +182,7 @@ Section SliceSpecializedCategory.
 End SliceSpecializedCategory.
 
 Section SliceSpecializedCategoryOver.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   Variable a : C.
 
   Definition SliceSpecializedCategoryOver := SliceSpecializedCategory a (IdentityFunctor C).
@@ -175,9 +190,7 @@ Section SliceSpecializedCategoryOver.
 End SliceSpecializedCategoryOver.
 
 Section ArrowSpecializedCategory.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowSpecializedCategory.

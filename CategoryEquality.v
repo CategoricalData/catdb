@@ -1,49 +1,48 @@
 Require Import ProofIrrelevance JMeq.
 Require Export Category FEqualDep.
-Require Import Common StructureEquality SpecializedCategory.
+Require Import Common Notations StructureEquality SpecializedCategory.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Generalizable All Variables.
+
+Local Infix "==" := JMeq.
 
 Section Categories_Equal.
   Lemma Categories_Equal : forall (A B : Category),
     Object A = Object B
     -> Morphism A == Morphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> @Identity _ A == @Identity _ B
+    -> @Compose _ A == @Compose _ B
     -> A = B.
-    Transparent Object Morphism Identity Compose.
-    unfold Identity, Compose, Morphism, Object.
-    intros.
-    destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    unfold Object, Morphism, Identity, Compose; intros;
+      destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
+        subst_body; repeat subst.
+    repeat f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma SmallCategories_Equal : forall (A B : SmallCategory),
     SObject A = SObject B
-    -> SMorphism A == SMorphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> Morphism A == Morphism B
+    -> @Identity _ A == @Identity _ B
+    -> @Compose _ A == @Compose _ B
     -> A = B.
-    Transparent SObject SMorphism Object Morphism Identity Compose.
-    unfold Identity, Compose, Morphism, Object, SObject, SMorphism.
-    intros.
-    destruct_type @SmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    unfold SObject, Morphism, Identity, Compose; intros;
+      destruct_type @SmallCategory; destruct_type @SmallSpecializedCategory; simpl in *;
+        subst_body; repeat (subst; JMeq_eq).
+    repeat f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma LocallySmallCategories_Equal : forall (A B : LocallySmallCategory),
     LSObject A = LSObject B
-    -> LSMorphism A == LSMorphism B
-    -> @Identity _ _ A == @Identity _ _ B
-    -> @Compose _ _ A == @Compose _ _ B
+    -> Morphism A == Morphism B
+    -> @Identity _ A == @Identity _ B
+    -> @Compose _ A == @Compose _ B
     -> A = B.
-    Transparent LSObject LSMorphism Object Morphism Identity Compose.
-    unfold Identity, Compose, Morphism, Object, LSObject, LSMorphism.
-    intros.
-    destruct_type @LocallySmallCategory; hnf in *; destruct_type @SpecializedCategory; simpl in *;
-      repeat subst; repeat f_equal; apply proof_irrelevance.
+    unfold LSObject, Morphism, Identity, Compose; intros;
+      destruct_type @LocallySmallCategory; destruct_type @LocallySmallSpecializedCategory; simpl in *;
+        subst_body; repeat (subst; JMeq_eq).
+    repeat f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.
 
@@ -58,9 +57,7 @@ Ltac cat_eq_step := cat_eq_step_with idtac.
 Ltac cat_eq := cat_eq_with idtac.
 
 Section RoundtripCat.
-  Variable obj : Type.
-  Variable mor : obj -> obj -> Type.
-  Variable C : SpecializedCategory mor.
+  Context `(C : @SpecializedCategory obj).
   Variable C' : Category.
 
   Lemma SpecializedCategory_Category_SpecializedCategory_Id : ((C : Category) : SpecializedCategory _) = C.
@@ -72,12 +69,10 @@ Section RoundtripCat.
   Qed.
 End RoundtripCat.
 
-Hint Rewrite SpecializedCategory_Category_SpecializedCategory_Id Category_SpecializedCategory_Category_Id.
+Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id.
 
 Section RoundtripLSCat.
-  Variable obj : Type.
-  Variable mor : obj -> obj -> Set.
-  Variable C : LocallySmallSpecializedCategory mor.
+  Context `(C : @LocallySmallSpecializedCategory obj).
   Variable C' : LocallySmallCategory.
 
   Lemma LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id : ((C : LocallySmallCategory) : LocallySmallSpecializedCategory _) = C.
@@ -89,12 +84,10 @@ Section RoundtripLSCat.
   Qed.
 End RoundtripLSCat.
 
-Hint Rewrite LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id.
+Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id.
 
 Section RoundtripSCat.
-  Variable obj : Set.
-  Variable mor : obj -> obj -> Set.
-  Variable C : SmallSpecializedCategory mor.
+  Context `(C : @SmallSpecializedCategory obj).
   Variable C' : SmallCategory.
 
   Lemma Small_SpecializedCategory_Category_SpecializedCategory_Id : ((C : SmallCategory) : SmallSpecializedCategory _) = C.
@@ -106,4 +99,4 @@ Section RoundtripSCat.
   Qed.
 End RoundtripSCat.
 
-Hint Rewrite Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id.
+Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id.

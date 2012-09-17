@@ -1,5 +1,5 @@
 Require Import Setoid ProofIrrelevance FunctionalExtensionality Ensembles.
-Require Import Common.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
@@ -63,7 +63,7 @@ Section equiv.
     transitivity proved by (Equivalence.equiv_transitive _)
       as equiv_equiv_rel.
 
-  Local Infix "~=" := equiv (at level 70, no associativity).
+  Local Infix "~=" := equiv.
 
   Local Ltac simpl_equiv := hnf; intros; trivial;
     repeat match goal with

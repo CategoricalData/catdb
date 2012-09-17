@@ -1,57 +1,86 @@
 Require Import FunctionalExtensionality.
-Require Export Category SetCategory DiscreteCategory.
+Require Export Category SetCategory DiscreteCategory CategoryIsomorphisms.
 Require Import Common.
 
 Set Implicit Arguments.
 
 Section InitialTerminal.
-  Local Transparent Object Morphism.
-
   Hint Extern 1 (_ = _) => apply (@functional_extensionality_dep _); intro.
+  Hint Extern 2 => destruct_to_empty_set.
 
   Local Ltac t := repeat (hnf in *; simpl in *; intros; try destruct_exists; try destruct_to_empty_set); auto.
 
-  Definition TypeCatEmptyInitial : @InitialObject _ _ TypeCat Empty_set. t. Defined.
-  Definition TypeCatSingletonTerminal : @TerminalObject _ _ TypeCat unit. t. Defined.
-  Definition SetCatEmptyInitial : @InitialObject _ _ SetCat Empty_set. t. Defined.
-  Definition SetCatSingletonTerminal : @TerminalObject _ _ SetCat unit. t. Defined.
+  Definition TypeCatEmptyInitial : InitialObject (C := TypeCat) Empty_set. t. Defined.
+  Definition TypeCatSingletonTerminal : TerminalObject (C := TypeCat) unit. t. Defined.
+  Definition SetCatEmptyInitial : InitialObject (C := SetCat) Empty_set. t. Defined.
+  Definition SetCatSingletonTerminal : TerminalObject (C := SetCat) unit. t. Defined.
 End InitialTerminal.
-
-
-(*Require Import Common FunctionalExtensionality.
-Set Implicit Arguments.
-
 
 Section EpiMono.
   Definition compose {A B C : Type} (f : B -> C) (g : A -> B) := (fun x => f (g x)).
 
   Variables S : Type.
-  Hypothesis eq_dec : forall a b : S, {a = b} + {a <> b}.
+
+  Local Ltac t' :=
+    match goal with
+      | _ => progress (intros; subst; trivial)
+      | _ => eexists; reflexivity
+      | _ => discriminate
+      | [ H : _ -> False |- _ ] => contradict H; solve [ t' ]
+      | [ H : ~_ |- _ ] => contradict H; solve [ t' ]
+      | [ dec : forall _, {_} + {_} |- _ ] =>
+        match goal with
+          | [ _ : appcontext[dec ?x] |- _ ] => destruct (dec x)
+          | [ |- appcontext[dec ?x] ] => destruct (dec x)
+        end
+      | _ => apply functional_extensionality_dep; intro
+      | _ => progress (unfold compose in *; simpl in *; fg_equal)
+      | _ => progress apply_hyp'
+      | _ => progress destruct_type bool
+      | [ H : (_ -> exists _, _), x : _ |- _ ] => destruct (H x); clear H
+      | _ => progress specialize_uniquely
+    end.
+
+  Local Ltac t :=
+    repeat match goal with
+             | _ => t'
+             | [ H : ?A -> _ |- _ ] =>
+               match goal with
+                 | [ _ : A |- _ ] => fail 1 (* don't make an [A] if we already have one *)
+                 | _ => let a := fresh in assert (a : A) by (repeat t'); specialize (H a)
+               end
+           end.
+
+  Lemma InjMono B (f : B -> S) :
+    (forall x y : B, f x = f y -> x = y)
+    -> (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g').
+  Proof.
+    t.
+  Qed.
 
   Lemma MonoInj B (f : B -> S) :
     (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g')
     -> (forall x y : B, f x = f y -> x = y).
-    intros H x y fxfy.
-    unfold compose in *; simpl in *; fg_equal.
-    apply (fun H' => H bool (fun b => if b then x else y) (fun _ => y) H' true).
-    apply functional_extensionality_dep.
-    intro b; destruct b; trivial.
+  Proof.
+    intros H x y; t.
+    pose proof (fun H' => H bool (fun b => if b then x else y) (fun _ => y) H' true).
+    t.
   Qed.
 
-  Lemma EpiSurj A (f : A -> S) :
+  Lemma SurjEpi A (f : A -> S) :
+    (forall x : S, exists y : A, f y = x)
+    -> (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g').
+  Proof.
+    t.
+  Qed.
+
+  Lemma EpiSurj A (f : A -> S) (member_dec : forall x : S, {exists y, f y = x} + {~exists y, f y = x}) :
     (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g')
     -> (forall x : S, exists y : A, f y = x).
+  Proof.
     intro H.
-    assert (H' := fun x H' => H bool (fun y => if eq_dec x y then true else false) (fun y => true) H').
+    assert (H' := fun H' => H bool (fun y => if member_dec y then true else false) (fun y => true) H').
     clear H.
-    unfold compose in *; simpl in *; fg_equal.
-
-    let H'T := type of H' in cut (~~H'T).
-    clear H'; intro H.
-    contradict H
-    cut (~(~H')).
-    contradict H'.
-    intro x.
-    pose (H bool (fun y => if eq_dec_B x y then true else false) (fun y => true)); simpl in *.
-    fg_equal.
-*)
+    t.
+  Qed.
+End EpiMono.

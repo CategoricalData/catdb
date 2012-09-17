@@ -1,11 +1,10 @@
 Require Import ProofIrrelevance.
-Require Export SpecializedCategory Functor ProductCategory ProductFunctor NaturalTransformation NaturalEquivalence.
-Require Import Common StructureEquality DefinitionSimplification.
+Require Export SpecializedCategory Functor ProductCategory FunctorProduct NaturalTransformation NaturalEquivalence.
+Require Import Common Notations StructureEquality DefinitionSimplification.
 
 Set Implicit Arguments.
 
-Reserved Notation "A ⊗ B" (at level 40, left associativity).
-Reserved Notation "A ⊗m B" (at level 40, left associativity).
+Generalizable All Variables.
 
 Section PreMonoidalCategory.
   (* It's too hard to implement it all inside a record, so first we
@@ -14,20 +13,18 @@ Section PreMonoidalCategory.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      *)
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
   (**
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
          monoidal product,
     *)
   Variable TensorProduct : SpecializedFunctor (C * C) C.
 
-  Let src (C : SpecializedCategory morC) s d (_ : Morphism C s d) := s.
-  Let dst (C : SpecializedCategory morC) s d (_ : Morphism C s d) := d.
+  Let src {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := s.
+  Let dst {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := d.
 
   Local Notation "A ⊗ B" := (TensorProduct (A, B)).
-  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B)).
+  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism).
 
   Let TriMonoidalProductL_ObjectOf (abc : C * C * C) : C :=
     (fst (fst abc) ⊗ snd (fst abc)) ⊗ snd abc.
@@ -70,7 +67,6 @@ Section PreMonoidalCategory.
                | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
                | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
              end.
-  Transparent Object Morphism.
   unfold Morphism, Object in Hf.
   simpl in Hf.
   assert False.
@@ -300,8 +296,6 @@ End PreMonoidalCategory.
 
 Section MonoidalCategory.
   Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
@@ -358,19 +352,17 @@ Section MonoidalCategory.
   Local Reserved Notation "'α'".
   Local Reserved Notation "'λ'".
   Local Reserved Notation "'ρ'".
-  Local Reserved Notation "A ⊗m B" (at level 40, left associativity).
 
-  Let src (C : SpecializedCategory morC) s d (_ : Morphism C s d) := s.
-  Let dst (C : SpecializedCategory morC) s d (_ : Morphism C s d) := d.
+  Let src (C : @SpecializedCategory objC) {s d} (_ : Morphism C s d) := s.
+  Let dst (C : @SpecializedCategory objC) s d (_ : Morphism C s d) := d.
 
-  Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in AssociatorCoherenceCondition.
-  Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in UnitorCoherenceCondition.
-  Print AssociatorCoherenceCondition'.
+  Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in @AssociatorCoherenceCondition.
+  Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in @UnitorCoherenceCondition.
 
   Record MonoidalCategory := {
-    MonoidalUnderlyingCategory :> SpecializedCategory morC;
+    MonoidalUnderlyingCategory :> @SpecializedCategory objC;
     TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
-      where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (src A, src B)) (d := (dst A, dst B)) (A, B));
+      where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism);
 
     IdentityObject : objC where "'I'" := IdentityObject;
 

@@ -3,15 +3,13 @@ Require Import Common FunctorCategory NaturalTransformation.
 
 Set Implicit Arguments.
 
-Local Notation "C ^ D" := (FunctorCategory D C).
+Generalizable All Variables.
+
+Local Open Scope category_scope.
 
 Section DiagonalFunctor.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   (**
      Quoting Dwyer and Spalinski:
@@ -32,7 +30,6 @@ Section DiagonalFunctor.
   Defined.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).
-    Transparent Object Morphism.
     simpl; unfold diagonal_functor_object_of; intro m.
     hnf.
     match goal with
@@ -46,25 +43,25 @@ Section DiagonalFunctor.
   Defined.
 
   Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).
-    Transparent Morphism.
-    refine {| ObjectOf' := diagonal_functor_object_of;
-      MorphismOf' := diagonal_functor_morphism_of
-      |}; abstract nt_eq.
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          diagonal_functor_object_of
+          diagonal_functor_morphism_of
+          _
+          _
+        )
+    end;
+    abstract nt_eq.
   Defined.
 
   Definition DiagonalFunctor := Eval cbv beta iota zeta delta [DiagonalFunctor' diagonal_functor_object_of (*diagonal_functor_morphism_of*)] in DiagonalFunctor'.
 End DiagonalFunctor.
 
 Section DiagonalFunctorLemmas.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable objD' : Type.
-  Variable morD' : objD' -> objD' -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
-  Variable D' : SpecializedCategory morD'.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(D' : @SpecializedCategory objD').
 
   Lemma Compose_DiagonalFunctor x (F : SpecializedFunctor D' D) :
     ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
@@ -72,15 +69,11 @@ Section DiagonalFunctorLemmas.
   Qed.
 End DiagonalFunctorLemmas.
 
-Hint Rewrite Compose_DiagonalFunctor.
+Hint Rewrite @Compose_DiagonalFunctor.
 
 Section Limit.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor D C.
 
   (**
@@ -136,12 +129,8 @@ Section Limit.
 End Limit.
 
 Section LimitMorphisms.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Variable F : SpecializedFunctor D C.
 
   Definition MorphismBetweenLimits (L L' : Limit F) : C.(Morphism) (LimitObject L) (LimitObject L').

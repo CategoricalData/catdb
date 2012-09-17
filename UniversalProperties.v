@@ -1,5 +1,5 @@
-Require Export CommaCategory.
-Require Import Common DefinitionSimplification Eqdep.
+Require Export CommaCategory CategoryIsomorphisms.
+Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
 
@@ -13,7 +13,7 @@ Section UniversalMorphism.
   Variables C D : Category.
 
   Section InitialMorphism.
-    Local Notation "A ↓ F" := (CosliceCategory A F) (at level 70, no associativity).
+    Local Notation "A ↓ F" := (CosliceCategory A F).
     Variable X : C.
     Variable U : Functor D C.
     (**
@@ -48,18 +48,19 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        Transparent Morphism Object.
-        Hint Unfold Morphism Object.
+        Hint Unfold Object.
         unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
-        unfold InitialObject, is_unique, unique in *; simpl in *.
+        unfold InitialObject, is_unique, unique in *; simpl in *; unfold Object in *.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
         repeat (autounfold with core in *; simpl in *).
         destruct_all_hypotheses; simpl in *.
-        repeat simultaneous_rewrite RightIdentity; repeat simultaneous_rewrite LeftIdentity.
+        match goal with
+          | [ H : _ |- _ ] => revert dependent H; rewrite @RightIdentity; intros
+        end.
         split; try (assumption || symmetry; assumption); intros.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
@@ -72,7 +73,7 @@ Section UniversalMorphism.
   End InitialMorphism.
 
   Section TerminalMorphism.
-    Local Notation "F ↓ A" := (SliceCategory A F) (at level 70, no associativity).
+    Local Notation "F ↓ A" := (SliceCategory A F).
     Variable U : Functor D C.
     Variable X : C.
     (**
@@ -106,18 +107,19 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
-        Transparent Morphism Object.
-        Hint Unfold Object Morphism.
+        Hint Unfold Object.
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
-        unfold TerminalObject, is_unique, unique in *; simpl in *.
+        unfold TerminalObject, is_unique, unique; simpl in *; unfold Object in *.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
         repeat (autounfold with core in *; simpl in *).
-        destruct_sig; simpl in *.
-        repeat simultaneous_rewrite LeftIdentity; repeat simultaneous_rewrite RightIdentity.
+        match goal with
+          | [ H : _ |- _ ] => revert dependent H; rewrite @LeftIdentity; intros
+        end.
+        destruct_all_hypotheses; unfold is_unique in *.
         split; try (assumption || symmetry; assumption); intros.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
@@ -209,6 +211,16 @@ Section UniversalMorphism.
   End UniversalMorphism.
 End UniversalMorphism.
 
+Ltac intro_from_universal_objects :=
+  repeat match goal with
+           | [ |- appcontext[TerminalMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[TerminalMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+           | [ |- appcontext[InitialMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[InitialMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+           | [ |- appcontext[UniversalMorphism_Object ?x] ] => unique_pose_with_body x
+           | [ _ : appcontext[UniversalMorphism_Object ?x] |- _ ] => unique_pose_with_body x
+         end.
+
 Ltac intro_universal_objects :=
   repeat match goal with
            | [ m : TerminalMorphism _ _ |- _ ] => unique_pose_with_body (TerminalMorphism_Object m)
@@ -216,11 +228,11 @@ Ltac intro_universal_objects :=
            | [ m : UniversalMorphism _ _ |- _ ] => unique_pose_with_body (UniversalMorphism_Object m)
          end.
 
-Ltac intro_universal_morphisms :=
+Ltac intro_universal_morphisms := intro_from_universal_objects;
   repeat match goal with
-           | [ m : TerminalMorphism _ _ |- _ ] => unique_pose (TerminalMorphism_Morphism m)
-           | [ m : InitialMorphism _ _ |- _ ] => unique_pose (InitialMorphism_Morphism m)
-           | [ m : UniversalMorphism _ _ |- _ ] => unique_pose (UniversalMorphism_Morphism m)
+           | [ m : TerminalMorphism _ _ |- _ ] => unique_pose_with_body (TerminalMorphism_Morphism m)
+           | [ m : InitialMorphism _ _ |- _ ] => unique_pose_with_body (InitialMorphism_Morphism m)
+           | [ m : UniversalMorphism _ _ |- _ ] => unique_pose_with_body (UniversalMorphism_Morphism m)
          end.
 
 Ltac intro_universal_property_morphisms :=

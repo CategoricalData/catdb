@@ -1,18 +1,16 @@
 Require Import FunctionalExtensionality.
 Require Export Limits.
-Require Import Common DefinitionSimplification NaturalTransformation FunctorCategory Adjoint Hom SetCategory Duals ProductFunctor.
+Require Import Common DefinitionSimplification NaturalTransformation FunctorCategory Adjoint Hom SetCategory Duals FunctorProduct.
 
 Set Implicit Arguments.
+
+Generalizable All Variables.
 
 Local Open Scope category_scope.
 
 Section HasLimits.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Definition HasLimits' := forall F : SpecializedFunctor D C, exists _ : Limit F, True.
   Definition HasLimits := forall F : SpecializedFunctor D C, Limit F.
@@ -22,12 +20,8 @@ Section HasLimits.
 End HasLimits.
 
 Section LimitFunctors.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
 
   Hypothesis HL : HasLimits C D.
   Hypothesis HC : HasColimits C D.
@@ -79,10 +73,15 @@ Section LimitFunctors.
 
   (* XXX TODO: Automate this better *)
   Definition LimitFunctor' : SpecializedFunctor (C ^ D) C.
-    Transparent Object Morphism Compose Identity.
-    refine {| ObjectOf' := LimitOf;
-      MorphismOf' := LimitFunctor_morphism_of
-    |};
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          LimitOf
+          LimitFunctor_morphism_of
+          _
+          _
+        )
+    end;
     subst_body; simpl;
       abstract (
         present_spnt;
@@ -135,9 +134,15 @@ Section LimitFunctors.
   Defined.
 
   Definition ColimitFunctor' : SpecializedFunctor (C ^ D) C.
-    refine {| ObjectOf' := ColimitOf;
-      MorphismOf' := ColimitFunctor_morphism_of
-      |};
+    match goal with
+      | [ |- SpecializedFunctor ?C ?D ] =>
+        refine (Build_SpecializedFunctor C D
+          ColimitOf
+          ColimitFunctor_morphism_of
+          _
+          _
+        )
+    end;
     abstract (
       subst LimitOf ColimitOf LimitFunctor_morphism_of ColimitFunctor_morphism_of;
         simpl; intros; autorewrite with core;
@@ -179,11 +184,11 @@ Section LimitFunctors.
     rename c into F;
       rename c0 into H;
         rename c1 into G.*)
-(*    Definition Δ {objC morC objD morD C D} := @diagonal_functor_object_of objC morC objD morD C D.
-    Definition ΔMor {objC morC objD morD C D} o1 o2 := @diagonal_functor_morphism_of objC morC objD morD C D o1 o2.
+(*    Definition Δ {objC morC objD C D} := @diagonal_functor_object_of objC morC objD C D.
+    Definition ΔMor {objC morC objD C D} o1 o2 := @diagonal_functor_morphism_of objC morC objD C D o1 o2.
     Definition colimo := InitialMorphism_Object.
     Definition φ := InitialMorphism_Morphism.
-    Definition unique_m {objC morC objD morD} C {a b c d} := @InitialProperty_Morphism objC morC objD morD C a b c d.
+    Definition unique_m {objC morC objD morD} C {a b c d} := @InitialProperty_Morphism objC morC objD C a b c d.
 
     change (diagonal_functor_morphism_of C D) with (@ΔMor _ _ _ _ C D) in *;
     change (MorphismOf (DiagonalSpecializedFunctor C D)) with (@ΔMor _ _ _ _ C D) in *;
@@ -194,16 +199,12 @@ Section LimitFunctors.
   Defined.
 End LimitFunctors.
 
-Definition LimitFunctor := Eval cbv beta iota zeta delta [LimitFunctor'(* LimitFunctor_morphism_of*)] in LimitFunctor'.
-Definition ColimitFunctor := Eval cbv beta iota zeta delta [ColimitFunctor'(* ColimitFunctor_morphism_of*)] in ColimitFunctor'.
+Definition LimitFunctor := Eval cbv beta iota zeta delta [LimitFunctor'(* LimitFunctor_morphism_of*)] in @LimitFunctor'.
+Definition ColimitFunctor := Eval cbv beta iota zeta delta [ColimitFunctor'(* ColimitFunctor_morphism_of*)] in @ColimitFunctor'.
 
 Section Adjoint.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable objD : Type.
-  Variable morD : objD -> objD -> Type.
-  Variable C : SpecializedCategory morC.
-  Variable D : SpecializedCategory morD.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
   Hypothesis HL : HasLimits C D.
   Hypothesis HC : HasColimits C D.
 
@@ -218,7 +219,6 @@ Section Adjoint.
 
   Definition LimitAdjunction_AComponentsOf_Inverse (c : C) (F : C ^ D)
     : TypeCat.(Morphism) (HomFunctor C (c, (LimitFunctor HL) F)) (HomFunctor (C ^ D) ((DiagonalFunctor C D) c, F)).
-    Transparent Morphism.
     simpl in *; intro f; hnf; simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?DF ?F ] =>
@@ -241,7 +241,6 @@ Section Adjoint.
 
   Lemma LimitAdjunction_AIsomorphism' (c : C) (F : C ^ D) :
     IsInverseOf (@LimitAdjunction_AComponentsOf c F) (@LimitAdjunction_AComponentsOf_Inverse c F).
-    Transparent Compose.
     unfold LimitAdjunction_AComponentsOf, LimitAdjunction_AComponentsOf_Inverse;
       unfold LimitMorphism, LimitProperty_Morphism, LimitObject, Limit in *;
         split; simpl in *;
@@ -261,8 +260,8 @@ Section Adjoint.
               try specialized_assumption idtac.
   Qed.
 
-  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : Isomorphism (@LimitAdjunction_AComponentsOf c F).
-    exists (LimitAdjunction_AComponentsOf_Inverse _);
+  Definition LimitAdjunction_AIsomorphism (c : C) (F : C ^ D) : IsomorphismOf (@LimitAdjunction_AComponentsOf c F).
+    exists (LimitAdjunction_AComponentsOf_Inverse c F);
       eapply (@LimitAdjunction_AIsomorphism' _ _).
   Defined.
 
@@ -276,16 +275,16 @@ Section Adjoint.
   Proof.
     Local Opaque FunctorCategory.
     repeat match goal with
-             | [ |- context G [@MorphismOf _ _ _ _ _ _ (HomFunctor ?C) ?s ?d ?m] ] =>
-               rewrite_by_context G (@SplitHom _ _ C s d m)
+             | [ |- context G [MorphismOf (HomFunctor ?C) (s := ?s) (d := ?d) ?m] ] =>
+               rewrite_by_context G (@SplitHom _ C s d m)
            end;
     repeat rewrite Associativity;
       unfold fst, snd; (* shaves off 4 seconds! *)
         match goal with
-          | [ |- @Compose _ _ _ ?s ?d ?e ?a (@Compose _ _ _ ?f ?g ?h ?b ?c) = @Compose _ _ _ ?s' ?d' ?e' ?a' (@Compose _ _ _ ?f' ?g' ?h' ?b' ?c') ] =>
+          | [ |- @Compose _ _ ?s ?d ?e ?a (@Compose _ _ ?f ?g ?h ?b ?c) = @Compose _ _ ?s' ?d' ?e' ?a' (@Compose _ _ ?f' ?g' ?h' ?b' ?c') ] =>
             eapply (@eq_trans _ _
               (Compose a' (Compose
-                (TerminalProperty_Morphism (HL _) _ : @Morphism _ _ TypeCat _ _)
+                (TerminalProperty_Morphism (HL _) _ : Morphism TypeCat _ _)
                 c)) _);
             try_associativity ltac:(apply f_equal2; try reflexivity)
         end;
@@ -293,8 +292,8 @@ Section Adjoint.
           unfold LimitAdjunction_AComponentsOf, LimitProperty_Morphism, LimitObject;
             apply functional_extensionality_dep; intro;
               repeat match goal with
-                       | [ |- appcontext[@NTComposeT ?objD ?morD ?D ?objC ?morC ?C ?F ?G ?H ?T ?U] ]
-                         => change (@NTComposeT objD morD D objC morC C F G H T U) with (@Compose _ _ (C ^ D) F G H T U) in *
+                       | [ |- appcontext[@NTComposeT ?objD ?D ?objC ?C ?F ?G ?H ?T ?U] ]
+                         => change (@NTComposeT objD D objC C F G H T U) with (@Compose _ (C ^ D) F G H T U) in *
                      end;
               repeat match goal with
                        | [ |- context[TerminalProperty_Morphism ?a ?b ?c] ] => let H := constr:(TerminalProperty a b c) in
@@ -305,7 +304,8 @@ Section Adjoint.
                          first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
                            repeat rewrite FCompositionOf; repeat rewrite Associativity;
                              simpl; f_equal
-                     end.
+                     end;
+              try (intros; reflexivity).
     Local Transparent FunctorCategory.
   Qed.
 
@@ -367,13 +367,13 @@ Section Adjoint.
             specialize_all_ways;
             destruct_hypotheses;
             match goal with
-              | [ T : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _ _ _)) in T
+              | [ T : _ |- _ ] => apply (f_equal (@ComponentsOf _ _ _ _ _ _)) in T
             end; fg_equal;
             try specialized_assumption idtac.
   Qed.
 
-  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : Isomorphism (@ColimitAdjunction_AComponentsOf F c).
-    exists (@ColimitAdjunction_AComponentsOf_Inverse _ _);
+  Definition ColimitAdjunction_AIsomorphism (F : C ^ D) (c : C) : IsomorphismOf (@ColimitAdjunction_AComponentsOf F c).
+    exists (@ColimitAdjunction_AComponentsOf_Inverse F c);
       eapply (@ColimitAdjunction_AIsomorphism' _ _).
   Defined.
 
@@ -387,16 +387,16 @@ Section Adjoint.
   Proof.
     Local Opaque FunctorCategory.
     repeat match goal with
-             | [ |- context G [@MorphismOf _ _ _ _ _ _ (HomFunctor ?C) ?s ?d ?m] ] =>
-               rewrite_by_context G (@SplitHom _ _ C s d m)
+             | [ |- context G [MorphismOf (HomFunctor ?C) (s := ?s) (d := ?d) ?m] ] =>
+               rewrite_by_context G (@SplitHom _ C s d m)
            end;
     repeat rewrite Associativity;
       unfold fst, snd; (* shaves off 4 seconds! *)
         match goal with
-          | [ |- @Compose _ _ _ ?s ?d ?e ?a (@Compose _ _ _ ?f ?g ?h ?b ?c) = @Compose _ _ _ ?s' ?d' ?e' ?a' (@Compose _ _ _ ?f' ?g' ?h' ?b' ?c') ] =>
+          | [ |- @Compose _ _ ?s ?d ?e ?a (@Compose _ _ ?f ?g ?h ?b ?c) = @Compose _ _ ?s' ?d' ?e' ?a' (@Compose _ _ ?f' ?g' ?h' ?b' ?c') ] =>
             eapply (@eq_trans _ _
               (Compose a (Compose
-                (InitialProperty_Morphism (HC _) _ : @Morphism _ _ TypeCat _ _)
+                (InitialProperty_Morphism (HC _) _ : Morphism TypeCat _ _)
                 c')) _);
             try_associativity ltac:(apply f_equal2; try reflexivity)
         end;
@@ -404,8 +404,8 @@ Section Adjoint.
           unfold ColimitAdjunction_AComponentsOf_Inverse, ColimitProperty_Morphism, ColimitObject;
             apply functional_extensionality_dep; intro;
               repeat match goal with
-                       | [ |- appcontext[@NTComposeT ?objD ?morD ?D ?objC ?morC ?C ?F ?G ?H ?T ?U] ]
-                         => change (@NTComposeT objD morD D objC morC C F G H T U) with (@Compose _ _ (C ^ D) F G H T U) in *
+                       | [ |- appcontext[@NTComposeT ?objD ?D ?objC ?C ?F ?G ?H ?T ?U] ]
+                         => change (@NTComposeT objD D objC C F G H T U) with (@Compose _ (C ^ D) F G H T U) in *
                      end;
           repeat match goal with
                    | [ |- context[InitialProperty_Morphism ?a ?b ?c] ] => let H := constr:(InitialProperty a b c) in
@@ -416,7 +416,8 @@ Section Adjoint.
                      first [ simpl_do_clear do_rewrite (proj1 H) | simpl_do_clear do_rewrite (proj2 H) ];
                          repeat rewrite FCompositionOf; repeat rewrite <- Associativity;
                            simpl; f_equal
-                 end.
+                 end;
+          try (intros; present_spcategory; apply f_equal2; trivial).
     Local Transparent FunctorCategory.
   Qed.
 
@@ -434,6 +435,7 @@ Section Adjoint.
     pose (@ColimitAdjunction_AIsomorphism' F c).
     pose (@ColimitAdjunction_AIsomorphism' F' c').
     unfold InverseOf in *; destruct_hypotheses.
+    present_spcategory.
     pre_compose_to_identity; post_compose_to_identity.
     apply ColimitAdjunction_ACommutes_Inverse.
   Qed.

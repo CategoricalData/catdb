@@ -1,8 +1,10 @@
 Require Import ProofIrrelevance.
 Require Export Category Functor ProductCategory NaturalTransformation.
-Require Import Common DiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
+Require Import Common DecidableDiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
 
 Set Implicit Arguments.
+
+Generalizable All Variables.
 
 Local Open Scope category_scope.
 
@@ -11,17 +13,13 @@ Section LaxSliceSpecializedCategory.
 
   Variable I : Type.
   Variable Index2Object : I -> Type.
-  Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (@Index2Morphism i).
+  Variable Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i).
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Morphism Index2Cat.
+  Let Cat := ComputableCategory Index2Object Index2Cat.
 
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-
+  Context `(C : @SpecializedCategory objC).
 
   Hint Resolve Associativity RightIdentity LeftIdentity.
 
@@ -48,7 +46,8 @@ Section LaxSliceSpecializedCategory.
        the [α]-part is identity.
        and you've worked both of those cases out already.
        *)
-  Record LaxSliceSpecializedCategory_Object := { LaxSliceSpecializedCategory_Object_Member :> { X : I & SpecializedFunctor X C } }.
+  (* use a pair, so that it's easily interchangable with [SliceSpecializedCategory] *)
+  Record LaxSliceSpecializedCategory_Object := { LaxSliceSpecializedCategory_Object_Member :> { X : I * unit & SpecializedFunctor (fst X) C } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
@@ -58,8 +57,8 @@ Section LaxSliceSpecializedCategory.
   Global Coercion Build_LaxSliceSpecializedCategory_Object' : LaxSliceSpecializedCategory_ObjectT >-> LaxSliceSpecializedCategory_Object.
 
   Record LaxSliceSpecializedCategory_Morphism (XG X'G' : LaxSliceSpecializedCategory_ObjectT) := { LaxSliceSpecializedCategory_Morphism_Member :>
-    { F : SpecializedFunctor (projT1 XG) (projT1 X'G') &
-      SpecializedNaturalTransformation (projT2 XG) (ComposeFunctors (projT2 X'G') F)
+    { F : SpecializedFunctor (fst (projT1 XG)) (fst (projT1 X'G')) * unit &
+      SpecializedNaturalTransformation (projT2 XG) (ComposeFunctors (projT2 X'G') (fst F))
     }
   }.
 
@@ -77,10 +76,9 @@ Section LaxSliceSpecializedCategory.
 
   Definition LaxSliceSpecializedCategory_Compose' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
     LaxSliceSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
-    exists (ComposeFunctors (projT1 Fα) (projT1 F'α')).
+    exists (ComposeFunctors (fst (projT1 Fα)) (fst (projT1 F'α')), tt).
     repeat match goal with
-             | [ H : _ |- _ ] => unique_pose_with_body (projT1 H)
+             | [ H : _ |- _ ] => unique_pose_with_body (fst (projT1 H))
              | [ H : _ |- _ ] => unique_pose_with_body (projT2 H)
            end; simpl in *.
     repeat match goal with
@@ -118,7 +116,7 @@ Section LaxSliceSpecializedCategory.
   Global Arguments LaxSliceSpecializedCategory_Compose _ _ _ _ _ /.
 
   Definition LaxSliceSpecializedCategory_Identity o : LaxSliceSpecializedCategory_MorphismT o o.
-    exists (IdentityFunctor _).
+    exists (IdentityFunctor _, tt).
     eapply (NTComposeT _ (IdentityNaturalTransformation _)).
     Grab Existential Variables.
     match goal with
@@ -137,10 +135,56 @@ Section LaxSliceSpecializedCategory.
 
   Global Arguments LaxSliceSpecializedCategory_Identity _ /.
 
-  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object LaxSliceSpecializedCategory_Morphism.
+  Local Ltac lax_slice_t :=
+    repeat (
+      let H := fresh in intro H; destruct H; simpl in * |-
+    );
+    unfold projT1, projT2;
+      try unfold LaxSliceSpecializedCategory_Compose at 1; try (symmetry; unfold LaxSliceSpecializedCategory_Compose at 1);
+        try apply f_equal (* slow; ~ 3s / goal *);
+          simpl_eq (* slow; ~ 4s / goal *);
+          nt_eq (* slow; ~ 2s / goal *); clear_refl_eq;
+          repeat rewrite ComposeFunctorsAssociativity;
+            repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
+              repeat rewrite FIdentityOf;
+                repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+                  repeat rewrite Associativity;
+                    try reflexivity;
+                      trivial.
+
+  Lemma LaxSliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxSliceSpecializedCategory_ObjectT)
+    (m1 : LaxSliceSpecializedCategory_MorphismT o1 o2)
+    (m2 : LaxSliceSpecializedCategory_MorphismT o2 o3)
+    (m3 : LaxSliceSpecializedCategory_MorphismT o3 o4),
+    LaxSliceSpecializedCategory_Compose
+    (LaxSliceSpecializedCategory_Compose m3 m2) m1 =
+    LaxSliceSpecializedCategory_Compose m3
+    (LaxSliceSpecializedCategory_Compose m2 m1).
+  Proof.
+    abstract lax_slice_t.
+  Qed.
+
+  Lemma LaxSliceSpecializedCategory_LeftIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
+    (f : LaxSliceSpecializedCategory_MorphismT a b),
+    LaxSliceSpecializedCategory_Compose
+    (LaxSliceSpecializedCategory_Identity b) f = f.
+  Proof.
+    abstract lax_slice_t.
+  Qed.
+
+  Lemma LaxSliceSpecializedCategory_RightIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
+    (f : LaxSliceSpecializedCategory_MorphismT a b),
+    LaxSliceSpecializedCategory_Compose
+    f (LaxSliceSpecializedCategory_Identity a) = f.
+  Proof.
+    abstract lax_slice_t.
+  Qed.
+
+  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          LaxSliceSpecializedCategory_Morphism
           LaxSliceSpecializedCategory_Identity
           LaxSliceSpecializedCategory_Compose
           _
@@ -150,20 +194,14 @@ Section LaxSliceSpecializedCategory.
     end;
     abstract (
       repeat (
-        let H := fresh in intro H; destruct H as [ [ ] ]; simpl in * |-
+        let H := fresh in intro H; destruct H as [ ]; simpl in * |-
       );
-      unfold LaxSliceSpecializedCategory_Object_Member, LaxSliceSpecializedCategory_Morphism_Member, Build_LaxSliceSpecializedCategory_Morphism',
-        projT1, projT2;
-        try unfold LaxSliceSpecializedCategory_Compose at 1; try (symmetry; unfold LaxSliceSpecializedCategory_Compose at 1);
-          try apply f_equal (* slow; ~ 3s / goal *);
-            simpl_eq (* slow; ~ 4s / goal *);
-            nt_eq (* slow; ~ 2s / goal *); clear_refl_eq;
-            repeat rewrite ComposeFunctorsAssociativity;
-              repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
-                repeat rewrite FIdentityOf;
-                  repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                    repeat rewrite Associativity;
-                      try reflexivity
+      unfold LaxSliceSpecializedCategory_Morphism_Member, LaxSliceSpecializedCategory_Object_Member,
+        Build_LaxSliceSpecializedCategory_Morphism', Build_LaxSliceSpecializedCategory_Object';
+        apply f_equal;
+          apply LaxSliceSpecializedCategory_Associativity ||
+            apply LaxSliceSpecializedCategory_LeftIdentity ||
+              apply LaxSliceSpecializedCategory_RightIdentity
     ).
   Defined.
 End LaxSliceSpecializedCategory.
@@ -175,19 +213,15 @@ Section LaxCosliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
 
   Variable I : Type.
-  Variable Index2Object : I -> Type.
-  Variable Index2Morphism : forall i : I, Index2Object i -> Index2Object i -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (@Index2Morphism i).
+  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Morphism Index2Cat.
+  Let Cat := ComputableCategory Index2Object Index2Cat.
 
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
-  Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : I & SpecializedFunctor X C } }.
+  Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : unit * I & SpecializedFunctor (snd X) C } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
@@ -197,8 +231,8 @@ Section LaxCosliceSpecializedCategory.
   Global Coercion Build_LaxCosliceSpecializedCategory_Object' : LaxCosliceSpecializedCategory_ObjectT >-> LaxCosliceSpecializedCategory_Object.
 
   Record LaxCosliceSpecializedCategory_Morphism (XG X'G' : LaxCosliceSpecializedCategory_ObjectT) := { LaxCosliceSpecializedCategory_Morphism_Member :>
-    { F : SpecializedFunctor (projT1 X'G') (projT1 XG) &
-      SpecializedNaturalTransformation (ComposeFunctors (projT2 XG) F) (projT2 X'G')
+    { F : unit * SpecializedFunctor (snd (projT1 X'G')) (snd (projT1 XG)) &
+      SpecializedNaturalTransformation (ComposeFunctors (projT2 XG) (snd F)) (projT2 X'G')
     }
   }.
 
@@ -216,10 +250,9 @@ Section LaxCosliceSpecializedCategory.
 
   Definition LaxCosliceSpecializedCategory_Compose' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
     LaxCosliceSpecializedCategory_MorphismT s d'.
-    Transparent Object Morphism.
-    exists (ComposeFunctors (projT1 F'α') (projT1 Fα)).
+    exists (tt, ComposeFunctors (snd (projT1 F'α')) (snd (projT1 Fα))).
     repeat match goal with
-             | [ H : _ |- _ ] => unique_pose_with_body (projT1 H)
+             | [ H : _ |- _ ] => unique_pose_with_body (snd (projT1 H))
              | [ H : _ |- _ ] => unique_pose_with_body (projT2 H)
            end; simpl in *.
     repeat match goal with
@@ -257,7 +290,7 @@ Section LaxCosliceSpecializedCategory.
   Global Arguments LaxCosliceSpecializedCategory_Compose _ _ _ _ _ /.
 
   Definition LaxCosliceSpecializedCategory_Identity o : LaxCosliceSpecializedCategory_MorphismT o o.
-    exists (IdentityFunctor _).
+    exists (tt, IdentityFunctor _).
     eapply (NTComposeT _ (IdentityNaturalTransformation _)).
     Grab Existential Variables.
     match goal with
@@ -276,10 +309,56 @@ Section LaxCosliceSpecializedCategory.
 
   Global Arguments LaxCosliceSpecializedCategory_Identity _ /.
 
-  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object LaxCosliceSpecializedCategory_Morphism.
+  Local Ltac lax_coslice_t :=
+    repeat (
+      let H := fresh in intro H; destruct H; simpl in * |-
+    );
+    unfold projT1, projT2;
+      try unfold LaxCosliceSpecializedCategory_Compose at 1; try (symmetry; unfold LaxCosliceSpecializedCategory_Compose at 1);
+        try apply f_equal (* slow; ~ 3s / goal *);
+          simpl_eq (* slow; ~ 4s / goal *);
+          nt_eq (* slow; ~ 2s / goal *); clear_refl_eq;
+          repeat rewrite ComposeFunctorsAssociativity;
+            repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
+              repeat rewrite FIdentityOf;
+                repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
+                  repeat rewrite Associativity;
+                    try reflexivity;
+                      trivial.
+
+  Lemma LaxCosliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxCosliceSpecializedCategory_ObjectT)
+    (m1 : LaxCosliceSpecializedCategory_MorphismT o1 o2)
+    (m2 : LaxCosliceSpecializedCategory_MorphismT o2 o3)
+    (m3 : LaxCosliceSpecializedCategory_MorphismT o3 o4),
+    LaxCosliceSpecializedCategory_Compose
+    (LaxCosliceSpecializedCategory_Compose m3 m2) m1 =
+    LaxCosliceSpecializedCategory_Compose m3
+    (LaxCosliceSpecializedCategory_Compose m2 m1).
+  Proof.
+    abstract lax_coslice_t.
+  Qed.
+
+  Lemma LaxCosliceSpecializedCategory_LeftIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
+    (f : LaxCosliceSpecializedCategory_MorphismT a b),
+    LaxCosliceSpecializedCategory_Compose
+    (LaxCosliceSpecializedCategory_Identity b) f = f.
+  Proof.
+    abstract lax_coslice_t.
+  Qed.
+
+  Lemma LaxCosliceSpecializedCategory_RightIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
+    (f : LaxCosliceSpecializedCategory_MorphismT a b),
+    LaxCosliceSpecializedCategory_Compose
+    f (LaxCosliceSpecializedCategory_Identity a) = f.
+  Proof.
+    abstract lax_coslice_t.
+  Qed.
+
+  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object.
     match goal with
-      | [ |- @SpecializedCategory ?obj ?mor ] =>
-        refine (@Build_SpecializedCategory obj mor
+      | [ |- @SpecializedCategory ?obj ] =>
+        refine (@Build_SpecializedCategory obj
+          LaxCosliceSpecializedCategory_Morphism
           LaxCosliceSpecializedCategory_Identity
           LaxCosliceSpecializedCategory_Compose
           _
@@ -289,20 +368,14 @@ Section LaxCosliceSpecializedCategory.
     end;
     abstract (
       repeat (
-        let H := fresh in intro H; destruct H as [ [ ] ]; simpl in * |-
+        let H := fresh in intro H; destruct H as [ ]; simpl in * |-
       );
-      unfold LaxCosliceSpecializedCategory_Object_Member, LaxCosliceSpecializedCategory_Morphism_Member, Build_LaxCosliceSpecializedCategory_Morphism',
-        projT1, projT2;
-        try unfold LaxCosliceSpecializedCategory_Compose at 1; try (symmetry; unfold LaxCosliceSpecializedCategory_Compose at 1);
-          try apply f_equal (* slow; ~ 3s / goal *);
-            simpl_eq (* slow; ~ 4s / goal *);
-            nt_eq (* slow; ~ 2s / goal *); clear_refl_eq;
-            repeat rewrite ComposeFunctorsAssociativity;
-              repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
-                repeat rewrite FIdentityOf;
-                  repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                    repeat rewrite Associativity;
-                      try reflexivity
+      unfold LaxCosliceSpecializedCategory_Morphism_Member, LaxCosliceSpecializedCategory_Object_Member,
+        Build_LaxCosliceSpecializedCategory_Morphism', Build_LaxCosliceSpecializedCategory_Object';
+        apply f_equal;
+          apply LaxCosliceSpecializedCategory_Associativity ||
+            apply LaxCosliceSpecializedCategory_LeftIdentity ||
+              apply LaxCosliceSpecializedCategory_RightIdentity
     ).
   Defined.
 End LaxCosliceSpecializedCategory.

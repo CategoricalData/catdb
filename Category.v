@@ -3,41 +3,40 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Record Category := {
   CObject : Type;
-  CMorphism : CObject -> CObject -> Type;
 
-  UnderlyingCategory :> @SpecializedCategory CObject CMorphism
+  UnderlyingCategory :> @SpecializedCategory CObject
 }.
 
-Definition GeneralizeCategory obj mor (C : @SpecializedCategory obj mor) : Category.
-  refine {| CObject := C.(Object); CMorphism := Morphism C |}; auto.
+Definition GeneralizeCategory `(C : @SpecializedCategory obj) : Category.
+  refine {| CObject := C.(Object) |}; auto.
 Defined.
 
 Coercion GeneralizeCategory : SpecializedCategory >-> Category.
 
 Record SmallCategory := {
   SObject : Set;
-  SMorphism : SObject -> SObject -> Set;
 
-  SUnderlyingCategory :> @SmallSpecializedCategory SObject SMorphism
+  SUnderlyingCategory :> @SmallSpecializedCategory SObject
 }.
 
-Definition GeneralizeSmallCategory obj mor (C : @SmallSpecializedCategory obj mor) : SmallCategory.
-  refine {| SObject := obj; SMorphism := mor |}; auto.
+Definition GeneralizeSmallCategory `(C : @SmallSpecializedCategory obj) : SmallCategory.
+  refine {| SObject := obj |}; auto.
 Defined.
 
 Coercion GeneralizeSmallCategory : SmallSpecializedCategory >-> SmallCategory.
 
 Record LocallySmallCategory := {
   LSObject : Type;
-  LSMorphism : LSObject -> LSObject -> Set;
 
-  LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject LSMorphism
+  LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject
 }.
 
-Definition GeneralizeLocallySmallCategory obj mor (C : @LocallySmallSpecializedCategory obj mor) : LocallySmallCategory.
-  refine {| LSObject := obj; LSMorphism := mor |}; auto.
+Definition GeneralizeLocallySmallCategory `(C : @LocallySmallSpecializedCategory obj) : LocallySmallCategory.
+  refine {| LSObject := obj |}; auto.
 Defined.
 
 Coercion GeneralizeLocallySmallCategory : LocallySmallSpecializedCategory >-> LocallySmallCategory.

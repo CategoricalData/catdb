@@ -1,5 +1,5 @@
 Require Import Program.
-Require Import Common EquivalenceRelation Schema Category Instance Translation.
+Require Import Common Schema Category Instance Translation.
 
 Set Implicit Arguments.
 

@@ -3,6 +3,8 @@ Require Import Common SetCategory.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section Grothendieck.
   (**
      Quoting Wikipedia:
@@ -18,17 +20,13 @@ Section Grothendieck.
      [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
      [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
      *)
-
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-
+  Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C TypeCat.
   Variable F' : SpecializedFunctor C SetCat.
 
   Record GrothendieckPair := {
     GrothendieckC' : objC;
-    GrothendieckX' : F.(ObjectOf') GrothendieckC'
+    GrothendieckX' : F GrothendieckC'
   }.
 
   Section GrothendieckInterface.
@@ -61,7 +59,6 @@ Section Grothendieck.
   Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
     { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
-    Transparent Compose.
     intros m2 m1.
     exists (Compose (proj1_sig m2) (proj1_sig m1)).
     abstract (
@@ -75,7 +72,6 @@ Section Grothendieck.
   Arguments GrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
   Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
-    Transparent Identity.
     exists (Identity c).
     abstract (
       rewrite FIdentityOf;
@@ -84,14 +80,14 @@ Section Grothendieck.
     ).
   Defined.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
+  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
   Hint Extern 1 (@eq (sig _) _ _) => simpl_eq.
 
   Definition CategoryOfElements : @SpecializedCategory
-    GrothendieckPair
-    (fun s d =>
-      { f : morC (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) }).
+    GrothendieckPair.
     refine {|
+      Morphism' := (fun s d =>
+        { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) });
       Compose' := (fun _ _ _ m1 m2 => GrothendieckCompose m1 m2);
       Identity' := (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
     |};
@@ -102,23 +98,19 @@ Section Grothendieck.
   Defined.
 
   Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
-    refine {| ObjectOf' := (fun o : CategoryOfElements.(Object) => GrothendieckC o);
-      MorphismOf' := (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
+    refine {| ObjectOf' := (fun o : CategoryOfElements => GrothendieckC o);
+      MorphismOf' := (fun s d (m : CategoryOfElements.(Morphism') s d) => proj1_sig m)
     |}; abstract (eauto; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
 End Grothendieck.
 
 Section SetGrothendieckCoercion.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
-
+  Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C SetCat.
   Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
 
-  Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'.
-    refine {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F'.(ObjectOf') _ |}.
-  Defined.
+  Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'
+    := {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.
 End SetGrothendieckCoercion.
 
 Coercion SetGrothendieck2Grothendieck : SetGrothendieckPair >-> GrothendieckPair.

@@ -1,17 +1,17 @@
 Require Import ProofIrrelevance.
 Require Export SpecializedCategory Functor.
-Require Import Common.
+Require Import Common CategoryIsomorphisms.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Section GroupoidOf.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Inductive GroupoidOf_Morphism (s d : objC) :=
-  | hasMorphism : morC s d -> GroupoidOf_Morphism s d
-  | hasInverse : morC d s -> GroupoidOf_Morphism s d
+  | hasMorphism : C.(Morphism') s d -> GroupoidOf_Morphism s d
+  | hasInverse : C.(Morphism') d s -> GroupoidOf_Morphism s d
   | byComposition : forall e, GroupoidOf_Morphism e d -> GroupoidOf_Morphism s e -> GroupoidOf_Morphism s d.
 
   Definition GroupoidOf_Compose (s d d' : C) :
@@ -24,10 +24,10 @@ Section GroupoidOf.
   (** Quoting Wikipedia:
      A groupoid is a small category in which every morphism is an isomorphism, and hence invertible.
      *)
-  Definition GroupoidOf : @SpecializedCategory objC
-    (fun s d => inhabited (GroupoidOf_Morphism s d)).
+  Definition GroupoidOf : @SpecializedCategory objC.
     refine {|
-      Identity' := (fun o : C => inhabits (hasMorphism (Identity o)));
+      Morphism' := (fun s d => inhabited (GroupoidOf_Morphism s d));
+      Identity' := (fun o : C => inhabits (hasMorphism _ _ (Identity o)));
       Compose' := @GroupoidOf_Compose
     |};
     abstract (simpl; intros; apply proof_irrelevance).
@@ -40,27 +40,31 @@ End GroupoidOf.
 Hint Constructors GroupoidOf_Morphism.
 
 Section Groupoid.
-  Variable objC : Type.
-  Variable morC : objC -> objC -> Type.
-  Variable C : SpecializedCategory morC.
+  Context `(C : @SpecializedCategory objC).
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
-    Transparent Morphism.
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;
       repeat
         match goal with
           | [ H : exists _, _ |- _ ] => destruct H; destruct_type @inhabited
           | [ m : _ |- _ ] => exists m
-          | [ m : _ |- _ ] => unique_pose (inhabits (hasMorphism morC _ _ m))
-          | [ m : _ |- _ ] => unique_pose (inhabits (hasInverse morC _ _ m))
-          | [ m : _, m' : _ |- _ ] => unique_pose (inhabits (byComposition m m'))
-        end;
-        hnf; repeat split; unfold Morphism; try apply proof_irrelevance.
+          | [ m : _ |- _ ] => unique_pose (inhabits (hasMorphism C _ _ m))
+          | [ m : _ |- _ ] => unique_pose (inhabits (hasInverse C _ _ m))
+          | [ m : _, m' : _ |- _ ] => unique_pose (inhabits (byComposition C _ _ _ m m'))
+          | [ m : _, m' : _ |- _ ] => unique_pose (Compose m m')
+          | [ |- @eq ?T ?a ?b ] => progress let T' := eval hnf in T in change T with T'
+          | [ |- _ = _ ] => apply proof_irrelevance
+          | _ => progress (hnf; repeat split)
+        end.
   Qed.
 
   Definition Groupoid_Functor : SpecializedFunctor C (GroupoidOf C).
-    refine {| ObjectOf' := (fun c => c);
-      MorphismOf' := (fun s d m => inhabits (hasMorphism morC s d m))
-    |}; abstract (simpl; intros; apply proof_irrelevance).
+    refine (Build_SpecializedFunctor C (GroupoidOf C)
+      (fun c => c)
+      (fun s d m => inhabits (hasMorphism C _ _ m))
+      _
+      _
+    );
+    abstract (simpl; intros; apply proof_irrelevance).
   Defined.
 End Groupoid.

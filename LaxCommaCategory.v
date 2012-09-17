@@ -1,10 +1,18 @@
 Require Import ProofIrrelevance.
 Require Export Category Functor ProductCategory NaturalTransformation.
-Require Import Common DiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
+Require Import Common DiscreteCategory ComputableCategory DefinitionSimplification FEqualDep SpecializedLaxCommaCategory.
 
 Set Implicit Arguments.
 
+Generalizable All Variables.
+
 Local Open Scope category_scope.
+
+Local Ltac fold_functor :=
+  change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *;
+    change (@SpecializedNaturalTransformation) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD)
+      (F G : SpecializedFunctor C D)
+      => @NaturalTransformation C D F G) in *.
 
 Section LaxSliceCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -14,123 +22,73 @@ Section LaxSliceCategory.
 
   Local Coercion Index2Cat : I >-> Category.
 
-  Let Cat := ComputableCategory _ _ Index2Cat.
+  Let Cat := ComputableCategory _ Index2Cat.
 
   Variable C : Category.
 
-
   Hint Resolve Associativity RightIdentity LeftIdentity.
 
-  (** Quoting David Spivak:
-     David: ok
-       so an object of [FC ⇓ D] is a pair [(X, G)], where [X] is a
-       finite category (or a small category or whatever you wanted)
-       and [G : X --> D] is a functor.
-       a morphism in [FC ⇓ D] is a ``natural transformation diagram''
-       (as opposed to a commutative diagram, in which the natural
-       transformation would be ``identity'')
-       so a map in [FC ⇓ D] from [(X, G)] to [(X', G')] is a pair
-       [(F, α)] where [F : X --> X'] is a functor and
-       [α : G --> G' ○ F] is a natural transformation
-       and the punchline is that there is a functor
-       [colim : FC ⇓ D --> D]
-     David: consider for yourself the case where [F : X --> X'] is
-       identity ([X = X']) and (separately) the case where
-       [α : G --> G ○ F] is identity.
-       the point is, you've already done the work to get this colim
-       functor.
-       because every map in [FC ⇓ D] can be written as a composition
-       of two maps, one where the [F]-part is identity and one where
-       the [α]-part is identity.
-       and you've worked both of those cases out already.
-       *)
-  Definition LaxSliceCategory_Object := { X : I & Functor X C }.
-  Definition LaxSliceCategory_Morphism (XG X'G' : LaxSliceCategory_Object) :=
-    { F : Functor (projT1 XG) (projT1 X'G') &
-      NaturalTransformation (projT2 XG) (ComposeFunctors (projT2 X'G') F)
-    }.
+  (* Pull the definitions from SpecializedLaxCommaCategory.v,
+     removing [Specialized], so that we have smaller definitions.
+     *)
 
-  Definition LaxSliceCategory_Compose' s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
-    LaxSliceCategory_Morphism s d'.
-    Transparent Object Morphism.
-    exists (ComposeFunctors (projT1 Fα) (projT1 F'α')).
-    repeat match goal with
-             | [ H : _ |- _ ] => unique_pose_with_body (projT1 H)
-             | [ H : _ |- _ ] => unique_pose_with_body (projT2 H)
-           end; simpl in *.
-    repeat match goal with
-             | [ x : _, T : _ |- _ ] => unique_pose (NTComposeF T (IdentityNaturalTransformation x))
-           end.
-    match goal with
-      | [ T0 : _, T1 : _ |- _ ] => eapply (NTComposeT _ (NTComposeT T0 T1))
-    end.
-    Grab Existential Variables.
-    match goal with
-      | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun x => Identity (C := C) _)
-          _
-        )
-    end.
-    abstract (
-      subst_body;
-      intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
-    ).
+  Let LaxSliceCategory_Object' := Eval hnf in LaxSliceSpecializedCategory_ObjectT _ Index2Cat C.
+  Let LaxSliceCategory_Object'' : Type.
+    simpl_definition_by_tac_and_exact LaxSliceCategory_Object' ltac:(simpl in *; fold_functor; simpl in *).
   Defined.
+  Definition LaxSliceCategory_Object := Eval hnf in LaxSliceCategory_Object''.
 
-  Definition LaxSliceCategory_Compose'' s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
-    LaxSliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(unfold LaxSliceCategory_Compose' in *).
+  Let LaxSliceCategory_Morphism' (XG X'G' : LaxSliceCategory_Object) := Eval hnf in @LaxSliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
+  Let LaxSliceCategory_Morphism'' (XG X'G' : LaxSliceCategory_Object) : Type.
+    simpl_definition_by_tac_and_exact (LaxSliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
   Defined.
+  Definition LaxSliceCategory_Morphism (XG X'G' : LaxSliceCategory_Object) := Eval hnf in LaxSliceCategory_Morphism'' XG X'G'.
 
-  (* Then we clean up a bit with reduction. *)
+  Let LaxSliceCategory_Compose' s d d' Fα F'α'
+    := Eval hnf in @LaxSliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
+  Let LaxSliceCategory_Compose'' s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
+    LaxSliceCategory_Morphism s d'.
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+  Defined.
   Definition LaxSliceCategory_Compose s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
     LaxSliceCategory_Morphism s d'
-    := Eval cbv beta iota zeta delta [LaxSliceCategory_Compose''] in (@LaxSliceCategory_Compose'' s d d' Fα F'α').
+    := Eval hnf in @LaxSliceCategory_Compose'' s d d' Fα F'α'.
+
+  Let LaxSliceCategory_Identity' o := Eval hnf in @LaxSliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
+  Let LaxSliceCategory_Identity'' (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o.
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+  Defined.
+  Definition LaxSliceCategory_Identity (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o
+    := Eval hnf in @LaxSliceCategory_Identity'' o.
 
   Global Arguments LaxSliceCategory_Compose _ _ _ _ _ /.
-
-  Definition LaxSliceCategory_Identity o : LaxSliceCategory_Morphism o o.
-    exists (IdentityFunctor _).
-    eapply (NTComposeT _ (IdentityNaturalTransformation _)).
-    Grab Existential Variables.
-    match goal with
-      | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun x => Identity (C := C) _)
-          _
-        )
-    end.
-    abstract (
-      intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
-    ).
-  Defined.
-
   Global Arguments LaxSliceCategory_Identity _ /.
+
+  Lemma LaxSliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxSliceCategory_Morphism o1 o2) (m2 : LaxSliceCategory_Morphism o2 o3) (m3 : LaxSliceCategory_Morphism o3 o4) :
+    LaxSliceCategory_Compose (LaxSliceCategory_Compose m3 m2) m1 = LaxSliceCategory_Compose m3 (LaxSliceCategory_Compose m2 m1).
+    abstract apply (@LaxSliceSpecializedCategory_Associativity _ _ Index2Cat _ C o1 o2 o3 o4 m1 m2 m3).
+  Qed.
+
+  Lemma LaxSliceCategory_LeftIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
+    LaxSliceCategory_Compose (LaxSliceCategory_Identity b) f = f.
+  Proof.
+    abstract apply (@LaxSliceSpecializedCategory_LeftIdentity _ _ Index2Cat _ C a b f).
+  Qed.
+
+  Lemma LaxSliceCategory_RightIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
+    LaxSliceCategory_Compose f (LaxSliceCategory_Identity a) = f.
+  Proof.
+    abstract apply (@LaxSliceSpecializedCategory_RightIdentity _ _ Index2Cat _ C a b f).
+  Qed.
 
   Definition LaxSliceCategory : Category.
     refine (@Build_SpecializedCategory LaxSliceCategory_Object LaxSliceCategory_Morphism
       LaxSliceCategory_Identity
       LaxSliceCategory_Compose
-      _
-      _
-      _
+      _ _ _
     );
-    abstract (
-      repeat (let H := fresh in intro H; destruct H; simpl in * |- );
-        simpl_eq;
-        nt_eq (* slow; ~ 7s / goal *); clear_refl_eq;
-        repeat rewrite ComposeFunctorsAssociativity;
-          repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
-            repeat rewrite FIdentityOf;
-              repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-                repeat rewrite Associativity;
-                  try reflexivity
-    ).
+    subst_body;
+    abstract (apply LaxSliceCategory_Associativity || apply LaxSliceCategory_LeftIdentity || apply LaxSliceCategory_RightIdentity).
   Defined.
 End LaxSliceCategory.
 
@@ -144,100 +102,67 @@ Section LaxCosliceCategory.
 
   Local Coercion Index2Cat : I >-> Category.
 
-  Let Cat := ComputableCategory _ _ Index2Cat.
+  Let Cat := ComputableCategory _ Index2Cat.
 
   Variable C : Category.
 
-  Definition LaxCosliceCategory_Object := { X : I & Functor X C }.
-  Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) :=
-    { F : Functor (projT1 X'G') (projT1 XG) &
-      NaturalTransformation (ComposeFunctors (projT2 XG) F) (projT2 X'G')
-    }.
-
-  Global Arguments LaxCosliceCategory_Object /.
-  Global Arguments LaxCosliceCategory_Morphism _ _ /.
-
-  Definition LaxCosliceCategory_Compose' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
-    LaxCosliceCategory_Morphism s d'.
-    Transparent Object Morphism.
-    exists (ComposeFunctors (projT1 F'α') (projT1 Fα)).
-    repeat match goal with
-             | [ H : _ |- _ ] => unique_pose_with_body (projT1 H)
-             | [ H : _ |- _ ] => unique_pose_with_body (projT2 H)
-           end; simpl in *.
-    repeat match goal with
-             | [ x : _, T : _ |- _ ] => unique_pose (NTComposeF T (IdentityNaturalTransformation x))
-           end.
-    match goal with
-      | [ T0 : _, T1 : _ |- _ ] => eapply (NTComposeT (NTComposeT T0 T1) _)
-    end.
-    Grab Existential Variables.
-    match goal with
-      | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun x => Identity (C := C) _)
-          _
-        )
-    end.
-    abstract (
-      subst_body;
-      intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
-    ).
+  Let LaxCosliceCategory_Object' := Eval hnf in LaxCosliceSpecializedCategory_ObjectT Index2Cat C.
+  Let LaxCosliceCategory_Object'' : Type.
+    simpl_definition_by_tac_and_exact LaxCosliceCategory_Object' ltac:(simpl in *; fold_functor; simpl in *).
   Defined.
+  Definition LaxCosliceCategory_Object := Eval hnf in LaxCosliceCategory_Object''.
 
-  Definition LaxCosliceCategory_Compose'' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
-    LaxCosliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(unfold LaxCosliceCategory_Compose' in *).
+  Let LaxCosliceCategory_Morphism' (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in @LaxCosliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
+  Let LaxCosliceCategory_Morphism'' (XG X'G' : LaxCosliceCategory_Object) : Type.
+    simpl_definition_by_tac_and_exact (LaxCosliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
   Defined.
+  Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in LaxCosliceCategory_Morphism'' XG X'G'.
 
-  (* Then we clean up a bit with reduction. *)
+  Let LaxCosliceCategory_Compose' s d d' Fα F'α'
+    := Eval hnf in @LaxCosliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
+  Let LaxCosliceCategory_Compose'' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
+    LaxCosliceCategory_Morphism s d'.
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+  Defined.
   Definition LaxCosliceCategory_Compose s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'
-    := Eval cbv beta iota zeta delta [LaxCosliceCategory_Compose''] in (@LaxCosliceCategory_Compose'' s d d' Fα F'α').
+    := Eval hnf in @LaxCosliceCategory_Compose'' s d d' Fα F'α'.
+
+  Let LaxCosliceCategory_Identity' o := Eval hnf in @LaxCosliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
+  Let LaxCosliceCategory_Identity'' (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o.
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+  Defined.
+  Definition LaxCosliceCategory_Identity (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o
+    := Eval hnf in @LaxCosliceCategory_Identity'' o.
 
   Global Arguments LaxCosliceCategory_Compose _ _ _ _ _ /.
-
-  Definition LaxCosliceCategory_Identity o : LaxCosliceCategory_Morphism o o.
-    exists (IdentityFunctor _).
-    eapply (NTComposeT _ (IdentityNaturalTransformation _)).
-    Grab Existential Variables.
-    match goal with
-      | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun x => Identity (C := C) _)
-          _
-        )
-    end.
-    abstract (
-      intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
-    ).
-  Defined.
-
   Global Arguments LaxCosliceCategory_Identity _ /.
 
+  Lemma LaxCosliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxCosliceCategory_Morphism o1 o2) (m2 : LaxCosliceCategory_Morphism o2 o3) (m3 : LaxCosliceCategory_Morphism o3 o4) :
+    LaxCosliceCategory_Compose (LaxCosliceCategory_Compose m3 m2) m1 = LaxCosliceCategory_Compose m3 (LaxCosliceCategory_Compose m2 m1).
+    abstract apply (@LaxCosliceSpecializedCategory_Associativity _ _ Index2Cat _ C o1 o2 o3 o4 m1 m2 m3).
+  Qed.
+
+  Lemma LaxCosliceCategory_LeftIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
+    LaxCosliceCategory_Compose (LaxCosliceCategory_Identity b) f = f.
+  Proof.
+    abstract apply (@LaxCosliceSpecializedCategory_LeftIdentity _ _ Index2Cat _ C a b f).
+  Qed.
+
+  Lemma LaxCosliceCategory_RightIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
+    LaxCosliceCategory_Compose f (LaxCosliceCategory_Identity a) = f.
+  Proof.
+    abstract apply (@LaxCosliceSpecializedCategory_RightIdentity _ _ Index2Cat _ C a b f).
+  Qed.
+
   Definition LaxCosliceCategory : Category.
-  refine (@Build_SpecializedCategory LaxCosliceCategory_Object LaxCosliceCategory_Morphism
-    LaxCosliceCategory_Identity
-    LaxCosliceCategory_Compose
-    _
-    _
-    _
-  );
-  abstract (
-    repeat (let H := fresh in intro H; destruct H; simpl in * |- );
-      simpl_eq;
-      nt_eq (* slow; ~ 7s / goal *); clear_refl_eq;
-      repeat rewrite ComposeFunctorsAssociativity;
-        repeat rewrite LeftIdentityFunctor; repeat rewrite RightIdentityFunctor;
-          repeat rewrite FIdentityOf;
-            repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-              repeat rewrite Associativity;
-                try reflexivity
-  ).
+    refine (@Build_SpecializedCategory LaxCosliceCategory_Object LaxCosliceCategory_Morphism
+      LaxCosliceCategory_Identity
+      LaxCosliceCategory_Compose
+      _ _ _
+    );
+    subst_body;
+    abstract (apply LaxCosliceCategory_Associativity || apply LaxCosliceCategory_LeftIdentity || apply LaxCosliceCategory_RightIdentity).
   Defined.
 End LaxCosliceCategory.
 

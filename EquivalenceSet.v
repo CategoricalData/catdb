@@ -1,5 +1,5 @@
 Require Import Setoid ProofIrrelevance FunctionalExtensionality.
-Require Import Common.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
@@ -70,7 +70,7 @@ Section equiv.
 
   Hypotheses equiv_dec : forall v v', {equiv v v'} + {~equiv v v'}.
 
-  Local Infix "~=" := equiv_dec (at level 70, no associativity).
+  Local Infix "~=" := equiv_dec.
 
   Local Ltac destruct_equiv :=
     repeat match goal with

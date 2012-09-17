@@ -1,11 +1,11 @@
 Require Import FunctionalExtensionality ProofIrrelevance JMeq.
-Require Import Common FEqualDep.
+Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
-Local Infix "==" := JMeq (at level 70).
+Local Infix "==" := JMeq.
 
-Ltac structures_eq_simpl_step_with tac := intros; simpl;
+Ltac structures_eq_simpl_step_with tac := intros; simpl in *;
   match goal with
     | _ => reflexivity
     | [ |- (fun _ : ?A => _) = _ ] => apply functional_extensionality_dep; intro
@@ -14,7 +14,7 @@ Ltac structures_eq_simpl_step_with tac := intros; simpl;
     | _ => tac
   end; simpl; JMeq_eq.
 
-Ltac structures_eq_step_with_tac structures_equal_tac tac := intros; simpl;
+Ltac structures_eq_step_with_tac structures_equal_tac tac := intros; simpl in *;
   match goal with
     | _ => reflexivity
     | [ |- _ = _ ] => structures_equal_tac

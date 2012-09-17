@@ -1,4 +1,4 @@
-Require Import Arith List Eqdep_dec Program.
+Require Import Omega Arith List Eqdep_dec Program.
 Require Import Schema Category Instance Translation.
 
 Set Implicit Arguments.
@@ -9,7 +9,7 @@ Set Implicit Arguments.
 Definition empty : Schema.
   refine {| Vertex := Empty_set;
     Edge := fun _ _ => Empty_set;
-    PathsEquivalent' := (fun _ _ _ _ => True) |};
+    PathsEquivalent := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
@@ -25,7 +25,7 @@ Defined.
 Definition booleans : Schema.
   refine {| Vertex := bool;
     Edge := (fun b1 b2 => b2 = false \/ b1 = true);
-    PathsEquivalent' := (fun _ _ _ _ => True) |};
+    PathsEquivalent := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
@@ -35,7 +35,7 @@ Defined.
 Definition naturals : Schema.
   refine {| Vertex := nat;
     Edge := ge;
-    PathsEquivalent' := (fun _ _ _ _ => True) |};
+    PathsEquivalent := (fun _ _ _ _ => True) |};
   abstract (repeat intuition).
 Defined.
 
@@ -232,8 +232,8 @@ Ltac destructor := simpl; intuition;
 Definition emailsSchema : Schema.
   refine {| Vertex := emailsV;
     Edge := emailsE;
-    PathsEquivalent' := emailsEq
-    |}; abstract (repeat destructor).
+    PathsEquivalent := emailsEq
+    |}; abstract (repeat destructor; hnf; destructor).
 Defined.
 
 Definition emailsTypeof (v : emailsSchema) : Set :=
