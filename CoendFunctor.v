@@ -37,7 +37,7 @@ Section Coend.
   Global Arguments CoendFunctor_Index_Identity x /.
 
   Ltac inj H := injection H; clear H; intros; subst.
-  
+
   Definition CoendFunctor_Index_Compose s d d' :
     CoendFunctor_Index_Morphism d d'
     -> CoendFunctor_Index_Morphism s d
@@ -66,22 +66,22 @@ Section Coend.
               end)).
   Defined.
 
-  Definition CoendFunctor_Diagram_ObjectOf : CoendFunctor_Index -> D :=
+  Definition CoendFunctor_Diagram_ObjectOf_pre : CoendFunctor_Index -> (COp * C) :=
     fun x => match x with
-               | inl c0c1 => F (projT1 c0c1)
-               | inr c => F (c, c)
+               | inl c0c1 => (projT1 c0c1)
+               | inr c => (c, c)
              end.
 
-  Global Arguments CoendFunctor_Diagram_ObjectOf _ /.
+  Global Arguments CoendFunctor_Diagram_ObjectOf_pre _ /.
 
   Hint Resolve Identity.
-  Hint Extern 1 (Morphism' _ ?X ?X) => apply Identity.
-  Hint Extern 1 (Morphism' _ _ _) => hnf.
-  Hint Extern 1 (Morphism _ _ _) => apply F.
+  Hint Extern 0 => present_spcategory.
+  Hint Extern 1 (Morphism _ ?X ?X) => apply Identity.
+(*  Hint Extern 1 (Morphism' _ _ _) => hnf. *)
 
-  Definition CoendFunctor_Diagram_MorphismOf s d :
+  Definition CoendFunctor_Diagram_MorphismOf_pre s d :
     CoendFunctor_Index_Morphism s d
-    -> Morphism D (CoendFunctor_Diagram_ObjectOf s) (CoendFunctor_Diagram_ObjectOf d).
+    -> Morphism (COp * C) (CoendFunctor_Diagram_ObjectOf_pre s) (CoendFunctor_Diagram_ObjectOf_pre d).
   Proof.
     destruct s, d; simpl in *; intros;
       repeat match goal with
@@ -99,28 +99,33 @@ Section Coend.
       | _ => injection H; intros; subst
     end.
 
-  Definition CoendFunctor_Diagram : SpecializedFunctor CoendFunctor_Index D.
+  Definition CoendFunctor_Diagram_pre : SpecializedFunctor CoendFunctor_Index (COp * C).
   Proof.
     refine (Build_SpecializedFunctor
-      CoendFunctor_Index D
-      CoendFunctor_Diagram_ObjectOf
-      CoendFunctor_Diagram_MorphismOf
+      CoendFunctor_Index (COp * C)
+      CoendFunctor_Diagram_ObjectOf_pre
+      CoendFunctor_Diagram_MorphismOf_pre
       _
       _);
-    repeat match goal with
-             | [ |- forall x : CoendFunctor_Index_Object, _ ] =>
-               destruct x
-           end; simpl; intros;
-    repeat match goal with
-             | _ => discriminate
-             | _ => progress (subst; unfold eq_rect_r)
-             | [ H : inl _ = inl _ |- _ ] => inj' H
-             | [ H : inr _ = inr _ |- _ ] => inj' H
-             | [ x : sigT _ |- _ ] => destruct x; simpl in *
-             | [ H : _ + _ |- _ ] => destruct H
-             | _ => rewrite <- eq_rect_eq
-           end; auto.
+    abstract (
+      repeat match goal with
+               | [ |- forall x : CoendFunctor_Index_Object, _ ] =>
+                 destruct x
+             end; simpl; intros;
+      repeat match goal with
+               | _ => discriminate
+               | _ => progress (subst; unfold eq_rect_r)
+               | [ H : inl _ = inl _ |- _ ] => inj' H
+               | [ H : inr _ = inr _ |- _ ] => inj' H
+               | [ x : sigT _ |- _ ] => destruct x; simpl in *
+               | [ H : _ + _ |- _ ] => destruct H
+               | _ => rewrite <- eq_rect_eq
+               | _ => apply injective_projections; simpl
+             end; auto
+    ).
   Defined.
+
+  Definition CoendFunctor_Diagram := ComposeFunctors F CoendFunctor_Diagram_pre.
 
   Hypothesis HasColimits : forall G : SpecializedFunctor CoendFunctor_Index D, Colimit G.
 
