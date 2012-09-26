@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
-Require Export Coend LimitFunctors.
-Require Import Common Notations ChainCategory.
+Require Export Coend LimitFunctors LimitFunctors FunctorCategory ProductInducedFunctors FunctorialComposition.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
@@ -10,11 +10,8 @@ Local Open Scope type_scope.
 
 Section Coend.
   Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
 
   Let COp := OppositeCategory C.
-
-  Variable F : SpecializedFunctor (COp * C) D.
 
   Definition CoendFunctor_Index_Object := { ds : objC * objC & Morphism C (snd ds) (fst ds) } + objC.
 
@@ -124,13 +121,20 @@ Section Coend.
              end; auto
     ).
   Defined.
-
-  Definition CoendFunctor_Diagram := ComposeFunctors F CoendFunctor_Diagram_pre.
-
-  Hypothesis HasColimits : forall G : SpecializedFunctor CoendFunctor_Index D, Colimit G.
-
-  Definition CoendFunctor := ColimitFunctor HasColimits.
 End Coend.
 
-(* TODO: Figure out why the notation for this is the same as the notation for the Grothendieck construction *)
-(*Notation "∫ F" := (Coend F).*)
+Section CoendFunctor.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+
+  Let COp := OppositeCategory C.
+
+  Hypothesis HasColimits : forall F : SpecializedFunctor (CoendFunctor_Index C) D, Colimit F.
+
+  Let CoendFunctor_post := ColimitFunctor HasColimits.
+
+  Let o := (FunctorialComposition (CoendFunctor_Index C) (COp * C) D).
+  Let CoendFunctor_pre := (o [ - , (CoendFunctor_Diagram_pre C) ])%functor.
+
+  Definition CoendFunctor := ComposeFunctors CoendFunctor_post CoendFunctor_pre.
+End CoendFunctor.
