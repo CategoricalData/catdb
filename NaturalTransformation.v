@@ -290,3 +290,42 @@ Section Associativity.
     ); simpl; abstract t.
   Defined.
 End Associativity.
+
+Section NaturalTransformationExchangeLaw.
+  Context `(C : SpecializedCategory objC).
+  Context `(D : SpecializedCategory objD).
+  Context `(E : SpecializedCategory objE).
+
+  Variables F G H : SpecializedFunctor C D.
+  Variables F' G' H' : SpecializedFunctor D E.
+
+  Variable T : SpecializedNaturalTransformation F G.
+  Variable U : SpecializedNaturalTransformation G H.
+
+  Variable T' : SpecializedNaturalTransformation F' G'.
+  Variable U' : SpecializedNaturalTransformation G' H'.
+
+  Local Ltac t_progress := progress repeat
+    match goal with
+      | _ => apply f_equal
+      | _ => apply f_equal2; try reflexivity; []
+      | _ => apply Commutes
+      | _ => symmetry; apply Commutes
+    end.
+
+  Local Ltac t_exch := repeat
+    match goal with
+      | _ => repeat rewrite FCompositionOf; repeat rewrite Associativity;
+        t_progress
+      | _ => repeat rewrite <- FCompositionOf; repeat rewrite <- Associativity;
+        t_progress
+    end.
+
+  Theorem NaturalTransformationExchangeLaw :
+    NTComposeF (NTComposeT U' T') (NTComposeT U T) =
+    NTComposeT (NTComposeF U' U) (NTComposeF T' T).
+  Proof.
+    nt_eq;
+    t_exch.
+  Qed.
+End NaturalTransformationExchangeLaw.
