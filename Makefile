@@ -42,6 +42,7 @@ MODULES    := Notations \
 	ProductInducedFunctors \
 	SumCategory \
 	ExponentialLaws \
+	FunctorialComposition \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
