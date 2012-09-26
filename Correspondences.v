@@ -160,7 +160,7 @@ Notation "C ★^ M D" := (CorrespondenceCategory (C := C) (C' := D) M) : categor
 Notation "C ★^{ M } D" := (CorrespondenceCategory (C := C) (C' := D) M) (at level 70, no associativity) : category_scope.
 
 (* We use {false, true} instead of {0, 1}, because it's more convenient, and slightly faster *)
-Local Notation "[ 1 ]" := BoolCat : category_scope.
+Local Notation "[ 1 ]" := BoolCat (at level 0) : category_scope.
 
 Section Functor_to_1.
   (*
@@ -171,19 +171,19 @@ Section Functor_to_1.
      *)
   Context `(dummy : @CorrespondenceCategory objC C objC' C' M).
 
-  Let CorrespondenceCategoryFunctor_ObjectOf (x : C + C') : Object [1] := if x then false else true. (*
+  Let CorrespondenceCategoryFunctor_ObjectOf (x : C + C') : Object ([1]) := if x then false else true. (*
     match x with
       | inl _ => exist _ 0 (le_S 0 0 (le_n 0))
       | inr _ => exist _ 1 (le_n 1)
     end. *)
   Definition CorrespondenceCategoryFunctor_MorphismOf (s d : C + C') (m : CorrespondenceCategory_Morphism M s d) :
-    Morphism [1] (CorrespondenceCategoryFunctor_ObjectOf s) (CorrespondenceCategoryFunctor_ObjectOf d).
+    Morphism ([1]) (CorrespondenceCategoryFunctor_ObjectOf s) (CorrespondenceCategoryFunctor_ObjectOf d).
     subst_body; abstract (
       destruct s, d; hnf in *; simpl in *; intuition
     ).
   Defined.
 
-  Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') [1].
+  Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') ([1]).
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -209,7 +209,7 @@ Section From_Functor_to_1.
      correspondence [M : C → C'] by the formula
      [M (X, Y) = Hom_{M} (X, Y)]. *)
   Context `(M : @SpecializedCategory objM).
-  Variable F : SpecializedFunctor M [1].
+  Variable F : SpecializedFunctor M ([1]).
 
   (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)
   Definition CorrespondenceCategory0 := FullSubcategory M (fun x => F x = false). (* proj1_sig (F x) = 0).*)
