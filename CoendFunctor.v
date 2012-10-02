@@ -134,7 +134,7 @@ Section CoendFunctor.
   Let CoendFunctor_post := ColimitFunctor HasColimits.
 
   Let o := (FunctorialComposition (CoendFunctor_Index C) (COp * C) D).
-  Let CoendFunctor_pre := (o [ - , (CoendFunctor_Diagram_pre C) ])%functor.
+  Let CoendFunctor_pre := (o ⟨ - , (CoendFunctor_Diagram_pre C) ⟩)%functor.
 
   Definition CoendFunctor := ComposeFunctors CoendFunctor_post CoendFunctor_pre.
 End CoendFunctor.

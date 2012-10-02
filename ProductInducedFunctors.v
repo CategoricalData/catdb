@@ -35,8 +35,8 @@ Section ProductInducedFunctors.
   Defined.
 End ProductInducedFunctors.
 
-Notation "F [ c , - ]" := (InducedProductSndFunctor F c) : functor_scope.
-Notation "F [ - , d ]" := (InducedProductFstFunctor F d) : functor_scope.
+Notation "F ⟨ c , - ⟩" := (InducedProductSndFunctor F c) : functor_scope.
+Notation "F ⟨ - , d ⟩" := (InducedProductFstFunctor F d) : functor_scope.
 
 Section ProductInducedNaturalTransformations.
   Context `(C : @SpecializedCategory objC).
@@ -45,7 +45,7 @@ Section ProductInducedNaturalTransformations.
 
   Variable F : SpecializedFunctor (C * D) E.
 
-  Definition InducedProductFstNaturalTransformation {s d} (m : Morphism C s d) : SpecializedNaturalTransformation (F [s, - ]) (F [d, - ]).
+  Definition InducedProductFstNaturalTransformation {s d} (m : Morphism C s d) : SpecializedNaturalTransformation (F ⟨ s, - ⟩) (F ⟨ d, - ⟩).
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
         refine (Build_SpecializedNaturalTransformation F0 G0
@@ -56,7 +56,7 @@ Section ProductInducedNaturalTransformations.
     abstract t.
   Defined.
 
-  Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F [ -, s]) (F [ - , d]).
+  Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F ⟨ -, s ⟩) (F ⟨ - , d ⟩).
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
         refine (Build_SpecializedNaturalTransformation F0 G0
@@ -68,5 +68,5 @@ Section ProductInducedNaturalTransformations.
   Defined.
 End ProductInducedNaturalTransformations.
 
-Notation "F [ f , - ]" := (InducedProductSndNaturalTransformation F f) : natural_transformation_scope.
-Notation "F [ - , f ]" := (InducedProductFstNaturalTransformation F f) : natural_transformation_scope.
+Notation "F ⟨ f , - ⟩" := (InducedProductSndNaturalTransformation F f) : natural_transformation_scope.
+Notation "F ⟨ - , f ⟩" := (InducedProductFstNaturalTransformation F f) : natural_transformation_scope.
