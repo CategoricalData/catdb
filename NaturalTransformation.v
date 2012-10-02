@@ -264,6 +264,24 @@ End IdentityNaturalTransformation.
 
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation.
 
+Section IdentityNaturalTransformationF.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(E : @SpecializedCategory objE).
+  Variable G : SpecializedFunctor D E.
+  Variable F : SpecializedFunctor C D.
+
+  Hint Resolve @LeftIdentity @RightIdentity.
+
+  Lemma NTComposeFIdentityNaturalTransformation :
+    NTComposeF (IdentityNaturalTransformation G) (IdentityNaturalTransformation F) = IdentityNaturalTransformation (ComposeFunctors G F).
+  Proof.
+    nt_eq; repeat rewrite FIdentityOf; auto.
+  Qed.
+End IdentityNaturalTransformationF.
+
+Hint Rewrite @NTComposeFIdentityNaturalTransformation.
+
 Section Associativity.
   Context `(B : @SpecializedCategory objB).
   Context `(C : @SpecializedCategory objC).
