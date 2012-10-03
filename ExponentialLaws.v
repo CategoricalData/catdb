@@ -234,8 +234,104 @@ Section Law2.
   Context `(C1 : @SpecializedCategory objC1).
   Context `(C2 : @SpecializedCategory objC2).
 
-  Definition ExponentialLaw2Functor : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2)).
-  Admitted.
+  Section functor.
+    Eval unfold Object in ((D ^ (C1 + C2)) -> ((D ^ C1) * (D ^ C2)))%category.
+    Let ExponentialLaw2Functor_ObjectOf_ObjectOf_1 (F : SpecializedFunctor (C1 + C2) D) :
+      C1 -> D
+      := fun x => F (inl x).
+    Let ExponentialLaw2Functor_ObjectOf_ObjectOf_2 (F : SpecializedFunctor (C1 + C2) D) :
+      C2 -> D
+      := fun x => F (inr x).
+
+    Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_1 (F : SpecializedFunctor (C1 + C2) D)
+      s d (m : Morphism C1 s d) :
+      Morphism D (ExponentialLaw2Functor_ObjectOf_ObjectOf_1 F s) (ExponentialLaw2Functor_ObjectOf_ObjectOf_1 F d)
+      := F.(MorphismOf) (s := inl _) (d := inl _) m.
+    Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_2 (F : SpecializedFunctor (C1 + C2) D)
+      s d (m : Morphism C2 s d) :
+      Morphism D (ExponentialLaw2Functor_ObjectOf_ObjectOf_2 F s) (ExponentialLaw2Functor_ObjectOf_ObjectOf_2 F d)
+      := F.(MorphismOf) (s := inr _) (d := inr _) m.
+
+    Arguments ExponentialLaw2Functor_ObjectOf_MorphismOf_1 / _ _ _ _.
+    Arguments ExponentialLaw2Functor_ObjectOf_MorphismOf_2 / _ _ _ _.
+
+    Definition ExponentialLaw2Functor_ObjectOf : SpecializedFunctor (C1 + C2) D -> (SpecializedFunctor C1 D) * (SpecializedFunctor C2 D).
+    Proof.
+      intro F.
+      match goal with
+        | [ |- prod (SpecializedFunctor ?C1 ?D) (SpecializedFunctor ?C2 ?D) ] =>
+          refine (Build_SpecializedFunctor C1 D
+            (ExponentialLaw2Functor_ObjectOf_ObjectOf_1 F)
+            (ExponentialLaw2Functor_ObjectOf_MorphismOf_1 F)
+            _
+            _
+            ,
+            Build_SpecializedFunctor C2 D
+            (ExponentialLaw2Functor_ObjectOf_ObjectOf_2 F)
+            (ExponentialLaw2Functor_ObjectOf_MorphismOf_2 F)
+            _
+            _
+          )
+      end;
+      simpl; subst_body; simpl; present_spcategory;
+        abstract (
+          intros; simpl;
+            try rewrite <- FCompositionOf;
+              try rewrite <- FIdentityOf;
+                trivial
+        ).
+    Defined.
+
+    Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 s d (m : Morphism (D ^ (C1 + C2)) s d) :
+      forall c : C1,
+        Morphism D ((fst (ExponentialLaw2Functor_ObjectOf s)) c) ((fst (ExponentialLaw2Functor_ObjectOf d)) c)
+        := fun c => m (inl c).
+    Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 s d (m : Morphism (D ^ (C1 + C2)) s d) :
+      forall c : C2,
+        Morphism D ((snd (ExponentialLaw2Functor_ObjectOf s)) c) ((snd (ExponentialLaw2Functor_ObjectOf d)) c)
+        := fun c => m (inr c).
+
+    Global Arguments ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 _ _ _ _ /.
+    Global Arguments ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 _ _ _ _ /.
+
+    Definition ExponentialLaw2Functor_MorphismOf s d
+      (m : Morphism (D ^ (C1 + C2)) s d) :
+      Morphism ((D ^ C1) * (D ^ C2)) (ExponentialLaw2Functor_ObjectOf s) (ExponentialLaw2Functor_ObjectOf d).
+    Proof.
+      hnf; unfold FunctorCategory, Morphism.
+      match goal with
+        | [ |- prod (SpecializedNaturalTransformation ?F1 ?G1) (SpecializedNaturalTransformation ?F2 ?G2) ] =>
+          refine (Build_SpecializedNaturalTransformation F1 G1
+            (@ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 s d m)
+            _
+            ,
+            Build_SpecializedNaturalTransformation F2 G2
+            (@ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 s d m)
+            _
+          )
+      end;
+      present_spfunctor; simpl; subst_body; simpl;
+        abstract (
+          intros; simpl;
+            auto
+        ).
+    Defined.
+
+    Definition ExponentialLaw2Functor : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2)).
+    Proof.
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            ExponentialLaw2Functor_ObjectOf
+            ExponentialLaw2Functor_MorphismOf
+            _
+            _
+          )
+      end;
+      present_spnt; intros;
+        abstract (intros; simpl; simpl_eq; nt_eq).
+    Defined.
+  End functor.
 
   Section inverse.
     Let ExponentialLaw2Functor_Inverse_ObjectOf_ObjectOf (F : SpecializedFunctor C1 D * SpecializedFunctor C2 D) :
