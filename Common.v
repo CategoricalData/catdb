@@ -270,6 +270,13 @@ Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
   destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
 Qed.
 
+Lemma injective_projections_JMeq (A B A' B' : Type) (p1 : A * B) (p2 : A' * B') :
+  fst p1 == fst p2 -> snd p1 == snd p2 -> p1 == p2.
+Proof.
+  destruct p1, p2; simpl; intros H0 H1; subst;
+    rewrite H0; rewrite H1; reflexivity.
+Qed.
+
 Ltac clear_refl_eq :=
   repeat match goal with
            | [ H : ?x = ?x |- _ ] => clear H
@@ -281,7 +288,8 @@ Ltac simpl_eq' :=
   apply sig_eq ||
     apply sig2_eq ||
       ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq) ||
-        apply injective_projections.
+        apply injective_projections ||
+          apply injective_projections_JMeq.
 
 Ltac simpl_eq := intros; repeat (
   simpl_eq'; simpl in *
