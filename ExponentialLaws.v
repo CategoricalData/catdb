@@ -1,4 +1,4 @@
-Require Import FunctionalExtensionality ProofIrrelevance.
+Require Import JMeq FunctionalExtensionality ProofIrrelevance.
 Require Export FunctorCategory SumCategory ProductCategory Functor.
 Require Import Common NatCategory FEqualDep.
 
@@ -450,7 +450,25 @@ Section Law2.
 
   Lemma ExponentialLaw2 : ComposeFunctors ExponentialLaw2Functor ExponentialLaw2Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw2Functor_Inverse ExponentialLaw2Functor = IdentityFunctor _.
-  Admitted.
+  Proof.
+    repeat match goal with
+             | _ => reflexivity
+             | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | _ => split
+             | _ => progress simpl_eq
+             | _ => progress functor_eq
+             | _ => progress nt_eq
+(*             | [ |- prod _ _ = prod _ _ ] => apply f_equal2 *) (* causes universe inconsistencies *)
+             | [ |- SpecializedNaturalTransformation _ _ = SpecializedNaturalTransformation _ _ ] => apply f_equal2
+             | [ |- Morphism ?C _ _ = Morphism ?C _ _ ] => apply f_equal2
+             | _ => progress repeat (apply functional_extensionality_dep;
+               let H := fresh in intro H; destruct H; simpl)
+             | _ => progress repeat (apply forall_extensionality_dep; intros)
+             | _ => progress destruct_head_hnf @sum
+             | [ |- JMeq _ _ ] => apply functional_extensionality_dep_JMeq; intros
+           end;
+    admit.
+  Qed.
 End Law2.
 
 Section Law3.
