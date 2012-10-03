@@ -469,6 +469,49 @@ Ltac eta_red :=
            | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
          end.
 
+Lemma sigT_eta : forall A (P : A -> Type) (x : sigT P),
+  x = existT _ (projT1 x) (projT2 x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sigT2_eta : forall A (P Q : A -> Type) (x : sigT2 P Q),
+  x = existT2 _ _ (projT1 x) (projT2 x) (projT3 x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sig_eta : forall A (P : A -> Prop) (x : sig P),
+  x = exist _ (proj1_sig x) (proj2_sig x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
+  x = exist2 _ _ (proj1_sig x) (proj2_sig x) (proj3_sig x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma prod_eta : forall (A B : Type) (x : A * B),
+  x = pair (fst x) (snd x).
+  destruct x; reflexivity.
+Qed.
+
+Ltac rewrite_eta_in Hf :=
+  repeat match type of Hf with
+           | context[match ?E with existT2 _ _ _ => _ end] => rewrite (sigT2_eta E) in Hf; simpl in Hf
+           | context[match ?E with exist2 _ _ _ => _ end] => rewrite (sig2_eta E) in Hf; simpl in Hf
+           | context[match ?E with existT _ _ => _ end] => rewrite (sigT_eta E) in Hf; simpl in Hf
+           | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
+           | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
+         end.
+
+Ltac rewrite_eta :=
+  repeat match goal with
+           | [ |- context[match ?E with existT2 _ _ _ => _ end] ] => rewrite (sigT2_eta E); simpl
+           | [ |- context[match ?E with exist2 _ _ _ => _ end] ] => rewrite (sig2_eta E); simpl
+           | [ |- context[match ?E with existT _ _ => _ end] ] => rewrite (sigT_eta E); simpl
+           | [ |- context[match ?E with exist _ _ => _ end] ] => rewrite (sig_eta E); simpl
+           | [ |- context[match ?E with pair _ _ => _ end] ] => rewrite (prod_eta E); simpl
+         end.
+
 Ltac intro_proj2_sig_from_goal'_by tac :=
   repeat match goal with
            | [ |- appcontext[proj1_sig ?x] ] => tac (proj2_sig x)
