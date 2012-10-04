@@ -476,15 +476,153 @@ Section Law3.
   Context `(C2 : @SpecializedCategory objC2).
   Context `(D : @SpecializedCategory objD).
 
+  Definition ExponentialLaw3Functor_ObjectOf : ((C1 * C2) ^ D)%category -> (C1 ^ D * C2 ^ D)%category.
+  Proof.
+    intro F; hnf in F |- *.
+    match goal with
+      | [ |- prod (SpecializedFunctor ?D ?C1) (SpecializedFunctor ?D ?C2) ] =>
+        refine (Build_SpecializedFunctor D C1
+          (fun x => fst (F x))
+          (fun _ _ m => fst (MorphismOf F m))
+          _
+          _,
+          Build_SpecializedFunctor D C2
+          (fun x => snd (F x))
+          (fun _ _ m => snd (MorphismOf F m))
+          _
+          _
+        )
+    end;
+    abstract (
+      intros; present_spcategory;
+        repeat rewrite FCompositionOf;
+          repeat rewrite FIdentityOf;
+            simpl; present_spcategory;
+              reflexivity
+    ).
+  Defined.
+
+  Definition ExponentialLaw3Functor_MorphismOf s d (m : Morphism ((C1 * C2) ^ D) s d) :
+    Morphism (C1 ^ D * C2 ^ D) (ExponentialLaw3Functor_ObjectOf s) (ExponentialLaw3Functor_ObjectOf d).
+  Proof.
+    hnf; split; hnf;
+      match goal with
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun x => fst (m x))
+            _
+          )
+        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+          refine (Build_SpecializedNaturalTransformation F G
+            (fun x => snd (m x))
+            _
+          )
+      end;
+      abstract (
+        simpl; present_spcategory; intros s0 d0 m0;
+          apply (f_equal (@fst _ _) (Commutes m s0 d0 m0)) ||
+            apply (f_equal (@snd _ _) (Commutes m s0 d0 m0))
+      ).
+  Defined.
+
   Definition ExponentialLaw3Functor : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
-  Admitted.
+  Proof.
+    match goal with
+      | [ |- SpecializedFunctor ?F ?G ] =>
+        refine (Build_SpecializedFunctor F G
+          ExponentialLaw3Functor_ObjectOf
+          ExponentialLaw3Functor_MorphismOf
+          _
+          _
+        )
+    end;
+    abstract (
+      intros; present_spfunctor;
+        simpl;
+          simpl_eq;
+          nt_eq
+    ).
+  Defined.
+
+  Definition ExponentialLaw3Functor_Inverse_ObjectOf : (C1 ^ D * C2 ^ D)%category -> ((C1 * C2) ^ D)%category.
+  Proof.
+    intro F; hnf in F |- *.
+    match goal with
+      | [ |- SpecializedFunctor ?D (?C1 * ?C2) ] =>
+        refine (Build_SpecializedFunctor D (C1 * C2)
+          (fun x => ((fst F) x, (snd F) x))
+          (fun _ _ m => (MorphismOf (fst F) m, MorphismOf (snd F) m))
+          _
+          _
+        )
+    end;
+    abstract (
+      intros; present_spcategory;
+        repeat rewrite FCompositionOf;
+          repeat rewrite FIdentityOf;
+            simpl; present_spcategory;
+              reflexivity
+    ).
+  Defined.
+
+  Definition ExponentialLaw3Functor_Inverse_MorphismOf s d (m : Morphism (C1 ^ D * C2 ^ D) s d) :
+    Morphism ((C1 * C2) ^ D) (ExponentialLaw3Functor_Inverse_ObjectOf s) (ExponentialLaw3Functor_Inverse_ObjectOf d).
+  Proof.
+    hnf.
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+          (fun x => ((fst m) x, (snd m) x))
+          _
+        )
+    end;
+    abstract (
+      simpl; intros; present_spfunctor;
+        simpl_eq; destruct m; simpl in *;
+          apply Commutes
+    ).
+  Defined.
 
   Definition ExponentialLaw3Functor_Inverse : SpecializedFunctor (C1 ^ D * C2 ^ D) ((C1 * C2) ^ D).
-  Admitted.
+  Proof.
+    match goal with
+      | [ |- SpecializedFunctor ?F ?G ] =>
+        refine (Build_SpecializedFunctor F G
+          ExponentialLaw3Functor_Inverse_ObjectOf
+          ExponentialLaw3Functor_Inverse_MorphismOf
+          _
+          _
+        )
+    end;
+    abstract (
+      intros; present_spfunctor;
+        simpl;
+          simpl_eq;
+          nt_eq
+    ).
+  Defined.
 
   Lemma ExponentialLaw3 : ComposeFunctors ExponentialLaw3Functor ExponentialLaw3Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw3Functor_Inverse ExponentialLaw3Functor = IdentityFunctor _.
-  Admitted.
+  Proof.
+    repeat match goal with
+             | _ => reflexivity
+             | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | _ => split
+             | _ => progress simpl_eq
+             | _ => progress functor_eq
+             | _ => progress nt_eq
+(*             | [ |- prod _ _ = prod _ _ ] => apply f_equal2 *) (* causes universe inconsistencies *)
+             | [ |- SpecializedNaturalTransformation _ _ = SpecializedNaturalTransformation _ _ ] => apply f_equal2
+             | [ |- Morphism ?C _ _ = Morphism ?C _ _ ] => apply f_equal2
+             | _ => progress repeat (apply functional_extensionality_dep;
+               let H := fresh in intro H; destruct H; simpl)
+             | _ => progress repeat (apply forall_extensionality_dep; intros)
+             | _ => progress destruct_head_hnf @sum
+             | [ |- JMeq _ _ ] => apply functional_extensionality_dep_JMeq; intros
+           end;
+    admit.
+  Qed.
 End Law3.
 
 Section Law4.
