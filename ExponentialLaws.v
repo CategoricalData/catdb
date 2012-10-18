@@ -630,13 +630,179 @@ Section Law4.
   Context `(C2 : @SpecializedCategory objC2).
   Context `(D : @SpecializedCategory objD).
 
-  Definition ExponentialLaw4Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
-  Admitted.
+  Section functor.
+    Local Ltac do_exponential4 := intros; simpl; present_spfunctor;
+      repeat (simpl;
+        match goal with
+          | _ => reflexivity
+          | _ => rewrite FCompositionOf
+          | _ => rewrite FIdentityOf
+          | _ => rewrite LeftIdentity
+          | _ => rewrite RightIdentity
+          | _ => try_associativity ltac:(rewrite Commutes)
+          | _ => repeat rewrite Associativity; apply f_equal
+          | _ => repeat rewrite <- Associativity; apply f_equal2; try reflexivity; []
+        end).
 
-  Definition ExponentialLaw4Functor_Inverse : SpecializedFunctor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
-  Admitted.
+    Definition ExponentialLaw4Functor_ObjectOf : ((D ^ C1) ^ C2)%category -> (D ^ (C1 * C2))%category.
+    Proof.
+      intro F; hnf in F |- *.
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            (fun c1c2 => F (snd c1c2) (fst c1c2))
+            (fun s1s2 d1d2 m1m2 => Compose ((F (snd d1d2)).(MorphismOf) (fst m1m2)) ((F.(MorphismOf) (snd m1m2)) (fst s1s2)))
+            _
+            _
+          )
+      end;
+      abstract do_exponential4.
+    Defined.
+
+    Definition ExponentialLaw4Functor_MorphismOf s d (m : Morphism ((D ^ C1) ^ C2) s d) :
+      Morphism (D ^ (C1 * C2)) (ExponentialLaw4Functor_ObjectOf s) (ExponentialLaw4Functor_ObjectOf d).
+    Proof.
+      exists (fun c => (m (snd c)) (fst c));
+        abstract (
+          do_exponential4;
+          match goal with
+            | [ |- Compose (ComponentsOf ?T ?x) (ComponentsOf ?U _) = Compose (ComponentsOf ?T' _) (ComponentsOf ?U' _) ] =>
+              cut (Compose T U = Compose T' U');
+                [ let H := fresh in intro H; simpl in H;
+                  exact (f_equal (fun T => ComponentsOf T (fst s0)) H)
+                  | rewrite Commutes; reflexivity
+                ]
+          end
+        ).
+    Defined.
+
+    Definition ExponentialLaw4Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
+    Proof.
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            ExponentialLaw4Functor_ObjectOf
+            ExponentialLaw4Functor_MorphismOf
+            _
+            _
+          )
+      end;
+      abstract nt_eq.
+    Defined.
+  End functor.
+
+  Section inverse.
+    Local Ltac do_exponential4_inverse := intros; simpl; present_spfunctor;
+      repeat (simpl;
+        match goal with
+          | _ => reflexivity
+          | _ => rewrite <- FCompositionOf
+          | _ => rewrite FIdentityOf
+          | _ => rewrite LeftIdentity
+          | _ => rewrite RightIdentity
+          | _ => try_associativity ltac:(rewrite Commutes)
+          | _ => repeat rewrite Associativity; apply f_equal
+          | _ => repeat rewrite <- Associativity; apply f_equal2; try reflexivity; []
+        end).
+
+
+    Section ObjectOf.
+      Variable F : SpecializedFunctor (C1 * C2) D.
+
+      Definition ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf : C2 -> (D ^ C1)%category.
+      Proof.
+        intro c2.
+        hnf.
+        match goal with
+          | [ |- SpecializedFunctor ?C ?D ] =>
+            refine (Build_SpecializedFunctor C D
+              (fun c1 => F (c1, c2))
+              (fun s1 d1 m1 => F.(MorphismOf) (s := (s1, c2)) (d := (d1, c2)) (m1, Identity c2))
+              _
+              _
+            )
+        end;
+        abstract do_exponential4_inverse.
+      Defined.
+
+      Definition ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf s d (m : Morphism C2 s d) :
+        Morphism (D ^ C1) (ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf s) (ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf d).
+      Proof.
+        exists (fun c => F.(MorphismOf) (s := (c, s)) (d := (c, d)) (Identity c, m));
+          abstract do_exponential4_inverse.
+      Defined.
+
+      Definition ExponentialLaw4Functor_Inverse_ObjectOf : ((D ^ C1) ^ C2)%category.
+      Proof.
+        hnf.
+        match goal with
+          | [ |- SpecializedFunctor ?C ?D ] =>
+            refine (Build_SpecializedFunctor C D
+              ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf
+              ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf
+              _
+              _
+            )
+        end;
+        abstract (nt_eq; do_exponential4_inverse).
+      Defined.
+    End ObjectOf.
+
+    Section MorphismOf.
+      Definition ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
+        forall c, Morphism _ ((ExponentialLaw4Functor_Inverse_ObjectOf s) c) ((ExponentialLaw4Functor_Inverse_ObjectOf d) c).
+      Proof.
+        intro c;
+          exists (fun c' => m (c', c));
+            abstract do_exponential4_inverse.
+      Defined.
+
+      Definition ExponentialLaw4Functor_Inverse_MorphismOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
+        Morphism ((D ^ C1) ^ C2) (ExponentialLaw4Functor_Inverse_ObjectOf s) (ExponentialLaw4Functor_Inverse_ObjectOf d).
+      Proof.
+        exists (ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf m);
+          abstract (nt_eq; do_exponential4_inverse).
+      Defined.
+    End MorphismOf.
+
+    Arguments ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf / _ _ _ _.
+
+    Definition ExponentialLaw4Functor_Inverse : SpecializedFunctor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
+    Proof.
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+            ExponentialLaw4Functor_Inverse_ObjectOf
+            ExponentialLaw4Functor_Inverse_MorphismOf
+            _
+            _
+          )
+      end;
+      abstract nt_eq.
+    Defined.
+  End inverse.
 
   Lemma ExponentialLaw4 : ComposeFunctors ExponentialLaw4Functor ExponentialLaw4Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw4Functor_Inverse ExponentialLaw4Functor = IdentityFunctor _.
-  Admitted.
+  Proof.
+    repeat match goal with
+             | _ => reflexivity
+             | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | _ => split
+             | _ => progress simpl_eq
+             | _ => progress functor_eq
+             | _ => progress nt_eq
+             | _ => progress destruct_head_hnf @prod
+             | _ => progress repeat rewrite <- FCompositionOf
+             | _ => progress repeat rewrite FIdentityOf
+             | _ => progress repeat rewrite LeftIdentity
+             | _ => progress repeat rewrite RightIdentity
+             | _ => apply f_equal
+             | [ |- SpecializedNaturalTransformation _ _ = SpecializedNaturalTransformation _ _ ] => apply f_equal2
+             | [ |- Morphism ?C _ _ = Morphism ?C _ _ ] => apply f_equal2
+             | _ => progress repeat (apply functional_extensionality_dep; intro)
+             | _ => progress repeat (apply forall_extensionality_dep; intros)
+             | [ |- JMeq _ _ ] => apply functional_extensionality_dep_JMeq; intros
+           end.
+  Qed.
 End Law4.
