@@ -235,7 +235,6 @@ Section Law2.
   Context `(C2 : @SpecializedCategory objC2).
 
   Section functor.
-    Eval unfold Object in ((D ^ (C1 + C2)) -> ((D ^ C1) * (D ^ C2)))%category.
     Let ExponentialLaw2Functor_ObjectOf_ObjectOf_1 (F : SpecializedFunctor (C1 + C2) D) :
       C1 -> D
       := fun x => F (inl x).
