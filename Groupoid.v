@@ -37,7 +37,7 @@ Section GroupoidOf.
     forall s d : C, forall m : Morphism C s d, IsIsomorphism m.
 End GroupoidOf.
 
-Hint Constructors GroupoidOf_Morphism.
+Hint Constructors GroupoidOf_Morphism : category.
 
 Section Groupoid.
   Context `(C : @SpecializedCategory objC).

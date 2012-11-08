@@ -32,6 +32,11 @@ Arguments Object {obj%type} C%category : rename.
 Arguments Identity' {obj%type} C%category o%object : rename.
 Arguments Compose' {obj%type} C%category s%object d%object d'%object m1%morphism m2%morphism : rename.
 
+(* create a hint db for all category theory things *)
+Create HintDb category discriminated.
+(* create a hint db for morphisms in categories *)
+Create HintDb morphism discriminated.
+
 Section SpecializedCategoryInterface.
   Definition Build_SpecializedCategory (obj : Type)
     (Morphism' : obj -> obj -> Type)
@@ -100,9 +105,24 @@ Ltac present_spcategory_all := present_spcategory;
          end;
   sanitize_spcategory.
 
-Hint Rewrite @LeftIdentity @RightIdentity.
-Hint Resolve @LeftIdentity @RightIdentity.
-Hint Immediate @Associativity.
+Ltac spcategory_hideProofs :=
+  repeat match goal with
+             | [ |- context[{|
+                               Morphism' := _;
+                               Identity' := _;
+                               Compose' := _;
+                               Associativity' := ?pf0;
+                               Associativity'_sym := ?pf1;
+                               LeftIdentity' := ?pf2;
+                               RightIdentity' := ?pf3
+                             |}] ] =>
+               hideProofs pf0 pf1 pf2 pf3
+         end.
+
+Hint Resolve @LeftIdentity @RightIdentity @Associativity : category.
+Hint Rewrite @LeftIdentity @RightIdentity : category.
+Hint Resolve @LeftIdentity @RightIdentity @Associativity : morphism.
+Hint Rewrite @LeftIdentity @RightIdentity : morphism.
 
 (* eh, I'm not terribly happy.  meh. *)
 Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
@@ -111,7 +131,7 @@ Identity Coercion LocallySmallSpecializedCategory_SpecializedCategory_Id : Local
 Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : SmallSpecializedCategory >-> SpecializedCategory.
 
 Section Categories_Equal.
-  Lemma SpecializedCategories_Equal `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
+  Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
     @Morphism' _ C = @Morphism' _ D
     -> (@Morphism' _ C = @Morphism' _ D -> @Identity' _ C == @Identity' _ D)
     -> (@Morphism' _ C = @Morphism' _ D -> @Compose' _ C == @Compose' _ D)
@@ -120,7 +140,7 @@ Section Categories_Equal.
       f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma SpecializedCategories_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
+  Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
     objC = objD
     -> (objC = objD -> @Morphism' _ C == @Morphism' _ D)
     -> (objD = objD -> @Morphism' _ C == @Morphism' _ D -> @Identity' _ C == @Identity' _ D)
@@ -132,12 +152,12 @@ Section Categories_Equal.
 End Categories_Equal.
 
 Ltac spcat_eq_step_with tac :=
-  structures_eq_step_with_tac ltac:(apply SpecializedCategories_Equal || apply SpecializedCategories_JMeq) tac.
+  structures_eq_step_with_tac ltac:(apply SpecializedCategory_eq || apply SpecializedCategory_JMeq) tac.
 
 Ltac spcat_eq_with tac := present_spcategory; repeat spcat_eq_step_with tac.
 
 Ltac spcat_eq_step := spcat_eq_step_with idtac.
-Ltac spcat_eq := spcat_eq_with idtac.
+Ltac spcat_eq := spcategory_hideProofs; spcat_eq_with idtac.
 
 Ltac solve_for_identity :=
   match goal with
@@ -165,7 +185,8 @@ Ltac noEvar := match goal with
                    cut (NoEvar X); [ intro; tauto | constructor ]
                end.
 
-Hint Rewrite @AssociativityNoEvar using noEvar.
+Hint Rewrite @AssociativityNoEvar using noEvar : category.
+Hint Rewrite @AssociativityNoEvar using noEvar : morphism.
 
 Ltac try_associativity_quick tac := try_rewrite Associativity tac.
 Ltac try_associativity tac := try_rewrite_by AssociativityNoEvar ltac:(idtac; noEvar) tac.

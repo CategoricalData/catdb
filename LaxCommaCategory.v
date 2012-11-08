@@ -26,8 +26,6 @@ Section LaxSliceCategory.
 
   Variable C : Category.
 
-  Hint Resolve Associativity RightIdentity LeftIdentity.
-
   (* Pull the definitions from SpecializedLaxCommaCategory.v,
      removing [Specialized], so that we have smaller definitions.
      *)
@@ -92,7 +90,7 @@ Section LaxSliceCategory.
   Defined.
 End LaxSliceCategory.
 
-Hint Unfold LaxSliceCategory_Compose LaxSliceCategory_Identity.
+Hint Unfold LaxSliceCategory_Compose LaxSliceCategory_Identity : category.
 
 Section LaxCosliceCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -166,4 +164,4 @@ Section LaxCosliceCategory.
   Defined.
 End LaxCosliceCategory.
 
-Hint Unfold LaxCosliceCategory_Compose LaxCosliceCategory_Identity.
+Hint Unfold LaxCosliceCategory_Compose LaxCosliceCategory_Identity : category.

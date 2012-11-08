@@ -16,8 +16,6 @@ Section sigT_sig_obj_mor.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sigT_sig : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -30,7 +28,7 @@ Section sigT_sig_obj_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; auto with category).
   Defined.
 
   Let SpecializedCategory_sigT_sig_as_sigT : @SpecializedCategory (sigT Pobj).

@@ -129,7 +129,7 @@ Section Law1.
     );
     present_spcategory;
     abstract (
-      intros; auto
+      intros; auto with morphism
     ).
   Defined.
 
@@ -148,7 +148,7 @@ Section Law1.
     end;
     simpl; present_spnt;
       abstract (
-        intros; autorewrite with core;
+        intros; autorewrite with morphism;
           reflexivity
       ).
   Defined.
@@ -228,6 +228,10 @@ Section Law1'.
                      end.
   Qed.
 End Law1'.
+
+Lemma ExponentialLaws_prod_eq_helper (A B C D : Type) : A = B -> C = D -> (A * C)%type = (B * D)%type.
+  intros; repeat subst; reflexivity.
+Qed.
 
 Section Law2.
   Context `(D : @SpecializedCategory objD).
@@ -312,7 +316,7 @@ Section Law2.
       present_spfunctor; simpl; subst_body; simpl;
         abstract (
           intros; simpl;
-            auto
+            auto with natural_transformation
         ).
     Defined.
 
@@ -380,7 +384,7 @@ Section Law2.
           destruct_hypotheses;
           repeat (let H := fresh in intro H; destruct H; simpl in *);
             intros; destruct_type Empty_set; present_spcategory;
-              auto
+              auto with functor
       ).
     Defined.
 
@@ -420,7 +424,7 @@ Section Law2.
         present_spfunctor; repeat (let H := fresh in intro H; destruct H);
           simpl in *;
             intros;
-              auto
+              auto with natural_transformation
       ).
     Defined.
 
@@ -457,7 +461,7 @@ Section Law2.
              | _ => progress simpl_eq
              | _ => progress functor_eq
              | _ => progress nt_eq
-(*             | [ |- prod _ _ = prod _ _ ] => apply f_equal2 *) (* causes universe inconsistencies *)
+             | [ |- prod _ _ = prod _ _ ] => apply ExponentialLaws_prod_eq_helper (* apply f_equal2 *) (* causes universe inconsistencies *)
              | [ |- SpecializedNaturalTransformation _ _ = SpecializedNaturalTransformation _ _ ] => apply f_equal2
              | [ |- Morphism ?C _ _ = Morphism ?C _ _ ] => apply f_equal2
              | _ => progress repeat (apply functional_extensionality_dep;
@@ -465,8 +469,7 @@ Section Law2.
              | _ => progress repeat (apply forall_extensionality_dep; intros)
              | _ => progress destruct_head_hnf @sum
              | [ |- JMeq _ _ ] => apply functional_extensionality_dep_JMeq; intros
-           end;
-    admit.
+           end.
   Qed.
 End Law2.
 
@@ -611,7 +614,7 @@ Section Law3.
              | _ => progress simpl_eq
              | _ => progress functor_eq
              | _ => progress nt_eq
-(*             | [ |- prod _ _ = prod _ _ ] => apply f_equal2 *) (* causes universe inconsistencies *)
+             | [ |- prod _ _ = prod _ _ ] => apply ExponentialLaws_prod_eq_helper (* apply f_equal2 *) (* causes universe inconsistencies *)
              | [ |- SpecializedNaturalTransformation _ _ = SpecializedNaturalTransformation _ _ ] => apply f_equal2
              | [ |- Morphism ?C _ _ = Morphism ?C _ _ ] => apply f_equal2
              | _ => progress repeat (apply functional_extensionality_dep;
@@ -619,8 +622,7 @@ Section Law3.
              | _ => progress repeat (apply forall_extensionality_dep; intros)
              | _ => progress destruct_head_hnf @sum
              | [ |- JMeq _ _ ] => apply functional_extensionality_dep_JMeq; intros
-           end;
-    admit.
+           end.
   Qed.
 End Law3.
 

@@ -22,7 +22,7 @@ Section FunctorFromPaths.
   Lemma FunctorFromPaths_FCompositionOf s d d' (p1 : path E s d) (p2 : path E d d') :
     path_compose (concatenate p1 p2) = Compose (path_compose p2) (path_compose p1).
   Proof.
-    induction p2; t_with t'.
+    induction p2; t_with t'; autorewrite with morphism; reflexivity.
   Qed.
 
   Definition FunctorFromPaths : SpecializedFunctor (PathsCategory E) D.

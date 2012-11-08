@@ -160,22 +160,20 @@ Section AdjunctionEquivalences.
           exact (fun A0 A' B B' m m' => A.(Commutes') (A0, A') (B, B') (m, m')) ].
   Defined.
 
-  Hint Rewrite @FIdentityOf.
-
   Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
     Compose (C := C) (G.(MorphismOf) g) (A.(AComponentsOf) _ _ f) =
     A.(AComponentsOf) _ _ (Compose g f).
     assert (H := fg_equal (A.(ACommutes) _ _ _ _ (Identity c) g) f).
-    simpl in *; autorewrite with core in *.
-    auto.
+    simpl in *; autorewrite with category in *.
+    auto with category.
   Qed.
 
   Lemma adjunction_naturality'_pre (A : HomAdjunction F G) c' c d (f : C.(Morphism) c (G d)) (h : C.(Morphism) c' c) :
     Compose (C := D) (proj1_sig (A.(AIsomorphism) _ _) f) (F.(MorphismOf) h) =
     proj1_sig (A.(AIsomorphism) _ _) (Compose f h).
     assert (H := fg_equal (ACommutes_Inverse A _ _ _ _ h (Identity d)) f).
-    simpl in *; autorewrite with core in *.
-    auto.
+    simpl in *; autorewrite with category in *.
+    auto with category.
   Qed.
 
   Section typeof.
@@ -220,7 +218,7 @@ Section AdjunctionEquivalences.
           simpl in *; fg_equal;
             repeat split; intros; [ | t_with t' ];
               repeat rewrite adjunction_naturality, RightIdentity;
-                auto
+                auto with category
     ).
     Grab Existential Variables.
     abstract (
@@ -228,8 +226,8 @@ Section AdjunctionEquivalences.
         repeat rewrite adjunction_naturality, RightIdentity;
           let H := fresh in assert (H := fg_equal (A.(ACommutes) d (F d) s (F d) m (Identity _)) (Identity _));
             simpl in *;
-              autorewrite with core in *;
-                auto
+              autorewrite with category in *;
+                auto with category
     ).
   Defined.
 
@@ -247,7 +245,7 @@ Section AdjunctionEquivalences.
         repeat rewrite (adjunction_naturality' A), LeftIdentity;
           simpl in *;
             intro_proj2_sig_from_goal;
-            destruct_hypotheses; fg_equal; auto
+            destruct_hypotheses; fg_equal; auto with category
     ).
     Grab Existential Variables.
     abstract (
@@ -255,8 +253,8 @@ Section AdjunctionEquivalences.
         rewrite (adjunction_naturality' A);
           let H := fresh in assert (H := fg_equal (ACommutes_Inverse A (G s) s (G s) d (Identity (G s)) m) (Identity _));
             simpl in *;
-              autorewrite with core in *;
-                auto
+              autorewrite with category in *;
+                auto with category
     ).
   Defined.
 End AdjunctionEquivalences.
@@ -275,7 +273,7 @@ Section AdjunctionEquivalences'.
               solve [
                 intro_proj2_sig_from_goal;
                 destruct_hypotheses;
-                auto
+                auto with category
                 |
                   repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
                     simpl_do do_rewrite_rev (Commutes T); reflexivity
@@ -300,10 +298,10 @@ Section AdjunctionEquivalences'.
               unfold unique in *;
                 split_and';
               repeat match goal with
-                       | [ H : _ |- _ ] => rewrite (H _ (eq_refl _)); auto
+                       | [ H : _ |- _ ] => rewrite (H _ (eq_refl _)); auto with category
                      end;
               repeat match goal with
-                       | [ H : _ |- _ ] => apply H; auto
+                       | [ H : _ |- _ ] => apply H; auto with category
                      end;
               intro_proj2_sig_from_goal;
               destruct_hypotheses;

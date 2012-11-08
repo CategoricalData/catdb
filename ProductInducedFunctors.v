@@ -24,14 +24,20 @@ Section ProductInducedFunctors.
     refine {| ObjectOf' := (fun c => F (c, d));
       MorphismOf' := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
     |};
-    abstract t.
+    abstract (
+        intros; (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
+        simpl; autorewrite with morphism; reflexivity
+      ).
   Defined.
 
   Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
     refine {| ObjectOf' := (fun d => F (c, d));
       MorphismOf' := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
     |};
-    abstract t.
+    abstract (
+        intros; (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
+        simpl; autorewrite with morphism; reflexivity
+      ).
   Defined.
 End ProductInducedFunctors.
 
@@ -53,7 +59,10 @@ Section ProductInducedNaturalTransformations.
           _
         )
     end;
-    abstract t.
+    abstract (
+        intros; simpl; repeat rewrite <- FCompositionOf;
+        simpl; autorewrite with morphism; reflexivity
+      ).
   Defined.
 
   Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F ⟨ -, s ⟩) (F ⟨ - , d ⟩).
@@ -64,7 +73,10 @@ Section ProductInducedNaturalTransformations.
           _
         )
     end;
-    abstract t.
+    abstract (
+        intros; simpl; repeat rewrite <- FCompositionOf;
+        simpl; autorewrite with morphism; reflexivity
+      ).
   Defined.
 End ProductInducedNaturalTransformations.
 

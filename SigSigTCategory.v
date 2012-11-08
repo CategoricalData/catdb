@@ -28,8 +28,6 @@ Section sig_sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -42,7 +40,7 @@ Section sig_sigT_obj_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; auto with category).
   Defined.
 
   Let sig_of_sigT' (A : Type) (P : A -> Prop) (X : sigT P) := exist P (projT1 X) (projT2 X).

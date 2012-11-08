@@ -10,8 +10,6 @@ Section FunctorialComposition.
   Context `(D : SpecializedCategory objD).
   Context `(E : SpecializedCategory objE).
 
-  Hint Immediate NaturalTransformationExchangeLaw LeftIdentity RightIdentity.
-
   Definition FunctorialComposition : SpecializedFunctor ((E ^ D) * (D ^ C)) (E ^ C).
   Proof.
     match goal with
@@ -26,10 +24,10 @@ Section FunctorialComposition.
     abstract (
       intros; present_spnt;
         destruct_hypotheses;
-        auto;
+        auto with category;
           nt_eq;
           repeat rewrite FIdentityOf;
-            auto
+            auto with category
     ).
   Defined.
 End FunctorialComposition.

@@ -38,7 +38,7 @@ Section DualCategories.
   Qed.
 End DualCategories.
 
-Hint Rewrite @op_op_id @op_distribute_prod.
+Hint Rewrite @op_op_id @op_distribute_prod : category.
 
 Section DualObjects.
   Context `(C : @SpecializedCategory objC).
@@ -77,7 +77,7 @@ Section OppositeFunctor_Id.
   Variable F : SpecializedFunctor C D.
 
   Lemma op_op_functor_id : OppositeFunctor (OppositeFunctor F) == F.
-    functor_eq; autorewrite with core; trivial.
+    functor_eq; autorewrite with category; trivial.
   Qed.
 End OppositeFunctor_Id.
 
@@ -109,7 +109,7 @@ Section OppositeNaturalTransformation_Id.
   Variable T : SpecializedNaturalTransformation F G.
 
   Lemma op_op_nt_id : OppositeNaturalTransformation (OppositeNaturalTransformation T) == T.
-    nt_eq; intros; try functor_eq; autorewrite with core; trivial.
+    nt_eq; intros; try functor_eq; autorewrite with category; trivial.
   Qed.
 End OppositeNaturalTransformation_Id.
 

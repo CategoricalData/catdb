@@ -48,7 +48,7 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        Hint Unfold Object.
+        Hint Unfold Object : category.
         unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
@@ -56,7 +56,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        repeat (autounfold with core in *; simpl in *).
+        repeat (autounfold with category in *; simpl in *).
         destruct_all_hypotheses; simpl in *.
         match goal with
           | [ H : _ |- _ ] => revert dependent H; rewrite @RightIdentity; intros
@@ -107,7 +107,7 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
-        Hint Unfold Object.
+        Hint Unfold Object : category.
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
           simpl in *.
         destruct M; clear M.
@@ -115,7 +115,7 @@ Section UniversalMorphism.
         match goal with
           | [ |- context[?i (existT ?f ?x ?m)] ] => destruct (i (existT f x m)); simpl in *; clear i
         end.
-        repeat (autounfold with core in *; simpl in *).
+        repeat (autounfold with category in *; simpl in *).
         match goal with
           | [ H : _ |- _ ] => revert dependent H; rewrite @LeftIdentity; intros
         end.

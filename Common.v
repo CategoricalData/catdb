@@ -714,6 +714,40 @@ Ltac do_for_each_hyp tac := do_for_each_hyp' tac ltac:(fun H => idtac).
 Tactic Notation "change_in_all" constr(from) "with" constr(to) :=
   change from with to; do_for_each_hyp ltac:(fun H => change from with to in H).
 
+(* [expand] replaces both terms of an equality (either [eq] or [JMeq]
+   in the goal with their head normal forms *)
+Ltac expand :=
+  match goal with
+    | [ |- ?X = ?Y ] =>
+      let X' := eval hnf in X in let Y' := eval hnf in Y in change (X' = Y')
+    | [ |- ?X == ?Y ] =>
+      let X' := eval hnf in X in let Y' := eval hnf in Y in change (X' == Y')
+  end; simpl.
+
+(* [hideProof' pf] generalizes [pf] only if it does not already exist
+   as a hypothesis *)
+Ltac hideProof' pf :=
+  match goal with
+    | [ x : _ |- _ ] => match x with
+                          | pf => fail 2
+                        end
+    | _ => generalize pf; intro
+  end.
+
+(* TODO(jgross): Is there a better way to do this? *)
+Tactic Notation "hideProofs" constr(pf)
+  := hideProof' pf.
+Tactic Notation "hideProofs" constr(pf0) constr(pf1)
+  := progress (try hideProof' pf0; try hideProof' pf1).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) constr(pf4)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) constr(pf4) constr(pf5)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4; try hideProof' pf5).
+
 Ltac destruct_to_empty_set :=
   match goal with
     | [ H : Empty_set |- _ ] => destruct H

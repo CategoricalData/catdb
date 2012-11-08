@@ -18,8 +18,6 @@ Section CommaCategory.
   Variable S : Functor A C.
   Variable T : Functor B C.
 
-  Hint Resolve Associativity RightIdentity LeftIdentity.
-
   (** Quoting Wikipedia:
      Suppose that [A], [B], and [C] are categories, and [S] and [T]
      are functors
@@ -112,7 +110,7 @@ Section CommaCategory.
   Defined.
 End CommaCategory.
 
-Hint Unfold CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object.
+Hint Unfold CommaCategory_Compose CommaCategory_Identity CommaCategory_Morphism CommaCategory_Object : category.
 
 Arguments CommaCategory [A B C] S T.
 
@@ -127,7 +125,7 @@ Section SliceCategory.
   Definition SliceCategory_Functor : Functor B C.
     refine {| ObjectOf' := (fun _ => a);
       MorphismOf' := (fun _ _ _ => Identity a)
-    |}; abstract (t_with t').
+    |}; abstract (intros; auto with morphism).
   Defined.
 
   Definition SliceCategory := CommaCategory S SliceCategory_Functor.

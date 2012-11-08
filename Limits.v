@@ -39,7 +39,7 @@ Section DiagonalFunctor.
           _
         )
     end;
-    abstract t.
+      simpl; abstract (intros; autorewrite with morphism; trivial).
   Defined.
 
   Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).

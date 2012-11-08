@@ -85,7 +85,7 @@ Section LimitFunctors.
     subst_body; simpl;
       abstract (
         present_spnt;
-        simpl; intros; autorewrite with core;
+        simpl; intros; autorewrite with category;
           repeat match goal with
                    | [ |- context[HL ?o] ] => generalize (HL o); intro
                  end;
@@ -97,7 +97,7 @@ Section LimitFunctors.
               end;
               nt_eq;
               try solve [
-                autorewrite with core;
+                autorewrite with category;
                   reflexivity
               ];
               repeat rewrite Associativity;
@@ -145,7 +145,7 @@ Section LimitFunctors.
     end;
     abstract (
       subst LimitOf ColimitOf LimitFunctor_morphism_of ColimitFunctor_morphism_of;
-        simpl; intros; autorewrite with core;
+        simpl; intros; autorewrite with category;
           repeat match goal with
                    | [ |- context[HC ?o] ] => generalize (HC o); intro
                  end;
@@ -157,7 +157,7 @@ Section LimitFunctors.
               end;
               nt_eq;
               try solve [
-                autorewrite with core;
+                autorewrite with category;
                   try reflexivity
               ];
               repeat rewrite Associativity;

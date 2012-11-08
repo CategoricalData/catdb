@@ -41,28 +41,31 @@ Section FunctorIsomorphism.
       RightInverseFunctor : ComposeFunctors F InverseFunctor = IdentityFunctor D
     }.
 
-    Hint Resolve RightInverseFunctor LeftInverseFunctor.
+    Hint Resolve RightInverseFunctor LeftInverseFunctor : category.
+    Hint Resolve RightInverseFunctor LeftInverseFunctor : functor.
 
     Definition FunctorIsomorphismOf_Identity `(C : @SpecializedCategory objC) : FunctorIsomorphismOf (IdentityFunctor C).
-      exists (IdentityFunctor _); eauto.
+      exists (IdentityFunctor _); eauto with functor.
     Defined.
 
     Definition InverseOfFunctor `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D)
       (i : FunctorIsomorphismOf F) : FunctorIsomorphismOf (InverseFunctor i).
-      exists i; auto.
+      exists i; auto with functor.
     Defined.
 
     Definition ComposeFunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} `{E : @SpecializedCategory objE}
       {F : SpecializedFunctor D E} {G : SpecializedFunctor C D} (i1 : FunctorIsomorphismOf F) (i2 : FunctorIsomorphismOf G) :
       FunctorIsomorphismOf (ComposeFunctors F G).
       exists (ComposeFunctors (InverseFunctor i2) (InverseFunctor i1));
-        abstract (
+      abstract (
           match goal with
             | [ |- context[ComposeFunctors (ComposeFunctors ?F ?G) (ComposeFunctors ?H ?I)] ] =>
               transitivity (ComposeFunctors (ComposeFunctors F (ComposeFunctors G H)) I);
                 try solve [ repeat rewrite ComposeFunctorsAssociativity; reflexivity ]; []
           end;
-          destruct i1, i2; t_with t'
+          destruct i1, i2; simpl;
+          repeat (rewrite_hyp; autorewrite with functor);
+          trivial
         ).
     Defined.
   End FunctorIsomorphismOf.
@@ -127,9 +130,6 @@ Section FunctorIsomorphism.
                | [ |- IsomorphismOfCategories _ _ ] => eapply Build_IsomorphismOfCategories
              end.
 
-    Hint Resolve @FunctorIsomorphismOf_Identity @ComposeFunctorIsmorphismOf.
-    Hint Extern 1 => eassumption.
-
     Lemma CategoriesIsomorphic_refl (C : Category) : CategoriesIsomorphic C C.
       t_iso.
       apply FunctorIsomorphismOf_Identity.
@@ -157,3 +157,23 @@ Section FunctorIsomorphism.
         as CategoriesIsomorphic_rel.
   End CategoriesIsomorphic.
 End FunctorIsomorphism.
+
+Section Functor_preserves_isomorphism.
+  Context `(C : SpecializedCategory objC).
+  Context `(D : SpecializedCategory objD).
+  Variable F : SpecializedFunctor C D.
+
+  Hint Rewrite <- FCompositionOf : functor.
+
+  Definition MorphismOf_IsomorphismOf s d (m : Morphism C s d) (i : IsomorphismOf m) : IsomorphismOf (F.(MorphismOf) m).
+    refine {| Inverse := (F.(MorphismOf) (Inverse i)) |};
+    abstract (
+        destruct i; simpl;
+        repeat (rewrite_hyp; autorewrite with functor);
+        reflexivity
+      ).
+  Defined.
+End Functor_preserves_isomorphism.
+
+Hint Resolve @MorphismOf_IsomorphismOf : category.
+Hint Resolve @MorphismOf_IsomorphismOf : functor.

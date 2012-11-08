@@ -22,7 +22,7 @@ Section FunctorFromDiscrete.
       present_spcategory;
       abstract (
         intros; hnf in *; subst; simpl;
-          auto
+          auto with category
       ).
   Defined.
 End FunctorFromDiscrete.

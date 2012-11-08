@@ -124,7 +124,7 @@ Section CorrespondenceCategory.
     abstract (
       intros; destruct_type @sum;
         unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
-          destruct_type @Empty_set; trivial; t_with t';
+          destruct_type @Empty_set; trivial; autorewrite with functor; auto with morphism;
             try match goal with
                   | [ |- appcontext[(Compose (C := ?A) ?a ?b, Identity (C := ?B) ?c)] ] =>
                     replace (Compose a b, Identity c) with
@@ -234,10 +234,8 @@ Section From_Functor_to_1.
       abstract (
         intros; destruct_hypotheses;
           apply functional_extensionality_dep; intro;
-            repeat rewrite Associativity;
-              repeat rewrite LeftIdentity;
-                repeat rewrite RightIdentity;
-                  reflexivity
+          autorewrite with morphism;
+          reflexivity
       ).
   Defined.
 End From_Functor_to_1.

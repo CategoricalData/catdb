@@ -9,8 +9,6 @@ Section FunctorCategory.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
      *)
@@ -19,7 +17,7 @@ Section FunctorCategory.
       Morphism' := SpecializedNaturalTransformation (C := C) (D := D);
       Compose' := NTComposeT (C := C) (D := D);
       Identity' := IdentityNaturalTransformation (C := C) (D := D)
-    |}; abstract (nt_eq; auto).
+    |}; abstract (nt_eq; auto with morphism).
   Defined.
 End FunctorCategory.
 

@@ -71,23 +71,25 @@ Section Coend.
 
   Global Arguments CoendFunctor_Diagram_ObjectOf_pre _ /.
 
-  Hint Resolve Identity.
-  Hint Extern 0 => present_spcategory.
-  Hint Extern 1 (Morphism _ ?X ?X) => apply Identity.
+  Hint Extern 0 => present_spcategory : morphism.
+  Hint Extern 1 (Morphism _ ?X ?X) => apply Identity : morphism.
 (*  Hint Extern 1 (Morphism' _ _ _) => hnf. *)
 
   Definition CoendFunctor_Diagram_MorphismOf_pre s d :
     CoendFunctor_Index_Morphism s d
     -> Morphism (COp * C) (CoendFunctor_Diagram_ObjectOf_pre s) (CoendFunctor_Diagram_ObjectOf_pre d).
   Proof.
-    destruct s, d; simpl in *; intros;
-      repeat match goal with
-               | _ => discriminate
-               | [ H : inl _ = inl _ |- _ ] => inj H
-               | [ H : inr _ = inr _ |- _ ] => inj H
-               | [ H : sigT _ |- _ ] => destruct H; simpl in *
-               | [ H : _ + _ |- _ ] => destruct H; subst
-             end; auto.
+    destruct s, d; simpl in *; intros; split;
+    present_spcategory;
+    repeat match goal with
+             | _ => discriminate
+             | _ => assumption
+             | [ H : inl _ = inl _ |- _ ] => inj H
+             | [ H : inr _ = inr _ |- _ ] => inj H
+             | [ H : sigT _ |- _ ] => destruct H; simpl in *
+             | [ H : _ + _ |- _ ] => destruct H; subst
+           end;
+    apply Identity.
   Defined.
 
   Ltac inj' H :=
@@ -118,7 +120,7 @@ Section Coend.
                | [ H : _ + _ |- _ ] => destruct H
                | _ => rewrite <- eq_rect_eq
                | _ => apply injective_projections; simpl
-             end; auto
+             end; auto with category
     ).
   Defined.
 End Coend.

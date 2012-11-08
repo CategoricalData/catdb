@@ -42,8 +42,6 @@ Section CommaCategory.
 
   Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
-  Hint Resolve FCompositionOf FIdentityOf.
-
   Definition CommaCategoryProjection : SpecializedFunctor (S ↓ T) (A * B).
     refine (Build_SpecializedFunctor (S ↓ T) (A * B)
       (@projT1 _ _)

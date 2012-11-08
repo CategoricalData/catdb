@@ -21,8 +21,6 @@ Section LaxSliceSpecializedCategory.
 
   Context `(C : @SpecializedCategory objC).
 
-  Hint Resolve Associativity RightIdentity LeftIdentity.
-
   (** Quoting David Spivak:
      David: ok
        so an object of [FC ⇓ D] is a pair [(X, G)], where [X] is a
@@ -98,8 +96,8 @@ Section LaxSliceSpecializedCategory.
     abstract (
       subst_body;
       intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
+      autorewrite with morphism;
+      reflexivity
     ).
   Defined.
 
@@ -127,10 +125,10 @@ Section LaxSliceSpecializedCategory.
         )
     end.
     abstract (
-      intros; simpl; present_spnt;
-        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          reflexivity
-    ).
+        intros; simpl; present_spnt;
+        autorewrite with morphism;
+        reflexivity
+      ).
   Defined.
 
   Global Arguments LaxSliceSpecializedCategory_Identity _ /.
@@ -206,8 +204,8 @@ Section LaxSliceSpecializedCategory.
   Defined.
 End LaxSliceSpecializedCategory.
 
-Hint Unfold LaxSliceSpecializedCategory_Compose LaxSliceSpecializedCategory_Identity.
-Hint Constructors LaxSliceSpecializedCategory_Morphism LaxSliceSpecializedCategory_Object.
+Hint Unfold LaxSliceSpecializedCategory_Compose LaxSliceSpecializedCategory_Identity : category.
+Hint Constructors LaxSliceSpecializedCategory_Morphism LaxSliceSpecializedCategory_Object : category.
 
 Section LaxCosliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -380,5 +378,5 @@ Section LaxCosliceSpecializedCategory.
   Defined.
 End LaxCosliceSpecializedCategory.
 
-Hint Unfold LaxCosliceSpecializedCategory_Compose LaxCosliceSpecializedCategory_Identity.
-Hint Constructors LaxCosliceSpecializedCategory_Morphism LaxCosliceSpecializedCategory_Object.
+Hint Unfold LaxCosliceSpecializedCategory_Compose LaxCosliceSpecializedCategory_Identity : category.
+Hint Constructors LaxCosliceSpecializedCategory_Morphism LaxCosliceSpecializedCategory_Object : category.

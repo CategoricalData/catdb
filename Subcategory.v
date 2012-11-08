@@ -35,10 +35,10 @@ Section Subcategory.
       Identity' := @Subcategory_Identity
     |};
     abstract (
-      intros; unfold Subcategory_Compose, Subcategory_Identity;
+        intros; unfold Subcategory_Compose, Subcategory_Identity;
         simpl_eq;
-        t_with t'
-    ).
+        auto with morphism
+      ).
   Defined.
 End Subcategory.
 
@@ -63,7 +63,7 @@ Section FullSubcategory.
       _
     );
     subst_body;
-    abstract (intros; simpl; t_with t').
+    abstract (intros; simpl; auto with morphism).
   Defined.
 End FullSubcategory.
 
@@ -103,6 +103,6 @@ Section WideSubcategory.
       _
     );
     subst_body;
-    abstract (intros; autorewrite with core; reflexivity).
+    abstract (intros; autorewrite with morphism; reflexivity).
   Defined.
 End WideSubcategory.

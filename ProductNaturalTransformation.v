@@ -20,11 +20,7 @@ Section ProductNaturalTransformation.
       (fun ac : A * C => (T (fst ac), U (snd ac)))
       _
     );
-    simpl; present_spnt;
-      abstract (
-        intros; simpl_eq;
-          apply Commutes
-      ).
+    abstract (intros; simpl; simpl_eq; auto with natural_transformation).
   Defined.
 End ProductNaturalTransformation.
 

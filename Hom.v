@@ -39,7 +39,7 @@ Section HomFunctor.
         _
         _
       );
-      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); auto with morphism).
     Defined.
   End Covariant.
 
@@ -53,7 +53,7 @@ Section HomFunctor.
         _
         _
       );
-      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); t_with t').
+      abstract (simpl; intros; repeat (apply functional_extensionality_dep; intro); auto with morphism).
     Defined.
   End Contravariant.
 
@@ -76,9 +76,11 @@ Section HomFunctor.
       _
     );
     abstract (
-      intros; simpl in *; destruct_hypotheses; simpl in *;
-        repeat (apply functional_extensionality_dep; intro); t_with t'
-    ).
+        intros; simpl in *; destruct_hypotheses;
+        simpl in *;
+          repeat (apply functional_extensionality_dep; intro);
+        autorewrite with morphism; reflexivity
+      ).
   Defined.
 End HomFunctor.
 
@@ -96,7 +98,7 @@ Section SplitHomFunctor.
     intro gh; destruct gh.
     simpl in *.
     apply functional_extensionality_dep; intro.
-    autorewrite with core.
+    autorewrite with morphism.
     reflexivity.
   Qed.
 
@@ -110,7 +112,7 @@ Section SplitHomFunctor.
     intro gh; destruct gh.
     simpl in *.
     apply functional_extensionality_dep; intro.
-    autorewrite with core.
+    autorewrite with morphism.
     reflexivity.
   Qed.
 End SplitHomFunctor.

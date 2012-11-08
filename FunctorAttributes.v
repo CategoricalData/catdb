@@ -22,8 +22,6 @@ Section FullFaithful.
   Let D'Op := OppositeCategory D'.
   Let F'Op := OppositeFunctor F'.
 
-  Hint Rewrite @FCompositionOf.
-
   Definition InducedHomNaturalTransformation :
     SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
     refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
@@ -31,7 +29,13 @@ Section FullFaithful.
         MorphismOf F (s := _) (d := _))
       _
     );
-    abstract (simpl; intros; destruct_type @prod; simpl in *; repeat (apply functional_extensionality_dep; intro); t_with t').
+    abstract (
+        simpl; intros;
+        destruct_type @prod;
+        simpl in *;
+          repeat (apply functional_extensionality_dep; intro);
+        repeat rewrite FCompositionOf; reflexivity
+      ).
   Defined.
 
   (* We really want surjective/injective here, but we only have epi/mono.
@@ -48,13 +52,15 @@ Section FullFaithful.
   Qed.
 
 (*
-   (* Depends on injective + surjective -> isomorphism, and epi = surj, mono = inj *)
+  (* Depends on injective + surjective -> isomorphism, and epi = surj, mono = inj *)
   Definition FunctorFullFaithful_and : FunctorFull /\ FunctorFaithful -> FunctorFullyFaithful.
     intro H; destruct H as [ e m ].
     unfold FunctorFullyFaithful, FunctorFull, FunctorFaithful in *.
     intros x y; specialize (e x y); specialize (m x y).
-    unfold Epimorphism, Monomorphism in *; simpl in *.
-    unfold SpecializedCategoryIsomorphism; simpl.
+    unfold IsEpimorphism, IsMonomorphism in *; simpl in *.
+    unfold IsIsomorphism; simpl.
+    eexists;
+      split; present_spcategory.
     destruct C, D, F; simpl in *; clear C D F.
     *)
 End FullFaithful.

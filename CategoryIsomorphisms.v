@@ -53,7 +53,8 @@ Section Category.
       RightInverse : Compose m Inverse = Identity d
     }.
 
-    Hint Resolve RightInverse LeftInverse.
+    Hint Resolve RightInverse LeftInverse : category.
+    Hint Resolve RightInverse LeftInverse : morphism.
 
     Definition IsomorphismOf_sig2 {s d : C} (m : C.(Morphism) s d) (i : @IsomorphismOf s d m) :
       { m' | Compose m' m = Identity s & Compose m m' = Identity d }.
@@ -75,19 +76,21 @@ Section Category.
     Global Coercion sig2_IsomorphismOf : IsomorphismOf_sig >-> IsomorphismOf.
 
     Definition IsomorphismOf_Identity (c : C) : IsomorphismOf (Identity c).
-      exists (Identity _); auto.
+      exists (Identity _); auto with morphism.
     Defined.
 
     Definition InverseOf {s d : C} (m : C.(Morphism) s d) (i : IsomorphismOf m) : IsomorphismOf (Inverse i).
-      exists (i : Morphism C _ _); auto.
+      exists (i : Morphism C _ _); auto with morphism.
     Defined.
 
-    Definition ComposeIsmorphismOf {s d d' : C} {m1 : C.(Morphism) d d'} {m2 : C.(Morphism) s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
+    Definition ComposeIsomorphismOf {s d d' : C} {m1 : C.(Morphism) d d'} {m2 : C.(Morphism) s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
       IsomorphismOf (Compose m1 m2).
       exists (Compose (Inverse i2) (Inverse i1));
-        abstract (
+      abstract (
           simpl; compose4associativity;
-            destruct i1, i2; t
+          destruct i1, i2; simpl;
+          repeat (rewrite_hyp; autorewrite with morphism);
+          trivial
         ).
     Defined.
   End IsomorphismOf.
@@ -148,8 +151,9 @@ Section Category.
                | [ |- Isomorphism _ _ ] => eapply Build_Isomorphism
              end.
 
-    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsmorphismOf.
-    Hint Extern 1 => eassumption.
+    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : category.
+    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : morphism.
+    Local Hint Extern 1 => eassumption.
 
     Lemma Isomorphic_refl c : Isomorphic c c.
       t_iso.
@@ -158,15 +162,15 @@ Section Category.
 
     Lemma Isomorphic_sym s d : Isomorphic s d -> Isomorphic d s.
       t_iso.
-      eauto.
+      eauto with morphism.
       Grab Existential Variables.
-      eauto.
+      eauto with morphism.
     Qed.
 
     Lemma Isomorphic_trans s d d' : Isomorphic s d -> Isomorphic d d' -> Isomorphic s d'.
       t_iso.
-      apply @ComposeIsmorphismOf;
-        eauto.
+      apply @ComposeIsomorphismOf;
+        eauto with morphism.
     Qed.
 
     Global Add Parametric Relation : _ Isomorphic
@@ -180,21 +184,21 @@ Section Category.
   Lemma iso_is_epi s d (m : _ s d) : IsIsomorphism m -> IsEpimorphism' (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
     present_spcategory.
-    transitivity (Compose m1 (Compose m x)); [ rewrite_hyp; autorewrite with core | ]; trivial.
-    transitivity (Compose m2 (Compose m x)); [ repeat rewrite <- Associativity | ]; rewrite_hyp; autorewrite with core; trivial.
+    transitivity (Compose m1 (Compose m x)); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
+    transitivity (Compose m2 (Compose m x)); [ repeat rewrite <- Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 
   (* XXX TODO: Automate this better. *)
   Lemma iso_is_mono s d (m : _ s d) : IsIsomorphism m -> IsMonomorphism' (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
     present_spcategory.
-    transitivity (Compose (Compose x m) m1); [ rewrite_hyp; autorewrite with core | ]; trivial.
-    transitivity (Compose (Compose x m) m2); [ repeat rewrite Associativity | ]; rewrite_hyp; autorewrite with core; trivial.
+    transitivity (Compose (Compose x m) m1); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
+    transitivity (Compose (Compose x m) m2); [ repeat rewrite Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 End Category.
 
-Hint Resolve @RightInverse @LeftInverse.
-Hint Resolve @IsomorphismOf_Identity.
+Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : category.
+Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : morphism.
 
 Ltac eapply_by_compose H :=
   match goal with
@@ -258,7 +262,7 @@ Section CategoryObjects2.
       repeat (destruct 1);
       repeat match goal with
                | [ x : _ |- _ ] => exists x
-             end; eauto; try split; try solve [ etransitivity; eauto ].
+             end; eauto with category; try split; try solve [ etransitivity; eauto with category ].
 
   (* The terminal object is unique up to unique isomorphism. *)
   Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (TerminalObject (C := C)).

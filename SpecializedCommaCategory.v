@@ -1,10 +1,12 @@
-Require Import ProofIrrelevance.
+Require Import JMeq ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common Notations InitialTerminalCategory.
+Require Import Common Notations InitialTerminalCategory FEqualDep.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
+
+Local Infix "==" := JMeq.
 
 Local Open Scope category_scope.
 
@@ -15,8 +17,6 @@ Section CommaSpecializedCategory.
   Context `(C : @SpecializedCategory objC).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
-
-  Hint Resolve Associativity RightIdentity LeftIdentity.
 
   (** Quoting Wikipedia:
      Suppose that [A], [B], and [C] are categories, and [S] and [T]
@@ -72,6 +72,19 @@ Section CommaSpecializedCategory.
     @Build_CommaSpecializedCategory_Morphism _ _ mem.
   Global Coercion Build_CommaSpecializedCategory_Morphism' : CommaSpecializedCategory_MorphismT >-> CommaSpecializedCategory_Morphism.
 
+  Lemma CommaSpecializedCategory_Morphism_eq αβf α'β'f' αβf2 α'β'f'2
+        (M : CommaSpecializedCategory_Morphism αβf α'β'f')
+        (N : CommaSpecializedCategory_Morphism αβf2 α'β'f'2) :
+    αβf = αβf2
+    -> α'β'f' = α'β'f'2
+    -> proj1_sig M == proj1_sig N
+    -> M == N.
+    clear; intros; destruct N as [ [ ] ], M as [ [ ] ]; simpl in *;
+    repeat subst;
+    apply eq_JMeq;
+    f_equal; simpl_eq; reflexivity.
+  Qed.
+
   Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
   Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
 
@@ -81,14 +94,16 @@ Section CommaSpecializedCategory.
     exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
     hnf in *; simpl in *.
     abstract (
-      present_spcategory;
-      destruct_all_hypotheses;
-      unfold Morphism in *;
-        destruct_hypotheses;
+        present_spcategory;
+        destruct_all_hypotheses;
+        unfold Morphism in *;
+          destruct_hypotheses;
         repeat rewrite FCompositionOf;
-          repeat rewrite <- Associativity;
-            t_rev_with t'
-    ).
+        repeat rewrite <- Associativity;
+        t_rev_with t';
+        repeat rewrite Associativity;
+        t_rev_with t'
+      ).
   Defined.
 
   Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
@@ -96,12 +111,8 @@ Section CommaSpecializedCategory.
   Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
     exists (Identity (C := A * B) (projT1 o)).
     abstract (
-      simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity;
-            repeat rewrite RightIdentity;
-              reflexivity
-    ).
+        simpl; autorewrite with category; reflexivity
+      ).
   Defined.
 
   Global Arguments CommaSpecializedCategory_Identity _ /.
@@ -112,11 +123,11 @@ Section CommaSpecializedCategory.
     );
     destruct_hypotheses;
     simpl in *;
-      present_spcategory;
-      simpl_eq;
-      present_spcategory; autorewrite with core;
-        f_equal;
-        try reflexivity.
+    present_spcategory;
+    simpl_eq;
+    present_spcategory; autorewrite with category;
+    f_equal;
+    try reflexivity.
 
   Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
@@ -159,8 +170,8 @@ Section CommaSpecializedCategory.
   Defined.
 End CommaSpecializedCategory.
 
-Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity.
-Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object.
+Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity : category.
+Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object : category.
 
 Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
@@ -174,7 +185,7 @@ Section SliceSpecializedCategory.
   Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
     refine {| ObjectOf' := (fun _ => a);
       MorphismOf' := (fun _ _ _ => Identity a)
-    |}; abstract (t_with t').
+    |}; abstract (intros; auto with morphism).
   Defined.
 
   Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.
