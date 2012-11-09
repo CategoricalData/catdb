@@ -133,8 +133,8 @@ Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : 
 Section Categories_Equal.
   Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
     @Morphism' _ C = @Morphism' _ D
-    -> (@Morphism' _ C = @Morphism' _ D -> @Identity' _ C == @Identity' _ D)
-    -> (@Morphism' _ C = @Morphism' _ D -> @Compose' _ C == @Compose' _ D)
+    -> @Identity' _ C == @Identity' _ D
+    -> @Compose' _ C == @Compose' _ D
     -> C = D.
     intros; intuition; destruct C, D; simpl in *; repeat subst;
       f_equal; apply proof_irrelevance.
@@ -142,9 +142,9 @@ Section Categories_Equal.
 
   Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
     objC = objD
-    -> (objC = objD -> @Morphism' _ C == @Morphism' _ D)
-    -> (objD = objD -> @Morphism' _ C == @Morphism' _ D -> @Identity' _ C == @Identity' _ D)
-    -> (objD = objD -> @Morphism' _ C == @Morphism' _ D -> @Compose' _ C == @Compose' _ D)
+    -> @Morphism' _ C == @Morphism' _ D
+    -> @Identity' _ C == @Identity' _ D
+    -> @Compose' _ C == @Compose' _ D
     -> C == D.
     intros; intuition; destruct C, D; simpl in *; repeat subst; JMeq_eq;
       f_equal; apply proof_irrelevance.

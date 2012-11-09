@@ -156,7 +156,7 @@ Section disc.
     apply JMeq_eq.
     symmetry.
     Require Import Setoid.
-    etransitivity; [ apply H0 | clear H0 ].
+    etransitivity; [ apply H | clear H ].
     compute.
     assert (JMeq match
                 s x0 x0 as s0 return (if s0 then unit else Empty_set)

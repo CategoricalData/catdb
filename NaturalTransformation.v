@@ -119,17 +119,11 @@ Section NaturalTransformations_Equal.
       (T : @SpecializedNaturalTransformation objC C objD D F G) (U : @SpecializedNaturalTransformation objC' C' objD' D' F' G'),
       objC = objC'
       -> objD = objD'
-      -> (objC = objC' -> C == C')
-      -> (objD = objD' -> D == D')
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        F == F')
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        G == G')
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        F == F' -> G == G' -> ComponentsOf T == ComponentsOf U)
+      -> C == C'
+      -> D == D'
+      -> F == F'
+      -> G == G'
+      -> ComponentsOf T == ComponentsOf U
       -> T == U.
     simpl; intros; intuition; destruct T, U; simpl in *; repeat subst;
       JMeq_eq.

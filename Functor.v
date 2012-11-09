@@ -107,7 +107,7 @@ Ltac functor_hideProofs :=
 Section Functors_Equal.
   Lemma Functor_eq objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
-    -> (ObjectOf F = ObjectOf G -> MorphismOf F == MorphismOf G)
+    -> MorphismOf F == MorphismOf G
     -> F = G.
     destruct F, G; simpl; intros; specialize_all_ways; repeat subst;
       f_equal; apply proof_irrelevance.
@@ -117,14 +117,10 @@ Section Functors_Equal.
     forall (F : @SpecializedFunctor objC C objD D) (G : @SpecializedFunctor objC' C' objD' D'),
       objC = objC'
       -> objD = objD'
-      -> (objC = objC' -> C == C')
-      -> (objD = objD' -> D == D')
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        ObjectOf F == ObjectOf G)
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        ObjectOf F == ObjectOf G -> MorphismOf F == MorphismOf G)
+      -> C == C'
+      -> D == D'
+      -> ObjectOf F == ObjectOf G
+      -> MorphismOf F == MorphismOf G
       -> F == G.
     simpl; intros; intuition; repeat subst; destruct F, G; simpl in *;
       repeat subst; JMeq_eq.
