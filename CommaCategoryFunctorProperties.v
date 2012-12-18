@@ -53,8 +53,8 @@ Section FCompositionOf.
 
     Let DOp := OppositeCategory D.
 
-    Lemma CosliceCategoryInducedFunctor_FCompositionOf s d d' (m1 : Morphism DOp s d) (m2 : Morphism DOp d d')
-    : CosliceCategoryInducedFunctor F s d' (Compose m2 m1)
+    Lemma CosliceCategoryInducedFunctor_FCompositionOf s d d' (m1 : Morphism D d s) (m2 : Morphism D d' d)
+    : CosliceCategoryInducedFunctor F s d' (Compose m1 m2)
       = ComposeFunctors (CosliceCategoryInducedFunctor F d d' m2) (CosliceCategoryInducedFunctor F s d m1).
       slice_t.
     Qed.
