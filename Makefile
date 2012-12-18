@@ -57,6 +57,7 @@ MODULES    := Notations \
 	LaxCommaCategory \
 	SpecializedLaxCommaCategory \
 	CommaCategoryFunctors \
+	CommaCategoryFunctorProperties \
 	UniversalProperties \
 	Duals \
 	Hom \
