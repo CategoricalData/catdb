@@ -45,6 +45,11 @@ Section FCompositionOf.
       = ComposeFunctors (SliceCategoryInducedFunctor F d d' m2) (SliceCategoryInducedFunctor F s d m1).
       slice_t.
     Qed.
+
+    Lemma SliceCategoryInducedFunctor_FIdentityOf x
+    : SliceCategoryInducedFunctor F x x (Identity x) = IdentityFunctor _.
+      slice_t.
+    Qed.
   End Slice.
 
   Section Coslice.
@@ -56,6 +61,11 @@ Section FCompositionOf.
     Lemma CosliceCategoryInducedFunctor_FCompositionOf s d d' (m1 : Morphism D d s) (m2 : Morphism D d' d)
     : CosliceCategoryInducedFunctor F s d' (Compose m1 m2)
       = ComposeFunctors (CosliceCategoryInducedFunctor F d d' m2) (CosliceCategoryInducedFunctor F s d m1).
+      slice_t.
+    Qed.
+
+    Lemma CosliceCategoryInducedFunctor_FIdentityOf x
+    : CosliceCategoryInducedFunctor F x x (Identity x) = IdentityFunctor _.
       slice_t.
     Qed.
   End Coslice.
