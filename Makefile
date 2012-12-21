@@ -99,15 +99,24 @@ MODULES    := Notations \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
+VDS	   := $(MODULES:%=%.v.d)
 
-.PHONY: coq clean
+.PHONY: coq clean timed
 
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
 
+timed: Makefile-timed.coq
+	$(MAKE) -f Makefile.coq clean
+	time $(MAKE) -f Makefile-timed.coq
+
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq
 
+Makefile-timed.coq: Makefile.coq
+	cp -f Makefile.coq Makefile-timed.coq
+	sed s'/^\t$$(COQC) /\ttime $$(COQC) /g' -i Makefile-timed.coq
+
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean
-	rm -f Makefile.coq .depend
+	rm -f Makefile.coq Makefile-timed.coq .depend

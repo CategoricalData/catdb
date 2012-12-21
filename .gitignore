@@ -3,5 +3,6 @@
 *.depend
 *.vo
 Makefile.coq
+Makefile-timed.coq
 *.glob
 *.v.d
