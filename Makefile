@@ -85,6 +85,7 @@ MODULES    := Notations \
 	SetColimits \
 	SetCategoryFacts \
 	Yoneda \
+	DataMigrationFunctors \
 	\
 	Schema \
 	SmallSchema \
@@ -106,17 +107,13 @@ VDS	   := $(MODULES:%=%.v.d)
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
 
-timed: Makefile-timed.coq
-	$(MAKE) -f Makefile.coq clean
-	time $(MAKE) -f Makefile-timed.coq
+# TODO(jgross): Look into combining this with the time-make.sh script
+timed: Makefile.coq
+	$(MAKE) -f Makefile.coq SHELL=./report_time.sh
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq
 
-Makefile-timed.coq: Makefile.coq
-	cp -f Makefile.coq Makefile-timed.coq
-	sed s'/^\t$$(COQC) /\ttime $$(COQC) /g' -i Makefile-timed.coq
-
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean
-	rm -f Makefile.coq Makefile-timed.coq .depend
+	rm -f Makefile.coq .depend
