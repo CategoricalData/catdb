@@ -358,6 +358,35 @@ Ltac repeat_subst_mor_of_type type :=
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
          end.
 
+(* Using [rew] instead of [rew'] makes this fail... WTF? *)
+Ltac subst_by_rewrite_hyp_rew a H rew' :=
+  rew' H; clear H;
+  match goal with
+    | [ H : appcontext[a] |- _ ] => fail 2 "Rewrite failed to clear all instances of" a
+    | [ |- appcontext[a] ] => fail 2 "Rewrite failed to clear all instances of" a
+    | _ => idtac
+  end.
+
+Ltac subst_by_rewrite_hyp a H :=
+  subst_by_rewrite_hyp_rew a H ltac:(fun H => try rewrite H in *; try setoid_rewrite H).
+
+Ltac subst_by_rewrite_rev_hyp a H :=
+  subst_by_rewrite_hyp_rew a H ltac:(fun H => try rewrite <- H in *; try setoid_rewrite <- H).
+
+Ltac subst_by_rewrite a :=
+  match goal with
+    | [ H : ?Rel a ?b |- _ ] => subst_by_rewrite_hyp a H
+    | [ H : ?Rel ?b a |- _ ] => subst_by_rewrite_rev_hyp a H
+  end.
+
+Ltac subst_atomic a := first [ atomic a | fail "Non-atomic variable" a ];
+                      subst_by_rewrite a.
+
+Ltac subst_rel rel :=
+  match goal with
+    | [ H : rel ?a ?b |- _ ] => (atomic a; subst_by_rewrite_hyp a H) || (atomic b; subst_by_rewrite_rev_hyp b H)
+  end.
+
 Ltac subst_body :=
   repeat match goal with
            | [ H := _ |- _ ] => subst H
@@ -622,6 +651,25 @@ Ltac specialize_hyp_with_evars E :=
                let y' := (eval unfold y in y) in clear y;
                  specialize (E y')
          end.
+
+(* converts existentials in the goal into evars *)
+Ltac existentials_to_evars :=
+  repeat match goal with
+           | [ |- context[?x] ] => atomic x; is_evar x;
+                                   let t := type of x in
+                                   let x' := fresh in
+                                   set (x' := x)
+         end.
+
+(* like [eexists], but introduces an evar rather than an existential *)
+Ltac evar_exists :=
+  hnf; match goal with
+         | [ |- exists x : ?T, _ ] => let x := fresh in evar (x : T); exists x
+         | _ => let T := fresh in (* catch things which aren't of the form [exists x, _], like records *)
+                let x := fresh in
+                evar (T : Type); evar (x : T); subst T;
+                exists x
+       end.
 
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
