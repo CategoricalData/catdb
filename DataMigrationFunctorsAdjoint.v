@@ -68,6 +68,7 @@ Require Import CommaCategoryFunctors.
       unfold NTComposeT, NTComposeF; simpl. (* ; nt_hideProofs. *)
       nt_hideProofs.
       simpl in *; present_spcategory.
+      (* setoid_rewrite FIdentityOf. (* fails with "Error: build_signature: no constraint can apply on a dependent argument" *) *)
       match goal with
         | [ |- ?A = _ ] =>
           match A with
