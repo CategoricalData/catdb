@@ -362,8 +362,8 @@ Ltac repeat_subst_mor_of_type type :=
 Ltac subst_by_rewrite_hyp_rew a H rew' :=
   rew' H; clear H;
   match goal with
-    | [ H : appcontext[a] |- _ ] => fail 2 "Rewrite failed to clear all instances of" a
-    | [ |- appcontext[a] ] => fail 2 "Rewrite failed to clear all instances of" a
+    | [ H : appcontext[a] |- _ ] => fail 1 "Rewrite failed to clear all instances of" a
+    | [ |- appcontext[a] ] => fail 1 "Rewrite failed to clear all instances of" a
     | _ => idtac
   end.
 
@@ -652,24 +652,37 @@ Ltac specialize_hyp_with_evars E :=
                  specialize (E y')
          end.
 
+(* tries to convert an existential to an evar *)
+Ltac existential_to_evar x :=
+  is_evar x;
+  let x' := fresh in
+  set (x' := x) in *.
+
 (* converts existentials in the goal into evars *)
-Ltac existentials_to_evars :=
+Ltac existentials_to_evars_in_goal :=
   repeat match goal with
-           | [ |- context[?x] ] => atomic x; is_evar x;
-                                   let t := type of x in
-                                   let x' := fresh in
-                                   set (x' := x)
+           | [ |- context[?x] ] => existential_to_evar x
          end.
 
-(* like [eexists], but introduces an evar rather than an existential *)
-Ltac evar_exists :=
-  hnf; match goal with
-         | [ |- exists x : ?T, _ ] => let x := fresh in evar (x : T); exists x
-         | _ => let T := fresh in (* catch things which aren't of the form [exists x, _], like records *)
-                let x := fresh in
-                evar (T : Type); evar (x : T); subst T;
-                exists x
-       end.
+(* converts all the existentials in the hypotheses to evars *)
+Ltac existentials_to_evars_in_hyps :=
+  repeat match goal with
+           | [ H : context[?x] |- _ ] => existential_to_evar x
+         end.
+
+(* converts all the existentials in the hypothesis [H] to evars *)
+Ltac existentials_to_evars_in H :=
+  repeat match type of H with
+           | context[?x] => existential_to_evar x
+         end.
+
+Tactic Notation "existentials_to_evars" := existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" "|-" "*" := existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" "*" := existentials_to_evars_in_goal; existentials_to_evars_in_hyps.
+Tactic Notation "existentials_to_evars" "in" "*" "|-" := existentials_to_evars_in_hyps.
+Tactic Notation "existentials_to_evars" "in" hyp(H) "|-" "*" := existentials_to_evars_in H; existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" hyp(H) := existentials_to_evars_in H.
+Tactic Notation "existentials_to_evars" "in" hyp(H) "|-" := existentials_to_evars_in H.
 
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
