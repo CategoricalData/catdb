@@ -190,6 +190,8 @@ Section SliceSpecializedCategory.
 
   Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.
   Definition CosliceSpecializedCategory := CommaSpecializedCategory SliceSpecializedCategory_Functor S.
+
+  (* [x ↓ F] is a slice category; [F ↓ x] is a coslice category *)
 End SliceSpecializedCategory.
 
 Section SliceSpecializedCategoryOver.
