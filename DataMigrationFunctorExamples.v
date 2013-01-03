@@ -445,6 +445,34 @@ Section FunctorialDataMigration.
       Example Δ_F__δ__T1_Ex221 := Eval compute in (fun d => projT2 (Δ_F__δ__T1_Ex221_with_type'' d)).
       Example Δ_F__δ__T2_Ex221 := Eval compute in (fun d => projT2 (Δ_F__δ__T2_Ex221_with_type'' d)).
 
+      Example Δ_F__δ__T1_Ex221_rev_T (x : Id_Ex221) (d : C_Objects_Ex22) : Type.
+      Proof.
+        pose (Δ_F__δ__T1_Ex221 d) as f;
+        destruct d; compute in *;
+        (specialize (f x); let t := type of f in exact t) || exact unit.
+      Defined.
+
+      Example Δ_F__δ__T1_Ex221_rev' (x : Id_Ex221) (d : C_Objects_Ex22) : Δ_F__δ__T1_Ex221_rev_T x d.
+      Proof.
+        pose (Δ_F__δ__T1_Ex221 d) as f;
+        destruct d; compute in *; exact (f x) || exact tt.
+      Defined.
+
+      Example Δ_F__δ__T1_Ex221_rev'' x d := Eval compute in Δ_F__δ__T1_Ex221_rev' x d.
+
+      Let typeof {T} (_ : T) := T.
+
+      Example Δ_F__δ__T1_Ex221_rev''' x d : typeof (Δ_F__δ__T1_Ex221_rev'' x d).
+      Proof.
+        pose (Δ_F__δ__T1_Ex221_rev'' x d) as f;
+        compute in *; destruct x; compute in *; destruct d; compute in *;
+        exact f.
+      Defined.
+
+      Example Δ_F__δ__T1_Ex221_rev x d := Eval compute in Δ_F__δ__T1_Ex221_rev''' x d.
+
+      Print Δ_F__δ__T1_Ex221_rev.
+
       Print Δ_F__δ__T1_Ex221.
       Print Δ_F__δ__T2_Ex221.
     End Example221.
@@ -574,8 +602,8 @@ Section FunctorialDataMigration.
       Section Π_F__γ__T1_Ex222_cleanup.
         Example Π_F__γ__U_Ex222' :=
           Eval hnf in (@ObjectOf _ _ _ _
-                                   Π_F__γ
-                                   U_Ex22_D).
+                                 Π_F__γ
+                                 U_Ex22_D).
 
         Example Π_F__γ__U_Ex222'' :=
           Eval cbv beta iota zeta delta [Π_F__γ__U_Ex222'
@@ -587,7 +615,7 @@ Section FunctorialDataMigration.
 
         Arguments Π_F__γ__U_Ex222'' /.
 
-        Example Π_F__γ__U_Ex222''' := Eval simpl in Π_F__γ__U_Ex222''.
+                  Example Π_F__γ__U_Ex222''' := Eval simpl in Π_F__γ__U_Ex222''.
 
         Set Printing Coercions.
         Let typeof {T} (_ : T) := T.
@@ -607,7 +635,745 @@ Section FunctorialDataMigration.
           end.
         Defined.
 
-        Eval hnf in Π_F__γ__U_Ex222''''.
+        Example Π_F__γ__U_Ex222''''' : Type.
+        Proof.
+          assert (f : focus Π_F__γ__U_Ex222'''') by constructor.
+          unfold Π_F__γ__U_Ex222'''' in f; revert f.
+          subst_body; hnf.
+          intro f.
+          match type of f with
+            | focus ({ S0 : forall c : CommaSpecializedCategory_Object ?A ?B, @?C c |
+                       @?D S0 }) =>
+              clear f; assert (f : focus ({ S0 : forall c : CommaSpecializedCategory_ObjectT A B,
+                                                   C (Build_CommaSpecializedCategory_Object A B c) |
+                                            D (fun c => S0 (CommaSpecializedCategory_Object_Member c)) }))
+                       by constructor;
+              unfold CommaSpecializedCategory_ObjectT in f; simpl in f
+          end.
+          match type of f with
+            | focus ({ S0 : ?ST |
+                       forall (c c' : CommaSpecializedCategory_Object ?A ?B)
+                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
+                                                                     (CommaSpecializedCategory_Object_Member c')),
+                         @?D S0 c c' g }) =>
+              clear f; assert (f : focus { S0 : ST |
+                                           forall (c c' : CommaSpecializedCategory_ObjectT A B)
+                                                  (g : CommaSpecializedCategory_MorphismT c c'),
+                                             D S0
+                                               (Build_CommaSpecializedCategory_Object A B c)
+                                               (Build_CommaSpecializedCategory_Object A B c')
+                                               (Build_CommaSpecializedCategory_Morphism c c' g) })
+                       by constructor;
+              unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in f;
+              simpl in f
+          end.
+          match type of f with
+            | focus ({ S0 : forall c : { ab : unit * ?B & @?C ab }, @?D c |
+                       @?E S0 }) =>
+              clear f; assert (f : focus ({ S0 : forall (b : B) (c : C (tt, b)),
+                                                   D (existT _ (tt, b) c) |
+                                            E (fun c => S0 (snd (projT1 c)) (projT2 c)) }))
+                       by constructor;
+              simpl in f
+          end.
+          match type of f with
+            | focus ({ S0 : ?ST |
+                       forall (c c' : ?C)
+                              (g : { ab : unit * @?B c c' | @?D c c' ab }),
+                         @?E S0 c c' g }) =>
+              clear f; assert (f : focus { S0 : ST |
+                                           forall (c c' : C)
+                                                  (g : B c c')
+                                                  (gp : D c c' (tt, g)),
+                                             E S0
+                                               c
+                                               c'
+                                               (existT _ (tt, g) gp)
+                              })
+                       by constructor;
+              simpl in f
+          end.
+          match type of f with
+            | focus ({ S0 : ?ST |
+                       forall (c c' : { ab : unit * ?B & @?C ab }),
+                         @?D S0 c c' }) =>
+              clear f; assert (f : focus { S0 : ST |
+                                           forall (b b' : B)
+                                                  (c : C (tt, b))
+                                                  (c' : C (tt, b')),
+                                             D S0
+                                               (existT _ (tt, b) c)
+                                               (existT _ (tt, b') c')
+                              })
+                       by constructor;
+              simpl in f
+          end.
+          repeat match type of f with
+                   | appcontext G [fun x : ?T => match x with tt => ?R end] =>
+                     clear f; let f' := context G[fun x : T => R] in
+                              assert (f : f') by constructor;
+                                simpl in f
+                 end.
+          (*repeat match type of f with
+                   | appcontext G [match _ with
+                                     | SSN_Ex22_C => Empty_set
+                                     | FirstName_Ex22_C => Empty_set
+                                     | LastName_Ex22_C => Empty_set
+                                     | Salary_Ex22_C => Empty_set
+                                     | T1_Ex22_C => Empty_set
+                                     | T2_Ex22_C => Empty_set
+                                   end] =>
+                     clear f; let f' := context G[Empty_set] in
+                              assert (f : f') by constructor;
+                                simpl in f
+                 end.*)
+          unfold C_Edges_Ex22 in f; simpl in f.
+          (*repeat match type of f with
+                   | appcontext G [fun x : ?E => _] =>
+                     match eval hnf in E with
+                       | Empty_set =>
+                         let T := fresh in
+                         let F := fresh "Empty_set_func" in
+                         evar (T : Type);
+                           pose (fun x : E => match x return T with end) as F;
+                           subst T;
+                           clear f; let f' := context G[F] in
+                                    assert (f : f') by constructor;
+                                      simpl in f
+                     end
+                 end.*)
+          repeat match type of f with
+                   | appcontext G [fun x : Empty_set => @?t x] =>
+                     match type of t with
+                       | Empty_set -> ?t' =>
+                         let F := fresh "Empty_set_func" in
+                         pose (fun x : Empty_set => match x return t' with end) as F;
+                             clear f; let f' := context G[F] in
+                                      assert (f : f') by constructor;
+                                        simpl in f
+                     end
+                 end.
+          (*repeat match type of f with
+                   | appcontext G [fun x : Empty_set => _] =>
+                     let T := fresh in
+                     let F := fresh "Empty_set_func" in
+                     evar (T : Type);
+                       pose (fun x : Empty_set => match x return T with end) as F;
+                       subst T;
+                       clear f; let f' := context G[F] in
+                                assert (f : f') by constructor;
+
+                                  simpl in f
+                 end;
+            subst_body.*)
+          (*repeat match type of f with
+                   | appcontext G [fun x : ?E => _] =>
+                     pose E;
+                     match eval hnf in E with
+                       | Empty_set =>
+                         let T := fresh in
+                         let F := fresh "Empty_set_func" in
+                         evar (T : Type);
+                           pose (fun x : E => match x return T with end) as F;
+                           subst T;
+                           clear f; let f' := context G[F] in
+                                    assert (f : f') by constructor;
+                                      simpl in f
+                     end
+                 end.*)
+          match type of f with
+            | focus ?T => let rtn := fresh in pose T as rtn; exact rtn
+          end.
+        Defined.
+
+        Example Π_F__γ__U_Ex222'''''' := Eval hnf in Π_F__γ__U_Ex222'''''.
+
+        Example Π_F__γ__U_Ex222''''''_Obj : Set.
+        Proof.
+          assert (f : focus (Π_F__γ__U_Ex222'''''')) by constructor; unfold Π_F__γ__U_Ex222'''''' in f;
+          revert f; clear; intro f.
+          unfold F_Functor_Ex22_ObjectOf in *.
+          match type of f with
+            | focus { S0 : ?T | _ } => exact T
+          end.
+        Defined.
+
+        Example Π_F__γ__U_Ex222''''''_Proof (o : Π_F__γ__U_Ex222''''''_Obj) : Prop.
+        Proof.
+          assert (f : focus (Π_F__γ__U_Ex222'''''')) by constructor; unfold Π_F__γ__U_Ex222'''''' in f;
+          hnf in o;
+          revert f o; clear; intros zf o.
+          match type of f with
+            | focus { S0 : ?T | @?Pf' S0 } => exact (Pf' o)
+          end.
+        Defined.
+
+        Eval hnf in Π_F__γ__U_Ex222''''''_Obj.
+        Print Π_F__γ__U_Ex222''''''.
+        Example Π_F__γ__U_Ex222_MorphismOf' (x : D_Objects_Ex22) (m : path D_Edges_Ex22 U_Ex22_D x)
+          := Eval hnf in (@MorphismOf _ _ _ _
+                                      Π_F__γ
+                                      U_Ex22_D
+                                      x m).
+
+        Example Π_F__γ__U_Ex222_MorphismOf'' x m : typeof (@Π_F__γ__U_Ex222_MorphismOf' x m).
+        Proof.
+          assert (f : focus (@Π_F__γ__U_Ex222_MorphismOf' x m)) by constructor;
+          unfold Π_F__γ__U_Ex222_MorphismOf' in *; revert f; clear; intro f.
+          simpl in f.
+          hnf in x, m.
+
+          revert
+
+
+        Print Π_F__γ__U_Ex222''''''.
+(*
+        Goal forall x : Π_F__γ__U_Ex222'''', True.
+        clear.
+        intro x.
+        hnf in x.
+        destruct x.
+        simpl in *.
+        match type of x with
+          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
+            assert (x' : forall c : CommaSpecializedCategory_ObjectT A B,
+                      f (Build_CommaSpecializedCategory_Object A B c))
+        end.
+        admit.
+        match type of e with
+          | forall (c c' : CommaSpecializedCategory_Object ?A ?B) (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
+               (CommaSpecializedCategory_Object_Member c')),
+              @?f c c' g =>
+            clear e; assert (e : forall (c c' : CommaSpecializedCategory_ObjectT A B) (g : CommaSpecializedCategory_MorphismT c c'),
+                                    f (Build_CommaSpecializedCategory_Object A B c) (Build_CommaSpecializedCategory_Object A B c')
+                                      (Build_CommaSpecializedCategory_Morphism c c' g)) by admit
+        end.
+        match type of x with
+          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
+            match type of e with
+              | appcontext e'[x] =>
+                let e'' := context e'[fun c : CommaSpecializedCategory_Object A B => x' (CommaSpecializedCategory_Object_Member c)] in
+                assert (e''' : e'') by admit
+            end
+        end.
+        clear e.
+        rename e''' into e'.
+        simpl in *.
+        match type of x with
+          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
+            repeat match type of e' with
+                     | appcontext e''[x] =>
+                       let e''' := context e''[fun c : CommaSpecializedCategory_Object A B => x' (CommaSpecializedCategory_Object_Member c)] in
+                       clear e'; assert (e' : e''') by admit
+                   end
+        end.
+        clear x.
+        rename x' into x, e' into e.
+        simpl in *.
+        compute in x.
+        unfold CommaSpecializedCategory_ObjectT in e; simpl in *.
+        unfold CommaSpecializedCategory_MorphismT in *; simpl in *.
+        Print existT.
+        Print exist.
+        match type of e with
+          | forall (c c' : { ab : unit * ?A & @?B ab }) (g : { ab : unit * @?C c c' | @?D c c' ab }), @?E c c' g =>
+            rename e into e'; pose proof (fun (c c' : { a : A & B (tt, a) })
+                                              (g : { a : C (existT _ (tt, projT1 c) (projT2 c))
+                                                           (existT _ (tt, projT1 c') (projT2 c')) |
+                                                     D (existT _ (tt, projT1 c) (projT2 c))
+                                                       (existT _ (tt, projT1 c') (projT2 c'))
+                                                       (tt, a) })
+                                          => e' (existT _ (tt, projT1 c) (projT2 c))
+                                                (existT _ (tt, projT1 c') (projT2 c'))
+                                                (exist _ (tt, proj1_sig g) (proj2_sig g))) as e; clear e'; simpl in *
+        end.
+        match type of x with
+          | forall (c : { ab : unit * ?A & @?B ab }), _ =>
+            rename x into x'; pose proof (fun c : { a : A & B (tt, a) } => x' (existT _ (tt, projT1 c) (projT2 c))) as x; simpl in *
+        end.
+        assert (H : x' = (fun c => x (existT _ (snd (projT1 c)) (projT2 c)))) by admit;
+          rewrite H in e; clear H; clear x'; simpl in *.
+        pose proof (fun ca ce c'a c'e ge gpf => e (existT _ ca (AddEdge NoEdges ce)) (existT _ c'a (AddEdge NoEdges c'e)) (exist _ (AddEdge NoEdges ge) gpf)) as e'; simpl in *.
+        compute in e'.
+        clear e.
+        pose (fun a p => x (existT _ a p)) as x'; simpl in *.
+        repeat match type of e' with
+               | appcontext e''[x] =>
+                 let e''' := context e''[fun c => (fun a p => x (existT _ a p)) (projT1 c) (projT2 c)] in
+                 clear e'; assert (e' : e''') by admit;
+                 change (fun a p => x (existT _ a p)) with x' in e'
+             end.
+        clearbody x'.
+        clear x.
+        compute in *.
+        rename x' into x, e' into e.
+        compute in *.
+        let t := type of x in evar (x' : t).
+        refine (x' = _).
+        instantiate (1 := refine _).
+        refine
+        pose (fun ca ce => (x ca (AddEdge NoEdges ce))) as f;
+          simpl in f.
+        clear f.
+        change (@AddEdge) with (fun V E s d d' => @AddEdge V E s d d') in e.
+        match goal with
+          | [ f := (fun ca ce => x ca (@?p ca ce)) |- _ ] =>  pose (fun ca ce =>
+        end.
+
+        clear x.
+        change (x ?ca (AddEdge
+        pose (fun ap => x (projT1 ap) (projT2 ap)) as x'; simpl in *.
+        pose (fun a e => x a (AddEdge NoEdges e)) as x'; simpl in *.
+        let t := type of x in let t' := type of x' in assert (FOOBAR : t).
+        intro a;
+          pose (x' a) as x'';
+          destruct a; simpl;
+          intro p; try apply (x'' tt); admit.
+        Show Proof.
+        Show Proof.
+        pose
+        intro p.
+        intros a p.
+        pose p as p'.
+        destruct p as [ p'' | p'' ].
+        admit.
+        pose a as a'; destruct a.
+        destruct
+        apply (x' a y).
+        destruct
+        Ltac rep_con e x x' :=
+             match e with
+               | appcontext e'[x] =>
+                 let e'' := context e'[x'] in
+                 match e'' with
+                   | appcontext e'''[AddEdge NoEdges] =>
+                     let e'''' := context e'''[fun u => u] in
+                     rep_con e'''' x x'
+                 end
+               | _ => e
+             end.
+        let e' := type of e in let e'' := rep_con e' x x' in assert (e''' : e'') by admit.
+
+
+        Check x'.
+        let t := type of x in
+        assert t.
+        Goal forall (x' : forall a : C_Objects_Ex22,
+       match
+         match a with
+         | SSN_Ex22_C => SSN_Ex22_D
+         | FirstName_Ex22_C => FirstName_Ex22_D
+         | LastName_Ex22_C => LastName_Ex22_D
+         | Salary_Ex22_C => Salary_Ex22_D
+         | T1_Ex22_C => U_Ex22_D
+         | T2_Ex22_C => U_Ex22_D
+         end
+       with
+       | SSN_Ex22_D => unit
+       | FirstName_Ex22_D => unit
+       | LastName_Ex22_D => unit
+       | Salary_Ex22_D => unit
+       | U_Ex22_D => Empty_set
+       end ->
+       match a with
+       | SSN_Ex22_C => SSN
+       | FirstName_Ex22_C => FirstName
+       | LastName_Ex22_C => LastName
+       | Salary_Ex22_C => Salary
+       | T1_Ex22_C => T1_Id_Ex222
+       | T2_Ex22_C => T2_Id_Ex222
+       end), forall a : C_Objects_Ex22,
+   path
+     (fun s d : D_Objects_Ex22 =>
+      match s with
+      | SSN_Ex22_D => Empty_set
+      | FirstName_Ex22_D => Empty_set
+      | LastName_Ex22_D => Empty_set
+      | Salary_Ex22_D => Empty_set
+      | U_Ex22_D =>
+          match d with
+          | SSN_Ex22_D => unit
+          | FirstName_Ex22_D => unit
+          | LastName_Ex22_D => unit
+          | Salary_Ex22_D => unit
+          | U_Ex22_D => Empty_set
+          end
+      end) U_Ex22_D
+     match a with
+     | SSN_Ex22_C => SSN_Ex22_D
+     | FirstName_Ex22_C => FirstName_Ex22_D
+     | LastName_Ex22_C => LastName_Ex22_D
+     | Salary_Ex22_C => Salary_Ex22_D
+     | T1_Ex22_C => U_Ex22_D
+     | T2_Ex22_C => U_Ex22_D
+     end ->
+   match a with
+   | SSN_Ex22_C => SSN
+   | FirstName_Ex22_C => FirstName
+   | LastName_Ex22_C => LastName
+   | Salary_Ex22_C => Salary
+   | T1_Ex22_C => T1_Id_Ex222
+   | T2_Ex22_C => T2_Id_Ex222
+   end.
+        clear.
+        intros x' a p.
+        refine match p with
+                 | AddEdge _ _ _ e => x' a _
+                 | _ => _
+               end.
+        Focus 2.
+
+
+        Show Proof.
+        Show Proof.
+        Show Proof.
+        intros a p.
+        Show Proof.
+        evar (x'' : t).
+
+ assert (H : x = x'') by admit; rewrite H in e; clear H.
+        assert (H : forall a e, x a (AddEdge NoEdges e) = x' a e) by reflexivity.
+        compute in e.
+        clearbody x'.
+        compute in
+        setoid_rewrite H in e.
+        match type of x' with
+          | forall (a : ?A) (e : @?E a), _ =>
+            pose E as E0
+        end.
+
+            assert (H : x = (fun a p => match p with
+                                          | AddEdge _ _ NoEdges e0 => x' a (e0 : E0 a)
+                                          | _ => x a p
+                                        end)).
+        change (x ?a0 (AddEdge NoEdges ?e0)) with (x' a0 e0) in e.
+        pose
+        change (x'
+        match type of x' with
+          | forall (a : ?A) (p : @?P a), _ =>
+            change x' with (fun (a : A) (p : P a) => (fun (p' : P a) (a' : A) => x' a' p') p a) in e'
+        end.
+
+        pose proof (fun a p => x (existT _ a p)) as x'; simpl in *.
+        simpl in *.
+        clear x e.
+
+        compute in e.
+        assert (forall
+        c : CommaSpecializedCategory_ObjectT
+              {|
+              ObjectOf' := fun _ : unit => U_Ex22_D;
+              MorphismOf' := fun _ _ _ : unit => NoEdges;
+              FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+                                   D_Category_Ex22 U_Ex22_D;
+              FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+                                D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22,
+      match snd (projT1 ( c)) with
+      | SSN_Ex22_C => SSN
+      | FirstName_Ex22_C => FirstName
+      | LastName_Ex22_C => LastName
+      | Salary_Ex22_C => Salary
+      | T1_Ex22_C => T1_Id_Ex222
+      | T2_Ex22_C => T2_Id_Ex222
+      end).
+*)
+        Eval hnf in (@ObjectOf _ _ _ _
+                               Π_F__γ
+                               SSN_Ex22_D).
+
+
+        Require Import InitialTerminalCategory ChainCategory DiscreteCategoryFunctors.
+
+        Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
+          clear.
+          eexists; intros; simpl; eauto.
+          Grab Existential Variables.
+          intros; simpl; eauto.
+          intros; simpl; eauto.
+        Defined.
+
+        Let Π_F_C objC (C : @LocallySmallSpecializedCategory objC) := Eval hnf in
+                             (@RightPushforwardAlong C
+                                                     (TerminalCategory : LocallySmallSpecializedCategory _)
+                                                     TypeCat
+                                                     (@F objC C)
+                                                     (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                                                                                  _
+                                                                                                  _
+                                                                                                  (RightPushforwardAlong_pre_Functor
+                                                                                                     C
+                                                                                                     (TerminalCategory : LocallySmallSpecializedCategory _)
+                                                                                                     TypeCat
+                                                                                                     (@F objC C)
+                                                                                                     (g : SpecializedFunctorToType _)
+                                                                                                     d))).
+
+        Let Π_F_C'_ObjectOf objC C := Eval hnf in @ObjectOf _ _ _ _ (@Π_F_C objC C).
+        Let Π_F_C'_MorphismOf objC C := Eval simpl in @MorphismOf _ _ _ _ (@Π_F_C objC C).
+
+        Require Import ProofIrrelevance.
+
+        Definition Functor_01_0 : SpecializedFunctor [0] [1].
+          clear.
+          eexists (fun _ => exist _ 0 _) _;
+            intros; compute; try apply proof_irrelevance.
+          Grab Existential Variables.
+          intros; compute; trivial.
+          intros; compute; constructor; trivial.
+        Defined.
+
+        Definition Functor_01_1 : SpecializedFunctor [0] [1].
+          clear.
+          eexists (fun _ => exist _ 1 _) _;
+            intros; compute; try apply proof_irrelevance.
+          Grab Existential Variables.
+          intros; compute; trivial.
+          intros; compute; constructor; trivial.
+        Defined.
+
+        Let Π_F_01_F F := Eval hnf in
+                           (@RightPushforwardAlong ([0] : LocallySmallSpecializedCategory _)
+                                                   ([1] : LocallySmallSpecializedCategory _)
+                                                   TypeCat
+                                                   F
+                                                   (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                                                                                _
+                                                                                                _
+                                                                                                (RightPushforwardAlong_pre_Functor
+                                                                                                   ([0] : LocallySmallSpecializedCategory _)
+                                                                                                   ([1] : LocallySmallSpecializedCategory _)
+                                                                                                   TypeCat
+                                                                                                   F
+                                                                                                   (g : SpecializedFunctorToType _)
+                                                                                                   d))).
+
+        Example Π_F_01_F_ObjectOf (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) := Eval hnf in (@ObjectOf _ _ _ _ (Π_F_01_F F) x).
+        Example Π_F_01_F_MorphismOf (F : SpecializedFunctor [0] [1]) (s d : SpecializedFunctor [0] TypeCat) m m' := Eval simpl in (@MorphismOf _ _ _ _ (Π_F_01_F F) s d m m').
+
+        Example Π_F_01_F_ObjectOf_ObjectOf F x (x' : [1]%category) := Eval hnf in (@Π_F_01_F_ObjectOf F x x').
+        Example Π_F_01_F_ObjectOf_MorhismOf F x s d (m : Morphism [1] s d) := Eval simpl in (MorphismOf (@Π_F_01_F_ObjectOf F x) m).
+
+        Example Π_F_01_F_ObjectOf'_ObjectOf F x x' : typeof (@Π_F_01_F_ObjectOf_ObjectOf F x x').
+        Proof.
+          clear.
+          pose (Π_F_01_F_ObjectOf_ObjectOf F x x') as f.
+          hnf in *;
+            simpl in *; unfold Object in *; simpl in *.
+          match goal with
+            | [ f := { S0 : forall c : CommaSpecializedCategory_Object ?A ?B, @?C c |
+                       @?D S0 } |- _ ] =>
+              clear f; pose ({ S0 : forall c : CommaSpecializedCategory_ObjectT A B, C (Build_CommaSpecializedCategory_Object A B c) |
+                               D (fun c => S0 (CommaSpecializedCategory_Object_Member c)) }) as f; unfold CommaSpecializedCategory_ObjectT in *;
+              simpl in *
+          end.
+          match goal with
+            | [ f := { S0 : ?ST |
+                       forall (c c' : CommaSpecializedCategory_Object ?A ?B)
+                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
+                                                                     (CommaSpecializedCategory_Object_Member c')),
+                         @?D S0 c c' g } |- _ ] =>
+              clear f; pose ({ S0 : ST |
+                               forall (c c' : CommaSpecializedCategory_ObjectT A B)
+                                      (g : CommaSpecializedCategory_MorphismT c c'),
+                                 D S0
+                                   (Build_CommaSpecializedCategory_Object A B c)
+                                   (Build_CommaSpecializedCategory_Object A B c')
+                                   (Build_CommaSpecializedCategory_Morphism c c' g) }) as f;
+              unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in f;
+              simpl in f
+          end.
+          exact f.
+        Defined.
+
+        Example Π_F_01_F_ObjectOf'_ObjectOf' (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
+          typeof (Π_F_01_F_ObjectOf'_ObjectOf F x x').
+        Proof.
+          hnf in *; simpl in *.
+          assert (Hf : focus (Π_F_01_F_ObjectOf'_ObjectOf F x x')) by constructor.
+          unfold Π_F_01_F_ObjectOf'_ObjectOf in Hf; simpl in Hf.
+          revert Hf; clear; intro.
+          unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in Hf.
+          simpl in Hf.
+          match type of Hf with
+            | focus ({ S0 : forall c : { ab : unit * ?A & @?B ab },
+                              @?C c |
+                       @?D S0 }) =>
+              clear Hf; assert (Hf : focus ({ S0 : forall (ca : A) (cb : B (tt, ca)),
+                                                     C (existT _ (tt, ca) cb) |
+                                              D (fun c => S0 (snd (projT1 c)) (projT2 c)) })) by constructor;
+              simpl in Hf
+          end.
+          match type of Hf with
+            | focus ({ S0 : ?ST |
+                       forall (c c' : { ab : unit * ?A & @?B ab }),
+                         @?C S0 c c' }) =>
+              clear Hf; assert (Hf : focus ({ S0 : ST |
+                                              forall (ca : A) (cb : B (tt, ca))
+                                                     (c'a : A) (c'b : B (tt, c'a)),
+                                                C S0
+                                                  (existT _ (tt, ca) cb)
+                                                  (existT _ (tt, c'a) c'b)
+                                           })) by constructor;
+              simpl in Hf
+          end.
+          match type of Hf with
+            | focus ({ S0 : ?ST |
+                       forall ca cb c'a c'b
+                              (g : { gh : unit * (@?A ca cb c'a c'b) | @?B ca cb c'a c'b gh }),
+                         @?C S0 ca cb c'a c'b g }) =>
+              clear Hf;
+                assert (Hf : focus ({ S0 : ST |
+                                      forall ca cb c'a c'b
+                                             (g : A ca cb c'a c'b)
+                                             (gpf : B ca cb c'a c'b (tt, g)),
+                                        C S0 ca cb c'a c'b (exist _ (tt, g) gpf) })) by constructor;
+                simpl in Hf
+          end.
+          match type of Hf with
+            | focus ?T => exact T
+          end.
+        Defined.
+
+        Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+
+        Require Import FunctionalExtensionality.
+
+        Definition f_to_functor_MorphismOf (f : [0]%category -> TypeCat) s d (m : Morphism [0] s d) : f s -> f d.
+          revert m; clear; intro; clear m;
+          destruct s as [ [ ] ];
+          match goal with
+            | [ H : S _ <= 0 |- _ ] => exfalso; revert H; clear; intro; solve [ intuition ] || fail 1
+            | _ => idtac
+          end;
+          destruct d as [ [ ] ];
+          match goal with
+            | [ H : S _ <= 0 |- _ ] => exfalso; revert H; clear; intro; solve [ intuition ] || fail 1
+            | _ => idtac
+          end;
+          repeat match goal with
+                   | [ H : 0 <= 0 |- _ ] => assert (H = le_n 0) by (apply proof_irrelevance); subst H
+                 end;
+          exact (@id _).
+        Defined.
+
+        Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
+        Proof.
+          revert f; clear; intro.
+          exists f (f_to_functor_MorphismOf f); intros; simpl; destruct_sig; simpl in *;
+          repeat match goal with
+                   | [ H : nat |- _ ] =>
+                     destruct H;
+                       match goal with
+                         | [ H : S _ <= 0 |- _ ] => exfalso; revert H; clear; intro; solve [ intuition ] || fail 1
+                         | _ => idtac
+                       end
+                 end;
+            repeat match goal with
+                     | [ H : 0 <= 0 |- _ ] => assert (H = le_n 0) by (apply proof_irrelevance); subst H
+                   end;
+            compute;
+            repeat match goal with
+                     | [ |- context[match ?f with _ => _ end] ] => destruct f
+                   end; try reflexivity.
+        Defined.
+      End Π_F__γ__T1_Ex222_cleanup.
+    End Example222.
+  End Example22.
+End FunctorialDataMigration.
+Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+Arguments Functor_01_0 / .
+Arguments f_to_functor / .
+Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_1 (f_to_functor f)).
+Let typeof {T} (_ : T) := T.
+Eval compute in typeof foo.
+Require Import ExtrOcamlString.
+Require Import ExtrOcamlBasic.
+Extraction Δ_F__δ__T1_Ex221_rev.
+Extraction foo.
+Extraction Π_F__γ__U_Ex222''''''.
+Extraction path.
+        Example F01_0 (f : [0]%category -> TypeCat) : Type.
+        Proof.
+          pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0 (f_to_functor f)) as f'.
+          hnf in *; revert f'; clear; intro.
+          simpl in *.
+
+          unfold f_to_functor_MorphismOf in *.
+          simpl in *.
+          revert f';
+        Goal Type.
+        pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0) as f; hnf in f; unfold typeof in f; simpl in f; revert f; clear; intro.
+        unfold MorphismOf in f; simpl in f.
+        apply f.
+        assert (f' : [0]%category -> TypeCat) by admit.
+
+        Goal forall x y : @Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0, x = y.
+
+          Set Printing All.
+
+ }) =>
+              clear Hf; assert (Hf : focus ({ S0 : forall (ca : A) (cb : B (tt, ca)),
+                                                     C (existT _ (tt, ca) cb) |
+                                              D (fun c => S0 (snd (projT1 c)) (projT2 c)) })) by constructor;
+              simpl in Hf
+          end.
+                                end.
+
+          unfold ObjectOf in f; simpl in *.
+          unfold MorphismOf in f; simpl in f.
+          compute in f.
+          simpl in *.
+        Print Π_F_01_F_ObjectOf'_ObjectOf'.
+          match goal with
+            | [ f := { S0 : ?ST |
+                       forall (c c' : ?C)
+                              (g : CommaSpecializedCategory_Morphism c c'),
+                         @?D S0 c c' g } |- _ ] =>
+              clear f; pose ({ S0 : ST |
+                               forall (c c' : C)
+                                      (g : CommaSpecializedCategory_MorphismT (Build_CommaSpecializedCategory_Object c) (CommaSpecializedCategory_Object_Member c')),
+                                 D S0 c c' (Build_CommaSpecializedCategory_Morphism c c' g) }) (*as f;
+              unfold CommaSpecializedCategory_MorphismT in f; simpl in * *)
+          end.
+                                                                      c')),
+
+
+                         @?D S0 c c' g
+                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
+                                                                     (CommaSpecializedCategory_Object_Member c')),
+
+                        D (exist _ (Build_CommaSpecializedCategory_Object A B (proj1_sig S0)) (proj2_sig S0))
+                          (Build_CommaSpecializedCategory_Object A' B' c)
+                          (Build_CommaSpecializedCategory_Object A' B' c')
+                          (Build_CommaSpecializedCategory_Morphism (Build_CommaSpecializedCategory_Object A' B' c)
+                                                                   (Build_CommaSpecializedCategory_Object A' B' c')
+                                                                   g) }) as f'
+
+          compute in f.
+
+        Print Π_F_01_F_ObjectOf.
+
+        Example Π_F_C'_ObjectOf' objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
+        Proof.
+          pose (@Π_F_C'_ObjectOf objC C g) as f; hnf in f |- *; revert f; clear; intro.
+          hnf in *.
+          unfold Object in *.
+          simpl in *.
+          unfold RightPushforwardAlong_pre_Functor, RightPushforwardAlong_ObjectOf_MorphismOf,
+            InducedLimitFunctors.InducedLimitFunctor_MorphismOf, LimitFunctorTheorems.InducedLimitMap, NTComposeT, NTComposeF in *;
+            simpl in *.
+        Print Π_F_C'_ObjectOf.
+        Example Π_F_C' objC C : typeof (@Π_F_C objC C).
+        pose (Π_F_C C) as Π_F_C''.
+        hnf in Π_F_C'' |- *.
+        revert Π_F_C''; clear; intro.
+
+        clear Π_F_C typeof.
+        clear
+        clear Π_F_C'
+        compute in Π_F_C''.
+
+        ((γ_Functor_Ex222 : SpecializedFunctorToSet _) : SpecializedFunctorToType _).
 
         Goal Π_F__γ__U_Ex222''''.
         hnf.
@@ -631,129 +1397,129 @@ Section FunctorialDataMigration.
           unfold concatenate in e.
 
           + induction p0.
-        destruct_head C_Objects_Ex22;
-        simpl in *.
+            destruct_head C_Objects_Ex22;
+              simpl in *.
 
-        CommaSpecializedCategory_Object
-                 {|
-                 ObjectOf' := fun _ : unit => U_Ex22_D;
-                 MorphismOf' := fun _ _ _ : unit => NoEdges;
-                 FCompositionOf' := SliceSpecializedCategory_Functor_subproof
-                                      D_Category_Ex22 U_Ex22_D;
-                 FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
-                                   D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22.
+            CommaSpecializedCategory_Object
+              {|
+                ObjectOf' := fun _ : unit => U_Ex22_D;
+                MorphismOf' := fun _ _ _ : unit => NoEdges;
+                FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+                                     D_Category_Ex22 U_Ex22_D;
+                FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+                                  D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22.
 
-        Example Π_F__γ__U_Ex222''''' : Type.
-        Proof.
-          evar (A : Type).
-          assert (forall a b : Π_F__γ__U_Ex222'''', a = b).
-          - intros a b; hnf in *.
-            destruct a as [ x e ].
-            simpl in *.
-            pose proof (fun c : CommaSpecializedCategory_ObjectT _ _ => x c) as x'; simpl in x'.
-            move x' at top.
-            compute in x'.
-            pose proof (fun (c c' : CommaSpecializedCategory_ObjectT _ _) (g : CommaSpecializedCategory_MorphismT _ _) => e c c' g) as e'.
-            move e' at top; simpl in e'.
-            unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in e'; simpl in e'.
-            unfold C_Edges_Ex22, D_Edges_Ex22 in *; simpl in *.
-            pattern x in e'.
-            Check e'.
-            pose proof (existT _ x' e') as a0.
-            pattern x in a0.
-            Check a0.
-            match type of e' with
-              | (fun _ => _) _ => idtac (* pose proof (existT _ x' (f x')) as a*)
-            end.
-            move a at top.
-            pattern
-            Ltac x_to_x' T2 x x' :=
-              match T2 with
-                | appcontext T2'[x] =>
-                  let T2'' := context T2'[x'] in
-                  x_to_x' T2'' x x'
-                | _ => T2
-              end.
-            match type of a with
-              | { _ : ?T1 & ?T2 } =>
-                let T2' := x_to_x' T2 x x' in
-                pose T2' as a'; move a' at top
-            end.
-            pattern x' in a'.
-            let t := type of a in
-            assert (t = A) by (subst A; reflexivity).
-            assert (
-          intros
-            pose Π_F__γ__U_Ex222'''' as f'.
-          hnf in *.
-          assert (f = f') by reflexivity.
-          destruct f.
+            Example Π_F__γ__U_Ex222''''' : Type.
+            Proof.
+              evar (A : Type).
+              assert (forall a b : Π_F__γ__U_Ex222'''', a = b).
+              - intros a b; hnf in *.
+                destruct a as [ x e ].
+                simpl in *.
+                pose proof (fun c : CommaSpecializedCategory_ObjectT _ _ => x c) as x'; simpl in x'.
+                move x' at top.
+                compute in x'.
+                pose proof (fun (c c' : CommaSpecializedCategory_ObjectT _ _) (g : CommaSpecializedCategory_MorphismT _ _) => e c c' g) as e'.
+                move e' at top; simpl in e'.
+                unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in e'; simpl in e'.
+                unfold C_Edges_Ex22, D_Edges_Ex22 in *; simpl in *.
+                pattern x in e'.
+                Check e'.
+                pose proof (existT _ x' e') as a0.
+                pattern x in a0.
+                Check a0.
+                match type of e' with
+                  | (fun _ => _) _ => idtac (* pose proof (existT _ x' (f x')) as a*)
+                end.
+                move a at top.
+                pattern
+                  Ltac x_to_x' T2 x x' :=
+                  match T2 with
+                    | appcontext T2'[x] =>
+                      let T2'' := context T2'[x'] in
+                      x_to_x' T2'' x x'
+                    | _ => T2
+                  end.
+                match type of a with
+                  | { _ : ?T1 & ?T2 } =>
+                    let T2' := x_to_x' T2 x x' in
+                    pose T2' as a'; move a' at top
+                end.
+                pattern x' in a'.
+                let t := type of a in
+                assert (t = A) by (subst A; reflexivity).
+                assert (
+                    intros
+                      pose Π_F__γ__U_Ex222'''' as f'.
+                    hnf in *.
+                    assert (f = f') by reflexivity.
+                    destruct f.
 
-        Eval hnf in Π_F__γ__U_Ex222''''.
+                    Eval hnf in Π_F__γ__U_Ex222''''.
 
 
-          change (CommaSpecializedCategory_Object_Member ?x) with x in *.
-          match goal with
-            | [ f := context G'[let (x) := ?y in x] |- _ ] => idtac
-          end.
-          change (let (x) := ?y in x) with y in *.
-          unfold C_Objects_Ex22 in *.
-          simpl in f.
-          change (CommaSpecializedCategory_Object ?A ?B) with (CommaSpecializedCategory_ObjectT A B) in f.
+                    change (CommaSpecializedCategory_Object_Member ?x) with x in *.
+                    match goal with
+                      | [ f := context G'[let (x) := ?y in x] |- _ ] => idtac
+                    end.
+                    change (let (x) := ?y in x) with y in *.
+                    unfold C_Objects_Ex22 in *.
+                    simpl in f.
+                    change (CommaSpecializedCategory_Object ?A ?B) with (CommaSpecializedCategory_ObjectT A B) in f.
 
-          Check (CommaSpecializedCategory_ObjectT _ _ : CommaSpecializedCategory_Object
-                 {|
-                 ObjectOf' := fun _ : unit => U_Ex22_D;
-                 MorphismOf' := fun _ _ _ : unit => NoEdges;
-                 FCompositionOf' := SliceSpecializedCategory_Functor_subproof
-                                      D_Category_Ex22 U_Ex22_D;
-                 FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
-                                   D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22).
-          unfold CommaSpecializedCategory_Object.
-          unfold Object, C_Edges_Ex22 in f.
+                    Check (CommaSpecializedCategory_ObjectT _ _ : CommaSpecializedCategory_Object
+                                                                    {|
+                                                                      ObjectOf' := fun _ : unit => U_Ex22_D;
+                                                                      MorphismOf' := fun _ _ _ : unit => NoEdges;
+                                                                      FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+                                                                                           D_Category_Ex22 U_Ex22_D;
+                                                                      FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+                                                                                        D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22).
+                    unfold CommaSpecializedCategory_Object.
+                    unfold Object, C_Edges_Ex22 in f.
 
-        Print Π_F__γ__U_Ex222'.
-                                   d
-                                   (AddEdge NoEdges e)).
+                    Print Π_F__γ__U_Ex222'.
+                    d
+                      (AddEdge NoEdges e)).
 
-        Example Π_F__γ__T1_Ex222_with_type' : {T : Set & T }
-          := Eval compute in @existT _ _ _ Π_F__γ__T1_Ex222'.
+                Example Π_F__γ__T1_Ex222_with_type' : {T : Set & T }
+                  := Eval compute in @existT _ _ _ Π_F__γ__T1_Ex222'.
 
-        Let Π_F__γ__T1_Ex222_DE_Type : Set.
-          match eval compute in (projT1 Π_F__γ__T1_Ex222_with_type') with
-            | forall d : ?D, @?E d -> _ => exact { d : D & E d }
-          end.
-        Defined.
+                Let Π_F__γ__T1_Ex222_DE_Type : Set.
+                  match eval compute in (projT1 Π_F__γ__T1_Ex222_with_type') with
+                    | forall d : ?D, @?E d -> _ => exact { d : D & E d }
+                  end.
+                Defined.
 
-        Let Π_F__γ__T1_Ex222_D_Type : Set.
-          match eval compute in (projT1 Π_F__γ__T1_Ex222_with_type') with
-            | forall d : ?D, @?E d -> _ => exact D
-          end.
-        Defined.
+                Let Π_F__γ__T1_Ex222_D_Type : Set.
+                  match eval compute in (projT1 Π_F__γ__T1_Ex222_with_type') with
+                    | forall d : ?D, @?E d -> _ => exact D
+                  end.
+                Defined.
 
-        Example Π_F__γ__T1_Ex222_with_type'' (d : Π_F__γ__T1_Ex222_D_Type) : {T : Set & T }.
-        Proof.
-          assert (H : focus Π_F__γ__T1_Ex222_DE_Type) by constructor; unfold Π_F__γ__T1_Ex222_DE_Type in *; hnf in d.
-          repeat match type of H with
-                   | appcontext G[unit] => let x := fresh in
-                                           evar (x : Set);
-                                             let G' := context G[x] in
-                                             clear H;
-                                               assert (H : G') by constructor;
-                                               subst x
-                 end;
-            repeat match type of H with
-                     | appcontext G[Empty_set] => let G' := context G[unit] in
-                                                  clear H;
-                                                    assert (H : G') by constructor
-                   end;
-            match type of H with
-              | focus ({ d0 : _ & @?f d0 }) => let P := fresh in pose (f d) as P; exists P; subst P; simpl; clear H;
-                                                                 pose d as d'; destruct d; try solve [ constructor ];
-                                                                 let g := fresh in pose (Π_F__γ__T1_Ex222' d' tt) as g; compute in *;
-                                                                                   exact g
-            end.
-        Defined.
+                Example Π_F__γ__T1_Ex222_with_type'' (d : Π_F__γ__T1_Ex222_D_Type) : {T : Set & T }.
+                Proof.
+                  assert (H : focus Π_F__γ__T1_Ex222_DE_Type) by constructor; unfold Π_F__γ__T1_Ex222_DE_Type in *; hnf in d.
+                  repeat match type of H with
+                           | appcontext G[unit] => let x := fresh in
+                                                   evar (x : Set);
+                                                     let G' := context G[x] in
+                                                     clear H;
+                                                       assert (H : G') by constructor;
+                                                       subst x
+                         end;
+                    repeat match type of H with
+                             | appcontext G[Empty_set] => let G' := context G[unit] in
+                                                          clear H;
+                                                            assert (H : G') by constructor
+                           end;
+                    match type of H with
+                      | focus ({ d0 : _ & @?f d0 }) => let P := fresh in pose (f d) as P; exists P; subst P; simpl; clear H;
+                                                                         pose d as d'; destruct d; try solve [ constructor ];
+                                                                         let g := fresh in pose (Π_F__γ__T1_Ex222' d' tt) as g; compute in *;
+                                                                                           exact g
+                    end.
+                Defined.
       End Π_F__γ__T1_Ex222_cleanup.
 
       Section Π_F__γ__T2_Ex222_cleanup.
