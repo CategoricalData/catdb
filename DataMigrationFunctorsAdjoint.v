@@ -5,7 +5,34 @@ Require Import Common Notations FunctorCategory LimitFunctors AdjointUnit Specia
 Set Implicit Arguments.
 
 Local Open Scope category_scope.
+(*
+Section coslice_initial.
+  (* TODO(jgross): This should go elsewhere *)
+  Definition CosliceSpecializedCategory_InitialObject objC C objD D (F : @SpecializedFunctor objC C objD D) x :
+    { o : _ & @InitialObject _ (CosliceSpecializedCategory (F x) F) o }.
+    unfold Object; simpl;
+    match goal with
+      | [ |- { o : CommaSpecializedCategory_Object ?A ?B & _ } ] =>
+        (exists (existT _ (tt, _) (@Identity _ D _) : CommaSpecializedCategory_ObjectT A B))
+    end;
+    simpl.
+    intro o'; hnf; simpl.
+    destruct o' as [ [ [ ? o' ] m' ] ]; simpl in *.
+    evar (T : Type); evar (t : T); subst T.
+    eexists (Build_CommaSpecializedCategory_Morphism _ _ _).
+    instantiate (1 := t); simpl in *.
 
+    {αβ : unit * objC & Morphism D (F x) (F (snd αβ))}
+    instantiate (1 := t).
+    simpl in t.
+    evar_exists.
+    eexists.
+    hnf.
+    intro o'.
+
+
+End coslice_initial.
+*)
 Section DataMigrationFunctorsAdjoint.
   Variables C D : LocallySmallCategory.
   Variables S : Category.
@@ -53,6 +80,8 @@ Section DataMigrationFunctorsAdjoint.
       Grab Existential Variables.
       apply Identity.
     Defined.
+
+    Print InitialObject.
 
 Require Import CommaCategoryFunctors.
 
@@ -108,6 +137,34 @@ Require Import CommaCategoryFunctors.
       present_spfunctor.
       present_spcategory.
       Print CommaSpecializedCategory_Object.
+      Check fun (g : (S ^ C)%functor) (d : D) =>
+              (RightPushforwardAlong_pre_Functor C D S F g d).
+      match goal with
+        | [ |- Compose ?a ?b = Compose ?c ?d ] => pose a; pose b; pose c; pose d; simpl in *
+      end.
+      pose ((HasLimits G (F d))); simpl in *.
+      pose ((RightPushforwardAlong_pre_Functor C D S F G (F d))); simpl in *.
+      match goal with
+        | [ |- Compose ?a ?b = Compose ?c ?d ] => pose a; pose
+      pose (RightPushforwardAlong_pre_Functor C D S F G (F d)) as x.
+      simpl in x.
+      hnf in x; simpl in x.
+      rename m0 into M0.
+      match goal with
+        | [ |- Compose ?a ?b = _ ] => pose a as m0
+      end.
+      simpl in m0.
+      pose (TerminalMorphism_Morphism (HasLimits G (F d)))
+          (existT
+             (fun αβ : unit * LSObject C => Morphism D (F d) (F (snd αβ)))
+             (tt, d) (Identity (F d)))
+      assert True.
+      -
+        unfold CosliceSpecializedCategory, CommaSpecializedCategory, Object in x; simpl in x.
+        unfold Object in x.
+      asser
+      Check (TerminalMorphism_Morphism (HasLimits G (F d)) (existT (fun αβ : unit * LSObject C => Morphism D (F d) (F (snd αβ)))
+           (tt, d) (Identity (F d)))).
       match goal with
         | [ |- context G[@Build_CommaSpecializedCategory_Object ?objA ?A ?objB ?C ?objC ?C
       Set Printing All.
