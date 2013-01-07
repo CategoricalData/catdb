@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export Adjoint Functor Category.
-Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals CommaCategoryFunctors SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep CommaCategoryFunctorProperties.
+Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals CommaCategoryFunctors SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep CommaCategoryFunctorProperties FunctorialComposition ExponentialLaws FunctorProduct NatCategory DiscreteCategoryFunctors ProductLaws.
 
 Set Implicit Arguments.
 
@@ -10,30 +10,15 @@ Section DataMigrationFunctors.
   Variables C D : LocallySmallCategory.
   Variables S : Category.
 
-  Variable F : SpecializedFunctor C D.
-
   Section Δ.
-    Let PullbackAlong_ObjectOf : S ^ D -> S ^ C := fun f => ComposeFunctors f F.
+    Definition PullbackAlong (F : SpecializedFunctor C D) : SpecializedFunctor (S ^ D) (S ^ C)
+      := ComposeFunctors (FunctorialComposition C D S)
+                         (ComposeFunctors ((IdentityFunctor (S ^ D)) * (FunctorFromDiscrete (D ^ C) (fun _ : Object 1 => F)))
+                                          (ProductLaw1Functor_Inverse _)).
 
-    Definition PullbackAlong_MorphismOf s d (m : Morphism (S ^ D) s d) : Morphism (S ^ C) (PullbackAlong_ObjectOf s) (PullbackAlong_ObjectOf d)
-      := Build_SpecializedNaturalTransformation (ComposeFunctors s F) (ComposeFunctors d F)
-      (fun c => m.(ComponentsOf) (F c))
-      (fun _ _ _ => m.(Commutes) _ _ _).
-
-    Definition PullbackAlong : Functor (S ^ D) (S ^ C).
-    Proof.
-      hnf.
-      match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
-            PullbackAlong_ObjectOf
-            PullbackAlong_MorphismOf
-            _
-            _
-          )
-      end;
-      abstract (intros; simpl in *; nt_eq).
-    Defined.
+    (* Universe Inconsistency *)
+    (* Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)
+      := (ExponentialLaw4Functor_Inverse _ _ _) (FunctorialComposition _ _ _). *)
   End Δ.
 
   Section Π.
@@ -66,17 +51,360 @@ Section DataMigrationFunctors.
        that to [Π_F ɣ(d)].
        *)
 
-    (* Define [ɣ ○ (π^F d)] *)
-    Definition RightPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (d ↓ F) S
-      := ComposeFunctors g (projT2 (CosliceCategoryProjectionFunctor C D F d)).
+    Section pre_functorial.
+      Variable F : SpecializedFunctor C D.
 
-    Variable HasLimits : forall g d, Limit (RightPushforwardAlong_pre_Functor g d).
+      (* Define [ɣ ○ (π^F d)] *)
+      Definition RightPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (d ↓ F) S
+        := ComposeFunctors g (projT2 (CosliceCategoryProjectionFunctor C D F d)).
 
-    Let Index2Cat d := d ↓ F.
+      (*Variable HasLimits : forall g d, Limit (RightPushforwardAlong_pre_Functor g d).*)
+      Variable HasLimits : forall d (F' : SpecializedFunctor (d ↓ F) S), Limit F'.
 
-    Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+      Let Index2Cat d := d ↓ F.
 
-    Let RightPushforwardAlong_ObjectOf_ObjectOf (g : S ^ C) d := LimitObject (HasLimits g d).
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+
+      Let HasLimits' (C0 : CAT ⇑ S) : Limit (projT2 C0)
+        := HasLimits (projT2 C0).
+
+      Let RightPushforwardAlong_pre_curried_ObjectOf_pre (g : S ^ C) (d : D) : CAT ⇑ S
+        := existT _ (tt, _) (RightPushforwardAlong_pre_pre_Functor g d) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+
+      Let RightPushforwardAlong_pre_curried_ObjectOf (gd : (S ^ C) * D) : CAT ⇑ S
+        := RightPushforwardAlong_pre_curried_ObjectOf_pre (fst gd) (snd gd).
+
+      Let RightPushforwardAlong_pre_curried_MorphismOf_pre g d g' d' (m : Morphism (S ^ C) g g') (m' : Morphism D d d') :
+        Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf_pre g d) (RightPushforwardAlong_pre_curried_ObjectOf_pre g' d').
+        constructor.
+        exists (tt, fst (proj1_sig (MorphismOf (CosliceCategoryProjectionFunctor C D F) m'))).
+        subst_body; simpl in *;
+        unfold RightPushforwardAlong_pre_pre_Functor;
+        simpl;
+        unfold Object, Morphism, GeneralizeFunctor.
+        match goal with
+          | [ |- SpecializedNaturalTransformation (ComposeFunctors (ComposeFunctors ?g ?h) ?i) _ ] =>
+            eapply (NTComposeT _ (ComposeFunctorsAssociator1 g h i))
+        end.
+        Grab Existential Variables.
+        eapply (NTComposeF m _).
+        Grab Existential Variables.
+        match goal with
+          | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
+            refine (Build_SpecializedNaturalTransformation F G
+                                                           (fun _ => Identity (C := C) _)
+                                                           _
+                   )
+        end;
+          abstract (
+              simpl; present_spnt; intros ? ? m0;
+              destruct m0 as [ [ m0 ] ]; simpl;
+              rewrite LeftIdentity; rewrite RightIdentity;
+              reflexivity
+            ).
+      Defined.
+
+      Definition RightPushforwardAlong_pre_curried_MorphismOf gd g'd' (m : Morphism ((S ^ C) * D) gd g'd') :
+        Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf gd) (RightPushforwardAlong_pre_curried_ObjectOf g'd')
+        := @RightPushforwardAlong_pre_curried_MorphismOf_pre (fst gd) (snd gd) (fst g'd') (snd g'd') (fst m) (snd m).
+
+      (* TODO(jgross): Check if [simpl in *] would make this faster. *)
+      Ltac step := clear; subst_body;
+                   ((abstract (autorewrite with category; reflexivity))
+                      || (abstract apply SliceCategoryInducedFunctor_FIdentityOf)
+                      || (abstract apply CosliceCategoryInducedFunctor_FIdentityOf)
+                      || (abstract apply SliceCategoryInducedFunctor_FCompositionOf)
+                      || (abstract apply CosliceCategoryInducedFunctor_FCompositionOf)
+                      || apply CommaSpecializedCategory_Morphism_eq
+                      || apply f_equal
+                      || (apply f_equal2; try reflexivity; [])
+                      || apply sigT_eq (* simpl_eq *)
+                      || (progress nt_eq)
+                      || (progress functor_eq)); simpl; trivial.
+
+      Ltac anihilate := repeat step.
+
+      Local Ltac pre_anihilate :=
+        simpl;
+        subst_body;
+        clear;
+        nt_hideProofs;
+        unfold NTComposeF, NTComposeT; simpl;
+        nt_hideProofs;
+        clear; simpl in *; present_spcategory.
+
+      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : SpecializedFunctor C S * LSObject D)
+            (m1 : Morphism ((S ^ C)%functor * D) s d)
+            (m2 : Morphism ((S ^ C)%functor * D) d d') :
+        RightPushforwardAlong_pre_curried_MorphismOf (Compose m2 m1) =
+        Compose (RightPushforwardAlong_pre_curried_MorphismOf m2)
+                (RightPushforwardAlong_pre_curried_MorphismOf m1).
+      Proof.
+        unfold RightPushforwardAlong_pre_curried_MorphismOf, RightPushforwardAlong_pre_curried_ObjectOf.
+      (* for speed *)
+      Admitted. (*
+      pre_anihilate.
+      anihilate.
+    Qed. *)
+
+      Lemma RightPushforwardAlong_pre_curried_FIdentityOf (o : SpecializedFunctor C S * LSObject D) :
+        RightPushforwardAlong_pre_curried_MorphismOf (Identity o) =
+        Identity (RightPushforwardAlong_pre_curried_ObjectOf o).
+      Proof.
+        unfold RightPushforwardAlong_pre_curried_MorphismOf, RightPushforwardAlong_pre_curried_ObjectOf.
+      (* for speed *)
+      Admitted. (*
+      pre_anihilate.
+      anihilate.
+    Qed. *)
+
+      Definition RightPushforwardAlong_pre_curried : SpecializedFunctor ((S ^ C) * D) (CAT ⇑ S).
+        match goal with
+          | [ |- SpecializedFunctor ?F ?G ] =>
+            exact (Build_SpecializedFunctor F G
+                                            RightPushforwardAlong_pre_curried_ObjectOf
+                                            RightPushforwardAlong_pre_curried_MorphismOf
+                                            RightPushforwardAlong_pre_curried_FCompositionOf
+                                            RightPushforwardAlong_pre_curried_FIdentityOf
+                  )
+        end.
+      Defined.
+    End pre_functorial.
+
+    Section functorial.
+      Variable HasLimits : forall (F : SpecializedFunctor C D) d (F' : SpecializedFunctor (d ↓ F) S), Limit F'.
+
+      Let Index2Cat (dF : D * (D ^ C)) := (fst dF) ↓ (snd dF).
+
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+
+      Let HasLimits' (C0 : CAT ⇑ S) : Limit (projT2 C0)
+        := HasLimits (projT2 C0).
+
+      Let RightPushforwardAlongFunctor_pre_curried_ObjectOf (Fgd : (OppositeCategory (D ^ C)) * ((S ^ C) * D)) : CAT ⇑ S
+        := let F := fst Fgd in
+           let g := fst (snd Fgd) in
+           let d := snd (snd Fgd) in
+           existT _ (tt, (d, F)) (projT2 (RightPushforwardAlong_pre_curried F (g, d))) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+
+      Definition RightPushforwardAlongFunctor_pre_curried_MorphismOf Fgd F'g'd' (m : Morphism ((OppositeCategory (D ^ C)) * ((S ^ C) * D)) Fgd F'g'd') :
+        Morphism (CAT ⇑ S)
+                 (RightPushforwardAlongFunctor_pre_curried_ObjectOf Fgd)
+                 (RightPushforwardAlongFunctor_pre_curried_ObjectOf F'g'd').
+        constructor.
+        let F := constr:(fst Fgd) in
+        let g := constr:(fst (snd Fgd)) in
+        let d := constr:(snd (snd Fgd)) in
+        let F' := constr:(fst F'g'd') in
+        let g' := constr:(fst (snd F'g'd')) in
+        let d' := constr:(snd (snd F'g'd')) in
+        let mF := constr:(fst m) in
+        let mg := constr:(fst (snd m)) in
+        let md := constr:(snd (snd m)) in
+        exists (tt, ComposeFunctors (CosliceCategoryInducedFunctor F d' d md) (CosliceCategoryNTInducedFunctor d' mF));
+          exists (fun c : CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D d') F'
+                  => mg (snd (projT1 c)));
+          simpl; subst_body; present_spcategory;
+          abstract (
+              intros;
+              destruct_head @CommaSpecializedCategory_Object;
+              destruct_head @CommaSpecializedCategory_Morphism;
+              destruct_sig;
+              destruct_head_hnf @prod;
+              simpl in *;
+                apply Commutes
+            ).
+      Defined.
+
+      Definition RightPushforwardAlongFunctor_pre_curried : SpecializedFunctor ((OppositeCategory (D ^ C)) * ((S ^ C) * D)) (CAT ⇑ S).
+        match goal with
+          | [ |- SpecializedFunctor ?C ?D ] =>
+            refine (Build_SpecializedFunctor C D
+                                             RightPushforwardAlongFunctor_pre_curried_ObjectOf
+                                             RightPushforwardAlongFunctor_pre_curried_MorphismOf
+                                             _
+                                             _)
+        end.
+        Focus 2.
+        simpl; intros.
+        expand.
+        apply f_equal.
+        apply sigT_eq; simpl.
+        (* HERE *)
+
+
+
+      Let RightPushforwardAlong_pre_curried_ObjectOf_pre (g : S ^ C) (d : D) : CAT ⇑ S
+        := existT _ (tt, _) (RightPushforwardAlong_pre_pre_Functor g d) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+
+      Let RightPushforwardAlong_pre_curried_ObjectOf (gd : (S ^ C) * D) : CAT ⇑ S
+        := RightPushforwardAlong_pre_curried_ObjectOf_pre (fst gd) (snd gd).
+
+      Let RightPushforwardAlong_pre_curried_MorphismOf_pre g d g' d' (m : Morphism (S ^ C) g g') (m' : Morphism D d d') :
+        Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf_pre g d) (RightPushforwardAlong_pre_curried_ObjectOf_pre g' d').
+        constructor.
+        exists (tt, fst (proj1_sig (MorphismOf (CosliceCategoryProjectionFunctor C D F) m'))).
+        subst_body; simpl in *;
+        unfold RightPushforwardAlong_pre_pre_Functor;
+        simpl;
+        unfold Object, Morphism, GeneralizeFunctor.
+        match goal with
+          | [ |- SpecializedNaturalTransformation (ComposeFunctors (ComposeFunctors ?g ?h) ?i) _ ] =>
+            eapply (NTComposeT _ (ComposeFunctorsAssociator1 g h i))
+        end.
+        Grab Existential Variables.
+        eapply (NTComposeF m _).
+        Grab Existential Variables.
+        match goal with
+          | [ C : _ |- SpecializedNaturalTransformation ?F ?G ] =>
+            refine (Build_SpecializedNaturalTransformation F G
+                                                           (fun _ => Identity (C := C) _)
+                                                           _
+                   )
+        end;
+          abstract (
+              simpl; present_spnt; intros ? ? m0;
+              destruct m0 as [ [ m0 ] ]; simpl;
+              rewrite LeftIdentity; rewrite RightIdentity;
+              reflexivity
+            ).
+      Defined.
+
+      Definition RightPushforwardAlong_pre_curried_MorphismOf gd g'd' (m : Morphism ((S ^ C) * D) gd g'd') :
+        Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf gd) (RightPushforwardAlong_pre_curried_ObjectOf g'd')
+        := @RightPushforwardAlong_pre_curried_MorphismOf_pre (fst gd) (snd gd) (fst g'd') (snd g'd') (fst m) (snd m).
+
+      (* TODO(jgross): Check if [simpl in *] would make this faster. *)
+      Ltac step := clear; subst_body;
+                   ((abstract (autorewrite with category; reflexivity))
+                      || (abstract apply SliceCategoryInducedFunctor_FIdentityOf)
+                      || (abstract apply CosliceCategoryInducedFunctor_FIdentityOf)
+                      || (abstract apply SliceCategoryInducedFunctor_FCompositionOf)
+                      || (abstract apply CosliceCategoryInducedFunctor_FCompositionOf)
+                      || apply CommaSpecializedCategory_Morphism_eq
+                      || apply f_equal
+                      || (apply f_equal2; try reflexivity; [])
+                      || apply sigT_eq (* simpl_eq *)
+                      || (progress nt_eq)
+                      || (progress functor_eq)); simpl; trivial.
+
+      Ltac anihilate := repeat step.
+
+      Local Ltac pre_anihilate :=
+        simpl;
+        subst_body;
+        clear;
+        nt_hideProofs;
+        unfold NTComposeF, NTComposeT; simpl;
+        nt_hideProofs;
+        clear; simpl in *; present_spcategory.
+
+      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : SpecializedFunctor C S * LSObject D)
+            (m1 : Morphism ((S ^ C)%functor * D) s d)
+            (m2 : Morphism ((S ^ C)%functor * D) d d') :
+        RightPushforwardAlong_pre_curried_MorphismOf (Compose m2 m1) =
+        Compose (RightPushforwardAlong_pre_curried_MorphismOf m2)
+                (RightPushforwardAlong_pre_curried_MorphismOf m1).
+      Proof.
+        unfold RightPushforwardAlong_pre_curried_MorphismOf, RightPushforwardAlong_pre_curried_ObjectOf.
+      (* for speed *)
+      Admitted. (*
+      pre_anihilate.
+      anihilate.
+    Qed. *)
+
+      Lemma RightPushforwardAlong_pre_curried_FIdentityOf (o : SpecializedFunctor C S * LSObject D) :
+        RightPushforwardAlong_pre_curried_MorphismOf (Identity o) =
+        Identity (RightPushforwardAlong_pre_curried_ObjectOf o).
+      Proof.
+        unfold RightPushforwardAlong_pre_curried_MorphismOf, RightPushforwardAlong_pre_curried_ObjectOf.
+      (* for speed *)
+      Admitted. (*
+      pre_anihilate.
+      anihilate.
+    Qed. *)
+
+      Definition RightPushforwardAlong_pre_curried : SpecializedFunctor ((S ^ C) * D) (CAT ⇑ S).
+        match goal with
+          | [ |- SpecializedFunctor ?F ?G ] =>
+            exact (Build_SpecializedFunctor F G
+                                            RightPushforwardAlong_pre_curried_ObjectOf
+                                            RightPushforwardAlong_pre_curried_MorphismOf
+                                            RightPushforwardAlong_pre_curried_FCompositionOf
+                                            RightPushforwardAlong_pre_curried_FIdentityOf
+                  )
+        end.
+      Defined.
+
+
+
+
+
+      step.
+      step.
+      Focus 2.
+      anihilate.
+
+      step.
+      step.
+      step.
+      step.
+      simpl in *.
+      Time anihilate.
+      Focus 2.
+      subst_body.
+      subst_body.
+      cbv beta iota zeta.
+      intros; subst_body; expand.
+      apply f_equal.
+      appl
+      intros.
+      simpl.
+
+      refine
+      := RightPushforwardAlong_pre_curried_ObjectOf_pre (fst gd) (snd gd).
+
+
+
+    Definition RightPushforwardAlong_pre_curried_ObjectOf (g : S ^ C) (d : D) : CAT ⇑ S.
+      pose (RightPushforwardAlong_pre_pre_Functor g d).
+      constructor.
+      exact (existT s.
+      constructor.
+      exists (tt, d).
+      subst_body; simpl.
+      pose (@CosliceCategoryProjection _ _ _ _ d F).
+      hnf in g.
+      pose Compose
+
+      constructor.
+      XF
+
+    Definition RightPushforwardAlong_pre_curried : SpecializedFunctor ((C ^ S) * D) (CAT ⇑ S).
+      hnf.
+      rename g into s.
+      revert s.
+      clear.
+      intro s.
+      hnf in s.
+
+
+    Definition RightPushforwardAlong_pre : SpecializedFunctor (S ^ C) ((CAT ⇑ S) ^ D).
+
+    Let RightPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : CAT ⇑ S
+      := existT _ (tt, _) (RightPushforwardAlong_pre_pre_Functor g d) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+
+    Let RightPushforwardAlong_ObjectOf_ObjectOf (g : S ^ C) (d : D) : S
+      := (InducedLimitFunctor HasLimits' (RightPushforwardAlong_pre_Functor g d)).
+    Check (InducedLimitFunctor HasLimits').
+    Check (InducedLimitFunctor (Index2Cat := Index2Cat) (D := S) HasLimits').
+    Let RightPushforwardAlong_ObjectOf_Pre
+    Definition RightPushforwardAlong_ObjectOf (g : S ^ C) : S ^ D.
+
+
+    Definition RightPushforwardAlong_ObjectOf_Pre (g : S ^ C) s d (m : Morphism D s d) :
+      Morphism S (RightPushforwardAlong_ObjectOf_ObjectOf g s) (RightPushforwardAlong_ObjectOf_ObjectOf g d).
+
 
     Let RightPushforwardAlong_ObjectOf_MorphismOf_Pre' (g : S ^ C) s d (m : Morphism D s d) :
       {F0 : unit * SpecializedFunctor (d ↓ F) (s ↓ F) &
@@ -271,11 +599,45 @@ Time pre_anihilate.
     Proof.
       exists (@RightPushforwardAlong_MorphismOf_ComponentsOf s d m).
       present_spnt.
-      unfold RightPushforwardAlong_MorphismOf_ComponentsOf, RightPushforwardAlong_MorphismOf_ComponentsOf_Pre;
-        subst_body; clear.
-      intros.
+      rename d into t.
+      intros d d' g.
+      unfold RightPushforwardAlong_MorphismOf_ComponentsOf, RightPushforwardAlong_ObjectOf, RightPushforwardAlong_ObjectOf_MorphismOf; simpl.
+      pose InducedLimitFunctor_FCompositionOf as H;
+        unfold InducedLimitFunctor_MorphismOf in *.
+      rewrite <- H.
+        simpl in *.
+
+
+      pose (MorphismOf (RightPushforwardAlong_ObjectOf s) g).
+      pose (((RightPushforwardAlong_ObjectOf s) d)).
+      simpl in o.
+      unfold RightPushforwardAlong_ObjectOf_ObjectOf in *.
+      pose (RightPushforwardAlong_pre_Functor s d').
+      pose ((MorphismOf (RightPushforwardAlong_ObjectOf s) g)).
+      simpl in m1.
+      unfold RightPushforwardAlong_ObjectOf_MorphismOf in m1.
+      unfold RightPushforwardAlong_ObjectOf_MorphismOf_Pre in m1; simpl in *.
+      pose (CosliceCategoryInducedFunctor F d' d g) as g'.
+      subst_body.
+      unfold RightPushforwardAlong_MorphismOf_ComponentsOf, RightPushforwardAlong_ObjectOf_MorphismOf; simpl.
+      pose @InducedLimitMap.
+      pose (fun I Index2Object Index2Cat => @InducedLimitFunctor I Index2Object Index2Cat _ S).
+      unfold
+      change
+      Print InducedLimitFunctor.
+      assert (CosliceCategoryProjection d F).
+
+      unfold
+      pose InducedLimitFunctor_MorphismOf.
+      unfold LaxCosliceSpecializedCategory
+      pose CosliceProjectionFunctor.
       Time pre_anihilate.
       simpl.
+
+      unfold RightPushforwardAlong_ObjectOf_MorphismOf; simpl in *.
+      unfold InducedLimitMap; simpl in *.
+
+      unfold InducedLimitFunctor_MorphismOf
 
       simpl; intros; subst_body; simpl in *.
       hnf in s, d.
