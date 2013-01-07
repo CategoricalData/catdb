@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export Adjoint DataMigrationFunctors.
-Require Import Common Notations FunctorCategory LimitFunctors AdjointUnit SpecializedCommaCategory InducedLimitFunctors (* NaturalTransformation Hom Duals CommaCategoryFunctors SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep CommaCategoryFunctorProperties*).
+Require Import Common Notations FunctorCategory LimitFunctors AdjointUnit SpecializedCommaCategory InducedLimitFunctors CommaCategoryFunctors (* NaturalTransformation Hom Duals CommaCategoryFunctors SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep CommaCategoryFunctorProperties*).
 
 Set Implicit Arguments.
 
@@ -42,13 +42,26 @@ Section DataMigrationFunctorsAdjoint.
   Let Δ_F := PullbackAlong C D S F.
 
   Section ΔΠ.
+    (*Variable HasLimits' : forall (F : SpecializedFunctor C D), Limit F.
+    Goal forall F (M := TerminalMorphism_Morphism (HasLimits' F)), True.
+    intros.
+    hnf in M.
+
+
+                           Limit (RightPushforwardAlong_pre_Functor C D S F g d).*)
     Variable HasLimits : forall (g : FunctorCategory C S) (d : D),
                            Limit (RightPushforwardAlong_pre_Functor C D S F g d).
     Let Π_F := RightPushforwardAlong HasLimits.
 
     Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf (G : S ^ C) (c : C) :
-      Morphism S ((ComposeFunctors (RightPushforwardAlong_ObjectOf HasLimits G) F) c) (G c).
-      simpl in *.
+      Morphism S ((ComposeFunctors (RightPushforwardAlong_ObjectOf HasLimits G) F) c) (G c)
+      := (TerminalMorphism_Morphism (HasLimits G (F c))
+                                    (existT
+                                       _
+                                       (tt, c)
+                                       (Identity (F c)) :
+                                       CommaSpecializedCategory_ObjectT (SliceSpecializedCategory_Functor D (F c)) F)).
+    (* simpl in *.
       unfold Limit, LimitObject in *;
         intro_from_universal_objects;
         intro_universal_morphisms;
@@ -79,11 +92,9 @@ Section DataMigrationFunctorsAdjoint.
       end.
       Grab Existential Variables.
       apply Identity.
-    Defined.
+    Defined. *)
 
-    Print InitialObject.
-
-Require Import CommaCategoryFunctors.
+    Eval cbv beta iota zeta delta [Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf] in Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf.
 
     Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf (G : S ^ C) :
       Morphism (S ^ C) ((ComposeFunctors Δ_F Π_F) G) ((IdentityFunctor _) G).
@@ -143,6 +154,29 @@ Require Import CommaCategoryFunctors.
         | [ |- Compose ?a ?b = Compose ?c ?d ] => pose a; pose b; pose c; pose d; simpl in *
       end.
       pose ((HasLimits G (F d))); simpl in *.
+      rename s into c, d into c'.
+      pose (TerminalProperty_Morphism (HasLimits G (F c')) (TerminalMorphism_Object (HasLimits G (F c)))).
+      clear m1; revert e0.
+      match goal with
+        | [ |- context[{| ComponentsOf' := ?x |}] ] => let x' := fresh in set (x' := x)
+      end.
+      intro e0.
+      setoid_rewrite @LeftIdentity in e0.
+      unfold RightPushforwardAlong_pre_Functor in *; simpl in *.
+      pose (fun (g : (S ^ C)%functor) (d : D) =>
+              (CosliceCategoryProjection d F)).
+      intro_universal_properties.
+      unfold unique in *; simpl in *.
+      split_and.
+      match goal with
+        | [ |- _ = Compose _ ?X ] => let x := fresh in pose X as x; move x at bottom; simpl in x
+      end.
+
+      pose @TerminalProperty_Morphism.
+      Set Printing All.
+      pose ((TerminalMorphism_Morphism (HasLimits G (F c)))
+        (existT (fun αβ : unit * LSObject C => Morphism D (F c) (F (snd αβ)))
+           (tt, c) (Identity (F c)))).
       pose ((RightPushforwardAlong_pre_Functor C D S F G (F d))); simpl in *.
       match goal with
         | [ |- Compose ?a ?b = Compose ?c ?d ] => pose a; pose
