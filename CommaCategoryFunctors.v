@@ -11,34 +11,10 @@ Local Notation "a \ C" := (@CosliceSpecializedCategoryOver _ C a) (at level 70) 
 
 Local Open Scope category_scope.
 
-Local Ltac slice_t :=
-  repeat match goal with
-           | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq
-           | [ |- (_ -> _) = (_ -> _) ] => apply f_type_equal
-           | _ => progress (intros; simpl in *; subst_body; simpl in *; trivial)
-           | _ => progress (simpl_eq; simpl in *; trivial)
-           | _ => progress (repeat rewrite Associativity; repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
-           | _ => progress JMeq_eq
-           | _ => apply f_equal
-           | [ |- JMeq (?f ?x) (?f ?y) ] =>
-             apply (@f_equal1_JMeq _ _ x y f)
-           | [ |- JMeq (?f ?x) (?g ?y) ] =>
-             apply (@f_equal_JMeq _ _ _ _ x y f g)
-           | _ =>
-             progress (
-               destruct_type @CommaSpecializedCategory_Object;
-               destruct_type @CommaSpecializedCategory_Morphism;
-               destruct_sig;
-               present_spcategory
-             )
-           | [ |- @eq ?T ?A ?B ] => let T' := eval hnf in T in progress change (@eq T' A B)
-           | [ |- @eq (SpecializedFunctor _ _) _ _ ] => functor_eq
-         end.
-
 Local Ltac rewrite_step :=
   (progress repeat rewrite @LeftIdentity in * )
     || (progress repeat rewrite @RightIdentity in * )
-    || (progress (repeat rewrite @Associativity; apply f_equal))
+    || (progress (repeat rewrite @Associativity; (reflexivity || apply f_equal)))
     || (progress (repeat rewrite <- @Associativity; apply f_equal2; trivial; [])).
 
 Local Ltac quick_step :=
@@ -46,12 +22,6 @@ Local Ltac quick_step :=
      || (apply sig_eq; simpl)
      || apply f_equal
      || (apply f_equal2; trivial; []));
-  trivial.
-
-Local Ltac step :=
-  (quick_step
-     || rewrite_step
-     || (progress auto 1 with category));
   trivial.
 
 Local Ltac pre_anihilate :=
@@ -65,6 +35,23 @@ Local Ltac pre_anihilate :=
   subst_body;
   unfold Object in *;
   simpl in *;
+  trivial.
+
+Local Ltac slice_step :=
+  match goal with
+    | _ => apply Functor_eq; simpl; intros; pre_anihilate
+    | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq; pre_anihilate
+    | [ |- JMeq (?f ?x) (?f ?y) ] =>
+      apply (@f_equal1_JMeq _ _ x y f); pre_anihilate
+    | [ |- JMeq (?f ?x) (?g ?y) ] =>
+      apply (@f_equal_JMeq _ _ _ _ x y f g); pre_anihilate
+  end.
+
+Local Ltac step :=
+  (quick_step
+     || rewrite_step
+     || (progress auto 1 with category)
+     || slice_step);
   trivial.
 
 Local Ltac anihilate := pre_anihilate; repeat step.
@@ -339,17 +326,15 @@ Section CommaCategoryProjectionFunctor.
 
   Lemma CommaCategoryProjectionFunctor_FIdentityOf x :
     CommaCategoryProjectionFunctor_MorphismOf (Identity x) = Identity _.
-    (*abstract (expand; slice_t). (* TODO(jgross): Fix that this is painfully slow *)
-  Qed.*)
-  Admitted.
+    Time (expand; anihilate). (* 20 s  :-( *)
+  Qed.
 
   Lemma CommaCategoryProjectionFunctor_FCompositionOf s d d' m m' :
     CommaCategoryProjectionFunctor_MorphismOf (@Compose _ _ s d d' m m')
     = Compose (CommaCategoryProjectionFunctor_MorphismOf m)
               (CommaCategoryProjectionFunctor_MorphismOf m').
-    (* expand; slice_t. (* TODO(jgross): Fix that this is painfully slow *)
-  Qed. *)
-  Admitted.
+    Time (expand; anihilate). (* 57 s  :-( :-( *)
+  Qed.
 
   Definition CommaCategoryProjectionFunctor :
     SpecializedFunctor ((OppositeCategory (C ^ A)) * (C ^ B))
