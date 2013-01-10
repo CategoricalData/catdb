@@ -51,33 +51,22 @@ Section Law0.
     );
     present_spcategory;
     abstract (
-      intros;
+        intros;
         nt_eq;
-        apply functional_extensionality_dep;
-          let x := fresh in intro x; destruct x
-    ).
+        destruct_head_hnf Empty_set
+      ).
   Defined.
 
   Lemma ExponentialLaw0 : ComposeFunctors ExponentialLaw0Functor ExponentialLaw0Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw0Functor_Inverse ExponentialLaw0Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq; try f_equal;
-      functor_eq;
-      nt_eq;
-      hnf in *;
-        repeat subst;
-          trivial;
-            repeat (apply functional_extensionality_dep; intro);
-              destruct_head_hnf sum;
-              destruct_head_hnf Empty_set;
-              destruct_head_hnf unit;
-              destruct_head_hnf @eq;
-              try reflexivity;
-                functor_eq;
-                nt_eq;
-                repeat (apply functional_extensionality_dep; intro);
-                  repeat (apply functional_extensionality_dep_JMeq; intros);
-                    destruct_head_hnf Empty_set.
+    split;
+    repeat (functor_eq; nt_eq; unfold ComponentsOf);
+    destruct_head_hnf sum;
+    destruct_head_hnf Empty_set;
+    destruct_head_hnf unit;
+    destruct_head_hnf @eq;
+    trivial.
   Qed.
 End Law0.
 
@@ -440,14 +429,12 @@ Section Law2.
           )
       end;
       simpl in *; present_spnt;
-        repeat (let H := fresh in intro H; destruct H);
-          simpl in *;
-            nt_eq;
-            simpl in *;
-              apply functional_extensionality_dep; let H := fresh in intro H; destruct H;
-                unfold ExponentialLaw2Functor_Inverse_MorphismOf, ExponentialLaw2Functor_Inverse_MorphismOf_ComponentsOf, ExponentialLaw2Functor_Inverse_ObjectOf_ObjectOf;
-                  simpl in *;
-                    reflexivity.
+      abstract (
+          nt_eq; intros;
+          destruct_head_hnf @prod;
+          destruct_head_hnf @sum;
+          reflexivity
+        ).
     Defined.
   End inverse.
 
@@ -457,6 +444,7 @@ Section Law2.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq
@@ -610,6 +598,7 @@ Section Law3.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq
@@ -789,6 +778,7 @@ Section Law4.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq
