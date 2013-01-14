@@ -10,6 +10,7 @@ Local Open Scope category_scope.
 
 Local Ltac slice_t :=
   repeat match goal with
+           | [ |- @eq (SpecializedFunctor _ _) _ _ ] => apply Functor_eq; intros
            | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq
            | [ |- (_ -> _) = (_ -> _) ] => apply f_type_equal
            | _ => progress (intros; simpl in *; trivial; subst_body)
@@ -28,45 +29,24 @@ Local Ltac slice_t :=
                destruct_sig;
                present_spcategory
              )
-           | [ |- @eq (SpecializedFunctor _ _) _ _ ] => functor_eq
          end.
 
 Section FCompositionOf.
+  Context `(A : @SpecializedCategory objA).
+  Context `(B : @SpecializedCategory objB).
   Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Variable F : SpecializedFunctor C D.
 
-  Section Slice.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
-    Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
+  Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
+        (m1 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)
+        (m2 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) d d') :
+    CommaCategoryInducedFunctor (Compose m2 m1)
+    = ComposeFunctors (CommaCategoryInducedFunctor m2) (CommaCategoryInducedFunctor m1).
+    Time slice_t. (* 44 s *)
+  Qed.
 
-    Lemma SliceCategoryInducedFunctor_FCompositionOf s d d' (m1 : Morphism D s d) (m2 : Morphism D d d')
-    : SliceCategoryInducedFunctor F s d' (Compose m2 m1)
-      = ComposeFunctors (SliceCategoryInducedFunctor F d d' m2) (SliceCategoryInducedFunctor F s d m1).
-      slice_t.
-    Qed.
-
-    Lemma SliceCategoryInducedFunctor_FIdentityOf x
-    : SliceCategoryInducedFunctor F x x (Identity x) = IdentityFunctor _.
-      slice_t.
-    Qed.
-  End Slice.
-
-  Section Coslice.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
-    Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).
-
-    Let DOp := OppositeCategory D.
-
-    Lemma CosliceCategoryInducedFunctor_FCompositionOf s d d' (m1 : Morphism D d s) (m2 : Morphism D d' d)
-    : CosliceCategoryInducedFunctor F s d' (Compose m1 m2)
-      = ComposeFunctors (CosliceCategoryInducedFunctor F d d' m2) (CosliceCategoryInducedFunctor F s d m1).
-      slice_t.
-    Qed.
-
-    Lemma CosliceCategoryInducedFunctor_FIdentityOf x
-    : CosliceCategoryInducedFunctor F x x (Identity x) = IdentityFunctor _.
-      slice_t.
-    Qed.
-  End Coslice.
+  Lemma CommaCategoryInducedFunctor_FIdentityOf (x : (OppositeCategory (C ^ A)) * (C ^ B)) :
+    CommaCategoryInducedFunctor (Identity x)
+    = IdentityFunctor _.
+    Time slice_t. (* 11 s *)
+  Qed.
 End FCompositionOf.

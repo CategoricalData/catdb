@@ -1,4 +1,4 @@
-Require Import JMeq ProofIrrelevance.
+Require Import JMeq ProofIrrelevance FunctionalExtensionality.
 Require Export Notations SpecializedCategory Category.
 Require Import Common StructureEquality FEqualDep.
 
@@ -105,12 +105,23 @@ Ltac functor_hideProofs :=
          end.
 
 Section Functors_Equal.
-  Lemma Functor_eq objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
+  Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
     -> MorphismOf F == MorphismOf G
     -> F = G.
     destruct F, G; simpl; intros; specialize_all_ways; repeat subst;
       f_equal; apply proof_irrelevance.
+  Qed.
+
+  Lemma Functor_eq objC C objD D :
+    forall (F G : @SpecializedFunctor objC C objD D),
+      (forall x, ObjectOf F x = ObjectOf G x)
+      -> (forall s d m, MorphismOf F (s := s) (d := d) m == MorphismOf G (s := s) (d := d) m)
+      -> F = G.
+    intros; cut (ObjectOf F = ObjectOf G); intros; try apply Functor_eq'; destruct F, G; simpl in *; repeat subst;
+    try apply eq_JMeq;
+    repeat (apply functional_extensionality_dep; intro); trivial;
+    try apply JMeq_eq; trivial.
   Qed.
 
   Lemma Functor_JMeq objC C objD D objC' C' objD' D' :

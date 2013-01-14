@@ -1,6 +1,6 @@
 Require Import JMeq FunctionalExtensionality ProofIrrelevance.
 Require Export FunctorCategory SumCategory ProductCategory Functor.
-Require Import Common NatCategory FEqualDep.
+Require Import Common NatCategory FEqualDep InitialTerminalCategory.
 
 Set Implicit Arguments.
 
@@ -9,75 +9,46 @@ Generalizable All Variables.
 Section Law0.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1
-    :=
-    Build_SpecializedFunctor (C ^ 0) 1
-    (fun _ => tt)
-    (fun _ _ _ => eq_refl)
-    (fun _ _ _ _ _ => eq_refl)
-    (fun _ => eq_refl).
+  Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1 := FunctorTo1 _.
 
-  Definition ExponentialLaw0Functor_Inverse_ObjectOf : (1 -> C ^ 0)%category.
-  Proof.
-    intro x; clear x.
-    refine (Build_SpecializedFunctor 0 C
-      (fun x => match x with end)
-      (fun s d m => match s with end)
-      _
-      _
-    );
-    abstract (
-      let x := fresh in intro x; case x
-    ).
-  Defined.
+  Definition ExponentialLaw0Functor_Inverse_ObjectOf : (1 -> C ^ 0)%category := (fun _ => FunctorFrom0 _).
 
   Global Arguments ExponentialLaw0Functor_Inverse_ObjectOf / _.
 
   Definition ExponentialLaw0Functor_Inverse_MorphismOf s d (m : Morphism 1 s d) :
     Morphism (C ^ 0) (ExponentialLaw0Functor_Inverse_ObjectOf s) (ExponentialLaw0Functor_Inverse_ObjectOf d)
     := Build_SpecializedNaturalTransformation (ExponentialLaw0Functor_Inverse_ObjectOf s) (ExponentialLaw0Functor_Inverse_ObjectOf d)
-    (fun c => match c with end)
-    (fun s' d' m' => match s' return _ with end).
+                                              (fun c => match c with end)
+                                              (fun s' d' m' => match s' return _ with end).
 
   Arguments ExponentialLaw0Functor_Inverse_MorphismOf / _ _ _.
 
   Definition ExponentialLaw0Functor_Inverse : SpecializedFunctor 1 (C ^ 0).
   Proof.
     refine (Build_SpecializedFunctor 1 (C ^ 0)
-      ExponentialLaw0Functor_Inverse_ObjectOf
-      ExponentialLaw0Functor_Inverse_MorphismOf
-      _
-      _
-    );
+                                     ExponentialLaw0Functor_Inverse_ObjectOf
+                                     ExponentialLaw0Functor_Inverse_MorphismOf
+                                     _
+                                     _
+           );
     present_spcategory;
     abstract (
-      intros;
+        intros;
         nt_eq;
-        apply functional_extensionality_dep;
-          let x := fresh in intro x; destruct x
-    ).
+        destruct_head_hnf Empty_set
+      ).
   Defined.
 
   Lemma ExponentialLaw0 : ComposeFunctors ExponentialLaw0Functor ExponentialLaw0Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw0Functor_Inverse ExponentialLaw0Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq; try f_equal;
-      functor_eq;
-      nt_eq;
-      hnf in *;
-        repeat subst;
-          trivial;
-            repeat (apply functional_extensionality_dep; intro);
-              destruct_head_hnf sum;
-              destruct_head_hnf Empty_set;
-              destruct_head_hnf unit;
-              destruct_head_hnf @eq;
-              try reflexivity;
-                functor_eq;
-                nt_eq;
-                repeat (apply functional_extensionality_dep; intro);
-                  repeat (apply functional_extensionality_dep_JMeq; intros);
-                    destruct_head_hnf Empty_set.
+    split;
+    repeat (functor_eq; nt_eq; unfold ComponentsOf);
+    destruct_head_hnf sum;
+    destruct_head_hnf Empty_set;
+    destruct_head_hnf unit;
+    destruct_head_hnf @eq;
+    trivial.
   Qed.
 End Law0.
 
@@ -87,17 +58,12 @@ Section Law0'.
 
   Definition ExponentialLaw0'Functor : SpecializedFunctor (0 ^ C) 0
     := Build_SpecializedFunctor (0 ^ C) 0
-    (fun F => F c)
-    (fun s d m => match (s c) with end)
-    (fun x _ _ _ _ => match (x c) with end)
-    (fun x => match (x c) with end).
+                                (fun F => F c)
+                                (fun s d m => match (s c) with end)
+                                (fun x _ _ _ _ => match (x c) with end)
+                                (fun x => match (x c) with end).
 
-  Definition ExponentialLaw0'Functor_Inverse : SpecializedFunctor 0 (0 ^ C)
-    := Build_SpecializedFunctor 0 (0 ^ C)
-    (fun x => match x with end)
-    (fun s d m => match s with end)
-    (fun x _ _ _ _ => match x with end)
-    (fun x => match x with end).
+  Definition ExponentialLaw0'Functor_Inverse : SpecializedFunctor 0 (0 ^ C) := FunctorFrom0 _.
 
   Lemma ExponentialLaw0' : ComposeFunctors ExponentialLaw0'Functor ExponentialLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw0'Functor_Inverse ExponentialLaw0'Functor = IdentityFunctor _.
@@ -114,11 +80,11 @@ Section Law1.
 
   Definition ExponentialLaw1Functor : SpecializedFunctor (C ^ 1) C
     := Build_SpecializedFunctor (C ^ 1) C
-    (fun F => F tt)
-    (fun s d m => m tt)
-    (fun _ _ _ _ _ => eq_refl)
-    (fun _ => eq_refl).
-
+                                (fun F => F tt)
+                                (fun s d m => m tt)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
+  
   Definition ExponentialLaw1Functor_Inverse_ObjectOf : C -> (C ^ 1)%category.
   Proof.
     refine (fun c => Build_SpecializedFunctor 1 C
@@ -185,27 +151,19 @@ End Law1.
 Section Law1'.
   Context `(C : @SpecializedCategory objC).
 
-  Let FunctorTo1 `(D : @SpecializedCategory objD) : SpecializedFunctor D 1
-    := Build_SpecializedFunctor D 1
-    (fun _ => tt)
-    (fun _ _ _ => eq_refl)
-    (fun _ _ _ _ _ => eq_refl)
-    (fun _ => eq_refl).
-
-
   Definition ExponentialLaw1'Functor : SpecializedFunctor (1 ^ C) 1 := FunctorTo1 _.
 
   Definition ExponentialLaw1'Functor_Inverse : SpecializedFunctor 1 (1 ^ C).
   Proof.
     refine (Build_SpecializedFunctor 1 (1 ^ C)
-      (fun _ => FunctorTo1 _)
-      (fun s d m => Build_SpecializedNaturalTransformation (FunctorTo1 C) (FunctorTo1 C)
-        (fun _ => Identity (C := 1) tt)
-        (fun _ _ _ => eq_refl)
-      )
-      _
-      _
-    );
+                                     (fun _ => FunctorTo1 _)
+                                     (fun s d m => Build_SpecializedNaturalTransformation (FunctorTo1 C) (FunctorTo1 C)
+                                                                                          (fun _ => Identity (C := 1) tt)
+                                                                                          (fun _ _ _ => eq_refl)
+                                     )
+                                     _
+                                     _
+           );
     abstract nt_eq.
   Defined.
 
@@ -440,14 +398,12 @@ Section Law2.
           )
       end;
       simpl in *; present_spnt;
-        repeat (let H := fresh in intro H; destruct H);
-          simpl in *;
-            nt_eq;
-            simpl in *;
-              apply functional_extensionality_dep; let H := fresh in intro H; destruct H;
-                unfold ExponentialLaw2Functor_Inverse_MorphismOf, ExponentialLaw2Functor_Inverse_MorphismOf_ComponentsOf, ExponentialLaw2Functor_Inverse_ObjectOf_ObjectOf;
-                  simpl in *;
-                    reflexivity.
+      abstract (
+          nt_eq; intros;
+          destruct_head_hnf @prod;
+          destruct_head_hnf @sum;
+          reflexivity
+        ).
     Defined.
   End inverse.
 
@@ -457,6 +413,7 @@ Section Law2.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq
@@ -610,6 +567,7 @@ Section Law3.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq
@@ -789,6 +747,7 @@ Section Law4.
     repeat match goal with
              | _ => reflexivity
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
+             | [ H : Empty_set |- _ ] => destruct H
              | _ => split
              | _ => progress simpl_eq
              | _ => progress functor_eq

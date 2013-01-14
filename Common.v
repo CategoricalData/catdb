@@ -829,27 +829,37 @@ Section unit.
 
   Lemma unit_eq (u u' : unit) : u = u'.
     case u; case u'; reflexivity.
-  Qed.
+  Defined.
+
+  Lemma unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _.
+    destruct u; destruct H; reflexivity.
+  Defined.
+
+  Lemma unit_eq_eq (u u' : unit) (H H' : u = u') : H = H'.
+    transitivity (@unit_eq u u');
+    destruct_head @eq; subst_body; destruct_head unit; reflexivity.
+  Defined.
 
   Lemma unit_JMeq (u u' : unit) : u == u'.
     case u; case u'; reflexivity.
-  Qed.
+  Defined.
 
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
-  Qed.
+  Defined.
 
   Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
     destruct a.
-  Qed.
+  Defined.
 
   Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
     destruct b.
-  Qed.
+  Defined.
 End unit.
 
 Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Hint Extern 0 (@eq (@eq unit _ _) _ _) => apply unit_eq_eq.
 Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
 Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.

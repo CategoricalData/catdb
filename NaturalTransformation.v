@@ -1,4 +1,4 @@
-Require Import JMeq ProofIrrelevance.
+Require Import JMeq ProofIrrelevance FunctionalExtensionality.
 Require Export Notations Functor.
 Require Import Common StructureEquality FEqualDep.
 
@@ -106,12 +106,20 @@ Ltac nt_hideProofs :=
          end.
 
 Section NaturalTransformations_Equal.
-  Lemma NaturalTransformation_eq objC C objD D F G :
+  Lemma NaturalTransformation_eq' objC C objD D F G :
     forall (T U : @SpecializedNaturalTransformation objC C objD D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
     destruct T, U; simpl; intros; repeat subst;
       f_equal; apply proof_irrelevance.
+  Qed.
+
+  Lemma NaturalTransformation_eq objC C objD D F G :
+    forall (T U : @SpecializedNaturalTransformation objC C objD D F G),
+    (forall x, ComponentsOf T x = ComponentsOf U x)
+    -> T = U.
+    intros; apply NaturalTransformation_eq'; destruct T, U; simpl in *; repeat subst;
+    apply functional_extensionality_dep; trivial.
   Qed.
 
   Lemma NaturalTransformation_JMeq objC C objD D objC' C' objD' D' :

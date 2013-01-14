@@ -23,7 +23,7 @@ Section OppositeCategory.
     (fun _ _ => LeftIdentity' C _ _).
 End OppositeCategory.
 
-Notation "C ᵒᵖ" := (OppositeCategory C) : category_scope.
+(*Notation "C ᵒᵖ" := (OppositeCategory C) : category_scope.*)
 
 Section DualCategories.
   Context `(C : @SpecializedCategory objC).
@@ -73,7 +73,7 @@ Section OppositeFunctor.
   Defined.
 End OppositeFunctor.
 
-Notation "C ᵒᵖ" := (OppositeFunctor C) : functor_scope.
+(*Notation "C ᵒᵖ" := (OppositeFunctor C) : functor_scope.*)
 
 Section OppositeFunctor_Id.
   Context `(C : @SpecializedCategory objC).
@@ -106,7 +106,7 @@ Section OppositeNaturalTransformation.
   Defined.
 End OppositeNaturalTransformation.
 
-Notation "C ᵒᵖ" := (OppositeNaturalTransformation C) : natural_transformation_scope.
+(*Notation "C ᵒᵖ" := (OppositeNaturalTransformation C) : natural_transformation_scope.*)
 
 Section OppositeNaturalTransformation_Id.
   Context `(C : @SpecializedCategory objC).

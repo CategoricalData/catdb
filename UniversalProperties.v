@@ -12,6 +12,16 @@ Section UniversalMorphism.
      *)
   Variables C D : Category.
 
+  Local Ltac intro_t :=
+    repeat intro;
+    destruct_sig;
+    destruct_head_hnf prod;
+    destruct_head_hnf unit;
+    simpl_eq;
+    repeat rewrite @RightIdentity in *;
+    repeat rewrite @LeftIdentity in *;
+    intuition.
+
   Section InitialMorphism.
     Local Notation "A ↓ F" := (CosliceCategory A F).
     Variable X : C.
@@ -38,7 +48,42 @@ Section UniversalMorphism.
        *)
     Definition InitialMorphism := { Aφ : (X ↓ U) & InitialObject Aφ }.
 
-    Section AbstractionBarrier.
+    Section IntroductionAbstractionBarrier.
+      Definition Build_InitialMorphism'
+          (A : D) (φ : Morphism C X (U A)) 
+          (UniversalProperty : forall (A' : D) (φ' : Morphism C X (U A')),
+                                 { m : Morphism D A A' |
+                                   Compose (MorphismOf U m) φ = φ'
+                                   /\
+                                   forall m' : Morphism D A A',
+                                     Compose (MorphismOf U m') φ = φ'
+                                     -> m' = m } ) :
+        InitialMorphism.
+        exists (existT _ (tt, A) φ).
+        intro o'.
+        specialize (UniversalProperty (snd (projT1 o')) (projT2 o')).
+        match goal with
+          | [ |- { _ : ?T | _ } ] => match eval hnf in T with
+                                       | sig ?P => cut (P (@unit_eq _ _, proj1_sig UniversalProperty));
+                                                  [ let H := fresh in
+                                                    intro H;
+                                                      exists (exist _ (@unit_eq _ _, proj1_sig UniversalProperty) H)
+                                                  | ]
+                                     end
+        end;
+          abstract intro_t.
+      Defined.
+      
+      Arguments Build_InitialMorphism' / .
+      Local Arguments Object / .
+      Local Arguments CommaCategory_Object / .
+      Local Arguments CommaCategory_Morphism / .
+      
+      Definition Build_InitialMorphism A φ UniversalProperty : InitialMorphism
+        := Eval simpl in @Build_InitialMorphism' A φ UniversalProperty.
+    End IntroductionAbstractionBarrier.
+
+    Section EliminationAbstractionBarrier.
       Variable M : InitialMorphism.
 
       Definition InitialMorphism_Object : D := snd (projT1 (projT1 M)).
@@ -62,14 +107,16 @@ Section UniversalMorphism.
           | [ H : _ |- _ ] => revert dependent H; rewrite @RightIdentity; intros
         end.
         split; try (assumption || symmetry; assumption); intros.
+        destruct_head @prod;
+          destruct_head unit.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
-            specialize (H (existT _ (tt, m) pf));
+            specialize (H (existT _ (eq_refl, m) pf));
               apply eq_sig_fst in H; apply (f_equal (@snd _ _)) in H;
                 solve [ intuition ]
         end.
       Qed.
-    End AbstractionBarrier.
+    End EliminationAbstractionBarrier.
   End InitialMorphism.
 
   Section TerminalMorphism.
@@ -97,6 +144,41 @@ Section UniversalMorphism.
        *)
     Definition TerminalMorphism := { Aφ : (U ↓ X) & TerminalObject Aφ }.
 
+    Section IntroductionAbstractionBarrier.
+      Definition Build_TerminalMorphism'
+                 (A : D) (φ : Morphism C (U A) X) 
+                 (UniversalProperty : forall (A' : D) (φ' : Morphism C (U A') X),
+                                        { m : Morphism D A' A |
+                                          Compose φ (MorphismOf U m) = φ'
+                                          /\
+                                          forall m' : Morphism D A' A,
+                                            Compose φ (MorphismOf U m') = φ'
+                                            -> m' = m } ) :
+        TerminalMorphism.
+        exists (existT _ (A, tt) φ).
+        intro o'.
+        specialize (UniversalProperty (fst (projT1 o')) (projT2 o')).
+        match goal with
+          | [ |- { _ : ?T | _ } ] => match eval hnf in T with
+                                       | sig ?P => cut (P (proj1_sig UniversalProperty, @unit_eq _ _));
+                                                  [ let H := fresh in
+                                                    intro H;
+                                                      exists (exist _ (proj1_sig UniversalProperty, @unit_eq _ _) H)
+                                                  | ]
+                                     end
+        end;
+          abstract intro_t.
+      Defined.
+      
+      Arguments Build_TerminalMorphism' / .
+      Local Arguments Object / .
+      Local Arguments CommaCategory_Object / .
+      Local Arguments CommaCategory_Morphism / .
+      
+      Definition Build_TerminalMorphism A φ UniversalProperty : TerminalMorphism
+        := Eval simpl in @Build_TerminalMorphism' A φ UniversalProperty.
+    End IntroductionAbstractionBarrier.
+
     Section AbstractionBarrier.
       Variable M : TerminalMorphism.
 
@@ -121,10 +203,12 @@ Section UniversalMorphism.
         end.
         destruct_all_hypotheses; unfold is_unique in *.
         split; try (assumption || symmetry; assumption); intros.
+        destruct_head @prod;
+          destruct_head unit.
         match goal with
           | [ m : _, pf : _, H : forall _, _ |- _ ] =>
             symmetry in pf;
-              specialize (H (existT _ (m, tt) pf));
+              specialize (H (existT _ (m, eq_refl) pf));
                 apply eq_sig_fst in H; apply (f_equal (@fst _ _)) in H;
                   solve [ intuition ]
         end.
