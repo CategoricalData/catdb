@@ -1,7 +1,7 @@
 Require Export SpecializedCategory DiscreteCategory.
 Require Import Common.
 
-Fixpoint CardinalityRepresentative (n : nat) : Type :=
+Fixpoint CardinalityRepresentative (n : nat) : Set :=
   match n with
     | O => Empty_set
     | 1 => unit

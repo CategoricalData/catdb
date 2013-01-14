@@ -314,7 +314,7 @@ Section CommaCategoryProjectionFunctor.
              (CommaCategoryProjectionFunctor_ObjectOf s)
              (CommaCategoryProjectionFunctor_ObjectOf d).
     hnf in *; constructor; simpl in *.
-    exists (CommaCategoryInducedFunctor m, tt).
+    exists (CommaCategoryInducedFunctor m, @unit_eq _ _).
     abstract (
         simpl;
         functor_eq;
