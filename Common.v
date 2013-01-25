@@ -532,6 +532,25 @@ Ltac rewrite_eta_in Hf :=
            | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
          end.
 
+Ltac destruct_match_in' T :=
+  match T with
+    | appcontext[match ?E with _ => _ end] => let x := fresh in set (x := E) in *; destruct x
+  end.
+
+Ltac destruct_match_in T :=
+  repeat match T with
+           | appcontext[match ?E with _ => _ end] => let x := fresh in set (x := E) in *; destruct x
+         end.
+
+Ltac destruct_match_in_goal :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with _ => _ end] ] => let x := fresh in set (x := E) in *; destruct x
+         end.
+
+Ltac destruct_match_in_hyp Hf :=
+  repeat (let T := type of Hf in
+          destruct_match_in' T).
+
 Ltac rewrite_eta :=
   repeat match goal with
            | [ |- context[match ?E with existT2 _ _ _ => _ end] ] => rewrite (sigT2_eta E); simpl
@@ -784,6 +803,65 @@ Ltac expand :=
     | [ |- ?X == ?Y ] =>
       let X' := eval hnf in X in let Y' := eval hnf in Y in change (X' == Y')
   end; simpl.
+
+
+Ltac pre_abstract_trailing_props_helper T B Rel :=
+  cut { A : T | Rel A B };
+  [ let x := fresh in intro x; exists (proj1_sig x); destruct x as [ ? x ]; unfold proj1_sig; destruct x; reflexivity
+  | ].
+
+Ltac pre_abstract_trailing_props :=
+  match goal with
+    | [ |- { F0 : ?T | @?P F0 } ] => let T' := eval hnf in T in change { F0 : T' | P F0 }; cbv beta
+  end;
+  try match goal with
+        | [ |- { A : ?T | identity A ?B } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | identity ?B A } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | ?B = A } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | @JMeq ?TB ?B ?T A } ] => pre_abstract_trailing_props_helper T B (fun a b => @JMeq T a TB b)
+      end.
+
+Local Ltac clear_then_exact pf :=
+  match goal with
+    | [ H : _ |- _ ] => clear H; clear_then_exact pf
+    | _ => abstract (exact pf)
+  end.
+
+Local Ltac do_replace_trailing_matching_with_goal term matcher tac :=
+  match term with
+    | ?f ?x => (first [ (matcher x;
+                         let t := type of x in
+                         let t' := (eval simpl in t) in
+                         let y := fresh in
+                         assert (y : t') by ((clear; abstract (exact x)) || clear_then_exact x);
+                         (do_replace_trailing_matching_with_goal f matcher ltac:(fun H => tac (H y)))
+                           || fail 2 "tactic failed")
+                      | (tac term || fail 1 "tactic failed") ])
+    | _ => tac term || fail 1 "tactic failed"
+  end.
+
+Ltac exact_replace_trailing_matching_with_goal term matcher :=
+  do_replace_trailing_matching_with_goal term matcher ltac:(fun H => exact H).
+
+Ltac type_of_type_of_matches T :=
+  fun term =>
+    let t := type of term in
+    let t' := type of t in
+    match eval hnf in t' with
+      | T => idtac
+    end.
+
+Ltac abstract_trailing_props term :=
+  let term' := (eval hnf in term) in
+  exact_replace_trailing_matching_with_goal term' ltac:(type_of_type_of_matches Prop).
+
+Ltac hnf_simpl_abstract_trailing_props term :=
+  let term' := (eval hnf in term) in
+  let term'' := (eval simpl in term') in
+  exact_replace_trailing_matching_with_goal term'' ltac:(type_of_type_of_matches Prop).
+
+Ltac evar_evar_Type t :=
+  let T := fresh in evar (T : Type); evar (t : T); subst T.
 
 (* [hideProof' pf] generalizes [pf] only if it does not already exist
    as a hypothesis *)
