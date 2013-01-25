@@ -22,13 +22,14 @@ Section SpecializedFunctor.
      (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
      (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
      **)
-  Record SpecializedFunctor := {
-    ObjectOf' : objC -> objD;
-    MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
-    FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
-      MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
-    FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
-  }.
+  Record SpecializedFunctor :=
+    {
+      ObjectOf' : objC -> objD;
+      MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
+      FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
+                          MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
+      FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
+    }.
 End SpecializedFunctor.
 
 Bind Scope functor_scope with SpecializedFunctor.
@@ -105,25 +106,25 @@ Ltac functor_hideProofs :=
          end.
 
 Ltac functor_tac_abstract_trailing_props F tac :=
-  let F' := (eval hnf in F) in
-  let F'' := (tac F') in
-  match F'' with
-    | @Build_SpecializedFunctor ?objC ?C
-                                ?objD ?D
-                                ?OO
-                                ?MO
-                                ?FCO
-                                ?FIO =>
-      let H := fresh in
-      pose F'' as H;
-        revert H; clear; intro H; clear H;
+  let H := fresh in
+  pose F as H;
+    revert H; clear; intro H; clear H;
+    let F' := (eval hnf in F) in
+    let F'' := (tac F') in
+    match F'' with
+      | @Build_SpecializedFunctor ?objC ?C
+                                  ?objD ?D
+                                  ?OO
+                                  ?MO
+                                  ?FCO
+                                  ?FIO =>
         refine (@Build_SpecializedFunctor objC C objD D
                                           OO
                                           MO
                                           _
                                           _);
-        abstract (exact FCO || exact FIO)
-  end.
+          [ abstract exact FCO | abstract exact FIO ]
+    end.
 Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => F').
 Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
