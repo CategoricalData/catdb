@@ -434,7 +434,7 @@ Section DataMigrationFunctors.
       Definition RightPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedLimitFunctor HasLimits') RightPushforwardAlongFunctor_pre_curried.
 
-      Definition RightPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
+      Definition RightPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C))
         := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) RightPushforwardAlongFunctor_curried).
 
 
@@ -689,8 +689,8 @@ Section DataMigrationFunctors.
       Definition LeftPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedColimitFunctor HasColimits') LeftPushforwardAlongFunctor_pre_curried.
 
-      Definition LeftPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
-          := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) LeftPushforwardAlongFunctor_curried).
+      Definition LeftPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C))
+        := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) LeftPushforwardAlongFunctor_curried).
     End applied.
   End Σ.
 End DataMigrationFunctors.
