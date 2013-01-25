@@ -821,13 +821,13 @@ Ltac pre_abstract_trailing_props :=
         | [ |- { A : ?T | @JMeq ?TB ?B ?T A } ] => pre_abstract_trailing_props_helper T B (fun a b => @JMeq T a TB b)
       end.
 
-Local Ltac clear_then_exact pf :=
+Ltac clear_then_exact pf :=
   match goal with
     | [ H : _ |- _ ] => clear H; clear_then_exact pf
     | _ => abstract (exact pf)
   end.
 
-Local Ltac do_replace_trailing_matching_with_goal term matcher tac :=
+Ltac do_replace_trailing_matching_with_goal term matcher tac :=
   match term with
     | ?f ?x => (first [ (matcher x;
                          let t := type of x in
