@@ -106,12 +106,12 @@ Ltac functor_hideProofs :=
          end.
 
 Ltac functor_tac_abstract_trailing_props F tac :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
   let H := fresh in
-  pose F as H;
+  pose F'' as H;
     hnf in H;
     revert H; clear; intro H; clear H;
-    let F' := (eval hnf in F) in
-    let F'' := (tac F') in
     match F'' with
       | @Build_SpecializedFunctor ?objC ?C
                                   ?objD ?D
@@ -173,12 +173,12 @@ Ltac functor_eq_step := functor_eq_step_with idtac.
 Ltac functor_eq := functor_hideProofs; functor_eq_with idtac.
 
 Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
   let H := fresh in
-  pose F as H;
+  pose F'' as H;
     hnf in H;
     revert H; clear; intro H; clear H;
-    let F' := (eval hnf in F) in
-    let F'' := (tac F') in
     match F'' with
       | @Build_SpecializedFunctor ?objC ?C
                                   ?objD ?D

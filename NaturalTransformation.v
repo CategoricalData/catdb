@@ -106,12 +106,12 @@ Ltac nt_hideProofs :=
          end.
 
 Ltac nt_tac_abstract_trailing_props T tac :=
+  let T' := (eval hnf in T) in
+  let T'' := (tac T') in
   let H := fresh in
-  pose T as H;
+  pose T'' as H;
     hnf in H;
     revert H; clear; intro H; clear H;
-    let T' := (eval hnf in T) in
-    let T'' := (tac T') in
     match T'' with
       | @Build_SpecializedNaturalTransformation ?objC ?C
                                                 ?objD ?D
@@ -171,12 +171,12 @@ Ltac nt_eq := nt_hideProofs; nt_eq_with idtac.
 
 
 Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
+  let T' := (eval hnf in T) in
+  let T'' := (tac T') in
   let H := fresh in
-  pose T as H;
+  pose T'' as H;
     hnf in H;
     revert H; clear; intro H; clear H;
-    let T' := (eval hnf in T) in
-    let T'' := (tac T') in
     match T'' with
       | @Build_SpecializedNaturalTransformation ?objC ?C
                                                 ?objD ?D
