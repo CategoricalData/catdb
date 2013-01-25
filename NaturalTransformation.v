@@ -106,23 +106,23 @@ Ltac nt_hideProofs :=
          end.
 
 Ltac nt_tac_abstract_trailing_props T tac :=
-  let T' := (eval hnf in T) in
-  let T'' := (tac T') in
-  match T'' with
-    | @Build_SpecializedNaturalTransformation ?objC ?C
-                                              ?objD ?D
-                                              ?F
-                                              ?G
-                                              ?CO
-                                              ?COM =>
-      let H := fresh in
-      pose T'' as H;
-        revert H; clear; intro H; clear H;
+  let H := fresh in
+  pose T as H;
+    revert H; clear; intro H; clear H;
+    let T' := (eval hnf in T) in
+    let T'' := (tac T') in
+    match T'' with
+      | @Build_SpecializedNaturalTransformation ?objC ?C
+                                                ?objD ?D
+                                                ?F
+                                                ?G
+                                                ?CO
+                                                ?COM =>
         refine (@Build_SpecializedNaturalTransformation objC C objD D F G
                                                         CO
                                                         _);
-        abstract exact COM
-  end.
+          abstract exact COM
+    end.
 Ltac nt_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => T').
 Ltac nt_simpl_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => let T'' := eval simpl in T' in T'').
 
