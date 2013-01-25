@@ -81,8 +81,11 @@ End Law0'.
 Section Law1.
   Context `(C : @SpecializedCategory objC).
 
+  Let ProductLaw1Functor' : SpecializedFunctor (C * 1) C.
+    functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
+  Defined.
   Definition ProductLaw1Functor : SpecializedFunctor (C * 1) C
-    := fst_Functor.
+    := Eval hnf in ProductLaw1Functor'.
 
   Definition ProductLaw1Functor_Inverse : SpecializedFunctor C (C * 1).
     refine (Build_SpecializedFunctor C (C * 1)
