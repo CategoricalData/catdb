@@ -1,4 +1,4 @@
-Require Import FunctionalExtensionality JMeq.
+Require Export FunctionalExtensionality JMeq.
 Require Import Common Notations.
 
 Set Implicit Arguments.
@@ -117,6 +117,52 @@ Section f_equal_dep.
       intuition.
   Qed.
 End f_equal_dep.
+
+Inductive identity_dep (A : Type) (a : A) : forall B : Type, B -> Type :=
+  identity_dep_refl : identity_dep a a.
+
+Section f_identity_dep.
+  Local Infix "~" := identity (at level 50).
+  Local Infix "~~" := identity_dep (at level 50).
+  Definition f_identity (A B : Type) (f : A -> B) (x y : A) (H : x ~ y) : f x ~ f y
+    := match H in (_ ~ y0) return (f x ~ f y0) with
+         | identity_refl => identity_refl (f x)
+       end.
+
+  Definition f_type_identity {A B A' B'} : A ~ A' -> B ~ B' -> (A -> B) ~ (A' -> B').
+    intros; destruct_head identity; reflexivity.
+  Defined.
+
+  Axiom functional_extensionality_dep_identity : forall {A : Type} {B : A -> Type} (f g : forall x : A, B x),
+                                                   (forall x : A, f x ~ g x) -> f ~ g.
+
+  Axiom identity_dep_identity : forall A (x y : A), x ~~ y -> x ~ y.
+
+  Definition functional_extensionality_identity {A B : Type} := fun (f g : A -> B) (H : forall x : A, f x ~ g x) => functional_extensionality_dep_identity f g H.
+
+  Theorem forall_extensionality_dep_identity : forall {A}
+                                                      (f g : A -> Type),
+                                                 (forall x, f x ~ g x) -> (forall x, f x) ~ (forall x, g x).
+    intros.
+    cut (f ~ g); [ let H := fresh in intro H; destruct H; reflexivity | ].
+    apply functional_extensionality_dep_identity; assumption.
+  Qed.
+
+  Theorem forall_extensionality_dep_identity_dep : forall {A B}
+                                                          (f : A -> Type) (g : B -> Type),
+                                                     A ~ B -> (A ~ B -> forall x y, x ~~ y -> f x ~~ g y) -> (forall x, f x) ~ (forall x, g x).
+    intros; intuition; destruct_head identity.
+    apply forall_extensionality_dep_identity.
+    intro.
+    apply identity_dep_identity.
+    match goal with | [ H : _ |- _ ] => apply H; reflexivity end.
+  Qed.
+
+  Definition identity_dep_identityT A B (x : A) (y : B) : x ~~ y -> A ~ B
+    := fun H => match H in (_ ~~ b) return _ with
+                  | identity_dep_refl => identity_refl A
+                end.
+End f_identity_dep.
 
 Ltac JMeq_eq :=
   repeat match goal with
