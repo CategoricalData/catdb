@@ -1,8 +1,12 @@
-Require Import FunctionalExtensionality ProofIrrelevance.
+Require Import FunctionalExtensionality ProofIrrelevance JMeq.
 Require Export Adjoint Functor Category.
-Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals CommaCategoryFunctors SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep FunctorialComposition ExponentialLaws FunctorProduct NatCategory DiscreteCategoryFunctors ProductLaws.
+Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals SetLimits SetColimits LimitFunctors LimitFunctorTheorems InducedLimitFunctors DefinitionSimplification FEqualDep FunctorialComposition ExponentialLaws FunctorProduct NatCategory DiscreteCategoryFunctors ProductLaws CommaCategoryFunctors.
 
 Set Implicit Arguments.
+
+Generalizable All Variables.
+
+Local Infix "==" := JMeq.
 
 Local Open Scope category_scope.
 
@@ -57,19 +61,185 @@ Local Ltac t :=
          end.
 
 Section DataMigrationFunctors.
-  Variables C D : LocallySmallCategory.
-  Variables S : Category.
+  Context `(C : LocallySmallSpecializedCategory objC).
+  Context `(D : LocallySmallSpecializedCategory objD).
+  Context `(S : SpecializedCategory objS).
 
   Section Δ.
+    Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)
+      := (ExponentialLaw4Functor_Inverse _ _ _) (FunctorialComposition _ _ _).
+    Definition PullbackAlong (F : SpecializedFunctor C D) : (S ^ C) ^ (S ^ D)
+      := Eval hnf in PullbackAlongFunctor F.
+    (*
+
+    Local Arguments ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf / .
+    Local Arguments ExponentialLaw4Functor_Inverse_ObjectOf / .
+    Local Arguments FunctorialComposition / .
+    Local Arguments ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf / .
+
+
+    Let PullbackAlongFunctor'' : { F | PullbackAlongFunctor' = F }.
+      assert (Hf : focus (exist _ PullbackAlongFunctor' eq_refl)) by constructor.
+      subst_body.
+      simpl in Hf.
+
+      Implicit Arguments exist [A P].
+      unfold IdentityFunctor, IdentityNaturalTransformation, NTComposeF, NTComposeT, ComposeFunctors in Hf.
+      simpl in Hf.
+    Let PullbackAlong' (F : SpecializedFunctor C D) : { PA : (S ^ C) ^ (S ^ D) | PullbackAlongFunctor' F = PA }.
+      pre_abstract_trailing_props.
+      functor_simpl_abstract_trailing_props_with_equality.
+    Defined.
+    Let PullbackAlongFunctor'_MorphismOf' s d m : { T : Morphism _ (proj1_sig (PullbackAlong' s)) (proj1_sig (PullbackAlong' d))
+                                                 | T == MorphismOf PullbackAlongFunctor' (s := s) (d := d) m }.
+      repeat match goal with
+               | [ |- context[proj1_sig ?E] ] => destruct (proj2_sig E)
+             end.
+      pre_abstract_trailing_props.
+      nt_simpl_abstract_trailing_props_with_equality.
+    Defined.
+
+    Definition PullbackAlong (F : SpecializedFunctor C D) : (S ^ C) ^ (S ^ D)
+      := Eval hnf in proj1_sig (PullbackAlong' F).
+
+    Let PullbackAlongFunctor'' : ((S ^ C) ^ (S ^ D)) ^ (D ^ C).
+      hnf.
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+                                           PullbackAlong
+                                           (fun s d m => proj1_sig (@PullbackAlongFunctor'_MorphismOf' s d m))
+                                           _
+                                           _)
+      end.
+      intros.
+      change PullbackAlong with (fun F => proj1_sig (PullbackAlong' F)); cbv beta.
+      unfold PullbackAlongFunctor'_MorphismOf'.
+      simpl.
+      match goal with
+        | [ |- context[proj1_sig ?E] ] => let H := fresh in let H' := fresh in set (H' := E) in *; set (H := proj2_sig H'); destruct H; simpl
+      end.
+
+      repeat m
+      exact (FCompositionOf PullbackAlongFunctor').
+      let f := fresh in pose PullbackAlongFunctor' as f; destruct f.
+      assumption.
+      destruct PullbackAlongFunctor'.
+
+      refine (
+
+    Let PullbackAlongFunctor'_MorphismOf'' s d (m : Morphism (D ^ C) s d) : Morphism _ (PullbackAlong s) (PullbackAlong d)
+      := Eval cbv beta iota zeta delta [PullbackAlongFunctor'_MorphismOf' proj1_sig proj2_sig PullbackAlong'] in proj1_sig (@PullbackAlongFunctor'_MorphismOf' s d m).
+    Print PullbackAlongFunctor'_MorphismOf''.
+
+    Definition PullbackAlongFunctor'_MorphismOf'' s d (m : Morphism (D ^ C) s d) : Morphism _ (PullbackAlong s) (PullbackAlong d)
+    Print PullbackAlongFunctor'_MorphismOf''.
+
+                                                 | T == MorphismOf PullbackAlongFunctor' (s := s) (d := d) m }.
+
+    Let
+    Print PullbackAlong''.
+
+      pre_abstract_trailing_props.
+      functor_simpl_abstract_trailing_props_with_equality.
+    Defined.
+    Let Definition
+    Goal True.
+    pose (fun F => proj1_sig (PullbackAlong' F)) as f.
+    unfold PullbackAlong' in f.
+    hnf in f.
+    simpl in f.
+    simpl in f.
+    pose (fun s d m => proj1_sig (@PullbackAlongFunctor'_MorphismOf' s d m)) as g.
+    unfold PullbackAlongFunctor'_MorphismOf' in g.
+    hnf in g.
+    simpl in g.
+    simpl in g.
+    Eval simpl in PullbackAlong'.
+    Let PullbackAlongFunctor'_MorphismOf s d m : { T : Morphism _ (proj1_sig (PullbackAlong' s)) (proj1_sig (PullbackAlong' d))
+                                                 | T == MorphismOf PullbackAlongFunctor' (s := s) (d := d) m }.
+      assert (Hf : focus (proj1_sig (@PullbackAlongFunctor'_MorphismOf' s d m))) by constructor.
+      unfold PullbackAlongFunctor'_MorphismOf' in Hf.
+      simpl in Hf.
+      destruct_match_in_hyp Hf.
+      simpl in Hf.
+      destruct (projT2 (PullbackAlong' s)).
+      destruct (projT2 (PullbackAlong' d)).
+
+
+
+(* HERE *)
+      match type of Hf with
+        | focus ?E => (exists E)
+      end.
+
+      subst_body.
+
+      pose
+      unfold PullbackAlongFunctor'_MorphismOf in f.
+      simpl in f.
+      let f' := (eval hnf in f) in
+      match f' with
+        | appcontext[match ?E with _ => _ end] => let x := fresh in set (x := E) in *; destruct x
+      end.
+      simpl in f.
+      revert f; clear.
+
+      set (x := projT2 (PullbackAlong' s)) in *.
+      destruct x.
+      set (x := projT2 (PullbackAlong' d)) in *.
+      destruct x.
+      simpl.
+      destruct (projT2 (PullbackAlong' s)).
+      revert f; subst_body; intro f.
+      hnf in f.
+      simpl in f.
+      set (H := (PullbackAlong'_subproof1 (PullbackAlong'_subproof d)
+                 (PullbackAlong'_subproof0 d))) in *.
+      simpl in *.
+      hnf.
+      intro f.
+      destruct H.
+      match type of H with
+        | ?a = ?b => set (A := a) in *; set (B := b) in *
+      end.
+      destruct H.
+
+      destruct (projT2 (PullbackAlong' s)).
+      hnf in f.
+      revert f; subst_body; clear; intro f.
+      let f' := (eval hnf in f) in
+      match f' with
+        | appcontext[match ?E with _ => _ end] => destruct E
+      end.
+      Transparent JMeq_rect_r.
+      Print JMeq_rect_r.
+      unfold JMeq_rect_r.
+
+      revert f; subst_body; clear; intro f.
+      subst PullbackAlongFunctor'_MorphismOf.
+      re
+
+      simpl in *.
+      simpl.
+      unfold Morphism.
+      change
+      unfold Morphism, FunctorCategory at 1.
+      functor_simpl_abstract_trailing_props_with_equality.
+    Defined.
     Definition PullbackAlong (F : SpecializedFunctor C D) : SpecializedFunctor (S ^ D) (S ^ C)
+      := Eval hnf in PullbackAlong' F.
+    Print PullbackAlong.
       := ComposeFunctors (FunctorialComposition C D S)
                          (ComposeFunctors ((IdentityFunctor (S ^ D)) * (FunctorFromDiscrete (D ^ C) (fun _ : Object 1 => F)))
                                           (ProductLaw1Functor_Inverse _)).
 
-  (* Universe Inconsistency *)
-  (* Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)
-      := (ExponentialLaw4Functor_Inverse _ _ _) (FunctorialComposition _ _ _). *)
+
+
+*)
   End Δ.
+  Local Arguments PullbackAlongFunctor / .
+  Eval simpl in PullbackAlongFunctor.
 
   Section Π.
     Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
@@ -264,9 +434,8 @@ Section DataMigrationFunctors.
       Definition RightPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedLimitFunctor HasLimits') RightPushforwardAlongFunctor_pre_curried.
 
-      (* Darn universe inconsistencies *)
-      (* Definition RightPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
-        := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) RightPushforwardAlongFunctor_curried).*)
+      Definition RightPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
+        := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) RightPushforwardAlongFunctor_curried).
 
 
       (*Definition RightPushforwardAlong_ObjectOf (x : S ^ C) (F : (OppositeCategory (D ^ C))) : S ^ D
@@ -274,7 +443,7 @@ Section DataMigrationFunctors.
       Definition RightPushforwardAlong_MorphismOf s0 d0 (m0 : Morphism (S ^ C) s0 d0) s1 d1 (m1 : Morphism (OppositeCategory (D ^ C)) s1 d1) :
         Morphism (S ^ D) (RightPushforwardAlong_ObjectOf s0 s1) (RightPushforwardAlong_ObjectOf d0 d1).
         hnf.
-        assert (forall x, Morphism _ ((RightPushforwardAlong_ObjectOf s0 s1) x) ((RightPushforwardAlong_ObjectOf d0 d1) x)).        
+        assert (forall x, Morphism _ ((RightPushforwardAlong_ObjectOf s0 s1) x) ((RightPushforwardAlong_ObjectOf d0 d1) x)).
         intro.
         Print ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf.
         simpl.
@@ -367,7 +536,7 @@ Section DataMigrationFunctors.
       Variable F : SpecializedFunctor C D.
 
       Let Index2Cat d := F ↓ d.
-      
+
       Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
 
       (* Define [ɣ ○ (π_F d)] *)
@@ -384,7 +553,7 @@ Section DataMigrationFunctors.
         end;
           simpl; abstract (intros; reflexivity).
       Defined.
-      
+
       Let LeftPushforwardAlong_pre_curried_ObjectOf_pre (g : S ^ C) (d : D) : CAT ⇓ S
         := existT _ (_, tt) (LeftPushforwardAlong_pre_pre_Functor g d) : LaxSliceSpecializedCategory_ObjectT _ Index2Cat S.
 
@@ -427,7 +596,7 @@ Section DataMigrationFunctors.
       Admitted. *)
         Time pre_anihilate.
         Time anihilate.
-      Qed. 
+      Qed.
 
       Lemma LeftPushforwardAlong_pre_curried_FIdentityOf (o : SpecializedFunctor C S * LSObject D) :
         LeftPushforwardAlong_pre_curried_MorphismOf (Identity o) =
@@ -438,7 +607,7 @@ Section DataMigrationFunctors.
       Admitted. *)
         Time pre_anihilate.
         Time anihilate.
-      Qed. 
+      Qed.
 
       Definition LeftPushforwardAlong_pre_curried : SpecializedFunctor ((S ^ C) * D) (CAT ⇓ S).
         match goal with
@@ -455,7 +624,7 @@ Section DataMigrationFunctors.
 
     Section functorial.
       Let Index2Cat (dF : D * (D ^ C)) := (snd dF) ↓ (fst dF).
-      
+
       Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
 
       Let LeftPushforwardAlongFunctor_pre_curried_ObjectOf (dgF : D * ((S ^ C) * (OppositeCategory (D ^ C)))) : CAT ⇓ S
@@ -509,7 +678,7 @@ Section DataMigrationFunctors.
 
     Section applied.
       Variable HasColimits : forall (F : SpecializedFunctor C D) d (F' : SpecializedFunctor (F ↓ d) S), Colimit F'.
-      
+
       Let Index2Cat (dF : D * (D ^ C)) := (snd dF) ↓ (fst dF).
 
       Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
@@ -520,9 +689,8 @@ Section DataMigrationFunctors.
       Definition LeftPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedColimitFunctor HasColimits') LeftPushforwardAlongFunctor_pre_curried.
 
-      (* Darn universe inconsistencies *)
-      (* Definition LeftPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
-        := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) LeftPushforwardAlongFunctor_curried).*)
+      Definition LeftPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C)).
+          := (ExponentialLaw4Functor_Inverse _ _ _) ((ExponentialLaw4Functor_Inverse _ _ _) LeftPushforwardAlongFunctor_curried).
     End applied.
   End Σ.
 End DataMigrationFunctors.
