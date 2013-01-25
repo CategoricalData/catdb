@@ -108,6 +108,7 @@ Ltac nt_hideProofs :=
 Ltac nt_tac_abstract_trailing_props T tac :=
   let H := fresh in
   pose T as H;
+    hnf in H;
     revert H; clear; intro H; clear H;
     let T' := (eval hnf in T) in
     let T'' := (tac T') in
@@ -170,18 +171,19 @@ Ltac nt_eq := nt_hideProofs; nt_eq_with idtac.
 
 
 Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
-  let T' := (eval hnf in T) in
-  let T'' := (tac T') in
-  match T'' with
-    | @Build_SpecializedNaturalTransformation ?objC ?C
-                                              ?objD ?D
-                                              ?F
-                                              ?G
-                                              ?CO
-                                              ?COM =>
-      let H := fresh in
-      pose T'' as H;
-        revert H; clear; intro H; clear H;
+  let H := fresh in
+  pose T as H;
+    hnf in H;
+    revert H; clear; intro H; clear H;
+    let T' := (eval hnf in T) in
+    let T'' := (tac T') in
+    match T'' with
+      | @Build_SpecializedNaturalTransformation ?objC ?C
+                                                ?objD ?D
+                                                ?F
+                                                ?G
+                                                ?CO
+                                                ?COM =>
         let COM' := fresh in
         let COMT' := type of COM in
         let COMT := (eval simpl in COMT') in
@@ -190,7 +192,7 @@ Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
                                                           CO
                                                           COM');
           expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
-  end.
+    end.
 Ltac nt_tac_abstract_trailing_props_with_equality tac :=
   pre_abstract_trailing_props;
   match goal with
