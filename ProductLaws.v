@@ -59,11 +59,15 @@ End Law0.
 Section Law0'.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0
-    := ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _).
+  Let ProductLaw0'Functor' : SpecializedFunctor (0 * C) 0.
+    functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
+  Defined.
+  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
 
-  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C)
-    := ComposeFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C).
+  Let ProductLaw0'Functor_Inverse' : SpecializedFunctor 0 (0 * C).
+    functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C)).
+  Defined.
+  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
 
   Lemma ProductLaw0' : ComposeFunctors ProductLaw0'Functor ProductLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0'Functor_Inverse ProductLaw0'Functor = IdentityFunctor _.
@@ -105,11 +109,15 @@ End Law1.
 Section Law1'.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ProductLaw1'Functor : SpecializedFunctor (1 * C) C
-    := ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _).
+  Definition ProductLaw1'Functor' : SpecializedFunctor (1 * C) C.
+    functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _)).
+  Defined.
+  Definition ProductLaw1'Functor : SpecializedFunctor (1 * C) C := Eval hnf in ProductLaw1'Functor'.
 
-  Definition ProductLaw1'Functor_Inverse : SpecializedFunctor C (1 * C)
-    := ComposeFunctors (SwapFunctor _ _) (ProductLaw1Functor_Inverse C).
+  Let ProductLaw1'Functor_Inverse' : SpecializedFunctor C (1 * C).
+    functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw1Functor_Inverse C)).
+  Defined.
+  Definition ProductLaw1'Functor_Inverse : SpecializedFunctor C (1 * C) := Eval hnf in ProductLaw1'Functor_Inverse'.
 
   Lemma ProductLaw1' : ComposeFunctors ProductLaw1'Functor ProductLaw1'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1'Functor_Inverse ProductLaw1'Functor = IdentityFunctor _.

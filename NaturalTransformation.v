@@ -105,6 +105,27 @@ Ltac nt_hideProofs :=
                hideProofs pf
          end.
 
+Ltac nt_tac_abstract_trailing_props T tac :=
+  let T' := (eval hnf in T) in
+  let T'' := (tac T') in
+  match T'' with
+    | @Build_SpecializedNaturalTransformation ?objC ?C
+                                              ?objD ?D
+                                              ?F
+                                              ?G
+                                              ?CO
+                                              ?COM =>
+      let H := fresh in
+      pose T'' as H;
+        revert H; clear; intro H; clear H;
+        refine (@Build_SpecializedNaturalTransformation objC C objD D F G
+                                                        CO
+                                                        _);
+        abstract exact COM
+  end.
+Ltac nt_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => T').
+Ltac nt_simpl_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => let T'' := eval simpl in T' in T'').
+
 Section NaturalTransformations_Equal.
   Lemma NaturalTransformation_eq' objC C objD D F G :
     forall (T U : @SpecializedNaturalTransformation objC C objD D F G),
@@ -146,6 +167,40 @@ Ltac nt_eq_with tac := repeat nt_eq_step_with tac.
 
 Ltac nt_eq_step := nt_eq_step_with idtac.
 Ltac nt_eq := nt_hideProofs; nt_eq_with idtac.
+
+
+Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
+  let T' := (eval hnf in T) in
+  let T'' := (tac T') in
+  match T'' with
+    | @Build_SpecializedNaturalTransformation ?objC ?C
+                                              ?objD ?D
+                                              ?F
+                                              ?G
+                                              ?CO
+                                              ?COM =>
+      let H := fresh in
+      pose T'' as H;
+        revert H; clear; intro H; clear H;
+        let COM' := fresh in
+        let COMT' := type of COM in
+        let COMT := (eval simpl in COMT') in
+        assert (COM' : COMT) by abstract exact COM;
+          exists (@Build_SpecializedNaturalTransformation objC C objD D F G
+                                                          CO
+                                                          COM');
+          expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
+  end.
+Ltac nt_tac_abstract_trailing_props_with_equality tac :=
+  pre_abstract_trailing_props;
+  match goal with
+    | [ |- { T0 : SpecializedNaturalTransformation _ _ | T0 = ?T } ] =>
+      nt_tac_abstract_trailing_props_with_equality_do tac T @NaturalTransformation_eq'
+    | [ |- { T0 : SpecializedNaturalTransformation _ _ | T0 == ?T } ] =>
+      nt_tac_abstract_trailing_props_with_equality_do tac T @NaturalTransformation_JMeq
+  end.
+Ltac nt_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_with_equality ltac:(fun T' => T').
+Ltac nt_simpl_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_with_equality ltac:(fun T' => let T'' := eval simpl in T' in T'').
 
 Section NaturalTransformationComposition.
   Context `(C : @SpecializedCategory objC).

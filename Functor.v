@@ -104,6 +104,29 @@ Ltac functor_hideProofs :=
                hideProofs pf0 pf1
          end.
 
+Ltac functor_tac_abstract_trailing_props F tac :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
+  match F'' with
+    | @Build_SpecializedFunctor ?objC ?C
+                                ?objD ?D
+                                ?OO
+                                ?MO
+                                ?FCO
+                                ?FIO =>
+      let H := fresh in
+      pose F'' as H;
+        revert H; clear; intro H; clear H;
+        refine (@Build_SpecializedFunctor objC C objD D
+                                          OO
+                                          MO
+                                          _
+                                          _);
+        abstract (exact FCO || exact FIO)
+  end.
+Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => F').
+Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
+
 Section Functors_Equal.
   Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
@@ -146,6 +169,46 @@ Ltac functor_eq_with tac := repeat functor_eq_step_with tac.
 
 Ltac functor_eq_step := functor_eq_step_with idtac.
 Ltac functor_eq := functor_hideProofs; functor_eq_with idtac.
+
+Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
+  match F'' with
+    | @Build_SpecializedFunctor ?objC ?C
+                                ?objD ?D
+                                ?OO
+                                ?MO
+                                ?FCO
+                                ?FIO =>
+      let H := fresh in
+      pose F'' as H;
+        revert H; clear; intro H; clear H;
+        let FCO' := fresh in
+        let FIO' := fresh in
+        let FCOT' := type of FCO in
+        let FIOT' := type of FIO in
+        let FCOT := (eval simpl in FCOT') in
+        let FIOT := (eval simpl in FIOT') in
+        assert (FCO' : FCOT) by abstract exact FCO;
+          assert (FIO' : FIOT) by (clear FCO'; abstract exact FIO);
+          exists (@Build_SpecializedFunctor objC C objD D
+                                            OO
+                                            MO
+                                            FCO'
+                                            FIO');
+          expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
+  end.
+
+Ltac functor_tac_abstract_trailing_props_with_equality tac :=
+  pre_abstract_trailing_props;
+  match goal with
+    | [ |- { F0 : SpecializedFunctor _ _ | F0 = ?F } ] =>
+      functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_eq'
+    | [ |- { F0 : SpecializedFunctor _ _ | F0 == ?F } ] =>
+      functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_JMeq
+  end.
+Ltac functor_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => F').
+Ltac functor_simpl_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section FunctorComposition.
   Context `(B : @SpecializedCategory objB).
