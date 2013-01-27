@@ -47,6 +47,7 @@ MODULES    := Notations \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
+	SetCategoryProductFunctor \
 	DecidableDiscreteCategory \
 	DecidableComputableCategory \
 	DecidableSmallCat \
