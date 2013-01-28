@@ -1,0 +1,91 @@
+Require Export SpecializedCategory Functor ComputableCategory.
+Require Import Common Notations.
+
+Set Implicit Arguments.
+
+Generalizable All Variables.
+
+Section Grothendieck.
+  Context `(Index2Cat : forall i : Index, SpecializedCategory (Index2Object i)).
+  Let Cat := @ComputableCategory _ Index2Object Index2Cat.
+
+  Local Coercion Index2Cat : Index >-> SpecializedCategory.
+
+  (**
+     Quoting Wikipedia:
+     The Grothendieck construction is an auxiliary construction used
+     in the mathematical field of category theory.
+
+     Let
+     [F : C -> Set]
+     be a functor from any small category to the category of sets.
+     The Grothendieck construct for [F] is the category [Γ F] whose
+     objects are pairs [(c, x)], where [c : C] is an
+     object and [x : F c] is an element, and for which the set
+     [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
+     [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
+     *)
+  Context `(C : @SpecializedCategory objC).
+  Variable F : SpecializedFunctor C Cat.
+
+  Record CatGrothendieckPair := {
+    CatGrothendieckC' : objC;
+    CatGrothendieckX' : F CatGrothendieckC'
+  }.
+
+  Section GrothendieckInterface.
+    Variable G : CatGrothendieckPair.
+
+    Definition CatGrothendieckC : C := G.(CatGrothendieckC').
+    Definition CatGrothendieckX : F CatGrothendieckC := G.(CatGrothendieckX').
+  End GrothendieckInterface.
+
+  Lemma CatGrothendieckPair_eta (x : CatGrothendieckPair) : Build_CatGrothendieckPair (CatGrothendieckC x) (CatGrothendieckX x) = x.
+    destruct x; reflexivity.
+  Qed.
+
+  Definition CatGrothendieckCompose cs xs cd xd cd' xd' :
+    { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
+    { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
+    intros m2 m1.
+    exists (Compose (proj1_sig m2) (proj1_sig m1)).
+    abstract (
+        destruct m1, m2;
+        rewrite FCompositionOf; simpl;
+        repeat subst;
+        reflexivity
+      ).
+  Defined.
+
+  Arguments CatGrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
+
+  Definition CatGrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
+    exists (Identity c).
+    abstract (rewrite FIdentityOf; reflexivity).
+  Defined.
+
+  Local Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
+
+  Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
+    refine {|
+        Morphism' := (fun s d =>
+                        { f : C.(Morphism) (CatGrothendieckC s) (CatGrothendieckC d) | F.(MorphismOf) f (CatGrothendieckX s) = (CatGrothendieckX d) });
+        Compose' := (fun _ _ _ m1 m2 => CatGrothendieckCompose m1 m2);
+        Identity' := (fun o => CatGrothendieckIdentity (CatGrothendieckC o) (CatGrothendieckX o))
+      |};
+    abstract (
+        repeat intro; hnf in *; expand;
+        destruct_head CatGrothendieckPair;
+        destruct_sig;
+        eauto with category
+      ).
+  Defined.
+
+  Definition CatGrothendieckProjectionFunctor1 : SpecializedFunctor CategoryOfCatElements C.
+    refine {|
+        ObjectOf' := (fun o : CategoryOfCatElements => CatGrothendieckC o);
+        MorphismOf' := (fun s d (m : CategoryOfCatElements.(Morphism') s d) => proj1_sig m)
+      |};
+    abstract (eauto with category; intros; simpl; reflexivity).
+  Defined.
+End Grothendieck.
