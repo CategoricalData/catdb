@@ -1,5 +1,5 @@
 Require Export SpecializedCategory Functor ComputableCategory.
-Require Import Common Notations.
+Require Import Common Notations NaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -45,34 +45,61 @@ Section Grothendieck.
   Qed.
 
   Definition CatGrothendieckCompose cs xs cd xd cd' xd' :
-    { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
-    { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
+    { f : C.(Morphism) cd cd' & Morphism _ (F.(MorphismOf) f xd) xd' }
+    -> { f : C.(Morphism) cs cd & Morphism _ (F.(MorphismOf) f xs) xd }
+    -> { f : C.(Morphism) cs cd' & Morphism _ (F.(MorphismOf) f xs) xd' }.
     intros m2 m1.
-    exists (Compose (proj1_sig m2) (proj1_sig m1)).
-    abstract (
-        destruct m1, m2;
-        rewrite FCompositionOf; simpl;
-        repeat subst;
-        reflexivity
-      ).
+    exists (Compose (projT1 m2) (projT1 m1)).
+    refine (Compose (projT2 m2) _).
+    rewrite FCompositionOf. (* ugh *)
+    refine (MorphismOf (MorphismOf F (projT1 m2)) (projT2 m1)).
   Defined.
 
   Arguments CatGrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
-  Definition CatGrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
+  Definition CatGrothendieckIdentity c x : { f : C.(Morphism) c c & Morphism _ (F.(MorphismOf) f x) x }.
     exists (Identity c).
-    abstract (rewrite FIdentityOf; reflexivity).
+    rewrite FIdentityOf.
+    exact (Identity _).
   Defined.
-
+(*
   Local Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
+  Local Hint Extern 1 (@eq (sigT _) _ _) => simpl_eq : category.
 
   Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
     refine {|
-        Morphism' := (fun s d =>
-                        { f : C.(Morphism) (CatGrothendieckC s) (CatGrothendieckC d) | F.(MorphismOf) f (CatGrothendieckX s) = (CatGrothendieckX d) });
+        Morphism' := (fun s d => _);
         Compose' := (fun _ _ _ m1 m2 => CatGrothendieckCompose m1 m2);
         Identity' := (fun o => CatGrothendieckIdentity (CatGrothendieckC o) (CatGrothendieckX o))
       |};
+    repeat intro; hnf in *; expand;
+    simpl_eq;
+    destruct_sig;
+    auto with category.
+    Focus 3.
+    unfold eq_rect_r.
+    unfold eq_rect.
+    unfold eq_sym.
+    repeat match goal with
+      | [ |- context[match ?E with _ => _ end] ] => (atomic E; fail 1) || let H := fresh in set (H := E)
+    end.
+        etransitivity.
+        destruct
+    Focus 2.
+    rewrite @FIdentityOf.
+    destruct H0.
+
+    simpl.
+    repeat rewrite Associativity.
+    repeat rewrite <- FCompositionOf.
+    unfold eq_rect_r.
+    unfold eq_sym.
+    unfold eq_rect.
+    destruct H0.
+    destruct H.
+    unfold
+    destruct_head CatGrothendieckPair;
+    simpl_eq.
     abstract (
         repeat intro; hnf in *; expand;
         destruct_head CatGrothendieckPair;
@@ -87,5 +114,5 @@ Section Grothendieck.
         MorphismOf' := (fun s d (m : CategoryOfCatElements.(Morphism') s d) => proj1_sig m)
       |};
     abstract (eauto with category; intros; simpl; reflexivity).
-  Defined.
+  Defined. *)
 End Grothendieck.
