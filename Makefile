@@ -62,6 +62,7 @@ MODULES    := Notations \
 	CommaCategoryFunctorProperties \
 	UniversalProperties \
 	Duals \
+	DualFunctor \
 	Hom \
 	FunctorAttributes \
 	Correspondences \
