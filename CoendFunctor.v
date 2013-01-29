@@ -1,6 +1,6 @@
 Require Import ProofIrrelevance.
-Require Export Coend LimitFunctors.
-Require Import Common Notations ChainCategory.
+Require Export Coend LimitFunctors LimitFunctors FunctorCategory ProductInducedFunctors FunctorialComposition.
+Require Import Common Notations.
 
 Set Implicit Arguments.
 
@@ -10,19 +10,12 @@ Local Open Scope type_scope.
 
 Section Coend.
   Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
 
   Let COp := OppositeCategory C.
-
-  Variable F : SpecializedFunctor (COp * C) D.
 
   Definition CoendFunctor_Index_Object := { ds : objC * objC & Morphism C (snd ds) (fst ds) } + objC.
 
   Global Arguments CoendFunctor_Index_Object /.
-
-(*  Let dom_obj : { n | n <= 1 } := exist _ 0 (le_S _ _ (le_n 0)).
-  Let cod_obj : { n | n <= 1 } := exist _ 1 (le_n 1).
-  Let mor_mor : Morphism [1] dom_obj cod_obj := proj2_sig dom_obj.*)
 
   Definition CoendFunctor_Index_Morphism (s d : CoendFunctor_Index_Object) : Set :=
     match (s, d) with
@@ -34,85 +27,26 @@ Section Coend.
 
   Definition CoendFunctor_Index_Identity x : CoendFunctor_Index_Morphism x x :=
     match x as s return (CoendFunctor_Index_Morphism s s) with
-      | inl s => eq_refl (*identity_dep_refl _*)
-      | inr s => eq_refl (*identity_dep_refl _*)
+      | inl s => eq_refl
+      | inr s => eq_refl
     end.
 
   Global Arguments CoendFunctor_Index_Identity x /.
 
-  Local Ltac simpl_identity :=
-    repeat match goal with
-             | _ => apply proof_irrelevance
-             | [ H : ?a = ?a |- _ ] => destruct H
-             | [ H : ?a = ?a |- _ ] => replace H with (@eq_refl _ a) in *; [ | apply proof_irrelevance ]; clear H
-             | [ |- ?a = ?b ] => cut (@eq Prop a b); [
-               let H := fresh in intro H; (rewrite H; reflexivity) || (rewrite <- H; reflexivity)
-               | apply proof_irrelevance
-             ]
-             | [ H : inl _ = inl _ |- _ ] => injection H; clear H; intro H; subst
-             | [ H : inr _ = inr _ |- _ ] => injection H; clear H; intro H; subst
-             | [ H : inl _ = inr _ |- _ ] => discriminate H
-             | [ H : inr _ = inl _ |- _ ] => discriminate H
-             | [ H : _ = _ |- _ ] => progress (injection H; intro; subst)
-             | [ |- _ = _ ] => constructor
-             | _ => progress (repeat subst)
-           end.
+  Ltac inj H := injection H; clear H; intros; subst.
 
-  Local Ltac simpl_CoendFunctor_index :=
-    repeat match goal with
-             | _ => progress simpl_identity
-             | [ H : (_ + _)%type |- _ ] => destruct H
-             | [ H : (_ * _)%type |- _ ] => destruct H
-             | _ => progress (hnf in *; trivial)
-             | [ |- (_ + _)%type ] => solve [ left; simpl_CoendFunctor_index ] || solve [ right; simpl_CoendFunctor_index ]
-           end.
-
-  Definition CoendFunctor_Index_Compose s d d' (m1 : CoendFunctor_Index_Morphism d d') (m2 : CoendFunctor_Index_Morphism s d) :
-    CoendFunctor_Index_Morphism s d'.
+  Definition CoendFunctor_Index_Compose s d d' :
+    CoendFunctor_Index_Morphism d d'
+    -> CoendFunctor_Index_Morphism s d
+    -> CoendFunctor_Index_Morphism s d'.
   Proof.
-    destruct s, d, d';
-      try solve [ simpl_CoendFunctor_index ].
-  Defined.
-
-  Local Ltac destruct_in_eq_type := intros;
-    let T' := fresh in
-      match goal with
-        | [ |- @eq ?T _ _ ] => pose T as T'
-      end;
-      repeat match eval hnf in T' with
-               | match ?x with _ => _ end => destruct x
-             end;
-      simpl in T';
+    destruct s, d, d'; simpl; intros;
+      try abstract congruence;
         match goal with
-          | [ |- ?a = ?b ] => change (@eq T' a b); unfold T'; try apply proof_irrelevance
+          | [ H : _ + _ |- _ ] => destruct H; [ left | right ];
+            abstract congruence
         end.
-
-  Local Ltac destruct_if_atomic_and_sum x := atomic x; let t := type of x in
-    match eval hnf in t with
-      | (_ + _)%type => let H := fresh in destruct x as [ H | H ];
-        try (destruct H; reflexivity)
-    end.
-
-  Local Ltac simpl_CoendFunctor_index_quicker :=
-    try destruct_in_eq_type;
-      try reflexivity;
-        try match goal with
-              | [ |- ?a = ?b ] => first [ destruct_if_atomic_and_sum a | destruct_if_atomic_and_sum b ]
-            end;
-        repeat match goal with
-                 | _ => reflexivity
-                 | [ H : _ |- _ ] => discriminate H || clear H
-                 | [ H : _ |- _ ] => hnf in H;
-                   match type of H with
-                     | _ = _ => progress subst
-                     | ?a = ?a => case H; clear H
-                     | @eq ?T ?a ?a => replace H with (@eq_refl T a) in *;
-                       [ clear H | apply proof_irrelevance ]
-                     | inl _ = inl _ => injection H; try clear H; intro; subst
-                     | inr _ = inr _ => injection H; try clear H; intro; subst
-                     | (_ + _)%type => destruct H
-                   end
-               end.
+  Defined.
 
   Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
   Proof.
@@ -120,86 +54,89 @@ Section Coend.
       Morphism' := CoendFunctor_Index_Morphism;
       Identity' := CoendFunctor_Index_Identity;
       Compose' := CoendFunctor_Index_Compose
-    |}; (*
-    abstract (
-      intros;
-        simpl_CoendFunctor_index
-    ). *) (* the following cuts off 4 seconds.  not sure if it's worth it *)
-    abstract simpl_CoendFunctor_index_quicker.
+    |}; abstract (simpl; intros;
+      repeat (match goal with
+                | [ x : _ + _ |- _ ] => destruct x; simpl in *
+                | _ => apply proof_irrelevance
+                | _ => congruence
+                | _ => f_equal
+              end)).
   Defined.
 
-  Definition CoendFunctor_Diagram_ObjectOf : CoendFunctor_Index -> D :=
+  Definition CoendFunctor_Diagram_ObjectOf_pre : CoendFunctor_Index -> (COp * C) :=
     fun x => match x with
-               | inl c0c1 => F (projT1 c0c1)
-               | inr c => F (c, c)
+               | inl c0c1 => (projT1 c0c1)
+               | inr c => (c, c)
              end.
 
-  Global Arguments CoendFunctor_Diagram_ObjectOf _ /.
+  Global Arguments CoendFunctor_Diagram_ObjectOf_pre _ /.
 
-  Definition CoendFunctor_Diagram_MorphismOf s d (m : CoendFunctor_Index_Morphism s d) :
-    Morphism D (CoendFunctor_Diagram_ObjectOf s) (CoendFunctor_Diagram_ObjectOf d).
+  Hint Extern 0 => present_spcategory : morphism.
+  Hint Extern 1 (Morphism _ ?X ?X) => apply Identity : morphism.
+(*  Hint Extern 1 (Morphism' _ _ _) => hnf. *)
+
+  Definition CoendFunctor_Diagram_MorphismOf_pre s d :
+    CoendFunctor_Index_Morphism s d
+    -> Morphism (COp * C) (CoendFunctor_Diagram_ObjectOf_pre s) (CoendFunctor_Diagram_ObjectOf_pre d).
   Proof.
-    simpl.
-    match goal with
-      | [ |- Morphism ?D
-        match ?s with
-          | inl sa => @?sa' sa
-          | inr sb => @?sb' sb
-        end
-        match ?d with
-          | inl da => @?da' da
-          | inr db => @?db' db
-        end ] =>
-      refine (match (s, d) as sd return
-                (CoendFunctor_Index_Morphism (fst sd) (snd sd)
-                  -> Morphism D
-                  match (fst sd) with
-                    | inl sa => sa' sa
-                    | inr sb => sb' sb
-                  end
-                  match (snd sd) with
-                    | inl da => da' da
-                    | inr db => db' db
-                  end)
-                with
-                | (inl s', inl d') => fun m' => F.(MorphismOf) _
-                | (inl s', inr d') => fun m' => F.(MorphismOf) _
-                | (inr s', inl d') => fun m' => F.(MorphismOf) _
-                | (inr s', inr d') => fun m' => F.(MorphismOf) _
-              end m)
-    end;
-    simpl in m' |- *;
-      split; present_spcategory;
-        try discriminate m';
-          try solve [ injection m'; clear m'; intro m'; case m'; apply Identity ];
-            destruct m' as [ m' | m' ];
-              try solve [ case m'; apply Identity || exact (projT2 s') ].
+    destruct s, d; simpl in *; intros; split;
+    present_spcategory;
+    repeat match goal with
+             | _ => discriminate
+             | _ => assumption
+             | [ H : inl _ = inl _ |- _ ] => inj H
+             | [ H : inr _ = inr _ |- _ ] => inj H
+             | [ H : sigT _ |- _ ] => destruct H; simpl in *
+             | [ H : _ + _ |- _ ] => destruct H; subst
+           end;
+    apply Identity.
   Defined.
 
-  Definition CoendFunctor_Diagram : SpecializedFunctor CoendFunctor_Index D.
+  Ltac inj' H :=
+    match type of H with
+      | ?X = ?X => fail 1
+      | _ => injection H; intros; subst
+    end.
+
+  Definition CoendFunctor_Diagram_pre : SpecializedFunctor CoendFunctor_Index (COp * C).
   Proof.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          CoendFunctor_Diagram_ObjectOf
-          CoendFunctor_Diagram_MorphismOf
-          _
-          _
-        )
-    end;
+    refine (Build_SpecializedFunctor
+      CoendFunctor_Index (COp * C)
+      CoendFunctor_Diagram_ObjectOf_pre
+      CoendFunctor_Diagram_MorphismOf_pre
+      _
+      _);
     abstract (
-      simpl_CoendFunctor_index_quicker;
-      present_spcategory;
-      unfold CoendFunctor_Diagram_MorphismOf; simpl;
-        repeat rewrite FIdentityOf;
-          auto
+      repeat match goal with
+               | [ |- forall x : CoendFunctor_Index_Object, _ ] =>
+                 destruct x
+             end; simpl; intros;
+      repeat match goal with
+               | _ => discriminate
+               | _ => progress (subst; unfold eq_rect_r)
+               | [ H : inl _ = inl _ |- _ ] => inj' H
+               | [ H : inr _ = inr _ |- _ ] => inj' H
+               | [ x : sigT _ |- _ ] => destruct x; simpl in *
+               | [ H : _ + _ |- _ ] => destruct H
+               | _ => rewrite <- eq_rect_eq
+               | _ => apply injective_projections; simpl
+             end; auto with category
     ).
   Defined.
-
-  Hypothesis HasColimits : forall G : SpecializedFunctor CoendFunctor_Index D, Colimit G.
-
-  Definition CoendFunctor := ColimitFunctor HasColimits.
 End Coend.
 
-(* TODO: Figure out why the notation for this is the same as the notation for the Grothendieck construction *)
-(*Notation "∫ F" := (Coend F).*)
+Section CoendFunctor.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+
+  Let COp := OppositeCategory C.
+
+  Hypothesis HasColimits : forall F : SpecializedFunctor (CoendFunctor_Index C) D, Colimit F.
+
+  Let CoendFunctor_post := ColimitFunctor HasColimits.
+
+  Let o := (FunctorialComposition (CoendFunctor_Index C) (COp * C) D).
+  Let CoendFunctor_pre := (o ⟨ - , (CoendFunctor_Diagram_pre C) ⟩)%functor.
+
+  Definition CoendFunctor := ComposeFunctors CoendFunctor_post CoendFunctor_pre.
+End CoendFunctor.

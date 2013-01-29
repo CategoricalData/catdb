@@ -15,8 +15,6 @@ Section sig_obj_mor.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
-
   Definition SpecializedCategory_sig : @SpecializedCategory (sig Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -29,7 +27,7 @@ Section sig_obj_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; auto with category).
   Defined.
 
   Definition proj1_sig_functor : SpecializedFunctor SpecializedCategory_sig A.
@@ -49,8 +47,6 @@ Section sig_obj.
   Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Prop.
 
-  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
-
   Definition SpecializedCategory_sig_obj : @SpecializedCategory (sig Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -63,14 +59,8 @@ Section sig_obj.
           _
         )
     end;
-    abstract (
-      intros; destruct_sig; simpl;
-        present_spcategory_all;
-        trivial
-    ).
+    abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
-
-  Hint Resolve Associativity LeftIdentity RightIdentity.
 
   Definition proj1_sig_obj_functor : SpecializedFunctor SpecializedCategory_sig_obj A.
     refine (Build_SpecializedFunctor SpecializedCategory_sig_obj A
@@ -131,8 +121,6 @@ Section sig_mor.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sig_mor : @SpecializedCategory objA.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -145,7 +133,7 @@ Section sig_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; present_spcategory_all; auto with category).
   Defined.
 
   Definition proj1_sig_mor_functor : SpecializedFunctor SpecializedCategory_sig_mor A.

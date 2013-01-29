@@ -5,6 +5,7 @@ Reserved Notation "x ~= y" (at level 70, no associativity).
 Reserved Notation "x ~= y ~= z" (at level 70, no associativity, y at next level).
 
 Reserved Notation "i ⁻¹" (at level 10).
+Reserved Notation "C ᵒᵖ" (at level 10).
 
 Reserved Notation "C ★^ M D" (at level 70, no associativity).
 Reserved Notation "C ★^{ M } D" (at level 70, no associativity).
@@ -32,9 +33,13 @@ Reserved Notation "∐_{ x } f" (at level 0, x at level 99).
 Reserved Notation "∐_{ x : A } f" (at level 0, x at level 99).
 
 (* I'm not terribly happy with this notation, but '('s don't work
-   because they interfere with things like [prod]s and grouping *)
-Reserved Notation "F [ c , - ]" (at level 70, no associativity).
-Reserved Notation "F [ - , d ]" (at level 70, no associativity).
+   because they interfere with things like [prod]s and grouping,
+   and '['s interfere with list notation in Program. *)
+Reserved Notation "F ⟨ c , - ⟩" (at level 70, no associativity).
+Reserved Notation "F ⟨ - , d ⟩" (at level 70, no associativity).
+
+(* Forced by the notation in Program *)
+Reserved Notation "[ x ]" (at level 0, x at level 200).
 
 Reserved Notation "∫ F" (at level 0).
 

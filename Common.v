@@ -258,16 +258,23 @@ Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> (projT1 s = projT1 s' -> projT2 s == projT2 s') -> s = s'.
+Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> projT2 s == projT2 s' -> s = s'.
   destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
 Qed.
 
 Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
   projT1 s = projT1 s'
-  -> (projT1 s = projT1 s' -> projT2 s == projT2 s')
-  -> (projT1 s = projT1 s' -> projT2 s == projT2 s' -> projT3 s == projT3 s')
+  -> projT2 s == projT2 s'
+  -> projT3 s == projT3 s'
   -> s = s'.
   destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
+Qed.
+
+Lemma injective_projections_JMeq (A B A' B' : Type) (p1 : A * B) (p2 : A' * B') :
+  fst p1 == fst p2 -> snd p1 == snd p2 -> p1 == p2.
+Proof.
+  destruct p1, p2; simpl; intros H0 H1; subst;
+    rewrite H0; rewrite H1; reflexivity.
 Qed.
 
 Ltac clear_refl_eq :=
@@ -278,10 +285,11 @@ Ltac clear_refl_eq :=
 (* reduce the proving of equality of sigma types to proving equality
    of their components *)
 Ltac simpl_eq' :=
-  apply sig_eq ||
-    apply sig2_eq ||
-      ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq) ||
-        apply injective_projections.
+  apply sig_eq
+        || apply sig2_eq
+        || ((apply sigT_eq || apply sigT2_eq); intros; clear_refl_eq)
+        || apply injective_projections
+        || apply injective_projections_JMeq.
 
 Ltac simpl_eq := intros; repeat (
   simpl_eq'; simpl in *
@@ -349,6 +357,35 @@ Ltac repeat_subst_mor_of_type type :=
   repeat match goal with
            | [ m : context[type] |- _ ] => subst_mor m; try clear m
          end.
+
+(* Using [rew] instead of [rew'] makes this fail... WTF? *)
+Ltac subst_by_rewrite_hyp_rew a H rew' :=
+  rew' H; clear H;
+  match goal with
+    | [ H : appcontext[a] |- _ ] => fail 1 "Rewrite failed to clear all instances of" a
+    | [ |- appcontext[a] ] => fail 1 "Rewrite failed to clear all instances of" a
+    | _ => idtac
+  end.
+
+Ltac subst_by_rewrite_hyp a H :=
+  subst_by_rewrite_hyp_rew a H ltac:(fun H => try rewrite H in *; try setoid_rewrite H).
+
+Ltac subst_by_rewrite_rev_hyp a H :=
+  subst_by_rewrite_hyp_rew a H ltac:(fun H => try rewrite <- H in *; try setoid_rewrite <- H).
+
+Ltac subst_by_rewrite a :=
+  match goal with
+    | [ H : ?Rel a ?b |- _ ] => subst_by_rewrite_hyp a H
+    | [ H : ?Rel ?b a |- _ ] => subst_by_rewrite_rev_hyp a H
+  end.
+
+Ltac subst_atomic a := first [ atomic a | fail "Non-atomic variable" a ];
+                      subst_by_rewrite a.
+
+Ltac subst_rel rel :=
+  match goal with
+    | [ H : rel ?a ?b |- _ ] => (atomic a; subst_by_rewrite_hyp a H) || (atomic b; subst_by_rewrite_rev_hyp b H)
+  end.
 
 Ltac subst_body :=
   repeat match goal with
@@ -459,6 +496,68 @@ Ltac eta_red :=
   repeat match goal with
            | [ H : appcontext[fun x => ?f x] |- _ ] => change (fun x => f x) with f in H
            | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
+         end.
+
+Lemma sigT_eta : forall A (P : A -> Type) (x : sigT P),
+  x = existT _ (projT1 x) (projT2 x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sigT2_eta : forall A (P Q : A -> Type) (x : sigT2 P Q),
+  x = existT2 _ _ (projT1 x) (projT2 x) (projT3 x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sig_eta : forall A (P : A -> Prop) (x : sig P),
+  x = exist _ (proj1_sig x) (proj2_sig x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
+  x = exist2 _ _ (proj1_sig x) (proj2_sig x) (proj3_sig x).
+  destruct x; reflexivity.
+Qed.
+
+Lemma prod_eta : forall (A B : Type) (x : A * B),
+  x = pair (fst x) (snd x).
+  destruct x; reflexivity.
+Qed.
+
+Ltac rewrite_eta_in Hf :=
+  repeat match type of Hf with
+           | context[match ?E with existT2 _ _ _ => _ end] => rewrite (sigT2_eta E) in Hf; simpl in Hf
+           | context[match ?E with exist2 _ _ _ => _ end] => rewrite (sig2_eta E) in Hf; simpl in Hf
+           | context[match ?E with existT _ _ => _ end] => rewrite (sigT_eta E) in Hf; simpl in Hf
+           | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
+           | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
+         end.
+
+Ltac destruct_match_in' T :=
+  match T with
+    | appcontext[match ?E with _ => _ end] => let x := fresh in set (x := E) in *; destruct x
+  end.
+
+Ltac destruct_match_in T :=
+  repeat match T with
+           | appcontext[match ?E with _ => _ end] => let x := fresh in set (x := E) in *; destruct x
+         end.
+
+Ltac destruct_match_in_goal :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with _ => _ end] ] => let x := fresh in set (x := E) in *; destruct x
+         end.
+
+Ltac destruct_match_in_hyp Hf :=
+  repeat (let T := type of Hf in
+          destruct_match_in' T).
+
+Ltac rewrite_eta :=
+  repeat match goal with
+           | [ |- context[match ?E with existT2 _ _ _ => _ end] ] => rewrite (sigT2_eta E); simpl
+           | [ |- context[match ?E with exist2 _ _ _ => _ end] ] => rewrite (sig2_eta E); simpl
+           | [ |- context[match ?E with existT _ _ => _ end] ] => rewrite (sigT_eta E); simpl
+           | [ |- context[match ?E with exist _ _ => _ end] ] => rewrite (sig_eta E); simpl
+           | [ |- context[match ?E with pair _ _ => _ end] ] => rewrite (prod_eta E); simpl
          end.
 
 Ltac intro_proj2_sig_from_goal'_by tac :=
@@ -572,6 +671,38 @@ Ltac specialize_hyp_with_evars E :=
                  specialize (E y')
          end.
 
+(* tries to convert an existential to an evar *)
+Ltac existential_to_evar x :=
+  is_evar x;
+  let x' := fresh in
+  set (x' := x) in *.
+
+(* converts existentials in the goal into evars *)
+Ltac existentials_to_evars_in_goal :=
+  repeat match goal with
+           | [ |- context[?x] ] => existential_to_evar x
+         end.
+
+(* converts all the existentials in the hypotheses to evars *)
+Ltac existentials_to_evars_in_hyps :=
+  repeat match goal with
+           | [ H : context[?x] |- _ ] => existential_to_evar x
+         end.
+
+(* converts all the existentials in the hypothesis [H] to evars *)
+Ltac existentials_to_evars_in H :=
+  repeat match type of H with
+           | context[?x] => existential_to_evar x
+         end.
+
+Tactic Notation "existentials_to_evars" := existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" "|-" "*" := existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" "*" := existentials_to_evars_in_goal; existentials_to_evars_in_hyps.
+Tactic Notation "existentials_to_evars" "in" "*" "|-" := existentials_to_evars_in_hyps.
+Tactic Notation "existentials_to_evars" "in" hyp(H) "|-" "*" := existentials_to_evars_in H; existentials_to_evars_in_goal.
+Tactic Notation "existentials_to_evars" "in" hyp(H) := existentials_to_evars_in H.
+Tactic Notation "existentials_to_evars" "in" hyp(H) "|-" := existentials_to_evars_in H.
+
 (* rewrite fails if hypotheses depend on one another.  simultaneous rewrite does not *)
 Ltac simultaneous_rewrite' E :=
   match type of E with
@@ -663,6 +794,99 @@ Ltac do_for_each_hyp tac := do_for_each_hyp' tac ltac:(fun H => idtac).
 Tactic Notation "change_in_all" constr(from) "with" constr(to) :=
   change from with to; do_for_each_hyp ltac:(fun H => change from with to in H).
 
+(* [expand] replaces both terms of an equality (either [eq] or [JMeq]
+   in the goal with their head normal forms *)
+Ltac expand :=
+  match goal with
+    | [ |- ?X = ?Y ] =>
+      let X' := eval hnf in X in let Y' := eval hnf in Y in change (X' = Y')
+    | [ |- ?X == ?Y ] =>
+      let X' := eval hnf in X in let Y' := eval hnf in Y in change (X' == Y')
+  end; simpl.
+
+
+Ltac pre_abstract_trailing_props_helper T B Rel :=
+  cut { A : T | Rel A B };
+  [ let x := fresh in intro x; exists (proj1_sig x); destruct x as [ ? x ]; unfold proj1_sig; destruct x; reflexivity
+  | ].
+
+Ltac pre_abstract_trailing_props :=
+  match goal with
+    | [ |- { F0 : ?T | @?P F0 } ] => let T' := eval hnf in T in change { F0 : T' | P F0 }; cbv beta
+  end;
+  try match goal with
+        | [ |- { A : ?T | identity A ?B } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | identity ?B A } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | ?B = A } ] => pre_abstract_trailing_props_helper T B (@eq T)
+        | [ |- { A : ?T | @JMeq ?TB ?B ?T A } ] => pre_abstract_trailing_props_helper T B (fun a b => @JMeq T a TB b)
+      end.
+
+Ltac clear_then_exact pf :=
+  match goal with
+    | [ H : _ |- _ ] => clear H; clear_then_exact pf
+    | _ => abstract (exact pf)
+  end.
+
+Ltac do_replace_trailing_matching_with_goal term matcher tac :=
+  match term with
+    | ?f ?x => (first [ (matcher x;
+                         let t := type of x in
+                         let t' := (eval simpl in t) in
+                         let y := fresh in
+                         assert (y : t') by ((clear; abstract (exact x)) || clear_then_exact x);
+                         (do_replace_trailing_matching_with_goal f matcher ltac:(fun H => tac (H y)))
+                           || fail 2 "tactic failed")
+                      | (tac term || fail 1 "tactic failed") ])
+    | _ => tac term || fail 1 "tactic failed"
+  end.
+
+Ltac exact_replace_trailing_matching_with_goal term matcher :=
+  do_replace_trailing_matching_with_goal term matcher ltac:(fun H => exact H).
+
+Ltac type_of_type_of_matches T :=
+  fun term =>
+    let t := type of term in
+    let t' := type of t in
+    match eval hnf in t' with
+      | T => idtac
+    end.
+
+Ltac abstract_trailing_props term :=
+  let term' := (eval hnf in term) in
+  exact_replace_trailing_matching_with_goal term' ltac:(type_of_type_of_matches Prop).
+
+Ltac hnf_simpl_abstract_trailing_props term :=
+  let term' := (eval hnf in term) in
+  let term'' := (eval simpl in term') in
+  exact_replace_trailing_matching_with_goal term'' ltac:(type_of_type_of_matches Prop).
+
+Ltac evar_evar_Type t :=
+  let T := fresh in evar (T : Type); evar (t : T); subst T.
+
+(* [hideProof' pf] generalizes [pf] only if it does not already exist
+   as a hypothesis *)
+Ltac hideProof' pf :=
+  match goal with
+    | [ x : _ |- _ ] => match x with
+                          | pf => fail 2
+                        end
+    | _ => generalize pf; intro
+  end.
+
+(* TODO(jgross): Is there a better way to do this? *)
+Tactic Notation "hideProofs" constr(pf)
+  := hideProof' pf.
+Tactic Notation "hideProofs" constr(pf0) constr(pf1)
+  := progress (try hideProof' pf0; try hideProof' pf1).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) constr(pf4)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4).
+Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) constr(pf4) constr(pf5)
+  := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4; try hideProof' pf5).
+
 Ltac destruct_to_empty_set :=
   match goal with
     | [ H : Empty_set |- _ ] => destruct H
@@ -683,27 +907,37 @@ Section unit.
 
   Lemma unit_eq (u u' : unit) : u = u'.
     case u; case u'; reflexivity.
-  Qed.
+  Defined.
+
+  Lemma unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _.
+    destruct u; destruct H; reflexivity.
+  Defined.
+
+  Lemma unit_eq_eq (u u' : unit) (H H' : u = u') : H = H'.
+    transitivity (@unit_eq u u');
+    destruct_head @eq; subst_body; destruct_head unit; reflexivity.
+  Defined.
 
   Lemma unit_JMeq (u u' : unit) : u == u'.
     case u; case u'; reflexivity.
-  Qed.
+  Defined.
 
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
-  Qed.
+  Defined.
 
   Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
     destruct a.
-  Qed.
+  Defined.
 
   Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
     destruct b.
-  Qed.
+  Defined.
 End unit.
 
 Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Hint Extern 0 (@eq (@eq unit _ _) _ _) => apply unit_eq_eq.
 Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
 Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.

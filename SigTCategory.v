@@ -28,8 +28,6 @@ Section sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sigT : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -42,7 +40,7 @@ Section sigT_obj_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; auto with category).
   Defined.
 
   Definition projT1_functor : SpecializedFunctor SpecializedCategory_sigT A.
@@ -62,8 +60,6 @@ Section sigT_obj.
   Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Type.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sigT_obj : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -76,14 +72,8 @@ Section sigT_obj.
           _
         )
     end;
-    abstract (
-      intros; destruct_sig; simpl;
-        present_spcategory_all;
-        trivial
-    ).
+    abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
-
-  Hint Resolve Associativity LeftIdentity RightIdentity.
 
   Definition projT1_obj_functor : SpecializedFunctor SpecializedCategory_sigT_obj A.
     refine (Build_SpecializedFunctor SpecializedCategory_sigT_obj A
@@ -156,8 +146,6 @@ Section sigT_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Hint Resolve Associativity LeftIdentity RightIdentity.
-
   Definition SpecializedCategory_sigT_mor : @SpecializedCategory objA.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
@@ -170,7 +158,7 @@ Section sigT_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; trivial).
+    abstract (intros; simpl_eq; auto with category).
   Defined.
 
   Definition projT1_mor_functor : SpecializedFunctor SpecializedCategory_sigT_mor A.

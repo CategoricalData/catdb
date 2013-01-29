@@ -19,7 +19,7 @@ Section CSet.
           _
         )
     end;
-    abstract (firstorder; etransitivity; eauto; t).
+    abstract (firstorder; etransitivity; eauto with morphism; t).
 
   Definition TypeCat : @SpecializedCategory Type. build_set_cat. Defined.
   Definition SetCat : @SpecializedCategory Set. build_set_cat. Defined.

@@ -41,12 +41,12 @@ Section SumCategory.
       Compose' := SumCategory_Compose
     |};
     abstract (
-      repeat match goal with
-               | [ H : Empty_set |- _ ] => case H
-               | _ => let H := fresh in intro H; try (case H; clear H); simpl in *
-             end;
-      t_with t'
-    ).
+        repeat match goal with
+                 | [ H : Empty_set |- _ ] => case H
+                 | _ => let H := fresh in intro H; try (case H; clear H); simpl in *
+               end;
+        auto with morphism
+      ).
   Defined.
 End SumCategory.
 

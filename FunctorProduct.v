@@ -13,8 +13,6 @@ Section FunctorProduct.
   Variable F : Functor C D.
   Variable F' : Functor C' D'.
 
-  Hint Resolve @FCompositionOf @FIdentityOf.
-
   Definition FunctorProduct : SpecializedFunctor  (C * C') (D * D').
     match goal with
       | [ |- SpecializedFunctor ?C0 ?D0 ] =>
@@ -25,7 +23,7 @@ Section FunctorProduct.
           _
         )
     end;
-    abstract (intros; unfold ProductCategory in *; destruct_type @prod; simpl in *; f_equal; auto).
+    abstract (intros; simpl; simpl_eq; auto with functor).
   Defined.
 End FunctorProduct.
 

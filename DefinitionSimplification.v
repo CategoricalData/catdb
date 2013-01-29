@@ -2,31 +2,6 @@ Require Import Common.
 
 Set Implicit Arguments.
 
-Lemma sigT_eta : forall A (P : A -> Type) (x : sigT P),
-  x = existT _ (projT1 x) (projT2 x).
-  destruct x; reflexivity.
-Qed.
-
-Lemma sigT2_eta : forall A (P Q : A -> Type) (x : sigT2 P Q),
-  x = existT2 _ _ (projT1 x) (projT2 x) (projT3 x).
-  destruct x; reflexivity.
-Qed.
-
-Lemma sig_eta : forall A (P : A -> Prop) (x : sig P),
-  x = exist _ (proj1_sig x) (proj2_sig x).
-  destruct x; reflexivity.
-Qed.
-
-Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
-  x = exist2 _ _ (proj1_sig x) (proj2_sig x) (proj3_sig x).
-  destruct x; reflexivity.
-Qed.
-
-Lemma prod_eta : forall (A B : Type) (x : A * B),
-  x = pair (fst x) (snd x).
-  destruct x; reflexivity.
-Qed.
-
 (* Silly predicate that we can use to get Ltac to help us manipulate terms *)
 Definition focus A (_ : A) := True.
 
@@ -34,13 +9,7 @@ Definition focus A (_ : A) := True.
 Ltac simpl_definition_by_tac_and_exact defn tac :=
   assert (Hf : focus defn) by constructor;
     let defnH := head defn in try unfold defnH in Hf; try tac; simpl in Hf;
-      repeat match type of Hf with
-               | context[match ?E with existT2 _ _ _ => _ end] => rewrite (sigT2_eta E) in Hf; simpl in Hf
-               | context[match ?E with exist2 _ _ _ => _ end] => rewrite (sig2_eta E) in Hf; simpl in Hf
-               | context[match ?E with existT _ _ => _ end] => rewrite (sigT_eta E) in Hf; simpl in Hf
-               | context[match ?E with exist _ _ => _ end] => rewrite (sig_eta E) in Hf; simpl in Hf
-               | context[match ?E with pair _ _ => _ end] => rewrite (prod_eta E) in Hf; simpl in Hf
-             end;
+      rewrite_eta_in Hf;
       match type of Hf with
         | focus ?V => exact V
       end.

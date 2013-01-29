@@ -1,4 +1,4 @@
-Require Import JMeq ProofIrrelevance.
+Require Import JMeq ProofIrrelevance FunctionalExtensionality.
 Require Export Notations SpecializedCategory Category.
 Require Import Common StructureEquality FEqualDep.
 
@@ -22,16 +22,19 @@ Section SpecializedFunctor.
      (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
      (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
      **)
-  Record SpecializedFunctor := {
-    ObjectOf' : objC -> objD;
-    MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
-    FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
-      MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
-    FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
-  }.
+  Record SpecializedFunctor :=
+    {
+      ObjectOf' : objC -> objD;
+      MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
+      FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
+                          MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
+      FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
+    }.
 End SpecializedFunctor.
 
 Bind Scope functor_scope with SpecializedFunctor.
+
+Create HintDb functor discriminated.
 
 Section FunctorInterface.
   Context `(C : @SpecializedCategory objC).
@@ -66,7 +69,8 @@ Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
 (* try to always unfold [GeneralizeFunctor]; it's in there
    only for coercions *)
 Arguments GeneralizeFunctor [objC C objD D] F /.
-Hint Extern 0 => unfold GeneralizeFunctor.
+Hint Extern 0 => unfold GeneralizeFunctor : category.
+Hint Extern 0 => unfold GeneralizeFunctor : functor.
 
 Arguments SpecializedFunctor {objC} C {objD} D.
 Arguments Functor C D.
@@ -76,7 +80,10 @@ Arguments MorphismOf {objC} [C] {objD} [D] F [s d] m : simpl nomatch.
 Arguments FCompositionOf [objC C objD D] F _ _ _ _ _.
 Arguments FIdentityOf [objC C objD D] F _.
 
-Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf'.
+Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : category.
+Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : functor.
+Hint Rewrite @FIdentityOf @FIdentityOf' : category.
+Hint Rewrite @FIdentityOf @FIdentityOf' : functor.
 
 Ltac present_obj_obj from to :=
   repeat match goal with
@@ -87,27 +94,69 @@ Ltac present_obj_obj from to :=
 Ltac present_spfunctor := present_spcategory;
   present_obj_obj @ObjectOf' @ObjectOf; present_obj_obj @MorphismOf' @MorphismOf.
 
+Ltac functor_hideProofs :=
+  repeat match goal with
+             | [ |- context[{|
+                               ObjectOf' := _;
+                               MorphismOf' := _;
+                               FCompositionOf' := ?pf0;
+                               FIdentityOf' := ?pf1
+                             |}] ] =>
+               hideProofs pf0 pf1
+         end.
+
+Ltac functor_tac_abstract_trailing_props F tac :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
+  let H := fresh in
+  pose F'' as H;
+    hnf in H;
+    revert H; clear; intro H; clear H;
+    match F'' with
+      | @Build_SpecializedFunctor ?objC ?C
+                                  ?objD ?D
+                                  ?OO
+                                  ?MO
+                                  ?FCO
+                                  ?FIO =>
+        refine (@Build_SpecializedFunctor objC C objD D
+                                          OO
+                                          MO
+                                          _
+                                          _);
+          [ abstract exact FCO | abstract exact FIO ]
+    end.
+Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => F').
+Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
+
 Section Functors_Equal.
-  Lemma Functors_Equal objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
+  Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
-    -> (ObjectOf F = ObjectOf G -> MorphismOf F == MorphismOf G)
+    -> MorphismOf F == MorphismOf G
     -> F = G.
     destruct F, G; simpl; intros; specialize_all_ways; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma Functors_JMeq objC C objD D objC' C' objD' D' :
+  Lemma Functor_eq objC C objD D :
+    forall (F G : @SpecializedFunctor objC C objD D),
+      (forall x, ObjectOf F x = ObjectOf G x)
+      -> (forall s d m, MorphismOf F (s := s) (d := d) m == MorphismOf G (s := s) (d := d) m)
+      -> F = G.
+    intros; cut (ObjectOf F = ObjectOf G); intros; try apply Functor_eq'; destruct F, G; simpl in *; repeat subst;
+    try apply eq_JMeq;
+    repeat (apply functional_extensionality_dep; intro); trivial;
+    try apply JMeq_eq; trivial.
+  Qed.
+
+  Lemma Functor_JMeq objC C objD D objC' C' objD' D' :
     forall (F : @SpecializedFunctor objC C objD D) (G : @SpecializedFunctor objC' C' objD' D'),
       objC = objC'
       -> objD = objD'
-      -> (objC = objC' -> C == C')
-      -> (objD = objD' -> D == D')
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        ObjectOf F == ObjectOf G)
-      -> (objC = objC' -> C == C' ->
-        objD = objD' -> D == D' ->
-        ObjectOf F == ObjectOf G -> MorphismOf F == MorphismOf G)
+      -> C == C'
+      -> D == D'
+      -> ObjectOf F == ObjectOf G
+      -> MorphismOf F == MorphismOf G
       -> F == G.
     simpl; intros; intuition; repeat subst; destruct F, G; simpl in *;
       repeat subst; JMeq_eq.
@@ -116,12 +165,53 @@ Section Functors_Equal.
 End Functors_Equal.
 
 Ltac functor_eq_step_with tac :=
-  structures_eq_step_with_tac ltac:(apply Functors_Equal || apply Functors_JMeq) tac.
+  structures_eq_step_with_tac ltac:(apply Functor_eq || apply Functor_JMeq) tac.
 
 Ltac functor_eq_with tac := repeat functor_eq_step_with tac.
 
 Ltac functor_eq_step := functor_eq_step_with idtac.
-Ltac functor_eq := functor_eq_with idtac.
+Ltac functor_eq := functor_hideProofs; functor_eq_with idtac.
+
+Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
+  let F' := (eval hnf in F) in
+  let F'' := (tac F') in
+  let H := fresh in
+  pose F'' as H;
+    hnf in H;
+    revert H; clear; intro H; clear H;
+    match F'' with
+      | @Build_SpecializedFunctor ?objC ?C
+                                  ?objD ?D
+                                  ?OO
+                                  ?MO
+                                  ?FCO
+                                  ?FIO =>
+        let FCO' := fresh in
+        let FIO' := fresh in
+        let FCOT' := type of FCO in
+        let FIOT' := type of FIO in
+        let FCOT := (eval simpl in FCOT') in
+        let FIOT := (eval simpl in FIOT') in
+        assert (FCO' : FCOT) by abstract exact FCO;
+          assert (FIO' : FIOT) by (clear FCO'; abstract exact FIO);
+          exists (@Build_SpecializedFunctor objC C objD D
+                                            OO
+                                            MO
+                                            FCO'
+                                            FIO');
+          expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
+    end.
+
+Ltac functor_tac_abstract_trailing_props_with_equality tac :=
+  pre_abstract_trailing_props;
+  match goal with
+    | [ |- { F0 : SpecializedFunctor _ _ | F0 = ?F } ] =>
+      functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_eq'
+    | [ |- { F0 : SpecializedFunctor _ _ | F0 == ?F } ] =>
+      functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_JMeq
+  end.
+Ltac functor_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => F').
+Ltac functor_simpl_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section FunctorComposition.
   Context `(B : @SpecializedCategory objB).
@@ -129,13 +219,15 @@ Section FunctorComposition.
   Context `(D : @SpecializedCategory objD).
   Context `(E : @SpecializedCategory objE).
 
-  Hint Rewrite @FCompositionOf @FIdentityOf.
+  Hint Rewrite @FCompositionOf : functor.
 
   Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
     refine {| ObjectOf' := (fun c => G (F c));
       MorphismOf' := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
     |};
-    abstract t.
+    abstract (
+        intros; autorewrite with functor; reflexivity
+      ).
   Defined.
 End FunctorComposition.
 
@@ -155,8 +247,6 @@ Section IdentityFunctorLemmas.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Hint Unfold ComposeFunctors IdentityFunctor ObjectOf MorphismOf.
-
   Lemma LeftIdentityFunctor (F : SpecializedFunctor D C) : ComposeFunctors (IdentityFunctor _) F = F.
     functor_eq.
   Qed.
@@ -166,8 +256,10 @@ Section IdentityFunctorLemmas.
   Qed.
 End IdentityFunctorLemmas.
 
-Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor.
-Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor.
+Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : category.
+Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category.
+Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
+Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : functor.
 
 Section FunctorCompositionLemmas.
   Context `(B : @SpecializedCategory objB).
@@ -180,3 +272,6 @@ Section FunctorCompositionLemmas.
     functor_eq.
   Qed.
 End FunctorCompositionLemmas.
+
+Hint Resolve @ComposeFunctorsAssociativity : category.
+Hint Resolve @ComposeFunctorsAssociativity : functor.

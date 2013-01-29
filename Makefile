@@ -42,9 +42,12 @@ MODULES    := Notations \
 	ProductInducedFunctors \
 	SumCategory \
 	ExponentialLaws \
+	ProductLaws \
+	FunctorialComposition \
 	MonoidalCategory \
 	EnrichedCategory \
 	SetCategory \
+	SetCategoryProductFunctor \
 	DecidableDiscreteCategory \
 	DecidableComputableCategory \
 	DecidableSmallCat \
@@ -56,8 +59,10 @@ MODULES    := Notations \
 	LaxCommaCategory \
 	SpecializedLaxCommaCategory \
 	CommaCategoryFunctors \
+	CommaCategoryFunctorProperties \
 	UniversalProperties \
 	Duals \
+	DualFunctor \
 	Hom \
 	FunctorAttributes \
 	Correspondences \
@@ -66,6 +71,7 @@ MODULES    := Notations \
 	Adjoint \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
+	PathsCategoryFunctors \
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
@@ -82,6 +88,7 @@ MODULES    := Notations \
 	SetColimits \
 	SetCategoryFacts \
 	Yoneda \
+	DataMigrationFunctors \
 	\
 	Schema \
 	SmallSchema \
@@ -96,11 +103,16 @@ MODULES    := Notations \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
+VDS	   := $(MODULES:%=%.v.d)
 
-.PHONY: coq clean
+.PHONY: coq clean timed
 
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
+
+# TODO(jgross): Look into combining this with the time-make.sh script
+timed: Makefile.coq
+	$(MAKE) -f Makefile.coq SHELL=./report_time.sh
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq

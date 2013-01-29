@@ -80,8 +80,7 @@ Section Grothendieck.
     ).
   Defined.
 
-  Hint Resolve @Associativity @LeftIdentity @RightIdentity.
-  Hint Extern 1 (@eq (sig _) _ _) => simpl_eq.
+  Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
 
   Definition CategoryOfElements : @SpecializedCategory
     GrothendieckPair.
@@ -93,14 +92,14 @@ Section Grothendieck.
     |};
     abstract (
       unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
-        intros; destruct_type GrothendieckPair; destruct_sig; eauto
+        intros; destruct_type GrothendieckPair; destruct_sig; eauto with category
     ).
   Defined.
 
   Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
     refine {| ObjectOf' := (fun o : CategoryOfElements => GrothendieckC o);
       MorphismOf' := (fun s d (m : CategoryOfElements.(Morphism') s d) => proj1_sig m)
-    |}; abstract (eauto; intros; destruct_type CategoryOfElements; simpl; reflexivity).
+    |}; abstract (eauto with category; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
 End Grothendieck.
 

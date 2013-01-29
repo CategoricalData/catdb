@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export Functor SetCategory SmallCat FunctorCategory.
+Require Export Functor SetCategory SmallCat FunctorCategory Paths.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.
@@ -135,8 +135,22 @@ Section FreeCategory.
 
   Let vertices := F GraphIndexTarget.
 
+  Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+
   Definition FreeCategory : SpecializedCategory vertices.
   Proof.
-    (* morphisms are paths *)
+    refine (@Build_SpecializedCategory
+              vertices
+              _
+              (@NoEdges _ _)
+              (fun s d d' m m' => @concatenate _ _ s d d' m' m)
+              _
+              _
+              _
+           );
+    intros; autorewrite with core; reflexivity.
+    Grab Existential Variables.
+  (* what goes here, of type [vertices -> vertices -> Type]? *)
+  (* morphisms are paths *)
   Admitted.
 End FreeCategory.

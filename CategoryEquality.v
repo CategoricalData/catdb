@@ -9,7 +9,7 @@ Generalizable All Variables.
 Local Infix "==" := JMeq.
 
 Section Categories_Equal.
-  Lemma Categories_Equal : forall (A B : Category),
+  Lemma Category_eq : forall (A B : Category),
     Object A = Object B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -21,7 +21,7 @@ Section Categories_Equal.
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma SmallCategories_Equal : forall (A B : SmallCategory),
+  Lemma SmallCategory_eq : forall (A B : SmallCategory),
     SObject A = SObject B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -33,7 +33,7 @@ Section Categories_Equal.
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma LocallySmallCategories_Equal : forall (A B : LocallySmallCategory),
+  Lemma LocallySmallCategory_eq : forall (A B : LocallySmallCategory),
     LSObject A = LSObject B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -48,7 +48,7 @@ End Categories_Equal.
 
 Ltac cat_eq_step_with tac :=
   structures_eq_step_with_tac
-  ltac:(apply SmallCategories_Equal || apply LocallySmallCategories_Equal || apply Categories_Equal)
+  ltac:(apply SmallCategory_eq || apply LocallySmallCategory_eq || apply Category_eq)
   tac.
 
 Ltac cat_eq_with tac := repeat cat_eq_step_with tac.
@@ -69,7 +69,7 @@ Section RoundtripCat.
   Qed.
 End RoundtripCat.
 
-Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id.
+Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripLSCat.
   Context `(C : @LocallySmallSpecializedCategory obj).
@@ -84,7 +84,7 @@ Section RoundtripLSCat.
   Qed.
 End RoundtripLSCat.
 
-Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id.
+Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripSCat.
   Context `(C : @SmallSpecializedCategory obj).
@@ -99,4 +99,4 @@ Section RoundtripSCat.
   Qed.
 End RoundtripSCat.
 
-Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id.
+Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id : category.

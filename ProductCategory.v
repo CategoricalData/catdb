@@ -15,7 +15,8 @@ Section ProductCategory.
       Identity' := (fun o => (Identity (fst o), Identity (snd o)));
 (*      Compose' := (fun s d d' m2 m1 => (Compose (fst m2) (fst m1), Compose (snd m2) (snd m1))) (* gives Uncaught exception: Not_found *) *)
       Compose' := (fun (s d d' : (C * D)%type) m2 m1 => (C.(Compose') _ _ _ (fst m2) (fst m1), D.(Compose') _ _ _ (snd m2) (snd m1)))
-    |}; abstract (present_spcategory; intros; simpl in *; destruct_type @prod; t).
+    |};
+    abstract (intros; simpl_eq; auto with morphism).
   Defined.
 End ProductCategory.
 
