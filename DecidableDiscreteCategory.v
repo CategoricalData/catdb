@@ -38,15 +38,17 @@ Section DCategoryDec.
   Defined.
 
   Definition DiscreteCategoryDec : @SpecializedCategory O.
-    refine {|
-      Morphism' := DiscreteCategoryDec_Morphism;
-      Compose' := DiscreteCategoryDec_Compose;
-      Identity' := DiscreteCategoryDec_Identity
-    |};
+    refine (@Build_SpecializedCategory _
+                                       DiscreteCategoryDec_Morphism
+                                       DiscreteCategoryDec_Identity
+                                       DiscreteCategoryDec_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
-      unfold DiscreteCategoryDec_Compose, DiscreteCategoryDec_Identity;
+        unfold DiscreteCategoryDec_Compose, DiscreteCategoryDec_Identity;
         simpl_eq_dec
-    ).
+      ).
   Defined.
 End DCategoryDec.
 

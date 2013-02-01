@@ -84,7 +84,7 @@ Section Law1.
                                 (fun s d m => m tt)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
-  
+
   Definition ExponentialLaw1Functor_Inverse_ObjectOf : C -> (C ^ 1)%category.
   Proof.
     refine (fun c => Build_SpecializedFunctor 1 C
@@ -259,7 +259,7 @@ Section Law2.
       (m : Morphism (D ^ (C1 + C2)) s d) :
       Morphism ((D ^ C1) * (D ^ C2)) (ExponentialLaw2Functor_ObjectOf s) (ExponentialLaw2Functor_ObjectOf d).
     Proof.
-      hnf; unfold FunctorCategory, Morphism.
+      hnf; unfold FunctorCategory, Morphism; simpl in *.
       match goal with
         | [ |- prod (SpecializedNaturalTransformation ?F1 ?G1) (SpecializedNaturalTransformation ?F2 ?G2) ] =>
           refine (Build_SpecializedNaturalTransformation F1 G1

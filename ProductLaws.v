@@ -103,8 +103,8 @@ Section Law1.
   Proof.
     split; functor_eq;
     destruct_head_hnf @prod;
-    destruct_head_hnf unit;
     destruct_head_hnf @eq;
+    destruct_head_hnf unit;
     reflexivity.
   Qed.
 End Law1.
@@ -127,8 +127,8 @@ Section Law1'.
   Proof.
     split; functor_eq;
     destruct_head_hnf @prod;
-    destruct_head_hnf unit;
     destruct_head_hnf @eq;
+    destruct_head_hnf unit;
     reflexivity.
   Qed.
 End Law1'.

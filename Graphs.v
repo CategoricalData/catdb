@@ -27,14 +27,16 @@ Section GraphObj.
   Defined.
 
   Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
-    refine {|
-      Morphism' := GraphIndex_Morphism;
-      Identity' := (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end);
-      Compose' := GraphIndex_Compose
-    |};
+    refine (@Build_SpecializedCategory _
+                                       GraphIndex_Morphism
+                                       (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end)
+                                       GraphIndex_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
-      intros; destruct_type GraphIndex; simpl in *; destruct_type Empty_set; trivial
-    ).
+        intros; destruct_type GraphIndex; simpl in *; destruct_type Empty_set; trivial
+      ).
   Defined.
 
   Definition UnderlyingGraph_ObjectOf x :=

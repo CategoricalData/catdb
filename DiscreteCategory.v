@@ -27,14 +27,16 @@ Section DCategory.
   Global Arguments DiscreteCategory_Identity o /.
 
   Definition DiscreteCategory : @SpecializedCategory O.
-    refine {|
-      Morphism' := DiscreteCategory_Morphism;
-      Compose' := DiscreteCategory_Compose;
-      Identity' := DiscreteCategory_Identity
-    |};
+    refine (@Build_SpecializedCategory _
+                                       DiscreteCategory_Morphism
+                                       DiscreteCategory_Identity
+                                       DiscreteCategory_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
-      unfold DiscreteCategory_Compose, DiscreteCategory_Identity;
+        unfold DiscreteCategory_Compose, DiscreteCategory_Identity;
         simpl_eq
-    ).
+      ).
   Defined.
 End DCategory.

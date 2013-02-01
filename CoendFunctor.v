@@ -50,17 +50,22 @@ Section Coend.
 
   Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
   Proof.
-    refine {|
-      Morphism' := CoendFunctor_Index_Morphism;
-      Identity' := CoendFunctor_Index_Identity;
-      Compose' := CoendFunctor_Index_Compose
-    |}; abstract (simpl; intros;
-      repeat (match goal with
-                | [ x : _ + _ |- _ ] => destruct x; simpl in *
-                | _ => apply proof_irrelevance
-                | _ => congruence
-                | _ => f_equal
-              end)).
+    refine (@Build_SpecializedCategory _
+                                       CoendFunctor_Index_Morphism
+                                       CoendFunctor_Index_Identity
+                                       CoendFunctor_Index_Compose
+                                       _
+                                       _
+                                       _);
+    abstract (
+        simpl; intros;
+        repeat (match goal with
+                  | [ x : _ + _ |- _ ] => destruct x; simpl in *
+                                                    | _ => apply proof_irrelevance
+                                                    | _ => congruence
+                                                    | _ => f_equal
+                end)
+      ).
   Defined.
 
   Definition CoendFunctor_Diagram_ObjectOf_pre : CoendFunctor_Index -> (COp * C) :=

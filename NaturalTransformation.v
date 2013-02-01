@@ -252,10 +252,14 @@ Section NaturalTransformationComposition.
 
   Definition NTComposeT (T' : SpecializedNaturalTransformation F' F'') (T : SpecializedNaturalTransformation F F') :
     SpecializedNaturalTransformation F F''.
-    refine {| ComponentsOf' := (fun c => Compose (T' c) (T c)) |};
+    exists (fun c => Compose (T' c) (T c));
     (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
-      abstract (intros; transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _)));
-                try_associativity ltac:(eauto with natural_transformation)).
+    abstract (
+        present_spcategory;
+        intros;
+        transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _)));
+        try_associativity ltac:(eauto with natural_transformation)
+      ).
   Defined.
 
   (*
@@ -297,10 +301,9 @@ Section NaturalTransformationComposition.
 
   Definition NTComposeF (U : SpecializedNaturalTransformation G G') (T : SpecializedNaturalTransformation F F'):
     SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    refine (Build_SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F')
-      (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)))
-      _);
+    exists (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)));
     abstract (
+        present_spcategory;
         simpl; intros; autorewrite with category;
         repeat try_associativity ltac:(repeat rewrite <- @Commutes; repeat rewrite <- @FCompositionOf);
         reflexivity
@@ -315,9 +318,8 @@ Section IdentityNaturalTransformation.
 
   (* There is an identity natrual transformation. *)
   Definition IdentityNaturalTransformation : SpecializedNaturalTransformation F F.
-    refine {| ComponentsOf' := (fun c => Identity (F c))
-      |}.
-    abstract (intros; autorewrite with morphism; reflexivity).
+    exists (fun c => Identity (F c));
+    abstract (present_spcategory; intros; autorewrite with morphism; reflexivity).
   Defined.
 
   Lemma LeftIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F' F) :
@@ -365,10 +367,11 @@ Section Associativity.
 
   Definition ComposeFunctorsAssociator1 : SpecializedNaturalTransformation F0 F1.
     refine (Build_SpecializedNaturalTransformation F0 F1
-      (fun _ => Identity (C := E) _)
-      _
-    );
+                                                   (fun _ => Identity (C := E) _)
+                                                   _
+           );
     abstract (
+        present_spcategory;
         simpl; intros;
         autorewrite with morphism; reflexivity
       ).
@@ -376,10 +379,11 @@ Section Associativity.
 
   Definition ComposeFunctorsAssociator2 : SpecializedNaturalTransformation F1 F0.
     refine (Build_SpecializedNaturalTransformation F1 F0
-      (fun _ => Identity (C := E) _)
-      _
-    );
+                                                   (fun _ => Identity (C := E) _)
+                                                   _
+           );
     abstract (
+        present_spcategory;
         simpl; intros;
         autorewrite with morphism; reflexivity
       ).

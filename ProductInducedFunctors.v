@@ -6,12 +6,10 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Local Ltac t :=
-  simpl; intros; present_spfunctor;
-    repeat rewrite <- FCompositionOf || rewrite <- FIdentityOf;
-      f_equal; simpl_eq;
-      unfold ProductCategory; simpl;
-        autorewrite with core;
-          reflexivity.
+  present_spfunctor;
+  intros; simpl; repeat (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
+  apply f_equal; expand; autorewrite with morphism;
+  reflexivity.
 
 Section ProductInducedFunctors.
   Context `(C : @SpecializedCategory objC).
@@ -24,20 +22,14 @@ Section ProductInducedFunctors.
     refine {| ObjectOf' := (fun c => F (c, d));
       MorphismOf' := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
     |};
-    abstract (
-        intros; (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
-        simpl; autorewrite with morphism; reflexivity
-      ).
+    abstract t.
   Defined.
 
   Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
     refine {| ObjectOf' := (fun d => F (c, d));
       MorphismOf' := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
     |};
-    abstract (
-        intros; (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
-        simpl; autorewrite with morphism; reflexivity
-      ).
+    abstract t.
   Defined.
 End ProductInducedFunctors.
 
@@ -59,10 +51,7 @@ Section ProductInducedNaturalTransformations.
           _
         )
     end;
-    abstract (
-        intros; simpl; repeat rewrite <- FCompositionOf;
-        simpl; autorewrite with morphism; reflexivity
-      ).
+    abstract t.
   Defined.
 
   Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F ⟨ -, s ⟩) (F ⟨ - , d ⟩).
@@ -73,10 +62,7 @@ Section ProductInducedNaturalTransformations.
           _
         )
     end;
-    abstract (
-        intros; simpl; repeat rewrite <- FCompositionOf;
-        simpl; autorewrite with morphism; reflexivity
-      ).
+    abstract t.
   Defined.
 End ProductInducedNaturalTransformations.
 

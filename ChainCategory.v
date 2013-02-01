@@ -6,11 +6,13 @@ Set Implicit Arguments.
 
 Section ChainCat.
   Definition OmegaCategory : @SpecializedCategory nat.
-    refine {|
-      Morphism' := le;
-      Compose' := (fun _ _ _ H0 H1 => le_trans H1 H0);
-      Identity' := le_refl
-    |};
+    refine (@Build_SpecializedCategory _
+                                       le
+                                       le_refl
+                                       (fun _ _ _ H0 H1 => le_trans H1 H0)
+                                       _
+                                       _
+                                       _);
     abstract (intros; apply proof_irrelevance).
   Defined.
 

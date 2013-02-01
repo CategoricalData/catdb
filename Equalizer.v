@@ -28,14 +28,16 @@ Section Equalizer.
   Defined.
 
   Definition EqualizerIndex : @SpecializedCategory EqualizerTwo.
-    refine {|
-      Morphism' := EqualizerIndex_Morphism;
-      Identity' := (fun x => match x with EqualizerA => tt | EqualizerB => tt end);
-      Compose' := EqualizerIndex_Compose
-    |};
+    refine (@Build_SpecializedCategory _
+                                       EqualizerIndex_Morphism
+                                       (fun x => match x with EqualizerA => tt | EqualizerB => tt end)
+                                       EqualizerIndex_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
-      intros; destruct_type EqualizerTwo; simpl in *; destruct_type Empty_set; trivial
-    ).
+        intros; destruct_type EqualizerTwo; simpl in *; destruct_type Empty_set; trivial
+      ).
   Defined.
 
   Definition EqualizerDiagram_ObjectOf x :=

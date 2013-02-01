@@ -133,7 +133,7 @@ Section sig_mor.
           _
         )
     end;
-    abstract (intros; simpl_eq; present_spcategory_all; auto with category).
+    abstract (intros; simpl_eq; present_spcategory; auto with category).
   Defined.
 
   Definition proj1_sig_mor_functor : SpecializedFunctor SpecializedCategory_sig_mor A.

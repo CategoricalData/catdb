@@ -11,12 +11,13 @@ Section PCategory.
   Hint Rewrite concatenate_associative.
 
   Definition PathsCategory : @SpecializedCategory V.
-  Proof.
-    refine {|
-      Morphism' := @path V E;
-      Compose' := (fun _ _ _ p p' => concatenate p' p);
-      Identity' := @NoEdges _ _
-    |};
+    refine (@Build_SpecializedCategory _
+                                       (@path V E)
+                                       (@NoEdges _ _)
+                                       (fun _ _ _ p p' => concatenate p' p)
+                                       _
+                                       _
+                                       _);
     abstract t_with t'.
   Defined.
 End PCategory.

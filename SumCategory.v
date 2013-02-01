@@ -28,18 +28,20 @@ Section SumCategory.
 
   Definition SumCategory_Compose (s d d' : C + D) (m1 : SumCategory_Morphism d d') (m2 : SumCategory_Morphism s d) : SumCategory_Morphism s d'.
     (* XXX NOTE: try to use typeclasses and work up to existance of morphisms here *)
-    case s, d, d'; simpl in *; try destruct_to_empty_set; present_spcategory_all;
+    case s, d, d'; simpl in *; try destruct_to_empty_set; present_spcategory;
       eapply Compose; eassumption.
   Defined.
 
   Global Arguments SumCategory_Compose [_ _ _] _ _ /.
 
   Definition SumCategory : @SpecializedCategory (objC + objD)%type.
-    refine {|
-      Morphism' := SumCategory_Morphism;
-      Identity' := SumCategory_Identity;
-      Compose' := SumCategory_Compose
-    |};
+    refine (@Build_SpecializedCategory _
+                                       SumCategory_Morphism
+                                       SumCategory_Identity
+                                       SumCategory_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
         repeat match goal with
                  | [ H : Empty_set |- _ ] => case H

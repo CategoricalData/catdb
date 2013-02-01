@@ -11,12 +11,13 @@ Section ComputableGraphCategory.
   Local Coercion Index2Graph : I >-> Graph.
 
   Definition ComputableGraphCategory : @SpecializedCategory I.
-  Proof.
-    refine {|
-      Morphism' := (fun C D : I => GraphTranslation C D);
-      Identity' := (fun o : I => IdentityGraphTranslation o);
-      Compose' := (fun C D E : I => ComposeGraphTranslations (C := C) (D := D) (E := E))
-    |};
+    refine (@Build_SpecializedCategory _
+                                       (fun C D : I => GraphTranslation C D)
+                                       (fun o : I => IdentityGraphTranslation o)
+                                       (fun C D E : I => ComposeGraphTranslations (C := C) (D := D) (E := E))
+                                       _
+                                       _
+                                       _);
     abstract graph_translation_eq.
   Defined.
 End ComputableGraphCategory.

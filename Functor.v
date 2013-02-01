@@ -222,10 +222,13 @@ Section FunctorComposition.
   Hint Rewrite @FCompositionOf : functor.
 
   Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
-    refine {| ObjectOf' := (fun c => G (F c));
-      MorphismOf' := (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-    |};
+    refine (Build_SpecializedFunctor C E
+                                     (fun c => G (F c))
+                                     (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                                     _
+                                     _);
     abstract (
+        present_spcategory;
         intros; autorewrite with functor; reflexivity
       ).
   Defined.

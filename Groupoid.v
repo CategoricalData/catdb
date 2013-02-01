@@ -25,11 +25,13 @@ Section GroupoidOf.
      A groupoid is a small category in which every morphism is an isomorphism, and hence invertible.
      *)
   Definition GroupoidOf : @SpecializedCategory objC.
-    refine {|
-      Morphism' := (fun s d => inhabited (GroupoidOf_Morphism s d));
-      Identity' := (fun o : C => inhabits (hasMorphism _ _ (Identity o)));
-      Compose' := @GroupoidOf_Compose
-    |};
+    refine (@Build_SpecializedCategory _
+                                       (fun s d => inhabited (GroupoidOf_Morphism s d))
+                                       (fun o : C => inhabits (hasMorphism _ _ (Identity o)))
+                                       (@GroupoidOf_Compose)
+                                       _
+                                       _
+                                       _);
     abstract (simpl; intros; apply proof_irrelevance).
   Defined.
 

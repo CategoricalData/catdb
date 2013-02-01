@@ -8,23 +8,37 @@ Generalizable All Variables.
 
 Local Infix "==" := JMeq.
 
-Record SpecializedCategory (obj : Type) := Build_SpecializedCategory' {
-  Object :> _ := obj;
-  Morphism' : obj -> obj -> Type;
+Record ComputationalCategory (obj : Type) :=
+  Build_ComputationalCategory {
+      Object :> _ := obj;
+      Morphism' : obj -> obj -> Type;
 
-  Identity' : forall o, Morphism' o o;
-  Compose' : forall s d d', Morphism' d d' -> Morphism' s d -> Morphism' s d';
+      Identity' : forall o, Morphism' o o;
+      Compose' : forall s d d', Morphism' d d' -> Morphism' s d -> Morphism' s d'
+    }.
 
-  Associativity' : forall o1 o2 o3 o4 (m1 : Morphism' o1 o2) (m2 : Morphism' o2 o3) (m3 : Morphism' o3 o4),
-    Compose' (Compose' m3 m2) m1 = Compose' m3 (Compose' m2 m1);
-  (* ask for [eq_sym (Associativity' ...)], so that C^{op}^{op} is convertible with C *)
-  Associativity'_sym : forall o1 o2 o3 o4 (m1 : Morphism' o1 o2) (m2 : Morphism' o2 o3) (m3 : Morphism' o3 o4),
-    Compose' m3 (Compose' m2 m1) = Compose' (Compose' m3 m2) m1;
-  LeftIdentity' : forall a b (f : Morphism' a b), Compose' (Identity' b) f = f;
-  RightIdentity' : forall a b (f : Morphism' a b), Compose' f (Identity' a) = f
-}.
+
+Record SpecializedCategory (obj : Type) :=
+  Build_SpecializedCategory' {
+      UnderlyingCCategory :> ComputationalCategory obj;
+
+      Associativity' : forall o1 o2 o3 o4
+                              (m1 : Morphism' UnderlyingCCategory o1 o2)
+                              (m2 : Morphism' UnderlyingCCategory o2 o3)
+                              (m3 : Morphism' UnderlyingCCategory o3 o4),
+                         Compose' _ _ _ _ (Compose' _ _ _ _ m3 m2) m1 = Compose' _ _ _ _ m3 (Compose' _ _ _ _ m2 m1);
+      (* ask for [eq_sym (Associativity' ...)], so that C^{op}^{op} is convertible with C *)
+      Associativity'_sym : forall o1 o2 o3 o4
+                                  (m1 : Morphism' UnderlyingCCategory o1 o2)
+                                  (m2 : Morphism' UnderlyingCCategory o2 o3)
+                                  (m3 : Morphism' UnderlyingCCategory o3 o4),
+                             Compose' _ _ _ _ m3 (Compose' _ _ _ _ m2 m1) = Compose' _ _ _ _ (Compose' _ _ _ _ m3 m2) m1;
+      LeftIdentity' : forall a b (f : Morphism' UnderlyingCCategory a b), Compose' _ _ _ _ (Identity' _ b) f = f;
+      RightIdentity' : forall a b (f : Morphism' UnderlyingCCategory a b), Compose' _ _ _ _ f (Identity' _ a) = f
+    }.
 
 Bind Scope category_scope with SpecializedCategory.
+Bind Scope category_scope with ComputationalCategory.
 Bind Scope object_scope with Object.
 Bind Scope morphism_scope with Morphism'.
 
@@ -48,38 +62,47 @@ Section SpecializedCategoryInterface.
     (RightIdentity' : forall (a b : obj) (f : Morphism' a b), Compose' a a b f (Identity' a) = f) :
     @SpecializedCategory obj
     := @Build_SpecializedCategory' obj
-    Morphism'
-    Identity' Compose'
-    Associativity'
-    (fun _ _ _ _ _ _ _ => eq_sym (Associativity' _ _ _ _ _ _ _))
-    LeftIdentity'
-    RightIdentity'.
+                                   (@Build_ComputationalCategory obj
+                                                                 Morphism'
+                                                                 Identity' Compose')
+                                   Associativity'
+                                   (fun _ _ _ _ _ _ _ => eq_sym (Associativity' _ _ _ _ _ _ _))
+                                   LeftIdentity'
+                                   RightIdentity'.
 
-  Context `(C : @SpecializedCategory obj).
+  Section Computational.
+    Context `(C : @ComputationalCategory obj).
 
-  Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
+    Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
 
-  Bind Scope morphism_scope with Morphism.
+    Bind Scope morphism_scope with Morphism.
 
-  Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
-  Definition Compose : forall {s d d' : C} (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
-  Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
-    Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1)
-    := C.(Associativity').
-  Definition LeftIdentity : forall (a b : C) (f : Morphism a b),
-    Compose (Identity b) f = f
-    := C.(LeftIdentity').
-  Definition RightIdentity : forall (a b : C) (f : Morphism a b),
-    Compose f (Identity a) = f
-    := C.(RightIdentity').
+    Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
+    Definition Compose : forall {s d d' : C} (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
+  End Computational.
+  Section Specialized.
+    Context `(C : @SpecializedCategory obj).
+
+    Bind Scope morphism_scope with Morphism.
+
+    Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism C o1 o2) (m2 : Morphism C o2 o3) (m3 : Morphism C o3 o4),
+                                 Compose _ (Compose _ m3 m2) m1 = Compose _ m3 (Compose _ m2 m1)
+      := C.(Associativity').
+    Definition LeftIdentity : forall (a b : C) (f : Morphism C a b),
+                                Compose _ (Identity _ b) f = f
+      := C.(LeftIdentity').
+    Definition RightIdentity : forall (a b : C) (f : Morphism C a b),
+                                 Compose _ f (Identity _ a) = f
+      := C.(RightIdentity').
+  End Specialized.
 End SpecializedCategoryInterface.
 
 Bind Scope morphism_scope with Morphism.
 
-Arguments Object {obj} C : rename, simpl never.
-Arguments Morphism {obj} C s d : rename, simpl nomatch.
-Arguments Compose {obj} [C s d d'] m m0 : simpl nomatch.
-Arguments Identity {obj} [C] o : simpl nomatch.
+Arguments Object {obj} !C : rename, simpl never.
+Arguments Morphism {obj} !C s d : rename. (* , simpl nomatch. *)
+Arguments Compose {obj} [!C s d d'] m m0. (* : simpl nomatch. *)
+Arguments Identity {obj} [!C] o. (* : simpl nomatch. *)
 
 Global Opaque Associativity LeftIdentity RightIdentity.
 
@@ -93,24 +116,24 @@ Ltac sanitize_spcategory :=
 
 Ltac present_obj from to :=
   repeat match goal with
-           | [ _ : appcontext[from ?obj ?C] |- _ ] => progress change (from obj) with (to obj) in *
-           | [ |- appcontext[from ?obj ?C] ] => progress change (from obj) with (to obj) in *
+           | [ _ : appcontext[from ?obj (UnderlyingCCategory ?C)] |- _ ] => progress change (from obj (UnderlyingCCategory C)) with (to obj C) in *
+           | [ |- appcontext[from ?obj (UnderlyingCCategory ?C)] ] => progress change (from obj (UnderlyingCCategory C)) with (to obj C) in *
          end.
 
 Ltac present_spcategory := present_obj @Morphism' @Morphism; present_obj @Identity' @Identity; present_obj @Compose' @Compose.
 
-Ltac present_spcategory_all := present_spcategory;
+Hint Extern 0 => progress present_spcategory : category.
+Hint Extern 0 => progress present_spcategory : morphism.
+
+(*Ltac present_spcategory_all := present_spcategory;
   repeat match goal with
            | [ C : @SpecializedCategory ?obj |- _ ] => progress (change_in_all obj with (@Object obj C); sanitize_spcategory)
          end;
-  sanitize_spcategory.
+  sanitize_spcategory.*)
 
 Ltac spcategory_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               Morphism' := _;
-                               Identity' := _;
-                               Compose' := _;
                                Associativity' := ?pf0;
                                Associativity'_sym := ?pf1;
                                LeftIdentity' := ?pf2;
@@ -136,8 +159,9 @@ Section Categories_Equal.
     -> @Identity' _ C == @Identity' _ D
     -> @Compose' _ C == @Compose' _ D
     -> C = D.
-    intros; intuition; destruct C, D; simpl in *; repeat subst;
-      f_equal; apply proof_irrelevance.
+    intros; intuition; destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
+    simpl in *; repeat subst;
+    f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
@@ -146,8 +170,9 @@ Section Categories_Equal.
     -> @Identity' _ C == @Identity' _ D
     -> @Compose' _ C == @Compose' _ D
     -> C == D.
-    intros; intuition; destruct C, D; simpl in *; repeat subst; JMeq_eq;
-      f_equal; apply proof_irrelevance.
+    intros; intuition; destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
+    simpl in *; repeat subst; JMeq_eq;
+    f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.
 

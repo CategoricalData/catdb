@@ -29,11 +29,13 @@ Section Subcategory.
     := exist _ (Identity (C := C) x) (Pmor_identity _).
 
   Definition Subcategory : @SpecializedCategory obj.
-    refine {|
-      Morphism' := mor;
-      Compose' := @Subcategory_Compose;
-      Identity' := @Subcategory_Identity
-    |};
+    refine (@Build_SpecializedCategory _
+                                       mor
+                                       (@Subcategory_Identity)
+                                       (@Subcategory_Compose)
+                                       _
+                                       _
+                                       _);
     abstract (
         intros; unfold Subcategory_Compose, Subcategory_Identity;
         simpl_eq;
@@ -96,13 +98,13 @@ Section WideSubcategory.
 
   Definition WideSubcategory : @SpecializedCategory obj.
     refine (@Build_SpecializedCategory obj mor'
-      (fun x => WideSubcategory'.(Identity') x)
-      (fun s d d' m1 m2 => WideSubcategory'.(Compose') _ _ _ m1 m2)
-      _
-      _
-      _
-    );
+                                       (fun x => WideSubcategory'.(Identity') x)
+                                       (fun s d d' m1 m2 => WideSubcategory'.(Compose') _ _ _ m1 m2)
+                                       _
+                                       _
+                                       _
+           );
     subst_body;
-    abstract (intros; autorewrite with morphism; reflexivity).
+    abstract (present_spcategory; intros; autorewrite with morphism; reflexivity).
   Defined.
 End WideSubcategory.

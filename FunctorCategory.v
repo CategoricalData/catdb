@@ -11,15 +11,18 @@ Section FunctorCategory.
 
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
-     *)
+   *)
   Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
-    refine {|
-      Morphism' := SpecializedNaturalTransformation (C := C) (D := D);
-      Compose' := NTComposeT (C := C) (D := D);
-      Identity' := IdentityNaturalTransformation (C := C) (D := D)
-    |}; abstract (nt_eq; auto with morphism).
+    refine (@Build_SpecializedCategory _
+                                       (SpecializedNaturalTransformation (C := C) (D := D))
+                                       (IdentityNaturalTransformation (C := C) (D := D))
+                                       (NTComposeT (C := C) (D := D))
+                                       _
+                                       _
+                                       _);
+    abstract (nt_eq; auto with morphism).
   Defined.
 End FunctorCategory.
 
-Notation "C ^ D" := (FunctorCategory D C) : category_scope.
 Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
+Notation "C ^ D" := (FunctorCategory D C) : category_scope.

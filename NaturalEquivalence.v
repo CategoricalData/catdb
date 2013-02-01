@@ -109,7 +109,7 @@ Section NaturalTransformationInverse.
       abstract (
         intros; destruct (X s); destruct (X d);
           simpl; unfold InverseOf in *; destruct_hypotheses;
-            present_spnt; present_spcategory_all;
+            present_spnt; present_spcategory;
             pre_compose_to_identity; post_compose_to_identity;
             auto
       ).

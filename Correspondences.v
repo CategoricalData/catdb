@@ -115,43 +115,23 @@ Section CorrespondenceCategory.
 
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
+  (* TODO(jgross): Rewrite fg_equal_in using typeclasses? for speed *)
   Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type.
-    refine {|
-      Morphism' := CorrespondenceCategory_Morphism;
-      Identity' := CorrespondenceCategory_Identity;
-      Compose' := CorrespondenceCategory_Compose
-    |};
+    refine (@Build_SpecializedCategory _
+                                       CorrespondenceCategory_Morphism
+                                       CorrespondenceCategory_Identity
+                                       CorrespondenceCategory_Compose
+                                       _
+                                       _
+                                       _);
     abstract (
-      intros; destruct_type @sum;
+        intros; destruct_head_hnf @sum;
         unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
           destruct_type @Empty_set; trivial; autorewrite with functor; auto with morphism;
-            try match goal with
-                  | [ |- appcontext[(Compose (C := ?A) ?a ?b, Identity (C := ?B) ?c)] ] =>
-                    replace (Compose a b, Identity c) with
-                      (Compose (C := A * B) (s := (_, c)) (d := (_, c)) (d' := (_, c)) (a, Identity c) (b, Identity c));
-                      [
-                        let H := fresh in
-                          pose proof (FCompositionOf' M (_, c) (_, c) (_, c) (a, Identity c) (b, Identity c)) as H; present_spfunctor;
-                            conv_rewrite H
-                        | simpl; repeat rewrite LeftIdentity; try reflexivity
-                      ]
-                  | [ |- appcontext[(Identity (C := ?B) ?c, Compose (C := ?A) ?a ?b)] ] =>
-                    replace (Identity c, Compose a b) with
-                      (Compose (C := B * A) (s := (c, _)) (d := (c, _)) (d' := (c, _)) (Identity c, a) (Identity c, b));
-                      [
-                        let H := fresh in
-                          pose proof (FCompositionOf' M (c, _) (c, _) (c, _) (Identity c, b) (Identity c, a)) as H;
-                            conv_rewrite H
-                        | simpl; repeat rewrite LeftIdentity; try reflexivity
-                      ]
-                  | [ |- ?f (?g ?x) = ?f' (?g' ?x') ] => change (Compose f g x = Compose f' g' x');
-                    repeat rewrite <- FCompositionOf; simpl; present_spcategory;
-                      repeat rewrite LeftIdentity; repeat rewrite RightIdentity
-                end;
-            repeat rewrite FIdentityOf;
-              repeat rewrite FCompositionOf;
-                try solve [ simpl; trivial ]
-    ).
+        destruct M as [ MO MM MI MC ]; simpl in *; fg_equal_in MI; fg_equal_in MC;
+        present_spcategory;
+        match goal with | [ H : _ |- _ ] => do 2 (try rewrite <- H); simpl; autorewrite with morphism; reflexivity end
+      ).
   Defined.
 End CorrespondenceCategory.
 

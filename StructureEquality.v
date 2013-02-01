@@ -17,8 +17,8 @@ Ltac structures_eq_simpl_step_with tac := intros; simpl in *;
 Ltac structures_eq_step_with_tac structures_equal_tac tac := intros; simpl in *;
   match goal with
     | _ => reflexivity
-    | [ |- _ = _ ] => structures_equal_tac
-    | [ |- _ == _ ] => structures_equal_tac
+    | [ |- _ = _ ] => expand; structures_equal_tac
+    | [ |- _ == _ ] => expand; structures_equal_tac
     | _ => structures_eq_simpl_step_with tac
   end.
 

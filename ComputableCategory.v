@@ -11,10 +11,13 @@ Section ComputableCategory.
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
   Definition ComputableCategory : @SpecializedCategory I.
-    refine {|
-      Morphism' := (fun C D : I => SpecializedFunctor C D);
-      Identity' := (fun o : I => IdentityFunctor o);
-      Compose' := (fun C D E : I => ComposeFunctors (C := C) (D := D) (E := E))
-      |}; abstract functor_eq.
+    refine (@Build_SpecializedCategory _
+                                       (fun C D : I => SpecializedFunctor C D)
+                                       (fun o : I => IdentityFunctor o)
+                                       (fun C D E : I => ComposeFunctors (C := C) (D := D) (E := E))
+                                       _
+                                       _
+                                       _);
+    abstract functor_eq.
   Defined.
 End ComputableCategory.

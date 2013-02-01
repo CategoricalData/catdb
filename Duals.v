@@ -11,16 +11,19 @@ Local Infix "==" := JMeq.
 Local Open Scope category_scope.
 
 Section OppositeCategory.
-  Context `(C : @SpecializedCategory objC).
+  Definition OppositeComputationalCategory `(C : @ComputationalCategory objC) : ComputationalCategory objC :=
+    @Build_ComputationalCategory objC
+                                 (fun s d => Morphism' C d s)
+                                 (Identity' C)
+                                 (fun _ _ _ m1 m2 => Compose' C _ _ _ m2 m1).
 
-  Definition OppositeCategory : @SpecializedCategory objC :=
-    @Build_SpecializedCategory' objC (fun s d => Morphism' C d s)
-    (Identity' C)
-    (fun _ _ _ m1 m2 => Compose' C _ _ _ m2 m1)
-    (fun _ _ _ _ _ _ _ => Associativity'_sym C _ _ _ _ _ _ _)
-    (fun _ _ _ _ _ _ _ => Associativity' C _ _ _ _ _ _ _)
-    (fun _ _ => RightIdentity' C _ _)
-    (fun _ _ => LeftIdentity' C _ _).
+  Definition OppositeCategory `(C : @SpecializedCategory objC) : @SpecializedCategory objC :=
+    @Build_SpecializedCategory' objC
+                                (OppositeComputationalCategory (UnderlyingCCategory C))
+                                (fun _ _ _ _ _ _ _ => Associativity'_sym C _ _ _ _ _ _ _)
+                                (fun _ _ _ _ _ _ _ => Associativity' C _ _ _ _ _ _ _)
+                                (fun _ _ => RightIdentity' C _ _)
+                                (fun _ _ => LeftIdentity' C _ _).
 End OppositeCategory.
 
 (*Notation "C ᵒᵖ" := (OppositeCategory C) : category_scope.*)
@@ -30,9 +33,10 @@ Section DualCategories.
   Context `(D : @SpecializedCategory objD).
 
   Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
-    unfold OppositeCategory; simpl.
+    clear D objD.
+    unfold OppositeCategory, OppositeComputationalCategory; simpl.
     repeat change (fun a => ?f a) with f.
-    case C; simpl; reflexivity.
+    destruct C as [ [ ] ]; intros; simpl; reflexivity.
   Qed.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).

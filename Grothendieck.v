@@ -82,18 +82,19 @@ Section Grothendieck.
 
   Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
 
-  Definition CategoryOfElements : @SpecializedCategory
-    GrothendieckPair.
-    refine {|
-      Morphism' := (fun s d =>
-        { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) });
-      Compose' := (fun _ _ _ m1 m2 => GrothendieckCompose m1 m2);
-      Identity' := (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
-    |};
+  Definition CategoryOfElements : @SpecializedCategory GrothendieckPair.
+    refine (@Build_SpecializedCategory _
+                                       (fun s d =>
+                                          { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) })
+                                       (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
+                                       (fun _ _ _ m1 m2 => GrothendieckCompose m1 m2)
+                                       _
+                                       _
+                                       _);
     abstract (
-      unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
+        unfold GrothendieckC, GrothendieckX, GrothendieckCompose, GrothendieckIdentity in *;
         intros; destruct_type GrothendieckPair; destruct_sig; eauto with category
-    ).
+      ).
   Defined.
 
   Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
