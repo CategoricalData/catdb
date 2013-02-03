@@ -63,6 +63,7 @@ MODULES    := Notations \
 	UniversalProperties \
 	Duals \
 	DualFunctor \
+	FunctorCategoryFunctorial \
 	Hom \
 	FunctorAttributes \
 	Correspondences \
