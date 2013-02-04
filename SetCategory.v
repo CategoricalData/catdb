@@ -5,20 +5,13 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-(* TODO(jgross): Figure out a better way to do this; the naive way works fine in HoTT/Coq *)
-Definition set_cat_fun_eta (a b : Type) (f : a -> b) : (fun x => f x) = f.
-  exact eq_refl.
-Defined.
-
-Arguments set_cat_fun_eta / _ _ _.
-
 Notation "'CatOf' obj" := (@Build_SpecializedCategory obj
                                                       (fun s d => s -> d)
                                                       (fun _ => (fun x => x))
                                                       (fun _ _ _ f g => (fun x => f (g x)))
                                                       (fun _ _ _ _ _ _ _ => eq_refl)
-                                                      set_cat_fun_eta
-                                                      set_cat_fun_eta
+                                                      (fun _ _ f => eq_refl : (fun x => f x) = f)
+                                                      (fun _ _ f => eq_refl : (fun x => f x) = f)
                           ) (at level 0).
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
@@ -79,12 +72,10 @@ Coercion SpecializedFunctorFrom_Type2Set : SpecializedFunctorFromType >-> Specia
 
 (* There is a category [Set*], where the objects are sets with a distinguished elements and the morphisms are set morphisms *)
 Section PointedSet.
-  Let pointed_set_fun_eta : forall {T : Type} {proj : T -> Type} (a b : T) (f : proj a -> proj b),
-                              (fun x => f x) = f.
-    intros; simpl; reflexivity.
-  Defined.
-
-  Local Notation "'PointedCatOf' obj" := (@Build_SpecializedCategory { A : obj & A }
+  Local Notation "'PointedCatOf' obj" := (let pointed_set_fun_eta := ((fun _ _ _ _ _ => eq_refl) :
+                                                                        forall {T : Type} {proj : T -> Type} (a b : T) (f : proj a -> proj b),
+                                                                          (fun x => f x) = f) in
+                                          @Build_SpecializedCategory { A : obj & A }
                                                                      (fun s d => (projT1 s) -> (projT1 d))
                                                                      (fun _ => (fun x => x))
                                                                      (fun _ _ _ f g => (fun x => f (g x)))
@@ -100,10 +91,10 @@ Section PointedSet.
                                                                              (fun _ => eq_refl)
                                                    ) (at level 0).
 
-  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := PointedCatOf Type.
+  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := Eval cbv beta zeta in PointedCatOf Type.
   Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
-  Definition PointedSetCat : @SpecializedCategory { A : Set & A } := PointedCatOf Set.
+  Definition PointedSetCat : @SpecializedCategory { A : Set & A } := Eval cbv beta zeta in PointedCatOf Set.
   Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat := PointedCatProjectionOf Set.
-  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := PointedCatOf Prop.
+  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := Eval cbv beta zeta in PointedCatOf Prop.
   Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat := PointedCatProjectionOf Prop.
 End PointedSet.
