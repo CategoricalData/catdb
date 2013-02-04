@@ -5,25 +5,27 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+(* TODO(jgross): Figure out a better way to do this; the naive way works fine in HoTT/Coq *)
+Definition set_cat_fun_eta (a b : Type) (f : a -> b) : (fun x => f x) = f.
+  exact eq_refl.
+Defined.
+
+Arguments set_cat_fun_eta / _ _ _.
+
+Notation "'CatOf' obj" := (@Build_SpecializedCategory obj
+                                                      (fun s d => s -> d)
+                                                      (fun _ => (fun x => x))
+                                                      (fun _ _ _ f g => (fun x => f (g x)))
+                                                      (fun _ _ _ _ _ _ _ => eq_refl)
+                                                      set_cat_fun_eta
+                                                      set_cat_fun_eta
+                          ) (at level 0).
+
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
-  Local Ltac build_set_cat :=
-    match goal with
-      | [ |- SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          (fun s d => s -> d)
-          (fun _ => (fun x => x))
-          (fun _ _ _ f g => (fun x => f (g x)))
-          _
-          _
-          _
-        )
-    end;
-    abstract (firstorder; etransitivity; eauto with morphism; t).
-
-  Definition TypeCat : @SpecializedCategory Type. build_set_cat. Defined.
-  Definition SetCat : @SpecializedCategory Set. build_set_cat. Defined.
-  Definition PropCat : @SpecializedCategory Prop. build_set_cat. Defined.
+  Definition TypeCat : @SpecializedCategory Type := CatOf Type.
+  Definition SetCat : @SpecializedCategory Set := CatOf Set.
+  Definition PropCat : @SpecializedCategory Prop := CatOf Prop.
 End CSet.
 
 Section SetCoercionsDefinitions.
@@ -77,36 +79,31 @@ Coercion SpecializedFunctorFrom_Type2Set : SpecializedFunctorFromType >-> Specia
 
 (* There is a category [Set*], where the objects are sets with a distinguished elements and the morphisms are set morphisms *)
 Section PointedSet.
-  Local Ltac build_pointed_set_cat :=
-    match goal with
-      | [ |- SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          (fun s d => (projT1 s) -> (projT1 d))
-          (fun _ => (fun x => x))
-          (fun _ _ _ f g => (fun x => f (g x)))
-          _
-          _
-          _
-        )
-    end;
-    abstract (firstorder; etransitivity; eauto; t).
+  Let pointed_set_fun_eta : forall {T : Type} {proj : T -> Type} (a b : T) (f : proj a -> proj b),
+                              (fun x => f x) = f.
+    intros; simpl; reflexivity.
+  Defined.
 
-  Local Ltac build_pointed_set_cat_projection :=
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (fun c => projT1 c)
-          (fun s d (m : (projT1 s) -> (projT1 d)) => m)
-          _
-          _
-        )
-    end;
-    abstract t.
+  Local Notation "'PointedCatOf' obj" := (@Build_SpecializedCategory { A : obj & A }
+                                                                     (fun s d => (projT1 s) -> (projT1 d))
+                                                                     (fun _ => (fun x => x))
+                                                                     (fun _ _ _ f g => (fun x => f (g x)))
+                                                                     (fun _ _ _ _ _ _ _ => eq_refl)
+                                                                     (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))
+                                                                     (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))
+                                         ) (at level 0).
 
-  Definition PointedTypeCat : @SpecializedCategory { A : Type & A }. build_pointed_set_cat. Defined.
-  Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat. build_pointed_set_cat_projection. Defined.
-  Definition PointedSetCat : @SpecializedCategory { A : Set & A }. build_pointed_set_cat. Defined.
-  Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat. build_pointed_set_cat_projection. Defined.
-  Definition PointedPropCat : @SpecializedCategory { A : Prop & A }. build_pointed_set_cat. Defined.
-  Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat. build_pointed_set_cat_projection. Defined.
+  Local Notation "'PointedCatProjectionOf' obj" := (Build_SpecializedFunctor (PointedCatOf obj) (CatOf obj)
+                                                                             (fun c => projT1 c)
+                                                                             (fun s d (m : (projT1 s) -> (projT1 d)) => m)
+                                                                             (fun _ _ _ _ _ => eq_refl)
+                                                                             (fun _ => eq_refl)
+                                                   ) (at level 0).
+
+  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := PointedCatOf Type.
+  Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
+  Definition PointedSetCat : @SpecializedCategory { A : Set & A } := PointedCatOf Set.
+  Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat := PointedCatProjectionOf Set.
+  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := PointedCatOf Prop.
+  Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat := PointedCatProjectionOf Prop.
 End PointedSet.
