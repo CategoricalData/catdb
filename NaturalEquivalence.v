@@ -12,14 +12,83 @@ Local Ltac intro_object_of :=
          end.
 
 Section NaturalIsomorphism.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Variables F G : SpecializedFunctor C D.
+  Section NaturalIsomorphism.
+    Context `(C : @SpecializedCategory objC).
+    Context `(D : @SpecializedCategory objD).
+    Variables F G : SpecializedFunctor C D.
 
-  Record NaturalIsomorphism := {
-    NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
-    NaturalIsomorphism_Isomorphism : forall x : objC, IsomorphismOf (NaturalIsomorphism_Transformation x)
-  }.
+    Record NaturalIsomorphism :=
+      {
+        NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
+        NaturalIsomorphism_Isomorphism : forall x : objC, IsomorphismOf (NaturalIsomorphism_Transformation x)
+      }.
+  End NaturalIsomorphism.
+
+  Section Inverse.
+    Context `(C : @SpecializedCategory objC).
+    Context `(D : @SpecializedCategory objD).
+    Variables F G : SpecializedFunctor C D.
+
+    Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
+      exists (fun x => Inverse (NaturalIsomorphism_Isomorphism T x)).
+      abstract (
+          present_spcategory;
+          intros;
+          repeat match goal with
+                   | [ |- appcontext[?E] ] => match type of E with | IsomorphismOf _ => destruct E; simpl end
+                   | [ H : _ |- _ ] => rewrite H
+                 end;
+          destruct T as [ [ ] ];
+          simpl in *;
+            present_spcategory;
+          pre_compose_to_identity; post_compose_to_identity;
+          auto with functor
+        ).
+    Defined.
+
+    Definition InverseNaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalIsomorphism G F
+      := {|
+          NaturalIsomorphism_Transformation := InverseNaturalIsomorphism_NT T;
+          NaturalIsomorphism_Isomorphism := (fun x => InverseOf (NaturalIsomorphism_Isomorphism T x))
+        |}.
+  End Inverse.
+
+  Section Composition.
+    Context `(C : @SpecializedCategory objC).
+    Context `(D : @SpecializedCategory objD).
+    Context `(E : @SpecializedCategory objE).
+    Variables F F' F'' : SpecializedFunctor C D.
+    Variables G G' : SpecializedFunctor D E.
+
+    Local Ltac t :=
+      simpl;
+      compose4associativity;
+      repeat match goal with
+               | _ => reflexivity
+               | [ H : _ |- _ ] => rewrite H
+               | _ => progress (repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity)
+               | _ => progress repeat rewrite <- FCompositionOf
+               | _ => progress repeat rewrite @FIdentityOf
+               | [ |- appcontext[?E] ] =>
+                 match type of E with
+                   | IsomorphismOf _ => destruct E; simpl
+                 end
+             end.
+
+    Definition NIComposeT (T' : NaturalIsomorphism F' F'') (T : NaturalIsomorphism F F') : NaturalIsomorphism F F''
+      := {|
+          NaturalIsomorphism_Transformation := NTComposeT T' T;
+          NaturalIsomorphism_Isomorphism := (fun x => ComposeIsomorphismOf (NaturalIsomorphism_Isomorphism T' x) (NaturalIsomorphism_Isomorphism T x))
+        |}.
+
+    Definition NIComposeF (U : NaturalIsomorphism G G') (T : NaturalIsomorphism F F') : NaturalIsomorphism (ComposeFunctors G F) (ComposeFunctors G' F').
+      exists (NTComposeF U T).
+      intro x.
+      exists (Compose (Inverse (NaturalIsomorphism_Isomorphism U (F x)))
+                      (MorphismOf G' (Inverse (NaturalIsomorphism_Isomorphism T x))));
+        abstract t.
+    Defined.
+  End Composition.
 End NaturalIsomorphism.
 
 Section NaturalIsomorphismOfCategories.
