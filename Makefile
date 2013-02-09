@@ -66,6 +66,7 @@ MODULES    := Notations \
 	FunctorCategoryFunctorial \
 	Hom \
 	FunctorAttributes \
+	SimplicialSets \
 	Correspondences \
 	Groupoid \
 	AdjointUnit \
