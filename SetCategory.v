@@ -5,20 +5,25 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Notation "'CatOf' obj" := (@Build_SpecializedCategory obj
-                                                      (fun s d => s -> d)
-                                                      (fun _ => (fun x => x))
-                                                      (fun _ _ _ f g => (fun x => f (g x)))
-                                                      (fun _ _ _ _ _ _ _ => eq_refl)
-                                                      (fun _ _ f => eq_refl : (fun x => f x) = f)
-                                                      (fun _ _ f => eq_refl : (fun x => f x) = f)
-                          ) (at level 0).
+Notation IndexedCatOf obj coerce := (@Build_SpecializedCategory obj
+                                                                (fun s d => coerce s -> coerce d)
+                                                                (fun _ => (fun x => x))
+                                                                (fun _ _ _ f g => (fun x => f (g x)))
+                                                                (fun _ _ _ _ _ _ f => eq_refl)
+                                                                (fun _ _ f => eq_refl : (fun x => f x) = f)
+                                                                (fun _ _ f => eq_refl : (fun x => f x) = f)
+                                    ).
+
+Notation CatOf obj := (IndexedCatOf obj (fun x => x)).
+Notation CoercedCatOf obj T := (IndexedCatOf obj (fun x => x : T)).
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
   Definition TypeCat : @SpecializedCategory Type := CatOf Type.
   Definition SetCat : @SpecializedCategory Set := CatOf Set.
   Definition PropCat : @SpecializedCategory Prop := CatOf Prop.
+
+  Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := IndexedCatOf Index Index2Object.
 End CSet.
 
 Section SetCoercionsDefinitions.
