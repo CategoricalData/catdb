@@ -50,15 +50,22 @@ Section UniversalMorphism.
 
     Section IntroductionAbstractionBarrier.
       Definition Build_InitialMorphism'
-          (A : D) (φ : Morphism C X (U A)) 
-          (UniversalProperty : forall (A' : D) (φ' : Morphism C X (U A')),
-                                 { m : Morphism D A A' |
-                                   Compose (MorphismOf U m) φ = φ'
-                                   /\
-                                   forall m' : Morphism D A A',
-                                     Compose (MorphismOf U m') φ = φ'
-                                     -> m' = m } ) :
+                 (UniversalProperty : { A : D & { φ : Morphism C X (U A) &
+                                              (*UniversalProperty : *)
+                                              forall (A' : D) (φ' : Morphism C X (U A')),
+                                                { m : Morphism D A A' |
+                                                  Compose (MorphismOf U m) φ = φ'
+                                                  /\
+                                                  forall m' : Morphism D A A',
+                                                    Compose (MorphismOf U m') φ = φ'
+                                                    -> m' = m } } }) :
         InitialMorphism.
+        pose proof (projT2 UniversalProperty) as φUniversalProperty;
+        set (A := projT1 UniversalProperty) in *;
+        clearbody A; clear UniversalProperty; simpl in *.
+        pose proof (projT2 φUniversalProperty) as UniversalProperty;
+        set (φ := projT1 φUniversalProperty) in *;
+        clearbody φ; clear φUniversalProperty; simpl in *.
         exists (existT _ (tt, A) φ).
         intro o'.
         specialize (UniversalProperty (snd (projT1 o')) (projT2 o')).
@@ -73,14 +80,14 @@ Section UniversalMorphism.
         end;
           abstract intro_t.
       Defined.
-      
+
       Arguments Build_InitialMorphism' / .
       Local Arguments Object / .
       Local Arguments CommaCategory_Object / .
       Local Arguments CommaCategory_Morphism / .
-      
+
       Definition Build_InitialMorphism A φ UniversalProperty : InitialMorphism
-        := Eval simpl in @Build_InitialMorphism' A φ UniversalProperty.
+        := Eval simpl in @Build_InitialMorphism' (existT _ A (existT _ φ UniversalProperty)).
     End IntroductionAbstractionBarrier.
 
     Section EliminationAbstractionBarrier.
@@ -146,15 +153,22 @@ Section UniversalMorphism.
 
     Section IntroductionAbstractionBarrier.
       Definition Build_TerminalMorphism'
-                 (A : D) (φ : Morphism C (U A) X) 
-                 (UniversalProperty : forall (A' : D) (φ' : Morphism C (U A') X),
-                                        { m : Morphism D A' A |
-                                          Compose φ (MorphismOf U m) = φ'
-                                          /\
-                                          forall m' : Morphism D A' A,
-                                            Compose φ (MorphismOf U m') = φ'
-                                            -> m' = m } ) :
+                 (UniversalProperty : { A : D & { φ : Morphism C (U A) X &
+                                                               (*UniversalProperty : *)
+                                                               forall (A' : D) (φ' : Morphism C (U A') X),
+                                                                 { m : Morphism D A' A |
+                                                                   Compose φ (MorphismOf U m) = φ'
+                                                                   /\
+                                                                   forall m' : Morphism D A' A,
+                                                                     Compose φ (MorphismOf U m') = φ'
+                                                                     -> m' = m } } }) :
         TerminalMorphism.
+        pose proof (projT2 UniversalProperty) as φUniversalProperty;
+        set (A := projT1 UniversalProperty) in *;
+        clearbody A; clear UniversalProperty; simpl in *.
+        pose proof (projT2 φUniversalProperty) as UniversalProperty;
+        set (φ := projT1 φUniversalProperty) in *;
+        clearbody φ; clear φUniversalProperty; simpl in *.
         exists (existT _ (A, tt) φ).
         intro o'.
         specialize (UniversalProperty (fst (projT1 o')) (projT2 o')).
@@ -169,14 +183,14 @@ Section UniversalMorphism.
         end;
           abstract intro_t.
       Defined.
-      
+
       Arguments Build_TerminalMorphism' / .
       Local Arguments Object / .
       Local Arguments CommaCategory_Object / .
       Local Arguments CommaCategory_Morphism / .
-      
+
       Definition Build_TerminalMorphism A φ UniversalProperty : TerminalMorphism
-        := Eval simpl in @Build_TerminalMorphism' A φ UniversalProperty.
+        := Eval simpl in @Build_TerminalMorphism' (existT _ A (existT _ φ UniversalProperty)).
     End IntroductionAbstractionBarrier.
 
     Section AbstractionBarrier.
@@ -294,6 +308,9 @@ Section UniversalMorphism.
     End AbstractionBarrier.
   End UniversalMorphism.
 End UniversalMorphism.
+
+Arguments Build_InitialMorphism [C D] X U A φ UniversalProperty.
+Arguments Build_TerminalMorphism [C D] U X A φ UniversalProperty.
 
 Ltac intro_from_universal_objects :=
   repeat match goal with
