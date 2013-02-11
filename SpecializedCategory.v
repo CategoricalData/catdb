@@ -261,6 +261,34 @@ Section Category.
   Definition IsMonomorphism x y (m : C.(Morphism) x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
       m1 = m2.
+
+  Section properties.
+    Lemma IdentityIsEpimorphism x : IsEpimorphism _ _ (Identity x).
+      repeat intro; autorewrite with category in *; trivial.
+    Qed.
+
+    Lemma IdentityIsMonomorphism x : IsMonomorphism _ _ (Identity x).
+      repeat intro; autorewrite with category in *; trivial.
+    Qed.
+
+    Lemma EpimorphismComposition s d d' m0 m1 :
+      IsEpimorphism _ _ m0
+      -> IsEpimorphism _ _ m1
+      -> IsEpimorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
+      repeat intro.
+      repeat match goal with | [ H : _ |- _ ] => rewrite <- Associativity in H end.
+      intuition.
+    Qed.
+
+    Lemma MonomorphismComposition s d d' m0 m1 :
+      IsMonomorphism _ _ m0
+      -> IsMonomorphism _ _ m1
+      -> IsMonomorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
+      repeat intro.
+      repeat match goal with | [ H : _ |- _ ] => rewrite Associativity in H end.
+      intuition.
+    Qed.
+  End properties.
 End Category.
 
 Arguments IsEpimorphism' {obj} [C x y] m.
