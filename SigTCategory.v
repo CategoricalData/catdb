@@ -1,12 +1,26 @@
-Require Import JMeq.
+Require Import FunctionalExtensionality JMeq.
 Require Export SpecializedCategory Functor.
-Require Import Common Notations.
+Require Import Common Notations FunctorAttributes FEqualDep.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
 
 Local Infix "==" := JMeq.
+
+Local Ltac faithful_t :=
+  repeat (unfold Object in *; simpl in *; subst;
+          match goal with
+            | _ => intro
+            | _ => progress trivial
+            | [ |- _ = _ ] => (apply functional_extensionality_dep; intro)
+            | _ => progress simpl_eq
+            | [ H : _ = _ |- _ ] => fg_equal_in H
+            (*| [ |- projT2 ?a == projT2 ?b ] =>
+              (cut (projT1 a = projT1 b); [ (*generalize a b*) | faithful_t ](*;
+               intros [] [] ?*))*)
+            | _ => progress JMeq_eq
+          end).
 
 Section sigT_obj_mor.
   Context `(A : @SpecializedCategory objA).
@@ -43,15 +57,12 @@ Section sigT_obj_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Definition projT1_functor : SpecializedFunctor SpecializedCategory_sigT A.
-    refine (Build_SpecializedFunctor SpecializedCategory_sigT A
-      (fun x => projT1 x)
-      (fun s d m => projT1 m)
-      _
-      _
-    );
-    intros; reflexivity.
-  Defined.
+  Definition projT1_functor : SpecializedFunctor SpecializedCategory_sigT A
+    := Build_SpecializedFunctor SpecializedCategory_sigT A
+                                (@projT1 _ _)
+                                (fun _ _ => @projT1 _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End sigT_obj_mor.
 
 Arguments projT1_functor {objA A Pobj Pmor Pidentity Pcompose P_Associativity P_LeftIdentity P_RightIdentity}.
@@ -75,46 +86,31 @@ Section sigT_obj.
     abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
 
-  Definition projT1_obj_functor : SpecializedFunctor SpecializedCategory_sigT_obj A.
-    refine (Build_SpecializedFunctor SpecializedCategory_sigT_obj A
-      (fun x => projT1 x)
-      (fun s d m => m)
-      _
-      _
-    );
-    intros; reflexivity.
-  Defined.
+  Definition projT1_obj_functor : SpecializedFunctor SpecializedCategory_sigT_obj A
+    := Build_SpecializedFunctor SpecializedCategory_sigT_obj A
+                                (@projT1 _ _)
+                                (fun s d m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
   Definition SpecializedCategory_sigT_obj_as_sigT : @SpecializedCategory (sigT Pobj).
-    apply (@SpecializedCategory_sigT _ A Pobj (fun _ _ _ => unit) (fun _ => tt) (fun _ _ _ _ _ _ _ => tt));
-      abstract (simpl; intros; trivial).
+    refine (@SpecializedCategory_sigT _ A Pobj (fun _ _ _ => unit) (fun _ => tt) (fun _ _ _ _ _ _ _ => tt) _ _ _);
+    abstract (simpl; intros; trivial).
   Defined.
 
-  Definition sigT_functor_obj : SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@id _)
-          (fun _ _ => @projT1 _ _)
-          _
-          _
-        )
-    end;
-    simpl; intros; reflexivity.
-  Defined.
+  Definition sigT_functor_obj : SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj
+    := Build_SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj
+                                (fun x => x)
+                                (fun _ _ => @projT1 _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition sigT_functor_obj_inv : SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@id _)
-          (fun _ _ m => existT _ m tt)
-          _
-          _
-        )
-    end;
-    abstract (simpl; intros; f_equal; trivial).
-  Defined.
+  Definition sigT_functor_obj_inv : SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT
+    := Build_SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT
+                                (fun x => x)
+                                (fun _ _ m => existT _ m tt)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
   Lemma sigT_obj_eq : ComposeFunctors sigT_functor_obj sigT_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sigT_functor_obj_inv sigT_functor_obj = IdentityFunctor _.
     split; functor_eq; hnf in *; destruct_type @sigT; f_equal; trivial.

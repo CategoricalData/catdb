@@ -1,12 +1,22 @@
-Require Import JMeq.
+Require Import JMeq FunctionalExtensionality.
 Require Export SpecializedCategory Functor.
-Require Import Common Notations.
+Require Import Common Notations FunctorAttributes.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
 
 Local Infix "==" := JMeq.
+
+Local Ltac faithful_t :=
+  repeat (unfold Object in *; simpl in *;
+          match goal with
+            | _ => intro
+            | _ => progress trivial
+            | [ |- _ = _ ] => (apply functional_extensionality_dep; intro)
+            | _ => progress simpl_eq
+            | [ H : _ = _ |- _ ] => fg_equal_in H
+          end).
 
 Section sig_obj_mor.
   Context `(A : @SpecializedCategory objA).
@@ -20,8 +30,8 @@ Section sig_obj_mor.
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
           (fun s d => sig (@Pmor s d))
-          (fun x => exist _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
-          (fun s d d' m1 m2 => exist _ (Compose (proj1_sig m1) (proj1_sig m2)) (Pcompose (proj2_sig m1) (proj2_sig m2)))
+          (fun x => exist _ _ (Pidentity x))
+          (fun s d d' m1 m2 => exist _ _ (Pcompose (proj2_sig m1) (proj2_sig m2)))
           _
           _
           _
@@ -30,15 +40,16 @@ Section sig_obj_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Definition proj1_sig_functor : SpecializedFunctor SpecializedCategory_sig A.
-    refine (Build_SpecializedFunctor SpecializedCategory_sig A
-      (fun x => proj1_sig x)
-      (fun s d m => proj1_sig m)
-      _
-      _
-    );
-    intros; reflexivity.
-  Defined.
+  Definition proj1_sig_functor : SpecializedFunctor SpecializedCategory_sig A
+    := Build_SpecializedFunctor SpecializedCategory_sig A
+                                (@proj1_sig _ _)
+                                (fun s d => @proj1_sig _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
+
+  Lemma proj1_sig_functor_faithful : FunctorFaithful proj1_sig_functor.
+    faithful_t.
+  Qed.
 End sig_obj_mor.
 
 Arguments proj1_sig_functor {objA A Pobj Pmor Pidentity Pcompose}.
@@ -62,53 +73,40 @@ Section sig_obj.
     abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
 
-  Definition proj1_sig_obj_functor : SpecializedFunctor SpecializedCategory_sig_obj A.
-    refine (Build_SpecializedFunctor SpecializedCategory_sig_obj A
-      (fun x => proj1_sig x)
-      (fun s d m => m)
-      _
-      _
-    );
-    intros; reflexivity.
-  Defined.
+  Definition proj1_sig_obj_functor : SpecializedFunctor SpecializedCategory_sig_obj A
+    := Build_SpecializedFunctor SpecializedCategory_sig_obj A
+                                (@proj1_sig _ _)
+                                (fun s d m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition SpecializedCategory_sig_obj_as_sig : @SpecializedCategory (sig Pobj).
-    apply (@SpecializedCategory_sig _ A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I));
-      abstract (simpl; intros; trivial).
-  Defined.
+  Definition SpecializedCategory_sig_obj_as_sig : @SpecializedCategory (sig Pobj)
+    := @SpecializedCategory_sig _ A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I).
 
-  Definition sig_functor_obj : SpecializedFunctor SpecializedCategory_sig_obj_as_sig SpecializedCategory_sig_obj.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@id _)
-          (fun _ _ => @proj1_sig _ _)
-          _
-          _
-        )
-    end;
-    simpl; intros; reflexivity.
-  Defined.
+  Definition sig_functor_obj : SpecializedFunctor SpecializedCategory_sig_obj_as_sig SpecializedCategory_sig_obj
+    := Build_SpecializedFunctor SpecializedCategory_sig_obj_as_sig SpecializedCategory_sig_obj
+                                (fun x => x)
+                                (fun _ _ => @proj1_sig _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition sig_functor_obj_inv : SpecializedFunctor SpecializedCategory_sig_obj SpecializedCategory_sig_obj_as_sig.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@id _)
-          (fun _ _ m => exist _ m I)
-          _
-          _
-        )
-    end;
-    abstract (simpl; intros; f_equal; trivial).
-  Defined.
+  Definition sig_functor_obj_inv : SpecializedFunctor SpecializedCategory_sig_obj SpecializedCategory_sig_obj_as_sig
+    := Build_SpecializedFunctor SpecializedCategory_sig_obj SpecializedCategory_sig_obj_as_sig
+                                (fun x => x)
+                                (fun _ _ m => exist _ m I)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
   Lemma sig_obj_eq : ComposeFunctors sig_functor_obj sig_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sig_functor_obj_inv sig_functor_obj = IdentityFunctor _.
-    split; functor_eq; unfold Morphism; simpl_eq; trivial.
+    split; functor_eq; destruct_sig; destruct_head True; reflexivity.
   Qed.
 
   Lemma sig_obj_compat : ComposeFunctors proj1_sig_obj_functor sig_functor_obj = proj1_sig_functor.
     functor_eq.
+  Qed.
+
+  Lemma proj1_sig_obj_functor_faithful : FunctorFaithful proj1_sig_obj_functor.
+    faithful_t.
   Qed.
 End sig_obj.
 
@@ -136,53 +134,40 @@ Section sig_mor.
     abstract (intros; simpl_eq; present_spcategory; auto with category).
   Defined.
 
-  Definition proj1_sig_mor_functor : SpecializedFunctor SpecializedCategory_sig_mor A.
-    refine (Build_SpecializedFunctor SpecializedCategory_sig_mor A
-      (fun x => x)
-      (fun s d m => proj1_sig m)
-      _
-      _
-    );
-    intros; reflexivity.
-  Defined.
+  Definition proj1_sig_mor_functor : SpecializedFunctor SpecializedCategory_sig_mor A
+    := Build_SpecializedFunctor SpecializedCategory_sig_mor A
+                                (fun x => x)
+                                (fun s d => @proj1_sig _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition SpecializedCategory_sig_mor_as_sig : @SpecializedCategory (sig (fun _ : objA => True)).
-    apply (@SpecializedCategory_sig _ A _ (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2));
-      abstract (intros; trivial).
-  Defined.
+  Definition SpecializedCategory_sig_mor_as_sig : @SpecializedCategory (sig (fun _ : objA => True))
+    := @SpecializedCategory_sig _ A _ (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2).
 
-  Definition sig_functor_mor : SpecializedFunctor SpecializedCategory_sig_mor_as_sig SpecializedCategory_sig_mor.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@proj1_sig _ _)
-          (fun _ _ => @id _)
-          _
-          _
-        )
-    end;
-    simpl; intros; reflexivity.
-  Defined.
+  Definition sig_functor_mor : SpecializedFunctor SpecializedCategory_sig_mor_as_sig SpecializedCategory_sig_mor
+    := Build_SpecializedFunctor SpecializedCategory_sig_mor_as_sig SpecializedCategory_sig_mor
+                                (@proj1_sig _ _)
+                                (fun _ _ m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition sig_functor_mor_inv : SpecializedFunctor SpecializedCategory_sig_mor SpecializedCategory_sig_mor_as_sig.
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (fun x => exist _ x I)
-          (fun _ _  => @id _)
-          _
-          _
-        )
-    end;
-    abstract (simpl; intros; f_equal; trivial).
-  Defined.
+  Definition sig_functor_mor_inv : SpecializedFunctor SpecializedCategory_sig_mor SpecializedCategory_sig_mor_as_sig
+    := Build_SpecializedFunctor SpecializedCategory_sig_mor SpecializedCategory_sig_mor_as_sig
+                                (fun x => exist _ x I)
+                                (fun _ _ m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
   Lemma sig_mor_eq : ComposeFunctors sig_functor_mor sig_functor_mor_inv = IdentityFunctor _ /\ ComposeFunctors sig_functor_mor_inv sig_functor_mor = IdentityFunctor _.
-    split; functor_eq; simpl_eq; trivial.
+    split; functor_eq; destruct_sig; destruct_head True; reflexivity.
   Qed.
 
   Lemma sig_mor_compat : ComposeFunctors proj1_sig_mor_functor sig_functor_mor = proj1_sig_functor.
     functor_eq.
+  Qed.
+
+  Lemma proj1_sig_mor_functor_faithful : FunctorFaithful proj1_sig_mor_functor.
+    faithful_t.
   Qed.
 End sig_mor.
 

@@ -22,16 +22,9 @@ MODULES    := Notations \
 	GraphTranslation \
 	ComputableGraphCategory \
 	\
-	SigCategory \
-	SigTCategory \
-	SigTSigCategory \
-	SigSigTCategory \
-	SigTInducedFunctors \
-	SigTSigInducedFunctors \
 	ChainCategory \
 	BoolCategory \
 	NatCategory \
-	Subcategory \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
@@ -48,10 +41,6 @@ MODULES    := Notations \
 	EnrichedCategory \
 	SetCategory \
 	SetCategoryProductFunctor \
-	DecidableDiscreteCategory \
-	DecidableComputableCategory \
-	DecidableSmallCat \
-	DecidableSetCategory \
 	InitialTerminalCategory \
 	SmallCat \
 	CommaCategory \
@@ -66,6 +55,17 @@ MODULES    := Notations \
 	FunctorCategoryFunctorial \
 	Hom \
 	FunctorAttributes \
+	SigCategory \
+	SigTCategory \
+	SigTSigCategory \
+	SigSigTCategory \
+	SigTInducedFunctors \
+	SigTSigInducedFunctors \
+	Subcategory \
+	DecidableDiscreteCategory \
+	DecidableComputableCategory \
+	DecidableSmallCat \
+	DecidableSetCategory \
 	SimplicialSets \
 	Correspondences \
 	Groupoid \
