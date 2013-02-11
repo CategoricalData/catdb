@@ -291,6 +291,9 @@ Section Category.
   End properties.
 End Category.
 
+Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category.
+Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : morphism.
+
 Arguments IsEpimorphism' {obj} [C x y] m.
 Arguments IsEpimorphism {obj} [C x y] m.
 Arguments IsMonomorphism' {obj} [C x y] m.
