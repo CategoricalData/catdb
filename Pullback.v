@@ -135,3 +135,38 @@ Section Pullback.
     Definition Pushout := Colimit PushoutDiagram.
   End pushout.
 End Pullback.
+
+Section PullbackObjects.
+  Context `(C : @SpecializedCategory objC).
+  Variables a b c : objC.
+
+
+  (** Does an object [d] together with the functions [i] and [j]
+    fit into a pullback diagram?
+
+    [[
+           i
+        d ----> a
+        |       |
+      j |       | f
+        ↓       ↓
+        b ----> c
+           g
+    ]]
+   *)
+  Definition IsPullbackObjectGivenLimits (f : Morphism C a c) (g : Morphism C b c)
+             PullbackObject (i : Morphism C PullbackObject a) (j : Morphism C PullbackObject b)
+             (HasLimits : forall F : SpecializedFunctor PullbackIndex C, Limit F)
+    := { iso : Isomorphism (LimitObject (HasLimits _ : Pullback C a b c f g)) PullbackObject
+       | let m := (LimitMorphism (HasLimits (PullbackDiagram C a b c f g))) in
+         Compose i iso = m PullbackA
+         /\ Compose j iso = m PullbackB }.
+
+  Definition IsPushoutObjectGivenLimits (f : Morphism C c a) (g : Morphism C c b)
+             PushoutObject (i : Morphism C a PushoutObject) (j : Morphism C b PushoutObject)
+             (HasColimits : forall F : SpecializedFunctor PushoutIndex C, Colimit F)
+    := { iso : Isomorphism PushoutObject (ColimitObject (HasColimits _ : Pushout C a b c f g))
+       | let m := (ColimitMorphism (HasColimits (PushoutDiagram C a b c f g))) in
+         Compose iso i = m PullbackA
+         /\ Compose iso j = m PullbackB }.
+End PullbackObjects.
