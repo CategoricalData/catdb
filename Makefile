@@ -67,6 +67,7 @@ MODULES    := Notations \
 	DecidableSmallCat \
 	DecidableSetCategory \
 	SimplicialSets \
+	SemiSimplicialSets \
 	Correspondences \
 	Groupoid \
 	AdjointUnit \
