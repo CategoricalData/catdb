@@ -82,6 +82,8 @@ MODULES    := Notations \
 	Graphs \
 	Equalizer \
 	EqualizerFunctor \
+	Pullback \
+	PullbackFunctor \
 	Products \
 	ProductFunctors \
 	Coend \
