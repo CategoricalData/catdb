@@ -88,6 +88,7 @@ MODULES    := Notations \
 	ProductFunctors \
 	Coend \
 	CoendFunctor \
+	SubobjectClassifier \
 	Grothendieck \
 	SetLimits \
 	SetColimits \
