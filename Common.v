@@ -887,6 +887,11 @@ Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) con
 Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) constr(pf4) constr(pf5)
   := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4; try hideProof' pf5).
 
+Section unique.
+  Definition uniqueT (A : Type) (P : A -> Type) (x : A)
+    := P x + {forall x' : A, P x' -> x = x'}.
+End unique.
+
 Ltac destruct_to_empty_set :=
   match goal with
     | [ H : Empty_set |- _ ] => destruct H
