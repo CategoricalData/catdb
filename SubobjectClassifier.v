@@ -59,22 +59,25 @@ Section subobject_classifier.
    *)
 
   Context `(C : @SpecializedCategory objC).
-  Variable One : C.
-  Hypothesis OneTerminal : TerminalObject One.
-  Hypothesis HasPullbacks : forall F : SpecializedFunctor PullbackIndex C, Limit F.
 
-  Local Notation "1" := One.
   Local Reserved Notation "'Ω'".
 
   Record SubobjectClassifier :=
     {
+      SubobjectClassifierOne : C where "1" := SubobjectClassifierOne;
+      SubobjectClassifierOneTerminal : TerminalObject 1;
+      SubobjectClassifierHasPullbacks : forall F : SpecializedFunctor PullbackIndex C, Limit F;
       ObjectOfTruthValues : C where "'Ω'" := ObjectOfTruthValues;
       TrueValue : C.(Morphism) 1 Ω;
       TrueIsMonomorphism : IsMonomorphism TrueValue;
       SubobjectClassifyingMap : forall U X (j : C.(Morphism) U X),
                                   IsMonomorphism j
                                   -> { χj : Morphism C X Ω &
-                                       uniqueT (fun χj => IsPullbackObjectGivenLimits X 1 Ω χj TrueValue U j (proj1_sig (OneTerminal U)) HasPullbacks)
-                                              χj }
+                                       uniqueT (fun χj => IsPullbackObjectGivenLimits X 1 Ω
+                                                                                      χj TrueValue
+                                                                                      U j
+                                                                                      (proj1_sig (SubobjectClassifierOneTerminal U))
+                                                                                      SubobjectClassifierHasPullbacks)
+                                       χj }
     }.
 End subobject_classifier.
