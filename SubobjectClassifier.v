@@ -65,7 +65,6 @@ Section subobject_classifier.
 
   Local Notation "1" := One.
   Local Reserved Notation "'Ω'".
-  Local Reserved Notation "'χ'".
 
   Record SubobjectClassifier :=
     {
@@ -75,7 +74,7 @@ Section subobject_classifier.
       SubobjectClassifyingMap : forall U X (j : C.(Morphism) U X),
                                   IsMonomorphism j
                                   -> { χj : Morphism C X Ω &
-                                       uniqueT (fun χj => IsPullbackObjectGivenLimits X 1 Ω TrueValue χj U j (proj1_sig (OneTerminal U)))
+                                       uniqueT (fun χj => IsPullbackObjectGivenLimits X 1 Ω χj TrueValue U j (proj1_sig (OneTerminal U)) HasPullbacks)
                                               χj }
     }.
 End subobject_classifier.
