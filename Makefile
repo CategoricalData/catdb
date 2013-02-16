@@ -72,6 +72,7 @@ MODULES    := Notations \
 	Groupoid \
 	AdjointUnit \
 	Adjoint \
+	AdjointUniversalMorphisms \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
 	PathsCategoryFunctors \
