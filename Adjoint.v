@@ -206,20 +206,22 @@ Section AdjunctionEquivalences.
      *)
   Definition UnitOf (A : HomAdjunction F G) : AdjunctionUnit F G.
     eexists (Build_SpecializedNaturalTransformation (IdentityFunctor C) (ComposeFunctors G F)
-      (fun c => A.(AComponentsOf) c (F c) (Identity _))
-      _
-    ).
+                                                    (fun c => A.(AComponentsOf) c (F c) (Identity _))
+                                                    _
+            ).
     simpl.
     intros c d f.
     exists (proj1_sig (A.(AIsomorphism) c d) f).
     abstract (
-      pose proof (proj2_sig (A.(AIsomorphism) c d));
+        pose proof (proj2_sig (A.(AIsomorphism) c d));
         pose proof (proj3_sig (A.(AIsomorphism) c d));
-          simpl in *; fg_equal;
-            repeat split; intros; [ | t_with t' ];
-              repeat rewrite adjunction_naturality, RightIdentity;
-                auto with category
-    ).
+        simpl in *; fg_equal;
+        repeat split; intros; [ | t_with t' ];
+        subst;
+        repeat rewrite adjunction_naturality, RightIdentity;
+        destruct A; simpl in *;
+        trivial
+      ).
     Grab Existential Variables.
     abstract (
       intros s d m; simpl in *;
@@ -242,11 +244,12 @@ Section AdjunctionEquivalences.
     exists (A.(AComponentsOf) c d f).
     abstract (
       split; intros; [ | t_with t' ];
-        repeat rewrite (adjunction_naturality' A), LeftIdentity;
-          simpl in *;
-            intro_proj2_sig_from_goal;
-            destruct_hypotheses; fg_equal; auto with category
-    ).
+      subst;
+      repeat rewrite (adjunction_naturality' A), LeftIdentity;
+      simpl in *;
+        intro_proj2_sig_from_goal;
+      destruct_hypotheses; fg_equal; auto with category
+      ).
     Grab Existential Variables.
     abstract (
       intros s d m; simpl in *;

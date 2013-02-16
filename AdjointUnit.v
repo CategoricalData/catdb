@@ -53,7 +53,7 @@ Section Adjunction.
   Definition AdjunctionUnit (F : Functor C D) (G : Functor D C) :=
     { T : NaturalTransformation (IdentityFunctor C) (ComposeFunctors G F) &
       forall (c : C) (d : D) (f : C.(Morphism) c (G d)),
-        { g : D.(Morphism) (F c) d | unique (fun g => f = Compose (G.(MorphismOf) g) (T c)) g }
+        { g : D.(Morphism) (F c) d | unique (fun g => Compose (G.(MorphismOf) g) (T c) = f) g }
     }.
 
   (**
@@ -92,6 +92,6 @@ Section Adjunction.
   Definition AdjunctionCounit (F : Functor C D) (G : Functor D C) :=
     { U : NaturalTransformation (ComposeFunctors F G) (IdentityFunctor D) &
       forall (c : C) (d : D) (g : D.(Morphism) (F c) d),
-        { f : C.(Morphism) c (G d) | unique (fun f => g = Compose (U d) (F.(MorphismOf) f)) f }
+        { f : C.(Morphism) c (G d) | unique (fun f => Compose (U d) (F.(MorphismOf) f) = g) f }
     }.
 End Adjunction.
