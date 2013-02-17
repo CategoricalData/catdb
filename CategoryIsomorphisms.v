@@ -231,7 +231,7 @@ Ltac pre_compose_to_identity :=
   [ solve_isomorphism | ].
 
 Section CategoryObjects1.
-  Context `{C : @SpecializedCategory obj}.
+  Context `(C : @SpecializedCategory obj).
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
@@ -239,20 +239,70 @@ Section CategoryObjects1.
   Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
     forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | IsIsomorphism m & is_unique m }.
 
-  (* A terminal object is an object with a unique morphism from every other object. *)
-  Definition TerminalObject' (o : C) : Prop :=
-    forall o', exists! m : C.(Morphism) o' o, True.
+  Section terminal.
+    (* A terminal object is an object with a unique morphism from every other object. *)
+    Definition IsTerminalObject' (o : C) : Prop :=
+      forall o', exists! m : C.(Morphism) o' o, True.
 
-  Definition TerminalObject (o : C) :=
-    forall o', { m : C.(Morphism) o' o | is_unique m }.
+    Definition IsTerminalObject (o : C) :=
+      forall o', { m : C.(Morphism) o' o | is_unique m }.
 
-  (* An initial object is an object with a unique morphism from every other object. *)
-  Definition InitialObject' (o : C) : Prop :=
-    forall o', exists! m : C.(Morphism) o o', True.
+    Record TerminalObject :=
+      {
+        TerminalObject_Object' : obj;
+        TerminalObject_Morphism : forall o, Morphism' C o TerminalObject_Object';
+        TerminalObject_Property : forall o, is_unique (TerminalObject_Morphism o)
+      }.
 
-  Definition InitialObject (o : C) :=
-    forall o', { m : C.(Morphism) o o' | is_unique m }.
+    Definition TerminalObject_Object : TerminalObject -> C := TerminalObject_Object'.
+
+    Global Coercion TerminalObject_Object : TerminalObject >-> Object.
+
+    Definition TerminalObject_IsTerminalObject (o : TerminalObject) : IsTerminalObject o
+      := fun o' => exist _ (TerminalObject_Morphism o o') (TerminalObject_Property o o').
+
+    Definition IsTerminalObject_TerminalObject o : IsTerminalObject o -> TerminalObject
+      := fun H => @Build_TerminalObject o (fun o' => proj1_sig (H o')) (fun o' => proj2_sig (H o')).
+
+    Global Coercion TerminalObject_IsTerminalObject : TerminalObject >-> IsTerminalObject.
+    Global Coercion IsTerminalObject_TerminalObject : IsTerminalObject >-> TerminalObject.
+  End terminal.
+
+  Section initial.
+    (* An initial object is an object with a unique morphism from every other object. *)
+    Definition IsInitialObject' (o : C) : Prop :=
+      forall o', exists! m : C.(Morphism) o o', True.
+
+    Definition IsInitialObject (o : C) :=
+      forall o', { m : C.(Morphism) o o' | is_unique m }.
+
+    Record InitialObject :=
+      {
+        InitialObject_Object' :> obj;
+        InitialObject_Morphism : forall o, Morphism' C InitialObject_Object' o;
+        InitialObject_Property : forall o, is_unique (InitialObject_Morphism o)
+      }.
+
+    Definition InitialObject_Object : InitialObject -> C := InitialObject_Object'.
+
+    Global Coercion InitialObject_Object : InitialObject >-> Object.
+
+    Definition InitialObject_IsInitialObject (o : InitialObject) : IsInitialObject o
+      := fun o' => exist _ (InitialObject_Morphism o o') (InitialObject_Property o o').
+
+    Definition IsInitialObject_InitialObject o : IsInitialObject o -> InitialObject
+      := fun H => @Build_InitialObject o (fun o' => proj1_sig (H o')) (fun o' => proj2_sig (H o')).
+
+    Global Coercion InitialObject_IsInitialObject : InitialObject >-> IsInitialObject.
+    Global Coercion IsInitialObject_InitialObject : IsInitialObject >-> InitialObject.
+  End initial.
 End CategoryObjects1.
+
+Arguments UniqueUpToUniqueIsomorphism {_ C} P.
+Arguments IsInitialObject' {_ C} o.
+Arguments IsInitialObject {_ C} o.
+Arguments IsTerminalObject' {_ C} o.
+Arguments IsTerminalObject {_ C} o.
 
 Section CategoryObjects2.
   Context `(C : @SpecializedCategory obj).
@@ -265,12 +315,12 @@ Section CategoryObjects2.
              end; eauto with category; try split; try solve [ etransitivity; eauto with category ].
 
   (* The terminal object is unique up to unique isomorphism. *)
-  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (TerminalObject (C := C)).
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (IsTerminalObject (C := C)).
     unique.
   Qed.
 
   (* The initial object is unique up to unique isomorphism. *)
-  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (InitialObject (C := C)).
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (IsInitialObject (C := C)).
     unique.
   Qed.
 End CategoryObjects2.

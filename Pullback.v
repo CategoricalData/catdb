@@ -94,6 +94,7 @@ Section Pullback.
     Defined.
 
     Definition Pullback := Limit PullbackDiagram.
+    Definition IsPullback := IsLimit (F := PullbackDiagram).
   End pullback.
 
   Section pushout.
@@ -133,13 +134,13 @@ Section Pullback.
     Defined.
 
     Definition Pushout := Colimit PushoutDiagram.
+    Definition IsPushout := IsColimit (F := PushoutDiagram).
   End pushout.
 End Pullback.
 
 Section PullbackObjects.
-  Context `(C : @SpecializedCategory objC).
+  Context `{C : @SpecializedCategory objC}.
   Variables a b c : objC.
-
 
   (** Does an object [d] together with the functions [i] and [j]
     fit into a pullback diagram?
@@ -154,19 +155,72 @@ Section PullbackObjects.
            g
     ]]
    *)
-  Definition IsPullbackObjectGivenLimits (f : Morphism C a c) (g : Morphism C b c)
-             PullbackObject (i : Morphism C PullbackObject a) (j : Morphism C PullbackObject b)
-             (HasLimits : forall F : SpecializedFunctor PullbackIndex C, Limit F)
-    := { iso : Isomorphism (LimitObject (HasLimits _ : Pullback C a b c f g)) PullbackObject
-       | let m := (LimitMorphism (HasLimits (PullbackDiagram C a b c f g))) in
-         Compose i iso = m PullbackA
-         /\ Compose j iso = m PullbackB }.
 
-  Definition IsPushoutObjectGivenLimits (f : Morphism C c a) (g : Morphism C c b)
-             PushoutObject (i : Morphism C a PushoutObject) (j : Morphism C b PushoutObject)
-             (HasColimits : forall F : SpecializedFunctor PushoutIndex C, Colimit F)
-    := { iso : Isomorphism PushoutObject (ColimitObject (HasColimits _ : Pushout C a b c f g))
-       | let m := (ColimitMorphism (HasColimits (PushoutDiagram C a b c f g))) in
-         Compose iso i = m PullbackA
-         /\ Compose iso j = m PullbackB }.
+  Local Ltac t :=
+    intros;
+    destruct_head_hnf PullbackThree;
+    destruct_head_hnf Empty_set;
+    destruct_head_hnf unit;
+    autorewrite with morphism;
+    trivial.
+
+  Definition IsPullbackGivenMorphisms_Object
+             (f : Morphism C a c)
+             (g : Morphism C b c)
+             PullbackObject
+             (i : Morphism C PullbackObject a)
+             (j : Morphism C PullbackObject b)
+             (PullbackCompatible : Compose f i = Compose g j)
+  : CommaCategory_Object (DiagonalFunctor C PullbackIndex)
+                         (SliceCategory_Functor
+                            (FunctorCategory.FunctorCategory PullbackIndex C)
+                            (PullbackDiagram C a b c f g)).
+    exists (PullbackObject, tt).
+    exists (fun x => match x as x return (Morphism C PullbackObject (PullbackDiagram_ObjectOf a b c x)) with
+                       | PullbackA => i
+                       | PullbackB => j
+                       | PullbackC => Compose f i
+                     end);
+      simpl; present_spcategory;
+      abstract t.
+  Defined.
+
+  Definition IsPullbackGivenMorphisms
+             (f : Morphism C a c)
+             (g : Morphism C b c)
+             PullbackObject
+             (i : Morphism C PullbackObject a)
+             (j : Morphism C PullbackObject b)
+             (PullbackCompatible : Compose f i = Compose g j)
+    := @IsPullback _ _ a b c f g (IsPullbackGivenMorphisms_Object f g PullbackObject i j PullbackCompatible).
+
+  Definition IsPushoutGivenMorphisms_Object
+             (f : Morphism C c a)
+             (g : Morphism C c b)
+             PushoutObject
+             (i : Morphism C a PushoutObject)
+             (j : Morphism C b PushoutObject)
+             (PushoutCompatible : Compose j g = Compose i f)
+  : CommaCategory_Object (SliceCategory_Functor
+                            (FunctorCategory.FunctorCategory PushoutIndex C)
+                            (PushoutDiagram C a b c f g))
+                         (DiagonalFunctor C PushoutIndex).
+    exists (tt, PushoutObject).
+    exists (fun x => match x as x return (Morphism C (PushoutDiagram_ObjectOf a b c x) PushoutObject) with
+                       | PullbackA => i
+                       | PullbackB => j
+                       | PullbackC => Compose i f
+                     end);
+      simpl; present_spcategory;
+      abstract t.
+  Defined.
+
+  Definition IsPushoutGivenMorphisms
+             (f : Morphism C c a)
+             (g : Morphism C c b)
+             PushoutObject
+             (i : Morphism C a PushoutObject)
+             (j : Morphism C b PushoutObject)
+             (PushoutCompatible : Compose j g = Compose i f)
+    := @IsPushout _ _ a b c f g (IsPushoutGivenMorphisms_Object f g PushoutObject i j PushoutCompatible).
 End PullbackObjects.

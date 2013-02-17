@@ -49,15 +49,19 @@ Hint Rewrite @op_op_id @op_distribute_prod : category.
 Section DualObjects.
   Context `(C : @SpecializedCategory objC).
 
-  Lemma initial_opposite_terminal (o : C) :
-    InitialObject o -> TerminalObject (C := OppositeCategory C) o.
-    t.
-  Qed.
+  Definition terminal_opposite_initial (o : C) : IsTerminalObject o -> IsInitialObject (C := OppositeCategory C) o
+    := fun H o' => H o'.
 
-  Lemma terminal_opposite_initial (o : C) :
-    TerminalObject o -> InitialObject (C := OppositeCategory C) o.
-    t.
-  Qed.
+  Definition initial_opposite_terminal (o : C) : IsInitialObject o -> IsTerminalObject (C := OppositeCategory C) o
+    := fun H o' => H o'.
+
+  Definition terminal_to_opposite_initial : TerminalObject C -> InitialObject (OppositeCategory C)
+    := Eval cbv beta iota zeta delta [terminal_opposite_initial TerminalObject_IsTerminalObject IsInitialObject_InitialObject proj1_sig proj2_sig] in
+        fun x => terminal_opposite_initial x.
+
+  Definition initial_to_opposite_terminal : InitialObject C -> TerminalObject (OppositeCategory C)
+    := Eval cbv beta iota zeta delta [initial_opposite_terminal IsTerminalObject_TerminalObject InitialObject_IsInitialObject proj1_sig proj2_sig] in
+        fun x => initial_opposite_terminal x.
 End DualObjects.
 
 Section OppositeFunctor.

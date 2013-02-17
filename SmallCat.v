@@ -9,7 +9,7 @@ Section SmallCat.
   Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.
 End SmallCat.
 
-Local Ltac destruct_simple_types := 
+Local Ltac destruct_simple_types :=
   repeat match goal with
            | [ |- context[?T] ] => let T' := type of T in
                                    let T'' := fresh in
@@ -28,7 +28,7 @@ Section Objects.
   Hint Extern 1 => destruct_simple_types.
   Hint Extern 3 => destruct_to_empty_set.
 
-  Lemma TerminalCategory_Terminal : TerminalObject (C := SmallCat) TerminalCategory.
+  Lemma TerminalCategory_Terminal : IsTerminalObject (C := SmallCat) TerminalCategory.
     repeat intro;
     exists (FunctorToTerminal _).
     abstract (
@@ -36,7 +36,7 @@ Section Objects.
       ).
   Defined.
 
-  Lemma InitialCategory_Initial : InitialObject (C := SmallCat) InitialCategory.
+  Lemma InitialCategory_Initial : IsInitialObject (C := SmallCat) InitialCategory.
     repeat intro;
     exists (FunctorFromInitial _).
     abstract (

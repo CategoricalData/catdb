@@ -64,20 +64,20 @@ Section subobject_classifier.
 
   Record SubobjectClassifier :=
     {
-      SubobjectClassifierOne : C where "1" := SubobjectClassifierOne;
-      SubobjectClassifierOneTerminal : TerminalObject 1;
-      SubobjectClassifierHasPullbacks : forall F : SpecializedFunctor PullbackIndex C, Limit F;
+      SubobjectClassifierOne : TerminalObject C where "1" := (TerminalObject_Object SubobjectClassifierOne);
       ObjectOfTruthValues : C where "'Ω'" := ObjectOfTruthValues;
       TrueValue : C.(Morphism) 1 Ω;
       TrueIsMonomorphism : IsMonomorphism TrueValue;
       SubobjectClassifyingMap : forall U X (j : C.(Morphism) U X),
                                   IsMonomorphism j
                                   -> { χj : Morphism C X Ω &
-                                       uniqueT (fun χj => IsPullbackObjectGivenLimits X 1 Ω
-                                                                                      χj TrueValue
-                                                                                      U j
-                                                                                      (proj1_sig (SubobjectClassifierOneTerminal U))
-                                                                                      SubobjectClassifierHasPullbacks)
-                                       χj }
+                                                     { H : Compose χj j =
+                                                           Compose TrueValue (TerminalObject_Morphism SubobjectClassifierOne U)
+                                                                   & IsPullbackGivenMorphisms
+                                                                   X 1 Ω
+                                                                   χj TrueValue
+                                                                   U j
+                                                                   (TerminalObject_Morphism SubobjectClassifierOne U)
+                                                                   H } }
     }.
 End subobject_classifier.

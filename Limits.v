@@ -85,6 +85,7 @@ Section Limit.
      there exists a unique map [s' : X -> L] in [C] such that [t (Δ s') = s].
      **)
   Definition Limit := TerminalMorphism (DiagonalFunctor C D) F.
+  Definition IsLimit := IsTerminalMorphism (U := DiagonalFunctor C D) (X := F).
   (*  Definition Limit (L : C) :=
     { t : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) L) F &
       forall X : C, forall s : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) X) F,
@@ -104,6 +105,7 @@ Section Limit.
      there exists a unique map [s' : c -> X] in [C] such that [(Δ s') t = s].
      **)
   Definition Colimit := @InitialMorphism (C ^ D) _ F (DiagonalFunctor C D).
+  Definition IsColimit := @IsInitialMorphism (C ^ D) _ F (DiagonalFunctor C D).
   (*  Definition Colimit (c : C) :=
     { t : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) c) &
       forall X : C, forall s : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) X),
@@ -111,6 +113,24 @@ Section Limit.
           SNTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
         }
     }.*)
+
+  Section coercions.
+    Definition Limit_IsLimit : forall o : Limit, IsLimit o
+      := fun o => TerminalMorphism_IsTerminalMorphism o.
+    Definition IsLimit_Limit : forall o, IsLimit o -> Limit
+      := fun o H => IsTerminalMorphism_TerminalMorphism H.
+
+    Global Coercion Limit_IsLimit : Limit >-> IsLimit.
+    Global Coercion IsLimit_Limit : IsLimit >-> Limit.
+
+    Definition Colimit_IsColimit : forall o : Colimit, IsColimit o
+      := fun o => InitialMorphism_IsInitialMorphism o.
+    Definition IsColimit_Colimit : forall o, IsColimit o -> Colimit
+      := fun o H => IsInitialMorphism_InitialMorphism H.
+
+    Global Coercion Colimit_IsColimit : Colimit >-> IsColimit.
+    Global Coercion IsColimit_Colimit : IsColimit >-> Colimit.
+  End coercions.
 
   Section AbstractionBarrier.
     Variable l : Limit.

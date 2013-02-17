@@ -10,10 +10,10 @@ Section InitialTerminal.
 
   Local Ltac t := repeat (hnf in *; simpl in *; intros; try destruct_exists; try destruct_to_empty_set); auto.
 
-  Definition TypeCatEmptyInitial : InitialObject (C := TypeCat) Empty_set. t. Defined.
-  Definition TypeCatSingletonTerminal : TerminalObject (C := TypeCat) unit. t. Defined.
-  Definition SetCatEmptyInitial : InitialObject (C := SetCat) Empty_set. t. Defined.
-  Definition SetCatSingletonTerminal : TerminalObject (C := SetCat) unit. t. Defined.
+  Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set. t. Defined.
+  Definition TypeCatSingletonTerminal : IsTerminalObject (C := TypeCat) unit. t. Defined.
+  Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set. t. Defined.
+  Definition SetCatSingletonTerminal : IsTerminalObject (C := SetCat) unit. t. Defined.
 End InitialTerminal.
 
 Section EpiMono.
