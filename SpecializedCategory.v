@@ -99,7 +99,7 @@ End SpecializedCategoryInterface.
 
 Bind Scope morphism_scope with Morphism.
 
-Arguments Object {obj} !C : rename, simpl never.
+Arguments Object {obj} !C / : rename (*, simpl never *).
 Arguments Morphism {obj} !C s d : rename. (* , simpl nomatch. *)
 Arguments Compose {obj} [!C s d d'] m m0. (* : simpl nomatch. *)
 Arguments Identity {obj} [!C] o. (* : simpl nomatch. *)
