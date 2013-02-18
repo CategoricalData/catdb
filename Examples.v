@@ -234,7 +234,8 @@ Polymorphic Definition emailsSchema : Schema.
   refine {| Vertex := emailsV;
     Edge := emailsE;
     PathsEquivalent := emailsEq
-    |}; abstract (repeat destructor; hnf; destructor).
+    |};
+  abstract (repeat esplit; hnf; repeat destructor).
 Defined.
 
 Polymorphic Definition emailsTypeof (v : emailsSchema) : Set :=
