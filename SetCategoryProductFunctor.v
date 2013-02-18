@@ -19,7 +19,7 @@ Section ProductFunctor.
                                           (fun _ _ fg => (fun xy => ((fst fg) (fst xy), (snd fg) (snd xy))))
                                           _
                                           _);
-          abstract eauto
+          abstract (simpl in *; eauto)
     end.
 
   Polymorphic Definition TypeProductFunctor : SpecializedFunctor (TypeCat * TypeCat) TypeCat. build_functor. Defined.
