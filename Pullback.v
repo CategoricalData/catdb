@@ -24,9 +24,9 @@ Section Pullback.
     Variable f : C.(Morphism) a c.
     Variable g : C.(Morphism) b c.
 
-    Inductive PullbackThree := PullbackA | PullbackB | PullbackC.
+    Polymorphic Inductive PullbackThree := PullbackA | PullbackB | PullbackC.
 
-    Definition PullbackIndex_Morphism (a b : PullbackThree) : Set :=
+    Polymorphic Definition PullbackIndex_Morphism (a b : PullbackThree) : Set :=
       match (a, b) with
         | (PullbackA, PullbackA) => unit
         | (PullbackB, PullbackB) => unit
@@ -38,12 +38,12 @@ Section Pullback.
 
     Global Arguments PullbackIndex_Morphism a b /.
 
-           Definition PullbackIndex_Compose s d d' (m1 : PullbackIndex_Morphism d d') (m2 : PullbackIndex_Morphism s d) :
+           Polymorphic Definition PullbackIndex_Compose s d d' (m1 : PullbackIndex_Morphism d d') (m2 : PullbackIndex_Morphism s d) :
       PullbackIndex_Morphism s d'.
              destruct s, d, d'; simpl in *; trivial.
            Defined.
 
-    Definition PullbackIndex : @SpecializedCategory PullbackThree.
+    Polymorphic Definition PullbackIndex : @SpecializedCategory PullbackThree.
       refine (@Build_SpecializedCategory _
                                          PullbackIndex_Morphism
                                          (fun x => match x as p return (PullbackIndex_Morphism p p) with
@@ -58,7 +58,7 @@ Section Pullback.
         ).
     Defined.
 
-    Definition PullbackDiagram_ObjectOf x :=
+    Polymorphic Definition PullbackDiagram_ObjectOf x :=
       match x with
         | PullbackA => a
         | PullbackB => b
@@ -67,7 +67,7 @@ Section Pullback.
 
     Global Arguments PullbackDiagram_ObjectOf x / .
 
-    Definition PullbackDiagram_MorphismOf s d (m : Morphism PullbackIndex s d) :
+    Polymorphic Definition PullbackDiagram_MorphismOf s d (m : Morphism PullbackIndex s d) :
       Morphism C (PullbackDiagram_ObjectOf s) (PullbackDiagram_ObjectOf d).
       destruct s, d; simpl in *;
       try apply Identity;
@@ -75,7 +75,7 @@ Section Pullback.
       try solve [ destruct m ].
     Defined.
 
-    Definition PullbackDiagram : SpecializedFunctor PullbackIndex C.
+    Polymorphic Definition PullbackDiagram : SpecializedFunctor PullbackIndex C.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D
@@ -93,21 +93,21 @@ Section Pullback.
         ).
     Defined.
 
-    Definition Pullback := Limit PullbackDiagram.
-    Definition IsPullback := IsLimit (F := PullbackDiagram).
+    Polymorphic Definition Pullback := Limit PullbackDiagram.
+    Polymorphic Definition IsPullback := IsLimit (F := PullbackDiagram).
   End pullback.
 
   Section pushout.
     Variable f : C.(Morphism) c a.
     Variable g : C.(Morphism) c b.
 
-    Definition PushoutIndex := OppositeCategory PullbackIndex.
-    Definition PushoutDiagram_ObjectOf := PullbackDiagram_ObjectOf.
+    Polymorphic Definition PushoutIndex := OppositeCategory PullbackIndex.
+    Polymorphic Definition PushoutDiagram_ObjectOf := PullbackDiagram_ObjectOf.
 
     Global Arguments PushoutDiagram_ObjectOf x / .
 
 
-    Definition PushoutDiagram_MorphismOf s d (m : Morphism PushoutIndex s d) :
+    Polymorphic Definition PushoutDiagram_MorphismOf s d (m : Morphism PushoutIndex s d) :
       Morphism C (PushoutDiagram_ObjectOf s) (PushoutDiagram_ObjectOf d).
       destruct s, d; simpl in *;
       try apply Identity;
@@ -115,7 +115,7 @@ Section Pullback.
       try solve [ destruct m ].
     Defined.
 
-    Definition PushoutDiagram : SpecializedFunctor PushoutIndex C.
+    Polymorphic Definition PushoutDiagram : SpecializedFunctor PushoutIndex C.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D
@@ -133,8 +133,8 @@ Section Pullback.
         ).
     Defined.
 
-    Definition Pushout := Colimit PushoutDiagram.
-    Definition IsPushout := IsColimit (F := PushoutDiagram).
+    Polymorphic Definition Pushout := Colimit PushoutDiagram.
+    Polymorphic Definition IsPushout := IsColimit (F := PushoutDiagram).
   End pushout.
 End Pullback.
 
@@ -164,7 +164,7 @@ Section PullbackObjects.
     autorewrite with morphism;
     trivial.
 
-  Definition IsPullbackGivenMorphisms_Object
+  Polymorphic Definition IsPullbackGivenMorphisms_Object
              (f : Morphism C a c)
              (g : Morphism C b c)
              PullbackObject
@@ -185,7 +185,7 @@ Section PullbackObjects.
       abstract t.
   Defined.
 
-  Definition IsPullbackGivenMorphisms
+  Polymorphic Definition IsPullbackGivenMorphisms
              (f : Morphism C a c)
              (g : Morphism C b c)
              PullbackObject
@@ -194,7 +194,7 @@ Section PullbackObjects.
              (PullbackCompatible : Compose f i = Compose g j)
     := @IsPullback _ _ a b c f g (IsPullbackGivenMorphisms_Object f g PullbackObject i j PullbackCompatible).
 
-  Definition IsPushoutGivenMorphisms_Object
+  Polymorphic Definition IsPushoutGivenMorphisms_Object
              (f : Morphism C c a)
              (g : Morphism C c b)
              PushoutObject
@@ -215,7 +215,7 @@ Section PullbackObjects.
       abstract t.
   Defined.
 
-  Definition IsPushoutGivenMorphisms
+  Polymorphic Definition IsPushoutGivenMorphisms
              (f : Morphism C c a)
              (g : Morphism C c b)
              PushoutObject

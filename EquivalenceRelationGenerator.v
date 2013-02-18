@@ -7,19 +7,19 @@ Section Gen.
   Variable A : Type.
   Variable equiv : relation A.
 
-  Inductive EquivalenceOf : A -> A -> Prop :=
+  Polymorphic Inductive EquivalenceOf : A -> A -> Prop :=
   | gen_underlying : forall a b, equiv a b -> EquivalenceOf a b
   | gen_refl : forall a, EquivalenceOf a a
   | gen_sym : forall a b, EquivalenceOf a b -> EquivalenceOf b a
   | gen_trans : forall a b c, EquivalenceOf a b -> EquivalenceOf b c -> EquivalenceOf a c.
 
-  Hint Constructors EquivalenceOf.
+  Polymorphic Hint Constructors EquivalenceOf.
 
-  Lemma EquivalenceOf_Equivalence : Equivalence EquivalenceOf.
+  Polymorphic Lemma EquivalenceOf_Equivalence : Equivalence EquivalenceOf.
     constructor; eauto.
   Defined.
 
-  Definition generateEquivalence : { equiv' : A -> A -> Prop | Equivalence equiv' & forall a b, equiv a b -> equiv' a b }.
+  Polymorphic Definition generateEquivalence : { equiv' : A -> A -> Prop | Equivalence equiv' & forall a b, equiv a b -> equiv' a b }.
     exists EquivalenceOf.
     exact EquivalenceOf_Equivalence.
     eauto.

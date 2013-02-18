@@ -28,7 +28,7 @@ Section Grothendieck.
   Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C Cat.
 
-  Record CatGrothendieckPair := {
+  Polymorphic Record CatGrothendieckPair := {
     CatGrothendieckC' : objC;
     CatGrothendieckX' : F CatGrothendieckC'
   }.
@@ -36,15 +36,15 @@ Section Grothendieck.
   Section GrothendieckInterface.
     Variable G : CatGrothendieckPair.
 
-    Definition CatGrothendieckC : C := G.(CatGrothendieckC').
-    Definition CatGrothendieckX : F CatGrothendieckC := G.(CatGrothendieckX').
+    Polymorphic Definition CatGrothendieckC : C := G.(CatGrothendieckC').
+    Polymorphic Definition CatGrothendieckX : F CatGrothendieckC := G.(CatGrothendieckX').
   End GrothendieckInterface.
 
-  Lemma CatGrothendieckPair_eta (x : CatGrothendieckPair) : Build_CatGrothendieckPair (CatGrothendieckC x) (CatGrothendieckX x) = x.
+  Polymorphic Lemma CatGrothendieckPair_eta (x : CatGrothendieckPair) : Build_CatGrothendieckPair (CatGrothendieckC x) (CatGrothendieckX x) = x.
     destruct x; reflexivity.
   Qed.
 
-  Definition CatGrothendieckCompose cs xs cd xd cd' xd' :
+  Polymorphic Definition CatGrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' & Morphism _ (F.(MorphismOf) f xd) xd' }
     -> { f : C.(Morphism) cs cd & Morphism _ (F.(MorphismOf) f xs) xd }
     -> { f : C.(Morphism) cs cd' & Morphism _ (F.(MorphismOf) f xs) xd' }.
@@ -57,16 +57,16 @@ Section Grothendieck.
 
   Arguments CatGrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
-  Definition CatGrothendieckIdentity c x : { f : C.(Morphism) c c & Morphism _ (F.(MorphismOf) f x) x }.
+  Polymorphic Definition CatGrothendieckIdentity c x : { f : C.(Morphism) c c & Morphism _ (F.(MorphismOf) f x) x }.
     exists (Identity c).
     rewrite FIdentityOf.
     exact (Identity _).
   Defined.
 (*
-  Local Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
-  Local Hint Extern 1 (@eq (sigT _) _ _) => simpl_eq : category.
+  Local Polymorphic Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
+  Local Polymorphic Hint Extern 1 (@eq (sigT _) _ _) => simpl_eq : category.
 
-  Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
+  Polymorphic Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
     refine {|
         Morphism' := (fun s d => _);
         Compose' := (fun _ _ _ m1 m2 => CatGrothendieckCompose m1 m2);
@@ -108,7 +108,7 @@ Section Grothendieck.
       ).
   Defined.
 
-  Definition CatGrothendieckProjectionFunctor1 : SpecializedFunctor CategoryOfCatElements C.
+  Polymorphic Definition CatGrothendieckProjectionFunctor1 : SpecializedFunctor CategoryOfCatElements C.
     refine {|
         ObjectOf' := (fun o : CategoryOfCatElements => CatGrothendieckC o);
         MorphismOf' := (fun s d (m : CategoryOfCatElements.(Morphism') s d) => proj1_sig m)

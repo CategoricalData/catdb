@@ -9,7 +9,7 @@ Generalizable All Variables.
 Local Infix "==" := JMeq.
 
 Section Categories_Equal.
-  Lemma Category_eq : forall (A B : Category),
+  Polymorphic Lemma Category_eq : forall (A B : Category),
     Object A = Object B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -21,7 +21,7 @@ Section Categories_Equal.
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma SmallCategory_eq : forall (A B : SmallCategory),
+  Polymorphic Lemma SmallCategory_eq : forall (A B : SmallCategory),
     SObject A = SObject B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -33,7 +33,7 @@ Section Categories_Equal.
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma LocallySmallCategory_eq : forall (A B : LocallySmallCategory),
+  Polymorphic Lemma LocallySmallCategory_eq : forall (A B : LocallySmallCategory),
     LSObject A = LSObject B
     -> Morphism A == Morphism B
     -> @Identity _ A == @Identity _ B
@@ -60,43 +60,43 @@ Section RoundtripCat.
   Context `(C : @SpecializedCategory obj).
   Variable C' : Category.
 
-  Lemma SpecializedCategory_Category_SpecializedCategory_Id : ((C : Category) : SpecializedCategory _) = C.
+  Polymorphic Lemma SpecializedCategory_Category_SpecializedCategory_Id : ((C : Category) : SpecializedCategory _) = C.
     spcat_eq.
   Qed.
 
-  Lemma Category_SpecializedCategory_Category_Id : ((C' : SpecializedCategory _) : Category) = C'.
+  Polymorphic Lemma Category_SpecializedCategory_Category_Id : ((C' : SpecializedCategory _) : Category) = C'.
     cat_eq.
   Qed.
 End RoundtripCat.
 
-Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id : category.
+Polymorphic Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripLSCat.
   Context `(C : @LocallySmallSpecializedCategory obj).
   Variable C' : LocallySmallCategory.
 
-  Lemma LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id : ((C : LocallySmallCategory) : LocallySmallSpecializedCategory _) = C.
+  Polymorphic Lemma LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id : ((C : LocallySmallCategory) : LocallySmallSpecializedCategory _) = C.
     spcat_eq.
   Qed.
 
-  Lemma LocallySmall_Category_SpecializedCategory_Category_Id : ((C' : LocallySmallSpecializedCategory _) : LocallySmallCategory) = C'.
+  Polymorphic Lemma LocallySmall_Category_SpecializedCategory_Category_Id : ((C' : LocallySmallSpecializedCategory _) : LocallySmallCategory) = C'.
     cat_eq.
   Qed.
 End RoundtripLSCat.
 
-Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
+Polymorphic Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripSCat.
   Context `(C : @SmallSpecializedCategory obj).
   Variable C' : SmallCategory.
 
-  Lemma Small_SpecializedCategory_Category_SpecializedCategory_Id : ((C : SmallCategory) : SmallSpecializedCategory _) = C.
+  Polymorphic Lemma Small_SpecializedCategory_Category_SpecializedCategory_Id : ((C : SmallCategory) : SmallSpecializedCategory _) = C.
     spcat_eq.
   Qed.
 
-  Lemma Small_Category_SpecializedCategory_Category_Id : ((C' : SmallSpecializedCategory _) : SmallCategory) = C'.
+  Polymorphic Lemma Small_Category_SpecializedCategory_Category_Id : ((C' : SmallSpecializedCategory _) : SmallCategory) = C'.
     cat_eq.
   Qed.
 End RoundtripSCat.
 
-Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id : category.
+Polymorphic Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id : category.

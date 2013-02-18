@@ -91,7 +91,7 @@ Section preobject.
   Local Reserved Notation "'ℕ'".
   Local Reserved Notation "'S'".
 
-  Record NaturalNumbersPreObject :=
+  Polymorphic Record NaturalNumbersPreObject :=
     {
       NaturalNumbersPreObject_Object :> E where "'ℕ'" := NaturalNumbersPreObject_Object;
       NaturalNumbersPreObject_TerminalObject : TerminalObject E where "1" := NaturalNumbersPreObject_TerminalObject;

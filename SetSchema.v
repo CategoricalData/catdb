@@ -13,7 +13,7 @@ Section SSet.
               solve [ let H := fresh in intro H; rewrite H; reflexivity ]
         end.
 
-  Definition TypeSch : Schema.
+  Polymorphic Definition TypeSch : Schema.
     refine {| Vertex := Type;
       Edge := (fun s d => s -> d);
       PathsEquivalent := (fun _ _ p p' => compose _ (fun _ _ => id) p = compose _ (fun _ _ => id) p')
@@ -21,7 +21,7 @@ Section SSet.
     abstract t_set.
   Defined.
 
-  Definition SetSch : Schema.
+  Polymorphic Definition SetSch : Schema.
     refine {| Vertex := Set;
       Edge := (fun s d => s -> d);
       PathsEquivalent := (fun _ _ p p' => compose _ (fun _ _ => id) p = compose _ (fun _ _ => id) p')
@@ -29,7 +29,7 @@ Section SSet.
     abstract t_set.
   Defined.
 
-  Definition PropSch : Schema.
+  Polymorphic Definition PropSch : Schema.
     refine {| Vertex := Prop;
       Edge := (fun s d => s -> d);
       PathsEquivalent := (fun _ _ p p' => compose _ (fun _ _ => id) p = compose _ (fun _ _ => id) p')

@@ -46,7 +46,7 @@ Section Coend.
   Variable Fob : ∐_{ c } (F (c, c)).
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the domain of the relevant morphism. *)
-  Definition Coend_Fdom : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
+  Polymorphic Definition Coend_Fdom : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
     apply (InducedColimitMap (G := InducedDiscreteFunctor _ (DomainNaturalTransformation _ (fun _ => C) tt))).
     hnf; simpl.
     match goal with
@@ -60,7 +60,7 @@ Section Coend.
   Defined.
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the codomain of the relevant morphism. *)
-  Definition Coend_Fcod : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
+  Polymorphic Definition Coend_Fcod : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
     apply (InducedColimitMap (G := InducedDiscreteFunctor _ (CodomainNaturalTransformation _ (fun _ => C) tt))).
     hnf; simpl.
     match goal with
@@ -73,7 +73,7 @@ Section Coend.
     abstract t.
   Defined.
 
-  Definition Coend := Coequalizer D _ _ Coend_Fdom Coend_Fcod.
+  Polymorphic Definition Coend := Coequalizer D _ _ Coend_Fdom Coend_Fcod.
 End Coend.
 
 (* TODO: Figure out why the notation for this is the same as the notation for the Grothendieck construction *)

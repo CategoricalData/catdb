@@ -10,15 +10,15 @@ Section ComputableSchema.
 
   Local Coercion Object2Sch : O >-> SmallSchema.
 
-  Hint Resolve LeftIdentitySmallTranslation RightIdentitySmallTranslation f_equal2 ComposeSmallTranslationsAssociativity.
+  Polymorphic Hint Resolve LeftIdentitySmallTranslation RightIdentitySmallTranslation f_equal2 ComposeSmallTranslationsAssociativity.
 
-  Hint Resolve PreComposeSmallTranslationsEquivalent PostComposeSmallTranslationsEquivalent.
+  Polymorphic Hint Resolve PreComposeSmallTranslationsEquivalent PostComposeSmallTranslationsEquivalent.
 
-  Hint Rewrite LeftIdentitySmallTranslation RightIdentitySmallTranslation.
-  Hint Rewrite ComposeSmallTranslationsAssociativity.
+  Polymorphic Hint Rewrite LeftIdentitySmallTranslation RightIdentitySmallTranslation.
+  Polymorphic Hint Rewrite ComposeSmallTranslationsAssociativity.
 
   (* XXX TODO: Automate this better. *)
-  Definition ComputableSchemaCategory : @SpecializedCategory O (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
+  Polymorphic Definition ComputableSchemaCategory : @SpecializedCategory O (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
     refine (Build_SpecializedCategory (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d))
       (fun o => @classOf _ _ (@SmallTranslationsEquivalent_rel _ _)
         (IdentitySmallTranslation o))

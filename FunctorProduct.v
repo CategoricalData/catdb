@@ -13,7 +13,7 @@ Section FunctorProduct.
   Variable F : Functor C D.
   Variable F' : Functor C' D'.
 
-  Definition FunctorProduct : SpecializedFunctor  (C * C') (D * D').
+  Polymorphic Definition FunctorProduct : SpecializedFunctor  (C * C') (D * D').
     match goal with
       | [ |- SpecializedFunctor ?C0 ?D0 ] =>
         refine (Build_SpecializedFunctor C0 D0

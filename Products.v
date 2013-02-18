@@ -10,8 +10,8 @@ Section Products.
   Variable I : Type.
   Variable f : I -> C.
 
-  Definition Product := Limit (InducedDiscreteFunctor C f).
-  Definition Coproduct := Colimit (InducedDiscreteFunctor C f).
+  Polymorphic Definition Product := Limit (InducedDiscreteFunctor C f).
+  Polymorphic Definition Coproduct := Colimit (InducedDiscreteFunctor C f).
 End Products.
 
 (* XXX: [Reserved Notation] doesn't work here? *)

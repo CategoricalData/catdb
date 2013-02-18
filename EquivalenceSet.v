@@ -27,7 +27,7 @@ Section EquivalenceSet.
 
      We define an [EquivalenceSet] by a map [value -> bool], rather than
      [value -> Prop], so that it can live in [Set]. *)
-  Record EquivalenceSet : Set := {
+  Polymorphic Record EquivalenceSet : Set := {
     InSet' : value -> bool;
     InSet : value -> Prop := (fun v => InSet' v = true);
 
@@ -93,7 +93,7 @@ Section equiv.
 
   (* The equivalence [setOf] a particular [value] is defined by the proposition that
      the elements are equivalent to that [value]. *)
-  Definition setOf (v : value) : EquivalenceSet equiv.
+  Polymorphic Definition setOf (v : value) : EquivalenceSet equiv.
     exists (fun v' => if v ~= v' then true else false);
       abstract (
         try exists v; repeat split; unfold InSet in *;
@@ -101,36 +101,36 @@ Section equiv.
       ).
   Defined.
 
-  Lemma setOf_refl : forall v, InSet (setOf v) v.
+  Polymorphic Lemma setOf_refl : forall v, InSet (setOf v) v.
     compute; intro; simpl_equiv.
   Qed.
 
   (* Two equivalence classes are the same if they share all values *)
-  Definition sameSet (C C' : EquivalenceSet equiv) := forall v, (InSet C v <-> InSet C' v).
+  Polymorphic Definition sameSet (C C' : EquivalenceSet equiv) := forall v, (InSet C v <-> InSet C' v).
 
-  Definition disjointSets (C C' : EquivalenceSet equiv) := forall v, ~InSet C v \/ ~InSet C' v.
+  Polymorphic Definition disjointSets (C C' : EquivalenceSet equiv) := forall v, ~InSet C v \/ ~InSet C' v.
 
-  Definition differentSets (C C' : EquivalenceSet equiv) := exists v,
+  Polymorphic Definition differentSets (C C' : EquivalenceSet equiv) := exists v,
     (InSet C v /\ ~InSet C' v) \/
     (~InSet C v /\ InSet C' v).
 
-  Definition notDisjointSets (C C' : EquivalenceSet equiv) := exists v, InSet C v /\ InSet C' v.
+  Polymorphic Definition notDisjointSets (C C' : EquivalenceSet equiv) := exists v, InSet C v /\ InSet C' v.
 
-  Definition notDisjointSets' (C C' : EquivalenceSet equiv) := exists v v', InSet C v /\ InSet C' v' /\ equiv v v'.
+  Polymorphic Definition notDisjointSets' (C C' : EquivalenceSet equiv) := exists v v', InSet C v /\ InSet C' v' /\ equiv v v'.
 
-  Lemma sameSet_refl : Reflexive sameSet.
+  Polymorphic Lemma sameSet_refl : Reflexive sameSet.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameSet_sym : Symmetric sameSet.
+  Polymorphic Lemma sameSet_sym : Symmetric sameSet.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameSet_trans : Transitive sameSet.
+  Polymorphic Lemma sameSet_trans : Transitive sameSet.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameSet_eq (C C' : EquivalenceSet equiv) : sameSet C C' -> C = C'.
+  Polymorphic Lemma sameSet_eq (C C' : EquivalenceSet equiv) : sameSet C C' -> C = C'.
     clear equiv_Equivalence; intro H.
     cut (InSet' C = InSet' C');
       destruct C, C'; simpl;
@@ -152,7 +152,7 @@ Section equiv.
                     assumption || symmetry; assumption.
   Qed.
 
-  Lemma eq_sameSet (C C' : EquivalenceSet equiv) : C = C' -> sameSet C C'.
+  Polymorphic Lemma eq_sameSet (C C' : EquivalenceSet equiv) : C = C' -> sameSet C C'.
     intro; subst; apply sameSet_refl.
   Qed.
 
@@ -163,7 +163,7 @@ Section equiv.
       apply sameSet_eq; compute in *; intros; split; intros; simpl_equiv.
   Qed.
 
-  Lemma setOf_eq x y : setOf x = setOf y <-> equiv x y.
+  Polymorphic Lemma setOf_eq x y : setOf x = setOf y <-> equiv x y.
     split; intro H; try apply setOf_mor; trivial.
     pose (setOf_refl x).
     pose (setOf_refl y).
@@ -172,13 +172,13 @@ Section equiv.
         simpl_equiv.
   Qed.
 
-  Lemma disjointSets_differentSets (C C' : EquivalenceSet equiv) : (disjointSets C C') -> (differentSets C C').
+  Polymorphic Lemma disjointSets_differentSets (C C' : EquivalenceSet equiv) : (disjointSets C C') -> (differentSets C C').
     clear equiv_Equivalence; unfold differentSets, disjointSets; intro H.
     pose (SetInhabited C) as H'; destruct H' as [ x H' ].
     exists x; specialize (H x); tauto.
   Qed.
 
-  Lemma notDisjointSets_sameSet (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> (sameSet C C').
+  Polymorphic Lemma notDisjointSets_sameSet (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> (sameSet C C').
     clear equiv_Equivalence; unfold notDisjointSets, sameSet; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
       match goal with
         | [ H0 : InSet ?C ?x, H1 : InSet ?C ?y |- InSet ?C' ?x ]
@@ -188,18 +188,18 @@ Section equiv.
       end.
   Qed.
 
-  Lemma notDisjointSets_eq (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> C = C'.
+  Polymorphic Lemma notDisjointSets_eq (C C' : EquivalenceSet equiv) : (notDisjointSets C C') -> C = C'.
     clear equiv_Equivalence; intro; apply sameSet_eq; apply notDisjointSets_sameSet; assumption.
   Qed.
 
-  Lemma EquivalenceSet_forall_equiv__eq (C C' : EquivalenceSet equiv) :
+  Polymorphic Lemma EquivalenceSet_forall_equiv__eq (C C' : EquivalenceSet equiv) :
     (forall v v', (InSet C v \/ InSet C' v') -> (InSet C v /\ InSet C' v' <-> equiv v v')) ->
     C' = C.
     clear equiv_Equivalence; intro H. apply sameSet_eq; unfold sameSet; intro v.
     assert (equiv v v) by reflexivity; firstorder.
   Qed.
 
-  Lemma EquivalenceSet_forall__eq (C C' : EquivalenceSet equiv) :
+  Polymorphic Lemma EquivalenceSet_forall__eq (C C' : EquivalenceSet equiv) :
     (forall v, InSet C v <-> InSet C' v) ->
     C' = C.
     clear equiv_Equivalence; intro H. apply sameSet_eq; unfold sameSet;
@@ -220,7 +220,7 @@ Section InSet_setOf.
 
   Hypothesis equiv_dec : forall v v', {equiv v v'} + {~ equiv v v'}.
 
-  Lemma InSet_setOf_eq eqv v : InSet C v -> C = setOf eqv equiv_dec v.
+  Polymorphic Lemma InSet_setOf_eq eqv v : InSet C v -> C = setOf eqv equiv_dec v.
     intro H.
     apply sameSet_eq.
     pose (setOf eqv equiv_dec v).
@@ -235,7 +235,7 @@ Section InSet_setOf.
   Let C_Equivalence : Equivalence equiv
     := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
 
-  Definition InSet_setOf_eq' : forall v, InSet C v -> C = setOf C_Equivalence equiv_dec v
+  Polymorphic Definition InSet_setOf_eq' : forall v, InSet C v -> C = setOf C_Equivalence equiv_dec v
     := InSet_setOf_eq C_Equivalence.
 End InSet_setOf.
 
@@ -272,7 +272,7 @@ Ltac InSet2setOf' :=
              apply (@InSet_setOf_eq' _ _ C equiv_dec _) in H
          end.
 
-Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.
+Polymorphic Hint Extern 1 (@eq (@EquivalenceSet _ _) _ _) => apply EquivalenceSet_forall__eq; replace_InSet.
 
 Ltac clear_InSet' :=
   repeat match goal with
@@ -309,9 +309,9 @@ Section apply1.
     transitivity proved by equiv'_trans
       as apply_equiv'_rel.
 
-  Hint Resolve f_mor.
+  Polymorphic Hint Resolve f_mor.
 
-  Definition apply_to_class : EquivalenceSet equiv'.
+  Polymorphic Definition apply_to_class : EquivalenceSet equiv'.
     Print EquivalenceSet.
     refine {| UnderlyingSet := (fun v => exists v0, InSet E0 v0 /\ equiv' v (f v0)) |};
       abstract (intros; try solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ];
@@ -320,21 +320,21 @@ Section apply1.
         ]).
   Defined.
 
-  Lemma apply_to_class_f_inj : forall v, InSet E0 v -> InSet apply_to_class (f v).
+  Polymorphic Lemma apply_to_class_f_inj : forall v, InSet E0 v -> InSet apply_to_class (f v).
     compute; firstorder.
   Qed.
 
-  Lemma apply_to_class_f_surj : forall v, InSet apply_to_class v -> exists v', equiv' v (f v') /\ InSet E0 v'.
+  Polymorphic Lemma apply_to_class_f_surj : forall v, InSet apply_to_class v -> exists v', equiv' v (f v') /\ InSet E0 v'.
     compute; firstorder.
   Qed.
 End apply1.
 
-Hint Resolve apply_to_class_f_inj.
+Polymorphic Hint Resolve apply_to_class_f_inj.
 
 Implicit Arguments apply_to_class [value0 equiv0
   value' equiv' equiv'_refl equiv'_sym equiv'_trans].
 
-Lemma apply_to_setOf value0 equiv0 equiv0_refl equiv0_sym equiv0_trans value' equiv' equiv'_refl equiv'_sym equiv'_trans f f_mor e0 :
+Polymorphic Lemma apply_to_setOf value0 equiv0 equiv0_refl equiv0_sym equiv0_trans value' equiv' equiv'_refl equiv'_sym equiv'_trans f f_mor e0 :
   @apply_to_class value0 equiv0 value' equiv' f f_mor
   (@setOf _ _ equiv0_refl equiv0_sym equiv0_trans e0)
   equiv'_refl equiv'_sym equiv'_trans
@@ -385,7 +385,7 @@ Section apply2.
     transitivity proved by (equiv_trans E1)
       as apply2_equiv1_rel.
 
-  Definition apply2_to_class : EquivalenceSet equiv'.
+  Polymorphic Definition apply2_to_class : EquivalenceSet equiv'.
     refine {| UnderlyingSet := (fun v => exists v0 v1, InSet E0 v0 /\ InSet E1 v1 /\ equiv' v (f v0 v1)) |};
       abstract (intros; try solve [ reflexivity || (symmetry; assumption) || (etransitivity; eauto) ];
         solve [
@@ -394,22 +394,22 @@ Section apply2.
         ]).
   Defined.
 
-  Lemma apply2_to_class_f_inj : forall v0 v1, InSet E0 v0 -> InSet E1 v1 -> InSet apply2_to_class (f v0 v1).
+  Polymorphic Lemma apply2_to_class_f_inj : forall v0 v1, InSet E0 v0 -> InSet E1 v1 -> InSet apply2_to_class (f v0 v1).
     compute; firstorder.
   Qed.
 
-  Lemma apply2_to_class_f_surj : forall v, InSet apply2_to_class v -> exists v0 v1, equiv' v (f v0 v1) /\ InSet E0 v0 /\ InSet E1 v1.
+  Polymorphic Lemma apply2_to_class_f_surj : forall v, InSet apply2_to_class v -> exists v0 v1, equiv' v (f v0 v1) /\ InSet E0 v0 /\ InSet E1 v1.
     compute; firstorder.
   Qed.
 End apply2.
 
-Hint Resolve apply2_to_class_f_inj.
+Polymorphic Hint Resolve apply2_to_class_f_inj.
 
 Implicit Arguments apply2_to_class [value0 equiv0
   value1 equiv1
   value' equiv' equiv'_refl equiv'_sym equiv'_trans].
 
-Lemma apply2_to_setOf
+Polymorphic Lemma apply2_to_setOf
   value0 equiv0 equiv0_refl equiv0_sym equiv0_trans
   value1 equiv1 equiv1_refl equiv1_sym equiv1_trans
   value' equiv' equiv'_refl equiv'_sym equiv'_trans

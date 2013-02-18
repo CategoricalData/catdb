@@ -11,7 +11,7 @@ Section AdjunctionUniversal.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
-  Definition InitialMorphismOfAdjunction (A : Adjunction F G) Y : InitialMorphism Y G.
+  Polymorphic Definition InitialMorphismOfAdjunction (A : Adjunction F G) Y : InitialMorphism Y G.
     pose (projT1 (A : AdjunctionCounit F G)) as ε.
     pose (projT1 (A : AdjunctionUnit F G)) as η.
     apply Build_InitialMorphism'.
@@ -39,7 +39,7 @@ Section AdjunctionUniversal.
   Defined.
 
   (* TODO(jgross): Automate this more *)
-  Definition TerminalMorphismOfAdjunction (A : Adjunction F G) X : TerminalMorphism F X.
+  Polymorphic Definition TerminalMorphismOfAdjunction (A : Adjunction F G) X : TerminalMorphism F X.
     pose (projT1 (A : AdjunctionCounit F G)) as ε.
     pose (projT1 (A : AdjunctionUnit F G)) as η.
     apply Build_TerminalMorphism'.
@@ -119,7 +119,7 @@ Section AdjunctionFromUniversal.
     Variable G : SpecializedFunctor D C.
     Variable M : forall Y, InitialMorphism Y G.
 
-    Definition AdjointFunctorOfInitialMorphism : SpecializedFunctor C D.
+    Polymorphic Definition AdjointFunctorOfInitialMorphism : SpecializedFunctor C D.
       refine (Build_SpecializedFunctor C D
                                        (fun Y => let ηY := InitialMorphism_Morphism (M Y) in
                                                  let F0Y := InitialMorphism_Object (M Y) in
@@ -132,7 +132,7 @@ Section AdjunctionFromUniversal.
       abstract solve_adjoint_functor M.
     Defined.
 
-    Definition AdjunctionOfInitialMorphism : Adjunction AdjointFunctorOfInitialMorphism G.
+    Polymorphic Definition AdjunctionOfInitialMorphism : Adjunction AdjointFunctorOfInitialMorphism G.
       refine (_ : AdjunctionUnit AdjointFunctorOfInitialMorphism G).
       exists (Build_SpecializedNaturalTransformation (IdentityFunctor C)
                                                      (ComposeFunctors G AdjointFunctorOfInitialMorphism)
@@ -147,7 +147,7 @@ Section AdjunctionFromUniversal.
     Variable F : SpecializedFunctor C D.
     Variable M : forall X, TerminalMorphism F X.
 
-    Definition AdjointFunctorOfTerminalMorphism : SpecializedFunctor D C.
+    Polymorphic Definition AdjointFunctorOfTerminalMorphism : SpecializedFunctor D C.
       refine (Build_SpecializedFunctor D C
                                        (fun X => let εX := TerminalMorphism_Morphism (M X) in
                                                  let G0X := TerminalMorphism_Object (M X) in
@@ -161,7 +161,7 @@ Section AdjunctionFromUniversal.
       abstract solve_adjoint_functor M.
     Defined.
 
-    Definition AdjunctionOfTerminalMorphism : Adjunction F AdjointFunctorOfTerminalMorphism.
+    Polymorphic Definition AdjunctionOfTerminalMorphism : Adjunction F AdjointFunctorOfTerminalMorphism.
       refine (_ : AdjunctionCounit F AdjointFunctorOfTerminalMorphism).
       hnf.
       exists (Build_SpecializedNaturalTransformation (ComposeFunctors F AdjointFunctorOfTerminalMorphism)

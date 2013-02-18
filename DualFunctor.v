@@ -3,7 +3,7 @@ Require Export Duals SmallCat.
 Set Implicit Arguments.
 
 Section OppositeCategory.
-  Definition SmallOppositeFunctor : SpecializedFunctor SmallCat SmallCat.
+  Polymorphic Definition SmallOppositeFunctor : SpecializedFunctor SmallCat SmallCat.
     refine (Build_SpecializedFunctor SmallCat SmallCat
                                      (fun x => OppositeCategory x : SmallSpecializedCategory _)
                                      (fun _ _ m => OppositeFunctor m)
@@ -12,7 +12,7 @@ Section OppositeCategory.
     simpl; abstract functor_eq.
   Defined.
 
-  Definition LocallySmallOppositeFunctor : SpecializedFunctor LocallySmallCat LocallySmallCat.
+  Polymorphic Definition LocallySmallOppositeFunctor : SpecializedFunctor LocallySmallCat LocallySmallCat.
     refine (Build_SpecializedFunctor LocallySmallCat LocallySmallCat
                                      (fun x => OppositeCategory x : LocallySmallSpecializedCategory _)
                                      (fun _ _ m => OppositeFunctor m)

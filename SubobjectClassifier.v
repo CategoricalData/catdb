@@ -41,7 +41,7 @@ Section subobject_classifier.
 
   (** Quoting nCatLab:
 
-   Definition 1. In a category [C] with finite limits, a subobject
+   Polymorphic Definition 1. In a category [C] with finite limits, a subobject
    classifier is a monomorphism [true : * → Ω] out of the terminal
    object, such that for every monomorphism [U → X] in [C] there is a unique
    morphism [χU : X → Ω] such that there is a pullback diagram
@@ -62,7 +62,7 @@ Section subobject_classifier.
 
   Local Reserved Notation "'Ω'".
 
-  Record SubobjectClassifier :=
+  Polymorphic Record SubobjectClassifier :=
     {
       SubobjectClassifierOne : TerminalObject C where "1" := (TerminalObject_Object SubobjectClassifierOne);
       ObjectOfTruthValues : C where "'Ω'" := ObjectOfTruthValues;

@@ -1,7 +1,7 @@
 Require Export SpecializedCategory DiscreteCategory.
 Require Import Common.
 
-Fixpoint CardinalityRepresentative (n : nat) : Set :=
+Polymorphic Fixpoint CardinalityRepresentative (n : nat) : Set :=
   match n with
     | O => Empty_set
     | 1 => unit
@@ -10,6 +10,6 @@ Fixpoint CardinalityRepresentative (n : nat) : Set :=
 
 Coercion CardinalityRepresentative : nat >-> Sortclass.
 
-Definition NatCategory (n : nat) := Eval unfold DiscreteCategory, DiscreteCategory_Identity in DiscreteCategory n.
+Polymorphic Definition NatCategory (n : nat) := Eval unfold DiscreteCategory, DiscreteCategory_Identity in DiscreteCategory n.
 
 Coercion NatCategory : nat >-> SpecializedCategory.

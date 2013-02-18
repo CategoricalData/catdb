@@ -9,9 +9,9 @@ Generalizable All Variables.
 Section GraphObj.
   Context `(C : @SpecializedCategory objC).
 
-  Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
+  Polymorphic Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
 
-  Definition GraphIndex_Morphism (a b : GraphIndex) : Set :=
+  Polymorphic Definition GraphIndex_Morphism (a b : GraphIndex) : Set :=
     match (a, b) with
       | (GraphIndexSource, GraphIndexSource) => unit
       | (GraphIndexTarget, GraphIndexTarget) => unit
@@ -21,12 +21,12 @@ Section GraphObj.
 
   Global Arguments GraphIndex_Morphism a b /.
 
-  Definition GraphIndex_Compose s d d' (m1 : GraphIndex_Morphism d d') (m2 : GraphIndex_Morphism s d) :
+  Polymorphic Definition GraphIndex_Compose s d d' (m1 : GraphIndex_Morphism d d') (m2 : GraphIndex_Morphism s d) :
     GraphIndex_Morphism s d'.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
+  Polymorphic Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
     refine (@Build_SpecializedCategory _
                                        GraphIndex_Morphism
                                        (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end)
@@ -39,7 +39,7 @@ Section GraphObj.
       ).
   Defined.
 
-  Definition UnderlyingGraph_ObjectOf x :=
+  Polymorphic Definition UnderlyingGraph_ObjectOf x :=
     match x with
       | GraphIndexSource => { sd : objC * objC & C.(Morphism) (fst sd) (snd sd) }
       | GraphIndexTarget => objC
@@ -47,7 +47,7 @@ Section GraphObj.
 
   Global Arguments UnderlyingGraph_ObjectOf x /.
 
-  Definition UnderlyingGraph_MorphismOf s d (m : Morphism GraphIndexingCategory s d) :
+  Polymorphic Definition UnderlyingGraph_MorphismOf s d (m : Morphism GraphIndexingCategory s d) :
     UnderlyingGraph_ObjectOf s -> UnderlyingGraph_ObjectOf d :=
     match (s, d) as sd return
       Morphism GraphIndexingCategory (fst sd) (snd sd) ->
@@ -63,7 +63,7 @@ Section GraphObj.
       | (GraphIndexTarget, GraphIndexTarget) => fun _ => @id _
     end m.
 
-  Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
+  Polymorphic Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
@@ -98,7 +98,7 @@ Section GraphFunctor.
                | _ => progress destruct_sig; simpl in *
              end.
 
-  Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
+  Polymorphic Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
     Morphism (TypeCat ^ GraphIndexingCategory) (UnderlyingGraph C) (UnderlyingGraph D).
   Proof.
     exists (fun c => match c as c return (UnderlyingGraph C) c -> (UnderlyingGraph D) c with
@@ -108,7 +108,7 @@ Section GraphFunctor.
     abstract t.
   Defined.
 
-  Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
+  Polymorphic Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
@@ -137,9 +137,9 @@ Section FreeCategory.
 
   Let vertices := F GraphIndexTarget.
 
-  Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+  Polymorphic Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
 
-  Definition FreeCategory : SpecializedCategory vertices.
+  Polymorphic Definition FreeCategory : SpecializedCategory vertices.
   Proof.
     refine (@Build_SpecializedCategory
               vertices

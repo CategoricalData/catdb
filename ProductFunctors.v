@@ -12,6 +12,6 @@ Section Products.
   Variable HasLimits : forall F : SpecializedFunctor (DiscreteCategory I) C, Limit F.
   Variable HasColimits : forall F : SpecializedFunctor (DiscreteCategory I) C, Colimit F.
 
-  Definition ProductFunctor := LimitFunctor HasLimits.
-  Definition CoproductFunctor := ColimitFunctor HasColimits.
+  Polymorphic Definition ProductFunctor := LimitFunctor HasLimits.
+  Polymorphic Definition CoproductFunctor := ColimitFunctor HasColimits.
 End Products.

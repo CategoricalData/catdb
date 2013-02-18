@@ -29,111 +29,111 @@ for m in range(1, 10):
         print(mk_get_arg(n, m, prefix=''))
 *)
 
-Definition get_arg_0_of_1 `{f : forall (a0 : A0), Type} {a0} (_ : f a0) := f.
+Polymorphic Definition get_arg_0_of_1 `{f : forall (a0 : A0), Type} {a0} (_ : f a0) := f.
 Arguments get_arg_0_of_1 / _ _ _ _ _.
-Definition get_arg_1_of_1 `{f : forall (a0 : A0), Type} {a0} (_ : f a0) := a0.
+Polymorphic Definition get_arg_1_of_1 `{f : forall (a0 : A0), Type} {a0} (_ : f a0) := a0.
 Arguments get_arg_1_of_1 / _ _ _ _.
-Definition get_arg_0_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := f.
+Polymorphic Definition get_arg_0_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := f.
 Arguments get_arg_0_of_2 / _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := a0.
+Polymorphic Definition get_arg_1_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := a0.
 Arguments get_arg_1_of_2 / _ _ _ _ _ _.
-Definition get_arg_2_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := a1.
+Polymorphic Definition get_arg_2_of_2 `{f : forall (a0 : A0) (a1 : A1 a0), Type} {a0 a1} (_ : f a0 a1) := a1.
 Arguments get_arg_2_of_2 / _ _ _ _ _ _.
-Definition get_arg_0_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := f.
+Polymorphic Definition get_arg_0_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := f.
 Arguments get_arg_0_of_3 / _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a0.
+Polymorphic Definition get_arg_1_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a0.
 Arguments get_arg_1_of_3 / _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a1.
+Polymorphic Definition get_arg_2_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a1.
 Arguments get_arg_2_of_3 / _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a2.
+Polymorphic Definition get_arg_3_of_3 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), Type} {a0 a1 a2} (_ : f a0 a1 a2) := a2.
 Arguments get_arg_3_of_3 / _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := f.
+Polymorphic Definition get_arg_0_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := f.
 Arguments get_arg_0_of_4 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a0.
+Polymorphic Definition get_arg_1_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a0.
 Arguments get_arg_1_of_4 / _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a1.
+Polymorphic Definition get_arg_2_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a1.
 Arguments get_arg_2_of_4 / _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a2.
+Polymorphic Definition get_arg_3_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a2.
 Arguments get_arg_3_of_4 / _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a3.
+Polymorphic Definition get_arg_4_of_4 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), Type} {a0 a1 a2 a3} (_ : f a0 a1 a2 a3) := a3.
 Arguments get_arg_4_of_4 / _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := f.
+Polymorphic Definition get_arg_0_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := f.
 Arguments get_arg_0_of_5 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a0.
+Polymorphic Definition get_arg_1_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a0.
 Arguments get_arg_1_of_5 / _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a1.
+Polymorphic Definition get_arg_2_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a1.
 Arguments get_arg_2_of_5 / _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a2.
+Polymorphic Definition get_arg_3_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a2.
 Arguments get_arg_3_of_5 / _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a3.
+Polymorphic Definition get_arg_4_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a3.
 Arguments get_arg_4_of_5 / _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_5_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a4.
+Polymorphic Definition get_arg_5_of_5 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), Type} {a0 a1 a2 a3 a4} (_ : f a0 a1 a2 a3 a4) := a4.
 Arguments get_arg_5_of_5 / _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := f.
+Polymorphic Definition get_arg_0_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := f.
 Arguments get_arg_0_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a0.
+Polymorphic Definition get_arg_1_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a0.
 Arguments get_arg_1_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a1.
+Polymorphic Definition get_arg_2_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a1.
 Arguments get_arg_2_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a2.
+Polymorphic Definition get_arg_3_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a2.
 Arguments get_arg_3_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a3.
+Polymorphic Definition get_arg_4_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a3.
 Arguments get_arg_4_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_5_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a4.
+Polymorphic Definition get_arg_5_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a4.
 Arguments get_arg_5_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_6_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a5.
+Polymorphic Definition get_arg_6_of_6 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4), Type} {a0 a1 a2 a3 a4 a5} (_ : f a0 a1 a2 a3 a4 a5) := a5.
 Arguments get_arg_6_of_6 / _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := f.
+Polymorphic Definition get_arg_0_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := f.
 Arguments get_arg_0_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a0.
+Polymorphic Definition get_arg_1_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a0.
 Arguments get_arg_1_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a1.
+Polymorphic Definition get_arg_2_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a1.
 Arguments get_arg_2_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a2.
+Polymorphic Definition get_arg_3_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a2.
 Arguments get_arg_3_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a3.
+Polymorphic Definition get_arg_4_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a3.
 Arguments get_arg_4_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_5_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a4.
+Polymorphic Definition get_arg_5_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a4.
 Arguments get_arg_5_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_6_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a5.
+Polymorphic Definition get_arg_6_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a5.
 Arguments get_arg_6_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_7_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a6.
+Polymorphic Definition get_arg_7_of_7 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5), Type} {a0 a1 a2 a3 a4 a5 a6} (_ : f a0 a1 a2 a3 a4 a5 a6) := a6.
 Arguments get_arg_7_of_7 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := f.
+Polymorphic Definition get_arg_0_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := f.
 Arguments get_arg_0_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a0.
+Polymorphic Definition get_arg_1_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a0.
 Arguments get_arg_1_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a1.
+Polymorphic Definition get_arg_2_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a1.
 Arguments get_arg_2_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a2.
+Polymorphic Definition get_arg_3_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a2.
 Arguments get_arg_3_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a3.
+Polymorphic Definition get_arg_4_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a3.
 Arguments get_arg_4_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_5_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a4.
+Polymorphic Definition get_arg_5_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a4.
 Arguments get_arg_5_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_6_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a5.
+Polymorphic Definition get_arg_6_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a5.
 Arguments get_arg_6_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_7_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a6.
+Polymorphic Definition get_arg_7_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a6.
 Arguments get_arg_7_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_8_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a7.
+Polymorphic Definition get_arg_8_of_8 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6), Type} {a0 a1 a2 a3 a4 a5 a6 a7} (_ : f a0 a1 a2 a3 a4 a5 a6 a7) := a7.
 Arguments get_arg_8_of_8 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_0_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := f.
+Polymorphic Definition get_arg_0_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := f.
 Arguments get_arg_0_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_1_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a0.
+Polymorphic Definition get_arg_1_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a0.
 Arguments get_arg_1_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_2_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a1.
+Polymorphic Definition get_arg_2_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a1.
 Arguments get_arg_2_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_3_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a2.
+Polymorphic Definition get_arg_3_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a2.
 Arguments get_arg_3_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_4_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a3.
+Polymorphic Definition get_arg_4_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a3.
 Arguments get_arg_4_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_5_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a4.
+Polymorphic Definition get_arg_5_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a4.
 Arguments get_arg_5_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_6_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a5.
+Polymorphic Definition get_arg_6_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a5.
 Arguments get_arg_6_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_7_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a6.
+Polymorphic Definition get_arg_7_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a6.
 Arguments get_arg_7_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_8_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a7.
+Polymorphic Definition get_arg_8_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a7.
 Arguments get_arg_8_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.
-Definition get_arg_9_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a8.
+Polymorphic Definition get_arg_9_of_9 `{f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3) (a5 : A5 a0 a1 a2 a3 a4) (a6 : A6 a0 a1 a2 a3 a4 a5) (a7 : A7 a0 a1 a2 a3 a4 a5 a6) (a8 : A8 a0 a1 a2 a3 a4 a5 a6 a7), Type} {a0 a1 a2 a3 a4 a5 a6 a7 a8} (_ : f a0 a1 a2 a3 a4 a5 a6 a7 a8) := a8.
 Arguments get_arg_9_of_9 / _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _.

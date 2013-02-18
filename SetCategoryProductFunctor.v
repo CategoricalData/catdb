@@ -7,8 +7,8 @@ Set Implicit Arguments.
 Local Close Scope nat_scope.
 
 Section ProductFunctor.
-  Hint Extern 1 (@eq (_ -> _) _ _) => apply functional_extensionality_dep; intro.
-  Hint Extern 2 => destruct_head @prod.
+  Polymorphic Hint Extern 1 (@eq (_ -> _) _ _) => apply functional_extensionality_dep; intro.
+  Polymorphic Hint Extern 2 => destruct_head @prod.
 
   Local Ltac build_functor :=
     hnf;
@@ -22,7 +22,7 @@ Section ProductFunctor.
           abstract eauto
     end.
 
-  Definition TypeProductFunctor : SpecializedFunctor (TypeCat * TypeCat) TypeCat. build_functor. Defined.
-  Definition SetProductFunctor  : SpecializedFunctor (SetCat * SetCat) SetCat. build_functor. Defined.
-  Definition PropProductFunctor : SpecializedFunctor (PropCat * PropCat) PropCat. build_functor. Defined.
+  Polymorphic Definition TypeProductFunctor : SpecializedFunctor (TypeCat * TypeCat) TypeCat. build_functor. Defined.
+  Polymorphic Definition SetProductFunctor  : SpecializedFunctor (SetCat * SetCat) SetCat. build_functor. Defined.
+  Polymorphic Definition PropProductFunctor : SpecializedFunctor (PropCat * PropCat) PropCat. build_functor. Defined.
 End ProductFunctor.

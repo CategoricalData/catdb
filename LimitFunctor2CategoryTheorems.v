@@ -27,11 +27,11 @@ Section LimReady.
 
   Variable HasLimits : forall C0 : CAT ⇑ S, Limit (projT2 C0).
 
-  Definition CatUpSet2Morphism A B (m1 m2 : Morphism (CAT ⇑ S) A B) : Type
+  Polymorphic Definition CatUpSet2Morphism A B (m1 m2 : Morphism (CAT ⇑ S) A B) : Type
     := { T : SpecializedNaturalTransformation (snd (projT1 m1)) (snd (projT1 m2)) |
          NTComposeT (projT2 m2) (NTComposeF (IdentityNaturalTransformation (projT2 A)) T) = projT2 m1 }.
 
-  Lemma LimReady A B m1 m2 (LimitF := @InducedLimitFunctor _ _ Index2Cat _ S HasLimits) :
+  Polymorphic Lemma LimReady A B m1 m2 (LimitF := @InducedLimitFunctor _ _ Index2Cat _ S HasLimits) :
     @CatUpSet2Morphism A B m1 m2 -> MorphismOf LimitF m1 = MorphismOf LimitF m2.
     intro X; destruct X.
     simpl in *.

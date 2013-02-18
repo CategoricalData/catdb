@@ -30,10 +30,10 @@ Section SetLimits.
      let F:C-->Set be a functor. An element of the limit is a collection of elements x_c,
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
-  Definition SetLimit_Object : SetCat :=
+  Polymorphic Definition SetLimit_Object : SetCat :=
     { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
-  Definition SetLimit_Morphism : SpecializedNaturalTransformation
+  Polymorphic Definition SetLimit_Morphism : SpecializedNaturalTransformation
                                    ((DiagonalFunctor SetCat C) SetLimit_Object)
                                    F.
     match goal with
@@ -46,7 +46,7 @@ Section SetLimits.
     abstract limit_t.
   Defined.
 
-  Definition SetLimit_Property_Morphism A'
+  Polymorphic Definition SetLimit_Property_Morphism A'
              (φ' : SpecializedNaturalTransformation ((DiagonalFunctor SetCat C) A') F) :
     A' -> SetLimit_Object.
     intro x; hnf.
@@ -54,7 +54,7 @@ Section SetLimits.
     abstract limit_t.
   Defined.
 
-  Definition SetLimit : Limit F.
+  Polymorphic Definition SetLimit : Limit F.
     refine (Build_TerminalMorphism (DiagonalFunctor SetCat C) F SetLimit_Object SetLimit_Morphism _).
     intros A' φ'.
     exists (SetLimit_Property_Morphism φ').
@@ -70,10 +70,10 @@ Section TypeLimits.
      let F:C-->Type be a functor. An element of the limit is a collection of elements x_c,
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
-  Definition TypeLimit_Object : TypeCat :=
+  Polymorphic Definition TypeLimit_Object : TypeCat :=
     { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
-  Definition TypeLimit_Morphism : SpecializedNaturalTransformation
+  Polymorphic Definition TypeLimit_Morphism : SpecializedNaturalTransformation
                                    ((DiagonalFunctor TypeCat C) TypeLimit_Object)
                                    F.
     match goal with
@@ -86,7 +86,7 @@ Section TypeLimits.
     abstract limit_t.
   Defined.
 
-  Definition TypeLimit_Property_Morphism A'
+  Polymorphic Definition TypeLimit_Property_Morphism A'
              (φ' : SpecializedNaturalTransformation ((DiagonalFunctor TypeCat C) A') F) :
     A' -> TypeLimit_Object.
     intro x; hnf.
@@ -94,7 +94,7 @@ Section TypeLimits.
     abstract limit_t.
   Defined.
 
-  Definition TypeLimit : Limit F.
+  Polymorphic Definition TypeLimit : Limit F.
     refine (Build_TerminalMorphism (DiagonalFunctor TypeCat C) F TypeLimit_Object TypeLimit_Morphism _).
     intros A' φ'.
     exists (TypeLimit_Property_Morphism φ').

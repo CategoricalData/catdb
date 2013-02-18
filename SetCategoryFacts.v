@@ -37,26 +37,26 @@ Notation CoercedUnitTerminalOf obj T := (IndexedUnitTerminalOf obj (fun x => x :
 Notation CoercedTrueTerminalOf obj T := (IndexedTrueTerminalOf obj (fun x => x : T)).
 
 Section InitialTerminal.
-  Definition TypeCatFalseInitial : IsInitialObject (C := TypeCat) False := Eval simpl in FalseInitialOf Type.
-  Definition SetCatFalseInitial : IsInitialObject (C := SetCat) False := Eval simpl in FalseInitialOf Set.
-  Definition PropCatFalseInitial : IsInitialObject (C := PropCat) False := Eval simpl in FalseInitialOf Prop.
+  Polymorphic Definition TypeCatFalseInitial : IsInitialObject (C := TypeCat) False := Eval simpl in FalseInitialOf Type.
+  Polymorphic Definition SetCatFalseInitial : IsInitialObject (C := SetCat) False := Eval simpl in FalseInitialOf Set.
+  Polymorphic Definition PropCatFalseInitial : IsInitialObject (C := PropCat) False := Eval simpl in FalseInitialOf Prop.
 
-  Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set := Eval simpl in EmptySetInitialOf Type.
-  Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set := Eval simpl in EmptySetInitialOf Set.
+  Polymorphic Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set := Eval simpl in EmptySetInitialOf Type.
+  Polymorphic Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set := Eval simpl in EmptySetInitialOf Set.
 
-  Definition TypeCatTrueTerminal : IsTerminalObject (C := TypeCat) True := Eval simpl in TrueTerminalOf Type.
-  Definition SetCatTrueTerminal : IsTerminalObject (C := SetCat) True := Eval simpl in TrueTerminalOf Set.
-  Definition PropCatTrueTerminal : IsTerminalObject (C := PropCat) True := Eval simpl in TrueTerminalOf Prop.
+  Polymorphic Definition TypeCatTrueTerminal : IsTerminalObject (C := TypeCat) True := Eval simpl in TrueTerminalOf Type.
+  Polymorphic Definition SetCatTrueTerminal : IsTerminalObject (C := SetCat) True := Eval simpl in TrueTerminalOf Set.
+  Polymorphic Definition PropCatTrueTerminal : IsTerminalObject (C := PropCat) True := Eval simpl in TrueTerminalOf Prop.
 
-  Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
-  Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
+  Polymorphic Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
+  Polymorphic Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
 
-  Definition TypeCatSingletonTerminal := Eval hnf in TypeCatUnitTerminal.
-  Definition SetCatSingletonTerminal := Eval hnf in SetCatUnitTerminal.
+  Polymorphic Definition TypeCatSingletonTerminal := Eval hnf in TypeCatUnitTerminal.
+  Polymorphic Definition SetCatSingletonTerminal := Eval hnf in SetCatUnitTerminal.
 End InitialTerminal.
 
 Section EpiMono.
-  Definition compose {A B C : Type} (f : B -> C) (g : A -> B) := (fun x => f (g x)).
+  Polymorphic Definition compose {A B C : Type} (f : B -> C) (g : A -> B) := (fun x => f (g x)).
 
   Variables S : Type.
 
@@ -90,14 +90,14 @@ Section EpiMono.
                end
            end.
 
-  Lemma InjMono B (f : B -> S) :
+  Polymorphic Lemma InjMono B (f : B -> S) :
     (forall x y : B, f x = f y -> x = y)
     -> (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g').
   Proof.
     t.
   Qed.
 
-  Lemma MonoInj B (f : B -> S) :
+  Polymorphic Lemma MonoInj B (f : B -> S) :
     (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g')
     -> (forall x y : B, f x = f y -> x = y).
   Proof.
@@ -106,14 +106,14 @@ Section EpiMono.
     t.
   Qed.
 
-  Lemma SurjEpi A (f : A -> S) :
+  Polymorphic Lemma SurjEpi A (f : A -> S) :
     (forall x : S, exists y : A, f y = x)
     -> (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g').
   Proof.
     t.
   Qed.
 
-  Lemma EpiSurj A (f : A -> S) (member_dec : forall x : S, {exists y, f y = x} + {~exists y, f y = x}) :
+  Polymorphic Lemma EpiSurj A (f : A -> S) (member_dec : forall x : S, {exists y, f y = x} + {~exists y, f y = x}) :
     (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g')
     -> (forall x : S, exists y : A, f y = x).
   Proof.
@@ -125,7 +125,7 @@ Section EpiMono.
 End EpiMono.
 
 Section nat.
-  Fixpoint NatBuilderFunction A (o : unit -> A) (s : A -> A) (n : nat) : A
+  Polymorphic Fixpoint NatBuilderFunction A (o : unit -> A) (s : A -> A) (n : nat) : A
     := match n with
          | 0 => o tt
          | S n' => s (NatBuilderFunction o s n')
@@ -164,7 +164,7 @@ Section nat.
       instantiate; abstract t.
 
   Let SetCatNaturalNumbersPreObject' : NaturalNumbersPreObject SetCat. build_nat Set SetCat. Defined.
-  Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
+  Polymorphic Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
   Let TypeCatNaturalNumbersPreObject' : NaturalNumbersPreObject TypeCat. build_nat Type TypeCat. Defined.
-  Definition TypeCatNaturalNumbersPreObject := Eval hnf in TypeCatNaturalNumbersPreObject'.
+  Polymorphic Definition TypeCatNaturalNumbersPreObject := Eval hnf in TypeCatNaturalNumbersPreObject'.
 End nat.

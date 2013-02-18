@@ -128,7 +128,7 @@ Section PreMonoidalCategory.
     Morphism C (TriMonoidalProductR_ObjectOf s) (TriMonoidalProductR_ObjectOf d)
     := Eval cbv beta iota zeta delta [TriMonoidalProductR_MorphismOf''] in @TriMonoidalProductR_MorphismOf'' s d m.
 
-  Definition TriMonoidalProductL' : SpecializedFunctor (C * C * C) C.
+  Polymorphic Definition TriMonoidalProductL' : SpecializedFunctor (C * C * C) C.
     refine (Build_SpecializedFunctor (C * C * C) C
       TriMonoidalProductL_ObjectOf
       TriMonoidalProductL_MorphismOf
@@ -144,7 +144,7 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition TriMonoidalProductR' : SpecializedFunctor (C * C * C) C.
+  Polymorphic Definition TriMonoidalProductR' : SpecializedFunctor (C * C * C) C.
     refine (Build_SpecializedFunctor (C * C * C) C
       TriMonoidalProductR_ObjectOf
       TriMonoidalProductR_MorphismOf
@@ -160,17 +160,17 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition TriMonoidalProductL'' : SpecializedFunctor (C * C * C) C.
+  Polymorphic Definition TriMonoidalProductL'' : SpecializedFunctor (C * C * C) C.
     simpl_definition_by_tac_and_exact TriMonoidalProductL' ltac:(idtac; subst_body).
   Defined.
 
-  Definition TriMonoidalProductR'' : SpecializedFunctor (C * C * C) C.
+  Polymorphic Definition TriMonoidalProductR'' : SpecializedFunctor (C * C * C) C.
     simpl_definition_by_tac_and_exact TriMonoidalProductR' ltac:(idtac; subst_body).
   Defined.
 
   (* Then we clean up a bit with reduction. *)
-  Definition TriMonoidalProductL := Eval cbv beta iota zeta delta [TriMonoidalProductL''] in TriMonoidalProductL''.
-  Definition TriMonoidalProductR := Eval cbv beta iota zeta delta [TriMonoidalProductR''] in TriMonoidalProductR''.
+  Polymorphic Definition TriMonoidalProductL := Eval cbv beta iota zeta delta [TriMonoidalProductL''] in TriMonoidalProductL''.
+  Polymorphic Definition TriMonoidalProductR := Eval cbv beta iota zeta delta [TriMonoidalProductR''] in TriMonoidalProductR''.
 
   (**
      - an object [I] called the unit object or identity object,
@@ -191,7 +191,7 @@ Section PreMonoidalCategory.
            right unitor, with components
            [λ A : I ⊗ A ~= A] and [ρ A : A ⊗ I ~= A].
      *)
-  Definition LeftUnitorFunctor : SpecializedFunctor C C.
+  Polymorphic Definition LeftUnitorFunctor : SpecializedFunctor C C.
     clear TriMonoidalProductL_MorphismOf TriMonoidalProductR_MorphismOf
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
@@ -209,7 +209,7 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition RightUnitorFunctor : SpecializedFunctor C C.
+  Polymorphic Definition RightUnitorFunctor : SpecializedFunctor C C.
     clear TriMonoidalProductL_MorphismOf TriMonoidalProductR_MorphismOf
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
@@ -265,12 +265,12 @@ Section PreMonoidalCategory.
     Let AssociatorCoherenceConditionB1 : Morphism C ((a ⊗ b) ⊗ (c ⊗ d)) (a ⊗ (b ⊗ (c ⊗ d)))
       := α (a, b, c ⊗ d).
 
-    Definition AssociatorCoherenceCondition' :=
+    Polymorphic Definition AssociatorCoherenceCondition' :=
       Compose AssociatorCoherenceConditionT2 (Compose AssociatorCoherenceConditionT1 AssociatorCoherenceConditionT0)
       = Compose AssociatorCoherenceConditionB1 AssociatorCoherenceConditionB0.
   End AssociatorCoherenceCondition.
 
-  Definition AssociatorCoherenceCondition := Eval unfold AssociatorCoherenceCondition' in
+  Polymorphic Definition AssociatorCoherenceCondition := Eval unfold AssociatorCoherenceCondition' in
     forall a b c d : C, AssociatorCoherenceCondition' a b c d.
 
   (**
@@ -289,7 +289,7 @@ Section PreMonoidalCategory.
      ]]
      commutes;
      *)
-  Definition UnitorCoherenceCondition := forall A B : C,
+  Polymorphic Definition UnitorCoherenceCondition := forall A B : C,
     Compose ((Identity A) ⊗m (λ B)) (α (A, I, B))
     = (ρ A) ⊗m (Identity B).
 End PreMonoidalCategory.
@@ -359,7 +359,7 @@ Section MonoidalCategory.
   Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in @AssociatorCoherenceCondition.
   Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in @UnitorCoherenceCondition.
 
-  Record MonoidalCategory := {
+  Polymorphic Record MonoidalCategory := {
     MonoidalUnderlyingCategory :> @SpecializedCategory objC;
     TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
       where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism);

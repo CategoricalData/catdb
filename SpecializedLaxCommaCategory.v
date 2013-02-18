@@ -45,25 +45,25 @@ Section LaxSliceSpecializedCategory.
        and you've worked both of those cases out already.
        *)
   (* use a pair, so that it's easily interchangable with [SliceSpecializedCategory] *)
-  Record LaxSliceSpecializedCategory_Object := { LaxSliceSpecializedCategory_Object_Member :> { X : I * unit & SpecializedFunctor (fst X) C } }.
+  Polymorphic Record LaxSliceSpecializedCategory_Object := { LaxSliceSpecializedCategory_Object_Member :> { X : I * unit & SpecializedFunctor (fst X) C } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
-  Definition LaxSliceSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_LaxSliceSpecializedCategory_Object.
+  Polymorphic Definition LaxSliceSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_LaxSliceSpecializedCategory_Object.
   Global Identity Coercion LaxSliceSpecializedCategory_Object_Id : LaxSliceSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_LaxSliceSpecializedCategory_Object' (mem : LaxSliceSpecializedCategory_ObjectT) := Build_LaxSliceSpecializedCategory_Object mem.
+  Polymorphic Definition Build_LaxSliceSpecializedCategory_Object' (mem : LaxSliceSpecializedCategory_ObjectT) := Build_LaxSliceSpecializedCategory_Object mem.
   Global Coercion Build_LaxSliceSpecializedCategory_Object' : LaxSliceSpecializedCategory_ObjectT >-> LaxSliceSpecializedCategory_Object.
 
-  Record LaxSliceSpecializedCategory_Morphism (XG X'G' : LaxSliceSpecializedCategory_ObjectT) := { LaxSliceSpecializedCategory_Morphism_Member :>
+  Polymorphic Record LaxSliceSpecializedCategory_Morphism (XG X'G' : LaxSliceSpecializedCategory_ObjectT) := { LaxSliceSpecializedCategory_Morphism_Member :>
     { F : SpecializedFunctor (fst (projT1 XG)) (fst (projT1 X'G')) * unit &
       SpecializedNaturalTransformation (projT2 XG) (ComposeFunctors (projT2 X'G') (fst F))
     }
   }.
 
-  Definition LaxSliceSpecializedCategory_MorphismT (XG X'G' : LaxSliceSpecializedCategory_ObjectT) :=
+  Polymorphic Definition LaxSliceSpecializedCategory_MorphismT (XG X'G' : LaxSliceSpecializedCategory_ObjectT) :=
     Eval hnf in SortPolymorphic_Helper (@Build_LaxSliceSpecializedCategory_Morphism XG X'G').
   Global Identity Coercion LaxSliceSpecializedCategory_Morphism_Id : LaxSliceSpecializedCategory_MorphismT >-> sigT.
-  Definition Build_LaxSliceSpecializedCategory_Morphism' XG X'G' (mem : @LaxSliceSpecializedCategory_MorphismT XG X'G') :=
+  Polymorphic Definition Build_LaxSliceSpecializedCategory_Morphism' XG X'G' (mem : @LaxSliceSpecializedCategory_MorphismT XG X'G') :=
     @Build_LaxSliceSpecializedCategory_Morphism _ _ mem.
   Global Coercion Build_LaxSliceSpecializedCategory_Morphism' : LaxSliceSpecializedCategory_MorphismT >-> LaxSliceSpecializedCategory_Morphism.
 
@@ -72,7 +72,7 @@ Section LaxSliceSpecializedCategory.
   Global Arguments LaxSliceSpecializedCategory_ObjectT /.
   Global Arguments LaxSliceSpecializedCategory_MorphismT _ _ /.
 
-  Definition LaxSliceSpecializedCategory_Compose' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxSliceSpecializedCategory_Compose' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
     LaxSliceSpecializedCategory_MorphismT s d'.
     exists (ComposeFunctors (fst (projT1 Fα)) (fst (projT1 F'α')), tt).
     repeat match goal with
@@ -101,19 +101,19 @@ Section LaxSliceSpecializedCategory.
     ).
   Defined.
 
-  Definition LaxSliceSpecializedCategory_Compose'' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxSliceSpecializedCategory_Compose'' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
     LaxSliceSpecializedCategory_MorphismT s d'.
     simpl_definition_by_tac_and_exact (@LaxSliceSpecializedCategory_Compose' s d d' Fα F'α') ltac:(unfold LaxSliceSpecializedCategory_Compose' in *).
   Defined.
 
   (* Then we clean up a bit with reduction. *)
-  Definition LaxSliceSpecializedCategory_Compose s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxSliceSpecializedCategory_Compose s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
     LaxSliceSpecializedCategory_MorphismT s d'
     := Eval cbv beta iota zeta delta [LaxSliceSpecializedCategory_Compose''] in (@LaxSliceSpecializedCategory_Compose'' s d d' Fα F'α').
 
   Global Arguments LaxSliceSpecializedCategory_Compose _ _ _ _ _ /.
 
-  Definition LaxSliceSpecializedCategory_Identity o : LaxSliceSpecializedCategory_MorphismT o o.
+  Polymorphic Definition LaxSliceSpecializedCategory_Identity o : LaxSliceSpecializedCategory_MorphismT o o.
     exists (IdentityFunctor _, tt).
     eapply (NTComposeT _ (IdentityNaturalTransformation _)).
     Grab Existential Variables.
@@ -150,7 +150,7 @@ Section LaxSliceSpecializedCategory.
                     try reflexivity;
                       trivial.
 
-  Lemma LaxSliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxSliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxSliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxSliceSpecializedCategory_ObjectT)
     (m1 : LaxSliceSpecializedCategory_MorphismT o1 o2)
     (m2 : LaxSliceSpecializedCategory_MorphismT o2 o3)
     (m3 : LaxSliceSpecializedCategory_MorphismT o3 o4),
@@ -162,7 +162,7 @@ Section LaxSliceSpecializedCategory.
     abstract lax_slice_t.
   Qed.
 
-  Lemma LaxSliceSpecializedCategory_LeftIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxSliceSpecializedCategory_LeftIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
     (f : LaxSliceSpecializedCategory_MorphismT a b),
     LaxSliceSpecializedCategory_Compose
     (LaxSliceSpecializedCategory_Identity b) f = f.
@@ -170,7 +170,7 @@ Section LaxSliceSpecializedCategory.
     abstract lax_slice_t.
   Qed.
 
-  Lemma LaxSliceSpecializedCategory_RightIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxSliceSpecializedCategory_RightIdentity : forall (a b : LaxSliceSpecializedCategory_ObjectT)
     (f : LaxSliceSpecializedCategory_MorphismT a b),
     LaxSliceSpecializedCategory_Compose
     f (LaxSliceSpecializedCategory_Identity a) = f.
@@ -178,7 +178,7 @@ Section LaxSliceSpecializedCategory.
     abstract lax_slice_t.
   Qed.
 
-  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object.
+  Polymorphic Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -204,8 +204,8 @@ Section LaxSliceSpecializedCategory.
   Defined.
 End LaxSliceSpecializedCategory.
 
-Hint Unfold LaxSliceSpecializedCategory_Compose LaxSliceSpecializedCategory_Identity : category.
-Hint Constructors LaxSliceSpecializedCategory_Morphism LaxSliceSpecializedCategory_Object : category.
+Polymorphic Hint Unfold LaxSliceSpecializedCategory_Compose LaxSliceSpecializedCategory_Identity : category.
+Polymorphic Hint Constructors LaxSliceSpecializedCategory_Morphism LaxSliceSpecializedCategory_Object : category.
 
 Section LaxCosliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -219,25 +219,25 @@ Section LaxCosliceSpecializedCategory.
 
   Context `(C : @SpecializedCategory objC).
 
-  Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : unit * I & SpecializedFunctor (snd X) C } }.
+  Polymorphic Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : unit * I & SpecializedFunctor (snd X) C } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
-  Definition LaxCosliceSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_LaxCosliceSpecializedCategory_Object.
+  Polymorphic Definition LaxCosliceSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_LaxCosliceSpecializedCategory_Object.
   Global Identity Coercion LaxCosliceSpecializedCategory_Object_Id : LaxCosliceSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_LaxCosliceSpecializedCategory_Object' (mem : LaxCosliceSpecializedCategory_ObjectT) := Build_LaxCosliceSpecializedCategory_Object mem.
+  Polymorphic Definition Build_LaxCosliceSpecializedCategory_Object' (mem : LaxCosliceSpecializedCategory_ObjectT) := Build_LaxCosliceSpecializedCategory_Object mem.
   Global Coercion Build_LaxCosliceSpecializedCategory_Object' : LaxCosliceSpecializedCategory_ObjectT >-> LaxCosliceSpecializedCategory_Object.
 
-  Record LaxCosliceSpecializedCategory_Morphism (XG X'G' : LaxCosliceSpecializedCategory_ObjectT) := { LaxCosliceSpecializedCategory_Morphism_Member :>
+  Polymorphic Record LaxCosliceSpecializedCategory_Morphism (XG X'G' : LaxCosliceSpecializedCategory_ObjectT) := { LaxCosliceSpecializedCategory_Morphism_Member :>
     { F : unit * SpecializedFunctor (snd (projT1 X'G')) (snd (projT1 XG)) &
       SpecializedNaturalTransformation (ComposeFunctors (projT2 XG) (snd F)) (projT2 X'G')
     }
   }.
 
-  Definition LaxCosliceSpecializedCategory_MorphismT (XG X'G' : LaxCosliceSpecializedCategory_ObjectT) :=
+  Polymorphic Definition LaxCosliceSpecializedCategory_MorphismT (XG X'G' : LaxCosliceSpecializedCategory_ObjectT) :=
     Eval hnf in SortPolymorphic_Helper (@Build_LaxCosliceSpecializedCategory_Morphism XG X'G').
   Global Identity Coercion LaxCosliceSpecializedCategory_Morphism_Id : LaxCosliceSpecializedCategory_MorphismT >-> sigT.
-  Definition Build_LaxCosliceSpecializedCategory_Morphism' XG X'G' (mem : @LaxCosliceSpecializedCategory_MorphismT XG X'G') :=
+  Polymorphic Definition Build_LaxCosliceSpecializedCategory_Morphism' XG X'G' (mem : @LaxCosliceSpecializedCategory_MorphismT XG X'G') :=
     @Build_LaxCosliceSpecializedCategory_Morphism _ _ mem.
   Global Coercion Build_LaxCosliceSpecializedCategory_Morphism' : LaxCosliceSpecializedCategory_MorphismT >-> LaxCosliceSpecializedCategory_Morphism.
 
@@ -246,7 +246,7 @@ Section LaxCosliceSpecializedCategory.
   Global Arguments LaxCosliceSpecializedCategory_ObjectT /.
   Global Arguments LaxCosliceSpecializedCategory_MorphismT _ _ /.
 
-  Definition LaxCosliceSpecializedCategory_Compose' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxCosliceSpecializedCategory_Compose' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
     LaxCosliceSpecializedCategory_MorphismT s d'.
     exists (tt, ComposeFunctors (snd (projT1 F'α')) (snd (projT1 Fα))).
     repeat match goal with
@@ -275,19 +275,19 @@ Section LaxCosliceSpecializedCategory.
     ).
   Defined.
 
-  Definition LaxCosliceSpecializedCategory_Compose'' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxCosliceSpecializedCategory_Compose'' s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
     LaxCosliceSpecializedCategory_MorphismT s d'.
     simpl_definition_by_tac_and_exact (@LaxCosliceSpecializedCategory_Compose' s d d' Fα F'α') ltac:(unfold LaxCosliceSpecializedCategory_Compose' in *).
   Defined.
 
   (* Then we clean up a bit with reduction. *)
-  Definition LaxCosliceSpecializedCategory_Compose s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
+  Polymorphic Definition LaxCosliceSpecializedCategory_Compose s d d' (Fα : LaxCosliceSpecializedCategory_MorphismT d d') (F'α' : LaxCosliceSpecializedCategory_MorphismT s d) :
     LaxCosliceSpecializedCategory_MorphismT s d'
     := Eval cbv beta iota zeta delta [LaxCosliceSpecializedCategory_Compose''] in (@LaxCosliceSpecializedCategory_Compose'' s d d' Fα F'α').
 
   Global Arguments LaxCosliceSpecializedCategory_Compose _ _ _ _ _ /.
 
-  Definition LaxCosliceSpecializedCategory_Identity o : LaxCosliceSpecializedCategory_MorphismT o o.
+  Polymorphic Definition LaxCosliceSpecializedCategory_Identity o : LaxCosliceSpecializedCategory_MorphismT o o.
     exists (tt, IdentityFunctor _).
     eapply (NTComposeT _ (IdentityNaturalTransformation _)).
     Grab Existential Variables.
@@ -324,7 +324,7 @@ Section LaxCosliceSpecializedCategory.
                     try reflexivity;
                       trivial.
 
-  Lemma LaxCosliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxCosliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxCosliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxCosliceSpecializedCategory_ObjectT)
     (m1 : LaxCosliceSpecializedCategory_MorphismT o1 o2)
     (m2 : LaxCosliceSpecializedCategory_MorphismT o2 o3)
     (m3 : LaxCosliceSpecializedCategory_MorphismT o3 o4),
@@ -336,7 +336,7 @@ Section LaxCosliceSpecializedCategory.
     abstract lax_coslice_t.
   Qed.
 
-  Lemma LaxCosliceSpecializedCategory_LeftIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxCosliceSpecializedCategory_LeftIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
     (f : LaxCosliceSpecializedCategory_MorphismT a b),
     LaxCosliceSpecializedCategory_Compose
     (LaxCosliceSpecializedCategory_Identity b) f = f.
@@ -344,7 +344,7 @@ Section LaxCosliceSpecializedCategory.
     abstract lax_coslice_t.
   Qed.
 
-  Lemma LaxCosliceSpecializedCategory_RightIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
+  Polymorphic Lemma LaxCosliceSpecializedCategory_RightIdentity : forall (a b : LaxCosliceSpecializedCategory_ObjectT)
     (f : LaxCosliceSpecializedCategory_MorphismT a b),
     LaxCosliceSpecializedCategory_Compose
     f (LaxCosliceSpecializedCategory_Identity a) = f.
@@ -352,7 +352,7 @@ Section LaxCosliceSpecializedCategory.
     abstract lax_coslice_t.
   Qed.
 
-  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object.
+  Polymorphic Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -378,5 +378,5 @@ Section LaxCosliceSpecializedCategory.
   Defined.
 End LaxCosliceSpecializedCategory.
 
-Hint Unfold LaxCosliceSpecializedCategory_Compose LaxCosliceSpecializedCategory_Identity : category.
-Hint Constructors LaxCosliceSpecializedCategory_Morphism LaxCosliceSpecializedCategory_Object : category.
+Polymorphic Hint Unfold LaxCosliceSpecializedCategory_Compose LaxCosliceSpecializedCategory_Identity : category.
+Polymorphic Hint Constructors LaxCosliceSpecializedCategory_Morphism LaxCosliceSpecializedCategory_Object : category.

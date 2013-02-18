@@ -3,7 +3,7 @@ Require Import Common Notations.
 
 Set Implicit Arguments.
 
-Local Hint Extern 2 (_ = _) => simpl in *; tauto.
+Local Polymorphic Hint Extern 2 (_ = _) => simpl in *; tauto.
 
 Section DCategoryDec.
   Variable O : Type.
@@ -28,16 +28,16 @@ Section DCategoryDec.
            end;
       auto.
 
-  Definition DiscreteCategoryDec_Compose (s d d' : O) (m : DiscreteCategoryDec_Morphism d d') (m' : DiscreteCategoryDec_Morphism s d) :
+  Polymorphic Definition DiscreteCategoryDec_Compose (s d d' : O) (m : DiscreteCategoryDec_Morphism d d') (m' : DiscreteCategoryDec_Morphism s d) :
     DiscreteCategoryDec_Morphism s d'.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategoryDec_Identity o : DiscreteCategoryDec_Morphism o o.
+  Polymorphic Definition DiscreteCategoryDec_Identity o : DiscreteCategoryDec_Morphism o o.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategoryDec : @SpecializedCategory O.
+  Polymorphic Definition DiscreteCategoryDec : @SpecializedCategory O.
     refine (@Build_SpecializedCategory _
                                        DiscreteCategoryDec_Morphism
                                        DiscreteCategoryDec_Identity
@@ -52,4 +52,4 @@ Section DCategoryDec.
   Defined.
 End DCategoryDec.
 
-Hint Unfold DiscreteCategoryDec_Compose DiscreteCategoryDec_Identity.
+Polymorphic Hint Unfold DiscreteCategoryDec_Compose DiscreteCategoryDec_Identity.

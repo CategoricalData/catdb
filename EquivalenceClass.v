@@ -23,7 +23,7 @@ Section EquivalenceClass.
      this without picking a representative element by requiring that
      for every member of the class, the class consists of exactly the
      values equivalent to that member. *)
-  Record EquivalenceClass := {
+  Polymorphic Record EquivalenceClass := {
     InClass : value -> Prop;
 
     ClassInhabited : exists v, InClass v;
@@ -78,7 +78,7 @@ Section equiv.
 
   (* The equivalence [classOf] a particular [value] is defined by the proposition that
      the elements are equivalent to that [value]. *)
-  Definition classOf (v : value) : EquivalenceClass equiv.
+  Polymorphic Definition classOf (v : value) : EquivalenceClass equiv.
     exists (fun v' => v ~= v');
       abstract (
         repeat esplit; unfold InClass in *;
@@ -86,36 +86,36 @@ Section equiv.
       ).
   Defined.
 
-  Lemma classOf_refl : forall v, InClass (classOf v) v.
+  Polymorphic Lemma classOf_refl : forall v, InClass (classOf v) v.
     compute; intro; reflexivity.
   Qed.
 
   (* Two equivalence classes are the same if they share all values *)
-  Definition sameClass (C C' : EquivalenceClass equiv) := forall v, (InClass C v <-> InClass C' v).
+  Polymorphic Definition sameClass (C C' : EquivalenceClass equiv) := forall v, (InClass C v <-> InClass C' v).
 
-  Definition disjointClasses (C C' : EquivalenceClass equiv) := forall v, ~InClass C v \/ ~InClass C' v.
+  Polymorphic Definition disjointClasses (C C' : EquivalenceClass equiv) := forall v, ~InClass C v \/ ~InClass C' v.
 
-  Definition differentClasses (C C' : EquivalenceClass equiv) := exists v,
+  Polymorphic Definition differentClasses (C C' : EquivalenceClass equiv) := exists v,
     (InClass C v /\ ~InClass C' v) \/
     (~InClass C v /\ InClass C' v).
 
-  Definition notDisjointClasses (C C' : EquivalenceClass equiv) := exists v, InClass C v /\ InClass C' v.
+  Polymorphic Definition notDisjointClasses (C C' : EquivalenceClass equiv) := exists v, InClass C v /\ InClass C' v.
 
-  Definition notDisjointClasses' (C C' : EquivalenceClass equiv) := exists v v', InClass C v /\ InClass C' v' /\ equiv v v'.
+  Polymorphic Definition notDisjointClasses' (C C' : EquivalenceClass equiv) := exists v v', InClass C v /\ InClass C' v' /\ equiv v v'.
 
-  Lemma sameClass_refl (C : EquivalenceClass equiv) : sameClass C C.
+  Polymorphic Lemma sameClass_refl (C : EquivalenceClass equiv) : sameClass C C.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameClass_sym (C C' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C.
+  Polymorphic Lemma sameClass_sym (C C' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameClass_trans (C C' C'' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C'' -> sameClass C C''.
+  Polymorphic Lemma sameClass_trans (C C' C'' : EquivalenceClass equiv) : sameClass C C' -> sameClass C' C'' -> sameClass C C''.
     clear equiv_Equivalence; firstorder.
   Qed.
 
-  Lemma sameClass_eq (C C' : EquivalenceClass equiv) : (sameClass C C') -> (C = C').
+  Polymorphic Lemma sameClass_eq (C C' : EquivalenceClass equiv) : (sameClass C C') -> (C = C').
     clear equiv_Equivalence; intro H.
     cut (InClass C = InClass C');
       destruct C, C'; simpl;
@@ -129,7 +129,7 @@ Section equiv.
                     firstorder.
   Qed.
 
-  Lemma eq_sameClass (C C' : EquivalenceClass equiv) : C = C' -> sameClass C C'.
+  Polymorphic Lemma eq_sameClass (C C' : EquivalenceClass equiv) : C = C' -> sameClass C C'.
     intro; subst; apply sameClass_refl.
   Qed.
 
@@ -140,7 +140,7 @@ Section equiv.
       apply sameClass_eq; compute in *; intros; split; intros; simpl_equiv.
   Qed.
 
-  Lemma classOf_eq x y : classOf x = classOf y <-> equiv x y.
+  Polymorphic Lemma classOf_eq x y : classOf x = classOf y <-> equiv x y.
     split; intro H; try apply classOf_mor; trivial.
     pose (classOf_refl x).
     pose (classOf_refl y).
@@ -149,13 +149,13 @@ Section equiv.
         simpl_equiv.
   Qed.
 
-  Lemma disjointClasses_differentClasses (C C' : EquivalenceClass equiv) : (disjointClasses C C') -> (differentClasses C C').
+  Polymorphic Lemma disjointClasses_differentClasses (C C' : EquivalenceClass equiv) : (disjointClasses C C') -> (differentClasses C C').
     clear equiv_Equivalence; unfold differentClasses, disjointClasses; intro H.
     pose (ClassInhabited C) as H'; destruct H' as [ x H' ].
     exists x; specialize (H x); tauto.
   Qed.
 
-  Lemma notDisjointClasses_sameClass (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> (sameClass C C').
+  Polymorphic Lemma notDisjointClasses_sameClass (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> (sameClass C C').
     clear equiv_Equivalence; unfold notDisjointClasses, sameClass; intro H; destruct H as [ x [ H0 H1 ] ]; intro v; split; intros;
       match goal with
         | [ H0 : InClass ?C ?x, H1 : InClass ?C ?y |- InClass ?C' ?x ]
@@ -165,18 +165,18 @@ Section equiv.
       end.
   Qed.
 
-  Lemma notDisjointClasses_eq (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> C = C'.
+  Polymorphic Lemma notDisjointClasses_eq (C C' : EquivalenceClass equiv) : (notDisjointClasses C C') -> C = C'.
     clear equiv_Equivalence; intro; apply sameClass_eq; apply notDisjointClasses_sameClass; assumption.
   Qed.
 
-  Lemma EquivalenceClass_forall_equiv__eq (C C' : EquivalenceClass equiv) :
+  Polymorphic Lemma EquivalenceClass_forall_equiv__eq (C C' : EquivalenceClass equiv) :
     (forall v v', (InClass C v \/ InClass C' v') -> (InClass C v /\ InClass C' v' <-> equiv v v')) ->
     C' = C.
     clear equiv_Equivalence; intro H. apply sameClass_eq; unfold sameClass; intro v.
     assert (equiv v v) by reflexivity; firstorder.
   Qed.
 
-  Lemma EquivalenceClass_forall__eq (C C' : EquivalenceClass equiv) :
+  Polymorphic Lemma EquivalenceClass_forall__eq (C C' : EquivalenceClass equiv) :
     (forall v, InClass C v <-> InClass C' v) ->
     C' = C.
     clear equiv_Equivalence; intro H. apply sameClass_eq; unfold sameClass;
@@ -195,7 +195,7 @@ Section InClass_classOf.
   Variable equiv : value -> value -> Prop.
   Variable C : EquivalenceClass equiv.
 
-  Lemma InClass_classOf_eq eqv v : InClass C v -> C = classOf eqv v.
+  Polymorphic Lemma InClass_classOf_eq eqv v : InClass C v -> C = classOf eqv v.
     intro H.
     apply sameClass_eq.
     pose (classOf eqv v).
@@ -210,7 +210,7 @@ Section InClass_classOf.
   Let C_Equivalence : Equivalence equiv
     := Build_Equivalence _ _ (ClassEquivalent_refl C) (ClassEquivalent_sym C) (ClassEquivalent_trans C).
 
-  Definition InClass_classOf_eq' : forall v, InClass C v -> C = classOf C_Equivalence v
+  Polymorphic Definition InClass_classOf_eq' : forall v, InClass C v -> C = classOf C_Equivalence v
     := InClass_classOf_eq C_Equivalence.
 End InClass_classOf.
 
@@ -248,7 +248,7 @@ Ltac InClass2classOf' :=
              apply (@InClass_classOf_eq' _ _ C _) in H
          end.
 
-Hint Extern 1 (@eq (EquivalenceClass _ _) _ _) => apply EquivalenceClass_forall__eq; replace_InClass.
+Polymorphic Hint Extern 1 (@eq (EquivalenceClass _ _) _ _) => apply EquivalenceClass_forall__eq; replace_InClass.
 
 Ltac clear_InClass' :=
   repeat match goal with
@@ -283,9 +283,9 @@ Section apply1.
     transitivity proved by (Equivalence.equiv_transitive _)
       as apply_equiv'_rel.
 
-  Hint Resolve f_mor.
+  Polymorphic Hint Resolve f_mor.
 
-  Definition apply_to_class : EquivalenceClass equiv'.
+  Polymorphic Definition apply_to_class : EquivalenceClass equiv'.
     refine {| InClass := (fun v => exists v0, InClass E0 v0 /\ equiv' v (f v0)) |};
       abstract (
         intros;
@@ -298,18 +298,18 @@ Section apply1.
       ).
   Defined.
 
-  Lemma apply_to_class_f_inj : forall v, InClass E0 v -> InClass apply_to_class (f v).
+  Polymorphic Lemma apply_to_class_f_inj : forall v, InClass E0 v -> InClass apply_to_class (f v).
     compute; firstorder.
   Qed.
 
-  Lemma apply_to_class_f_surj : forall v, InClass apply_to_class v -> exists v', equiv' v (f v') /\ InClass E0 v'.
+  Polymorphic Lemma apply_to_class_f_surj : forall v, InClass apply_to_class v -> exists v', equiv' v (f v') /\ InClass E0 v'.
     compute; firstorder.
   Qed.
 End apply1.
 
-Hint Resolve apply_to_class_f_inj.
+Polymorphic Hint Resolve apply_to_class_f_inj.
 
-Lemma apply_to_classOf value0 equiv0 equiv0_eqv value' equiv' equiv'_eqv f f_mor e0 :
+Polymorphic Lemma apply_to_classOf value0 equiv0 equiv0_eqv value' equiv' equiv'_eqv f f_mor e0 :
   @apply_to_class value0 equiv0 value' equiv' f f_mor
   (@classOf _ _ equiv0_eqv e0)
   equiv'_eqv
@@ -355,7 +355,7 @@ Section apply2.
     transitivity proved by (@ClassEquivalent_trans _ _ E1)
       as apply2_equiv1_rel.
 
-  Definition apply2_to_class : EquivalenceClass equiv'.
+  Polymorphic Definition apply2_to_class : EquivalenceClass equiv'.
     refine {| InClass := (fun v => exists v0 v1, InClass E0 v0 /\ InClass E1 v1 /\ equiv' v (f v0 v1)) |};
       abstract (
         intros;
@@ -371,18 +371,18 @@ Section apply2.
     ).
   Defined.
 
-  Lemma apply2_to_class_f_inj : forall v0 v1, InClass E0 v0 -> InClass E1 v1 -> InClass apply2_to_class (f v0 v1).
+  Polymorphic Lemma apply2_to_class_f_inj : forall v0 v1, InClass E0 v0 -> InClass E1 v1 -> InClass apply2_to_class (f v0 v1).
     compute; firstorder.
   Qed.
 
-  Lemma apply2_to_class_f_surj : forall v, InClass apply2_to_class v -> exists v0 v1, equiv' v (f v0 v1) /\ InClass E0 v0 /\ InClass E1 v1.
+  Polymorphic Lemma apply2_to_class_f_surj : forall v, InClass apply2_to_class v -> exists v0 v1, equiv' v (f v0 v1) /\ InClass E0 v0 /\ InClass E1 v1.
     compute; firstorder.
   Qed.
 End apply2.
 
-Hint Resolve apply2_to_class_f_inj.
+Polymorphic Hint Resolve apply2_to_class_f_inj.
 
-Lemma apply2_to_classOf
+Polymorphic Lemma apply2_to_classOf
   value0 equiv0 equiv0_eqv
   value1 equiv1 equiv1_eqv
   value' equiv' equiv'_eqv

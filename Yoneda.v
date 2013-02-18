@@ -32,7 +32,7 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
+    Polymorphic Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
       match goal with
         | [ |- SpecializedFunctor ?C0 ?D0 ] =>
           refine (Build_SpecializedFunctor C0 D0
@@ -57,7 +57,7 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
+    Polymorphic Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
       match goal with
         | [ |- SpecializedFunctor ?C0 ?D0 ] =>
           refine (Build_SpecializedFunctor C0 D0
@@ -77,12 +77,12 @@ Section YonedaLemma.
   Let COp := OppositeCategory C : SpecializedCategory _.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
-  Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
+  Polymorphic Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
 
-  Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
+  Polymorphic Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
     simpl; intro Xc.
     hnf.
     match goal with
@@ -101,7 +101,7 @@ Section YonedaLemma.
     ).
   Defined.
 
-  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
+  Polymorphic Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
     pose (FIdentityOf X).
@@ -116,12 +116,12 @@ Section CoYonedaLemma.
   Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
-  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
+  Polymorphic Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
 
-  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
+  Polymorphic Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
     simpl; intro Xc.
     hnf.
     match goal with
@@ -140,7 +140,7 @@ Section CoYonedaLemma.
     ).
   Defined.
 
-  Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
+  Polymorphic Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     exists (@CoYonedaLemmaMorphismInverse c X).
     split; simpl; nt_eq; clear; present_spcategory;
     [ | pose (FIdentityOf X); fg_equal; trivial ];
@@ -154,7 +154,7 @@ End CoYonedaLemma.
 Section FullyFaithful.
   Context `(C : @SpecializedCategory objC).
 
-  Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
+  Polymorphic Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@YonedaLemma _ C c (CovariantHomFunctor C c')) as [ m i ].
@@ -163,7 +163,7 @@ Section FullyFaithful.
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 
-  Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
+  Polymorphic Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@CoYonedaLemma _ C c (ContravariantHomFunctor C c')) as [ m i ].

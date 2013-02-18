@@ -12,7 +12,7 @@ Section FunctorCategory.
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
    *)
-  Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
+  Polymorphic Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
     refine (@Build_SpecializedCategory _
                                        (SpecializedNaturalTransformation (C := C) (D := D))
                                        (IdentityNaturalTransformation (C := C) (D := D))

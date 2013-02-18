@@ -10,6 +10,6 @@ Section Equalizer.
   Variable HasLimits : forall F : SpecializedFunctor EqualizerIndex C, Limit F.
   Variable HasColimits : forall F : SpecializedFunctor EqualizerIndex C, Colimit F.
 
-  Definition EqualizerFunctor := LimitFunctor HasLimits.
-  Definition CoequalizerFunctor := ColimitFunctor HasColimits.
+  Polymorphic Definition EqualizerFunctor := LimitFunctor HasLimits.
+  Polymorphic Definition CoequalizerFunctor := ColimitFunctor HasColimits.
 End Equalizer.

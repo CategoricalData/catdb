@@ -16,16 +16,16 @@ Section BoolCat.
            end; trivial.
   Local Ltac t := t0; abstract t1.
 
-  Definition BoolCat_Compose s d d' (m1 : mor d d') (m2 : mor s d) : mor s d'.
+  Polymorphic Definition BoolCat_Compose s d d' (m1 : mor d d') (m2 : mor s d) : mor s d'.
     t.
   Defined.
 
-  Definition BoolCat_Identity x : mor x x := if x return mor x x then tt else tt.
+  Polymorphic Definition BoolCat_Identity x : mor x x := if x return mor x x then tt else tt.
 
   Global Arguments BoolCat_Compose [s d d'] m1 m2 : simpl never.
   Global Arguments BoolCat_Identity x : simpl never.
 
-  Definition BoolCat : @SpecializedCategory bool.
+  Polymorphic Definition BoolCat : @SpecializedCategory bool.
     refine (@Build_SpecializedCategory _
                                        mor
                                        BoolCat_Identity

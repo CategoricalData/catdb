@@ -28,7 +28,7 @@ Section sig_sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
+  Polymorphic Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -73,11 +73,11 @@ Section sig_sigT_obj_mor.
     trivial.
   Defined.
 
-  Definition sig_sigT_functor_sigT_MorphismOf (s d  : {x | Pobj x}) (m : sigT (Pmor s d)) : sigT (Pmor' s d).
+  Polymorphic Definition sig_sigT_functor_sigT_MorphismOf (s d  : {x | Pobj x}) (m : sigT (Pmor s d)) : sigT (Pmor' s d).
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Definition sig_sigT_functor_sigT : SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT.
+  Polymorphic Definition sig_sigT_functor_sigT : SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT.
     refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT
       (fun x => x)
       (@sig_sigT_functor_sigT_MorphismOf)
@@ -87,11 +87,11 @@ Section sig_sigT_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Definition sigT_functor_sig_sigT_MorphismOf (s d : sigT Pobj) (m : sigT (Pmor' s d)) : sigT (Pmor s d).
+  Polymorphic Definition sigT_functor_sig_sigT_MorphismOf (s d : sigT Pobj) (m : sigT (Pmor' s d)) : sigT (Pmor s d).
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Definition sigT_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT.
+  Polymorphic Definition sigT_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT.
     refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT
       (fun x => x)
       (@sigT_functor_sig_sigT_MorphismOf)
@@ -101,12 +101,12 @@ Section sig_sigT_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Lemma sig_sigT_sigT_compat :
+  Polymorphic Lemma sig_sigT_sigT_compat :
     ComposeFunctors sig_sigT_functor_sigT sigT_functor_sig_sigT = IdentityFunctor _ /\
     ComposeFunctors sigT_functor_sig_sigT sig_sigT_functor_sigT = IdentityFunctor _.
     split; functor_eq; destruct_sig; reflexivity.
   Qed.
 
-  Definition proj1_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT A
+  Polymorphic Definition proj1_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT A
     := ComposeFunctors projT1_functor sig_sigT_functor_sigT.
 End sig_sigT_obj_mor.

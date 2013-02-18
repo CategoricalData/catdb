@@ -19,23 +19,23 @@ Notation CoercedCatOf obj T := (IndexedCatOf obj (fun x => x : T)).
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
-  Definition TypeCat : @SpecializedCategory Type := CatOf Type.
-  Definition SetCat : @SpecializedCategory Set := CatOf Set.
-  Definition PropCat : @SpecializedCategory Prop := CatOf Prop.
+  Polymorphic Definition TypeCat : @SpecializedCategory Type := CatOf Type.
+  Polymorphic Definition SetCat : @SpecializedCategory Set := CatOf Set.
+  Polymorphic Definition PropCat : @SpecializedCategory Prop := CatOf Prop.
 
-  Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := IndexedCatOf Index Index2Object.
+  Polymorphic Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := IndexedCatOf Index Index2Object.
 End CSet.
 
 Section SetCoercionsDefinitions.
   Context `(C : @SpecializedCategory objC).
 
-  Definition SpecializedFunctorToProp := SpecializedFunctor C PropCat.
-  Definition SpecializedFunctorToSet := SpecializedFunctor C SetCat.
-  Definition SpecializedFunctorToType := SpecializedFunctor C TypeCat.
+  Polymorphic Definition SpecializedFunctorToProp := SpecializedFunctor C PropCat.
+  Polymorphic Definition SpecializedFunctorToSet := SpecializedFunctor C SetCat.
+  Polymorphic Definition SpecializedFunctorToType := SpecializedFunctor C TypeCat.
 
-  Definition SpecializedFunctorFromProp := SpecializedFunctor PropCat C.
-  Definition SpecializedFunctorFromSet := SpecializedFunctor SetCat C.
-  Definition SpecializedFunctorFromType := SpecializedFunctor TypeCat C.
+  Polymorphic Definition SpecializedFunctorFromProp := SpecializedFunctor PropCat C.
+  Polymorphic Definition SpecializedFunctorFromSet := SpecializedFunctor SetCat C.
+  Polymorphic Definition SpecializedFunctorFromType := SpecializedFunctor TypeCat C.
 End SetCoercionsDefinitions.
 
 Identity Coercion SpecializedFunctorToProp_Id : SpecializedFunctorToProp >-> SpecializedFunctor.
@@ -59,13 +59,13 @@ Section SetCoercions.
                                        )
                              end.
 
-  Definition SpecializedFunctorTo_Prop2Set (F : SpecializedFunctorToProp C) : SpecializedFunctorToSet C. build_functor. Defined.
-  Definition SpecializedFunctorTo_Prop2Type (F : SpecializedFunctorToProp C) : SpecializedFunctorToType C. build_functor. Defined.
-  Definition SpecializedFunctorTo_Set2Type (F : SpecializedFunctorToSet C) : SpecializedFunctorToType C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorTo_Prop2Set (F : SpecializedFunctorToProp C) : SpecializedFunctorToSet C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorTo_Prop2Type (F : SpecializedFunctorToProp C) : SpecializedFunctorToType C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorTo_Set2Type (F : SpecializedFunctorToSet C) : SpecializedFunctorToType C. build_functor. Defined.
 
-  Definition SpecializedFunctorFrom_Set2Prop (F : SpecializedFunctorFromSet C) : SpecializedFunctorFromProp C. build_functor. Defined.
-  Definition SpecializedFunctorFrom_Type2Prop (F : SpecializedFunctorFromType C) : SpecializedFunctorFromProp C. build_functor. Defined.
-  Definition SpecializedFunctorFrom_Type2Set (F : SpecializedFunctorFromType C) : SpecializedFunctorFromSet C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorFrom_Set2Prop (F : SpecializedFunctorFromSet C) : SpecializedFunctorFromProp C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorFrom_Type2Prop (F : SpecializedFunctorFromType C) : SpecializedFunctorFromProp C. build_functor. Defined.
+  Polymorphic Definition SpecializedFunctorFrom_Type2Set (F : SpecializedFunctorFromType C) : SpecializedFunctorFromSet C. build_functor. Defined.
 End SetCoercions.
 
 Coercion SpecializedFunctorTo_Prop2Set : SpecializedFunctorToProp >-> SpecializedFunctorToSet.
@@ -94,10 +94,10 @@ Section PointedSet.
                                                                          (fun _ _ _ _ _ => eq_refl)
                                                                          (fun _ => eq_refl)).
 
-  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := Eval cbv beta zeta in PointedCatOf Type.
-  Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
-  Definition PointedSetCat : @SpecializedCategory { A : Set & A } := Eval cbv beta zeta in PointedCatOf Set.
-  Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat := PointedCatProjectionOf Set.
-  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := Eval cbv beta zeta in PointedCatOf Prop.
-  Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat := PointedCatProjectionOf Prop.
+  Polymorphic Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := Eval cbv beta zeta in PointedCatOf Type.
+  Polymorphic Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
+  Polymorphic Definition PointedSetCat : @SpecializedCategory { A : Set & A } := Eval cbv beta zeta in PointedCatOf Set.
+  Polymorphic Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat := PointedCatProjectionOf Set.
+  Polymorphic Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := Eval cbv beta zeta in PointedCatOf Prop.
+  Polymorphic Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat := PointedCatProjectionOf Prop.
 End PointedSet.

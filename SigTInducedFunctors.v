@@ -36,7 +36,7 @@ Section T2.
     P_MorphismOf (existT (Pmor0 o o) (Identity (projT1 o)) (Pidentity0 o)) =
     Pidentity1 (InducedT2Functor_sigT_ObjectOf o).
 
-  Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
+  Polymorphic Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D

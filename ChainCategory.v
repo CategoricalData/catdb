@@ -5,7 +5,7 @@ Require Import NatFacts Subcategory DefinitionSimplification.
 Set Implicit Arguments.
 
 Section ChainCat.
-  Definition OmegaCategory : @SpecializedCategory nat.
+  Polymorphic Definition OmegaCategory : @SpecializedCategory nat.
     refine (@Build_SpecializedCategory _
                                        le
                                        le_refl
@@ -19,7 +19,7 @@ Section ChainCat.
   Let ChainCategory' n : @SpecializedCategory { m | m <= n }.
     simpl_definition_by_tac_and_exact (FullSubcategory OmegaCategory (fun m => m <= n)) ltac:(unfold Subcategory in *).
   Defined.
-  Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.
+  Polymorphic Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.
 End ChainCat.
 
 Notation "[ n ]" := (ChainCategory n) : category_scope.

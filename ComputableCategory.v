@@ -10,7 +10,7 @@ Section ComputableCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Definition ComputableCategory : @SpecializedCategory I.
+  Polymorphic Definition ComputableCategory : @SpecializedCategory I.
     refine (@Build_SpecializedCategory _
                                        (fun C D : I => SpecializedFunctor C D)
                                        (fun o : I => IdentityFunctor o)

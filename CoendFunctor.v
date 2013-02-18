@@ -13,11 +13,11 @@ Section Coend.
 
   Let COp := OppositeCategory C.
 
-  Definition CoendFunctor_Index_Object := { ds : objC * objC & Morphism C (snd ds) (fst ds) } + objC.
+  Polymorphic Definition CoendFunctor_Index_Object := { ds : objC * objC & Morphism C (snd ds) (fst ds) } + objC.
 
   Global Arguments CoendFunctor_Index_Object /.
 
-  Definition CoendFunctor_Index_Morphism (s d : CoendFunctor_Index_Object) : Set :=
+  Polymorphic Definition CoendFunctor_Index_Morphism (s d : CoendFunctor_Index_Object) : Set :=
     match (s, d) with
       | (inl sdm, inr c) => (fst (projT1 sdm) = c) + (snd (projT1 sdm) = c)
       | _ => (s = d)
@@ -25,7 +25,7 @@ Section Coend.
 
   Global Arguments CoendFunctor_Index_Morphism s d /.
 
-  Definition CoendFunctor_Index_Identity x : CoendFunctor_Index_Morphism x x :=
+  Polymorphic Definition CoendFunctor_Index_Identity x : CoendFunctor_Index_Morphism x x :=
     match x as s return (CoendFunctor_Index_Morphism s s) with
       | inl s => eq_refl
       | inr s => eq_refl
@@ -35,7 +35,7 @@ Section Coend.
 
   Ltac inj H := injection H; clear H; intros; subst.
 
-  Definition CoendFunctor_Index_Compose s d d' :
+  Polymorphic Definition CoendFunctor_Index_Compose s d d' :
     CoendFunctor_Index_Morphism d d'
     -> CoendFunctor_Index_Morphism s d
     -> CoendFunctor_Index_Morphism s d'.
@@ -48,7 +48,7 @@ Section Coend.
         end.
   Defined.
 
-  Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
+  Polymorphic Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
   Proof.
     refine (@Build_SpecializedCategory _
                                        CoendFunctor_Index_Morphism
@@ -68,7 +68,7 @@ Section Coend.
       ).
   Defined.
 
-  Definition CoendFunctor_Diagram_ObjectOf_pre : CoendFunctor_Index -> (COp * C) :=
+  Polymorphic Definition CoendFunctor_Diagram_ObjectOf_pre : CoendFunctor_Index -> (COp * C) :=
     fun x => match x with
                | inl c0c1 => (projT1 c0c1)
                | inr c => (c, c)
@@ -76,11 +76,11 @@ Section Coend.
 
   Global Arguments CoendFunctor_Diagram_ObjectOf_pre _ /.
 
-  Hint Extern 0 => present_spcategory : morphism.
-  Hint Extern 1 (Morphism _ ?X ?X) => apply Identity : morphism.
-(*  Hint Extern 1 (Morphism' _ _ _) => hnf. *)
+  Polymorphic Hint Extern 0 => present_spcategory : morphism.
+  Polymorphic Hint Extern 1 (Morphism _ ?X ?X) => apply Identity : morphism.
+(*  Polymorphic Hint Extern 1 (Morphism' _ _ _) => hnf. *)
 
-  Definition CoendFunctor_Diagram_MorphismOf_pre s d :
+  Polymorphic Definition CoendFunctor_Diagram_MorphismOf_pre s d :
     CoendFunctor_Index_Morphism s d
     -> Morphism (COp * C) (CoendFunctor_Diagram_ObjectOf_pre s) (CoendFunctor_Diagram_ObjectOf_pre d).
   Proof.
@@ -103,7 +103,7 @@ Section Coend.
       | _ => injection H; intros; subst
     end.
 
-  Definition CoendFunctor_Diagram_pre : SpecializedFunctor CoendFunctor_Index (COp * C).
+  Polymorphic Definition CoendFunctor_Diagram_pre : SpecializedFunctor CoendFunctor_Index (COp * C).
   Proof.
     refine (Build_SpecializedFunctor
       CoendFunctor_Index (COp * C)
@@ -143,5 +143,5 @@ Section CoendFunctor.
   Let o := (FunctorialComposition (CoendFunctor_Index C) (COp * C) D).
   Let CoendFunctor_pre := (o ⟨ - , (CoendFunctor_Diagram_pre C) ⟩)%functor.
 
-  Definition CoendFunctor := ComposeFunctors CoendFunctor_post CoendFunctor_pre.
+  Polymorphic Definition CoendFunctor := ComposeFunctors CoendFunctor_post CoendFunctor_pre.
 End CoendFunctor.

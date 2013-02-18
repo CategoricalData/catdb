@@ -19,7 +19,7 @@ Section Adjunction.
   Let HomCPreFunctor : SpecializedFunctor (COp * D) (COp * C) := ((IdentityFunctor _) * G)%functor.
   Let HomDPreFunctor : SpecializedFunctor (COp * D) (DOp * D) := (FOp * (IdentityFunctor _))%functor.
 
-  Record Adjunction := {
+  Polymorphic Record Adjunction := {
     AMateOf :> NaturalIsomorphism
     (ComposeFunctors (HomFunctor D) HomDPreFunctor)
     (ComposeFunctors (HomFunctor C) HomCPreFunctor)
@@ -44,7 +44,7 @@ Section Adjunction.
        Hom_D (F B) B' ~= Hom_C B (G B')
      ]]
      *)
-  Record HomAdjunction := {
+  Polymorphic Record HomAdjunction := {
     AComponentsOf' : forall A A', D.(Morphism') (F A) A' -> C.(Morphism') A (G A');
     (* [IsomorphismOf] is sort-polymorphic, but it picks up the type of morphisms in [TypeCat].  The [IsInverseOf']s don't *)
     AIsomorphism' : forall A A', { m' : _ |
@@ -61,12 +61,12 @@ Section Adjunction.
   Section AdjunctionInterface.
     Variable T : HomAdjunction.
 
-    Definition AComponentsOf : forall (A : C) (A' : D),
+    Polymorphic Definition AComponentsOf : forall (A : C) (A' : D),
       TypeCat.(Morphism) (HomFunctor D (F A, A')) (HomFunctor C (A, G A'))
       := Eval cbv beta delta [AComponentsOf'] in T.(AComponentsOf').
-    Definition AIsomorphism (A : C) (A' : D) : IsomorphismOf (C := TypeCat) (@AComponentsOf A A')
+    Polymorphic Definition AIsomorphism (A : C) (A' : D) : IsomorphismOf (C := TypeCat) (@AComponentsOf A A')
       := Eval cbv beta delta [AIsomorphism'] in T.(AIsomorphism') A A' : IsomorphismOf_sig (@AComponentsOf A A').
-    Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
+    Polymorphic Definition ACommutes : forall (A : C) (A' : D) (B : C) (B' : D) (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (@AComponentsOf B B') (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) =
       Compose (MorphismOf (HomFunctor C) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')) (@AComponentsOf A A')
       := T.(ACommutes').
@@ -74,7 +74,7 @@ Section Adjunction.
 
   Global Coercion AComponentsOf : HomAdjunction >-> Funclass.
 
-  Lemma ACommutes_Inverse (T : HomAdjunction) :
+  Polymorphic Lemma ACommutes_Inverse (T : HomAdjunction) :
     forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (MorphismOf (HomFunctor D) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m')) (proj1_sig (T.(AIsomorphism) A A')) =
       Compose (proj1_sig (T.(AIsomorphism) B B')) (MorphismOf (HomFunctor C) (s := (A, G A')) (d := (B, G B')) (m, G.(MorphismOf) m')).
@@ -121,7 +121,7 @@ Section AdjunctionEquivalences.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
-  Definition HomAdjunction2Adjunction_AMateOf (A : HomAdjunction F G) :
+  Polymorphic Definition HomAdjunction2Adjunction_AMateOf (A : HomAdjunction F G) :
     SpecializedNaturalTransformation
     (ComposeFunctors (HomFunctor D)
       (OppositeFunctor F * IdentityFunctor D))
@@ -145,14 +145,14 @@ Section AdjunctionEquivalences.
     ).
   Defined.
 
-  Definition HomAdjunction2Adjunction (A : HomAdjunction F G) : Adjunction F G.
+  Polymorphic Definition HomAdjunction2Adjunction (A : HomAdjunction F G) : Adjunction F G.
     constructor.
     exists (HomAdjunction2Adjunction_AMateOf A).
     intro x; hnf; simpl.
     exact (AIsomorphism A (fst x) (snd x)).
   Defined.
 
-  Definition Adjunction2HomAdjunction (A : Adjunction F G) : HomAdjunction F G.
+  Polymorphic Definition Adjunction2HomAdjunction (A : Adjunction F G) : HomAdjunction F G.
     hnf; simpl.
     exists (fun c d => ComponentsOf A (c, d));
       simpl;
@@ -160,7 +160,7 @@ Section AdjunctionEquivalences.
           exact (fun A0 A' B B' m m' => A.(Commutes') (A0, A') (B, B') (m, m')) ].
   Defined.
 
-  Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
+  Polymorphic Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
     Compose (C := C) (G.(MorphismOf) g) (A.(AComponentsOf) _ _ f) =
     A.(AComponentsOf) _ _ (Compose g f).
     assert (H := fg_equal (A.(ACommutes) _ _ _ _ (Identity c) g) f).
@@ -168,7 +168,7 @@ Section AdjunctionEquivalences.
     auto with category.
   Qed.
 
-  Lemma adjunction_naturality'_pre (A : HomAdjunction F G) c' c d (f : C.(Morphism) c (G d)) (h : C.(Morphism) c' c) :
+  Polymorphic Lemma adjunction_naturality'_pre (A : HomAdjunction F G) c' c d (f : C.(Morphism) c (G d)) (h : C.(Morphism) c' c) :
     Compose (C := D) (proj1_sig (A.(AIsomorphism) _ _) f) (F.(MorphismOf) h) =
     proj1_sig (A.(AIsomorphism) _ _) (Compose f h).
     assert (H := fg_equal (ACommutes_Inverse A _ _ _ _ h (Identity d)) f).
@@ -182,8 +182,8 @@ Section AdjunctionEquivalences.
     Let adjunction_naturality'T := Eval simpl in typeof adjunction_naturality'_pre.
     Let adjunction_naturalityT' := Eval cbv beta iota delta [typeof adjunction_naturalityT] zeta in adjunction_naturalityT.
     Let adjunction_naturality'T' := Eval cbv beta iota delta [typeof adjunction_naturality'T] zeta in adjunction_naturality'T.
-    Definition adjunction_naturality : adjunction_naturalityT' := adjunction_naturality_pre.
-    Definition adjunction_naturality' : adjunction_naturality'T' := adjunction_naturality'_pre.
+    Polymorphic Definition adjunction_naturality : adjunction_naturalityT' := adjunction_naturality_pre.
+    Polymorphic Definition adjunction_naturality' : adjunction_naturality'T' := adjunction_naturality'_pre.
   End typeof.
 
   (**
@@ -204,7 +204,7 @@ Section AdjunctionEquivalences.
      [ϕ g = G g ○ η c]
      [η c = ϕ(1_{F c})]
      *)
-  Definition UnitOf (A : HomAdjunction F G) : AdjunctionUnit F G.
+  Polymorphic Definition UnitOf (A : HomAdjunction F G) : AdjunctionUnit F G.
     eexists (Build_SpecializedNaturalTransformation (IdentityFunctor C) (ComposeFunctors G F)
                                                     (fun c => A.(AComponentsOf) c (F c) (Identity _))
                                                     _
@@ -234,7 +234,7 @@ Section AdjunctionEquivalences.
   Defined.
 
 
-  Definition CounitOf (A : HomAdjunction F G) : AdjunctionCounit F G.
+  Polymorphic Definition CounitOf (A : HomAdjunction F G) : AdjunctionCounit F G.
     eexists (Build_SpecializedNaturalTransformation (ComposeFunctors F G) (IdentityFunctor D)
       (fun d => proj1_sig (A.(AIsomorphism) (G d) d) (Identity _))
       _
@@ -267,7 +267,7 @@ Section AdjunctionEquivalences'.
   Variable F : Functor C D.
   Variable G : Functor D C.
 
-  Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
+  Polymorphic Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (projT1 T c)) |};
       try (intros; exists (fun f => proj1_sig (projT2 T _ _ f)));
         abstract (
@@ -284,7 +284,7 @@ Section AdjunctionEquivalences'.
         ).
   Defined.
 
-  Definition HomAdjunctionOfCounit (T : AdjunctionCounit F G) : HomAdjunction F G.
+  Polymorphic Definition HomAdjunctionOfCounit (T : AdjunctionCounit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) =>
       let inverseOf := (fun s d f => proj1_sig (projT2 T s d f)) in
         let f := inverseOf _ _ g in

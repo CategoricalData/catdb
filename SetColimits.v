@@ -46,18 +46,18 @@ Section SetColimits.
   Variable F : SpecializedFunctor C SetCat.
   Let F' : SpecializedFunctorToType _ := F : SpecializedFunctorToSet _.
 
-  Definition SetColimit_Object_pre := SetGrothendieckPair F. (* { c : objC & F.(ObjectOf') c }.*)
+  Polymorphic Definition SetColimit_Object_pre := SetGrothendieckPair F. (* { c : objC & F.(ObjectOf') c }.*)
   Global Arguments SetColimit_Object_pre /.
-  Definition SetColimit_Object_equiv_sig :=
+  Polymorphic Definition SetColimit_Object_equiv_sig :=
     generateEquivalence (fun x y : SetColimit_Object_pre => inhabited (Morphism (CategoryOfElements F') x y)).
-  Definition SetColimit_Object_equiv :=
+  Polymorphic Definition SetColimit_Object_equiv :=
     proj1_sig SetColimit_Object_equiv_sig.
-  Definition SetColimit_Object_equiv_Equivalence :=
+  Polymorphic Definition SetColimit_Object_equiv_Equivalence :=
     proj2_sig SetColimit_Object_equiv_sig.
 
   Local Infix "~=" := SetColimit_Object_equiv.
 
-  Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) c x c' x'
+  Polymorphic Lemma SetColimit_Property_Morphism_respectful (S : SetCat) (m : Morphism (SetCat ^ C) F (DiagonalFunctor SetCat C S)) c x c' x'
     (a := Build_SetGrothendieckPair F c x) (b := Build_SetGrothendieckPair F c' x') :
     a ~= b
     -> m c x = m c' x'.
@@ -81,16 +81,16 @@ Section SetColimits.
     Let chooser_respectful1 x y : x ~= y -> chooser x = chooser y := proj1 (chooser_respectful x y).
     Let chooser_respectful2 x y : chooser x = chooser y -> x ~= y := proj2 (chooser_respectful x y).
 
-    Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
+    Polymorphic Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
 
-    Definition SetColimit_Object : SetCat := { x | chooser x = x }.
+    Polymorphic Definition SetColimit_Object : SetCat := { x | chooser x = x }.
 
     Let chooser' (x : SetColimit_Object_pre) : SetColimit_Object.
       exists (chooser x); abstract trivial.
     Defined.
 
     (* TODO: Automate better. *)
-    Definition SetColimit_Morphism : Morphism (SetCat ^ C) F ((DiagonalFunctor SetCat C) SetColimit_Object).
+    Polymorphic Definition SetColimit_Morphism : Morphism (SetCat ^ C) F ((DiagonalFunctor SetCat C) SetColimit_Object).
       hnf; simpl.
       match goal with
         | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -106,11 +106,11 @@ Section SetColimits.
       abstract colimit_morphism_t chooser_respectful.
     Defined.
 
-    Definition SetColimit_Property_Morphism A' (φ' : Morphism (SetCat ^ C)%functor F ((DiagonalFunctor SetCat C) A')) :
+    Polymorphic Definition SetColimit_Property_Morphism A' (φ' : Morphism (SetCat ^ C)%functor F ((DiagonalFunctor SetCat C) A')) :
       SetColimit_Object -> A'
       := fun x => φ' (SetGrothendieckC (proj1_sig x)) (SetGrothendieckX (proj1_sig x)).
 
-    Definition SetColimit : Colimit F.
+    Polymorphic Definition SetColimit : Colimit F.
       apply (Build_InitialMorphism (C := SetCat ^ C) F (DiagonalFunctor SetCat C) SetColimit_Object SetColimit_Morphism).
       intros A' φ'.
       exists (SetColimit_Property_Morphism φ').
@@ -121,7 +121,7 @@ Section SetColimits.
   Section axiom.
     Hypothesis inhabited_dec : forall x y : SetColimit_Object_pre, {x ~= y} + {~(x ~= y)}.
 
-    Hint Resolve setOf_mor.
+    Polymorphic Hint Resolve setOf_mor.
 
     Let chooserSet (x : SetColimit_Object_pre) := setOf SetColimit_Object_equiv_Equivalence inhabited_dec x.
 
@@ -158,7 +158,7 @@ Section SetColimits.
       apply notDisjointSets_sameSet; exists x; intro_proj2_sig; split; clear_InSet; eauto.
     Qed.
 
-    Lemma SetHasColimits : Colimit F.
+    Polymorphic Lemma SetHasColimits : Colimit F.
       exact (@SetColimit chooser chooser_respectful chooser_idempotent).
     Qed.
   End axiom.
@@ -171,18 +171,18 @@ Section TypeColimits.
   Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C TypeCat.
 
-  Definition TypeColimit_Object_pre := GrothendieckPair F. (* { c : objC & F.(ObjectOf') c }. *)
+  Polymorphic Definition TypeColimit_Object_pre := GrothendieckPair F. (* { c : objC & F.(ObjectOf') c }. *)
   Global Arguments TypeColimit_Object_pre /.
-  Definition TypeColimit_Object_equiv_sig :=
+  Polymorphic Definition TypeColimit_Object_equiv_sig :=
     generateEquivalence (fun x y : TypeColimit_Object_pre => inhabited (Morphism (CategoryOfElements F) x y)).
-  Definition TypeColimit_Object_equiv :=
+  Polymorphic Definition TypeColimit_Object_equiv :=
     proj1_sig TypeColimit_Object_equiv_sig.
-  Definition TypeColimit_Object_equiv_Equivalence :=
+  Polymorphic Definition TypeColimit_Object_equiv_Equivalence :=
     proj2_sig TypeColimit_Object_equiv_sig.
 
   Local Infix "~=" := TypeColimit_Object_equiv.
 
-  Lemma TypeColimit_Property_Morphism_respectful (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) c x c' x'
+  Polymorphic Lemma TypeColimit_Property_Morphism_respectful (S : TypeCat) (m : Morphism (TypeCat ^ C) F (DiagonalFunctor TypeCat C S)) c x c' x'
     (a := Build_GrothendieckPair F c x) (b := Build_GrothendieckPair F c' x') :
     a ~= b
     -> m c x = m c' x'.
@@ -206,16 +206,16 @@ Section TypeColimits.
     Let chooser_respectful1 x y : x ~= y -> chooser x = chooser y := proj1 (chooser_respectful x y).
     Let chooser_respectful2 x y : chooser x = chooser y -> x ~= y := proj2 (chooser_respectful x y).
 
-    Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
+    Polymorphic Hint Resolve chooser_respectful1 chooser_respectful2 chooser_idempotent.
 
-    Definition TypeColimit_Object : TypeCat := { x | chooser x = x }.
+    Polymorphic Definition TypeColimit_Object : TypeCat := { x | chooser x = x }.
 
     Let chooser' (x : TypeColimit_Object_pre) : TypeColimit_Object.
       exists (chooser x); abstract trivial.
     Defined.
 
     (* TODO: Automate better. *)
-    Definition TypeColimit_Morphism : Morphism (TypeCat ^ C) F ((DiagonalFunctor TypeCat C) TypeColimit_Object).
+    Polymorphic Definition TypeColimit_Morphism : Morphism (TypeCat ^ C) F ((DiagonalFunctor TypeCat C) TypeColimit_Object).
       hnf; simpl.
       match goal with
         | [ |- SpecializedNaturalTransformation ?F ?G ] =>
@@ -231,11 +231,11 @@ Section TypeColimits.
       abstract colimit_morphism_t chooser_respectful.
     Defined.
 
-    Definition TypeColimit_Property_Morphism A' (φ' : Morphism (TypeCat ^ C)%functor F ((DiagonalFunctor TypeCat C) A')) :
+    Polymorphic Definition TypeColimit_Property_Morphism A' (φ' : Morphism (TypeCat ^ C)%functor F ((DiagonalFunctor TypeCat C) A')) :
       TypeColimit_Object -> A'
       := fun x => φ' (GrothendieckC (proj1_sig x)) (GrothendieckX (proj1_sig x)).
 
-    Definition TypeColimit : Colimit F.
+    Polymorphic Definition TypeColimit : Colimit F.
       apply (Build_InitialMorphism (C := TypeCat ^ C) F (DiagonalFunctor TypeCat C) TypeColimit_Object TypeColimit_Morphism).
       intros A' φ'.
       exists (TypeColimit_Property_Morphism φ').
@@ -244,7 +244,7 @@ Section TypeColimits.
   End chooser.
 
   Section axiom.
-    Hint Resolve classOf_mor.
+    Polymorphic Hint Resolve classOf_mor.
 
     Let chooserClass (x : TypeColimit_Object_pre) := classOf TypeColimit_Object_equiv_Equivalence x.
 
@@ -282,7 +282,7 @@ Section TypeColimits.
         eauto || symmetry; eauto.
     Qed.
 
-    Lemma TypeHasColimits : Colimit F.
+    Polymorphic Lemma TypeHasColimits : Colimit F.
       exact (@TypeColimit chooser chooser_respectful chooser_idempotent).
     Qed.
   End axiom.

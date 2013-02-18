@@ -21,12 +21,12 @@ Section InducedFunctor.
   Let DOp := OppositeCategory D.
 
   Section Limit.
-    Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
+    Polymorphic Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
       (m : Morphism _ s d) :
       Morphism D (LimitObject limS) (LimitObject limD)
       := InducedLimitMap (projT2 m) _ _.
 
-    Lemma InducedLimitFunctor_FCompositionOf (s d d' : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
+    Polymorphic Lemma InducedLimitFunctor_FCompositionOf (s d d' : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedLimitFunctor_MorphismOf limS limD' (Compose m2 m1) =
       Compose (InducedLimitFunctor_MorphismOf limD limD' m2) (InducedLimitFunctor_MorphismOf limS limD m1).
@@ -64,7 +64,7 @@ Section InducedFunctor.
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
-    Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
+    Polymorphic Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
       InducedLimitFunctor_MorphismOf limX limX (Identity x) =
       Identity (LimitObject limX).
     Proof.
@@ -82,9 +82,9 @@ Section InducedFunctor.
 
     Variable HasLimits : forall C : CAT ⇑ D, Limit (projT2 C).
 
-    Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
+    Polymorphic Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
-    Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
+    Polymorphic Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D
@@ -99,12 +99,12 @@ Section InducedFunctor.
   End Limit.
 
   Section Colimit.
-    Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
+    Polymorphic Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
       (m : Morphism _ s d) :
       Morphism D (ColimitObject colimS) (ColimitObject colimD)
       := InducedColimitMap (projT2 m) _ _.
 
-    Lemma InducedColimitFunctor_FCompositionOf (s d d' : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
+    Polymorphic Lemma InducedColimitFunctor_FCompositionOf (s d d' : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedColimitFunctor_MorphismOf colimS colimD' (Compose m2 m1) =
       Compose (InducedColimitFunctor_MorphismOf colimD colimD' m2) (InducedColimitFunctor_MorphismOf colimS colimD m1).
@@ -141,7 +141,7 @@ Section InducedFunctor.
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
-    Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
+    Polymorphic Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
       InducedColimitFunctor_MorphismOf colimX colimX (Identity x) =
       Identity (ColimitObject colimX).
     Proof.
@@ -159,9 +159,9 @@ Section InducedFunctor.
 
     Variable HasColimits : forall C : CAT ⇓ D, Colimit (projT2 C).
 
-    Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
+    Polymorphic Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
-    Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
+    Polymorphic Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D

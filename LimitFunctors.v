@@ -11,23 +11,23 @@ Section LimitFunctors.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Definition HasLimits' := forall F : SpecializedFunctor D C, exists _ : Limit F, True.
-  Definition HasLimits := forall F : SpecializedFunctor D C, Limit F.
+  Polymorphic Definition HasLimits' := forall F : SpecializedFunctor D C, exists _ : Limit F, True.
+  Polymorphic Definition HasLimits := forall F : SpecializedFunctor D C, Limit F.
 
-  Definition HasColimits' := forall F : SpecializedFunctor D C, exists _ : Colimit F, True.
-  Definition HasColimits := forall F : SpecializedFunctor D C, Colimit F.
+  Polymorphic Definition HasColimits' := forall F : SpecializedFunctor D C, exists _ : Colimit F, True.
+  Polymorphic Definition HasColimits := forall F : SpecializedFunctor D C, Colimit F.
 
   Hypothesis HL : HasLimits.
   Hypothesis HC : HasColimits.
 
-  Definition LimitFunctor : SpecializedFunctor (C ^ D) C
+  Polymorphic Definition LimitFunctor : SpecializedFunctor (C ^ D) C
     := Eval unfold AdjointFunctorOfTerminalMorphism in AdjointFunctorOfTerminalMorphism HL.
-  Definition ColimitFunctor : SpecializedFunctor (C ^ D) C
+  Polymorphic Definition ColimitFunctor : SpecializedFunctor (C ^ D) C
     := Eval unfold AdjointFunctorOfInitialMorphism in AdjointFunctorOfInitialMorphism HC.
 
-  Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) LimitFunctor
+  Polymorphic Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) LimitFunctor
     := AdjunctionOfTerminalMorphism _.
 
-  Definition ColimitAdjunction : Adjunction ColimitFunctor (DiagonalFunctor C D)
+  Polymorphic Definition ColimitAdjunction : Adjunction ColimitFunctor (DiagonalFunctor C D)
     := AdjunctionOfInitialMorphism _.
 End LimitFunctors.

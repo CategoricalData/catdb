@@ -12,7 +12,7 @@ Section Graphs.
   Context `(G : Graph v).
   Context `(H : Graph w).
 
-  Record GraphTranslation := {
+  Polymorphic Record GraphTranslation := {
     VertexOf' : v -> w;
     EdgeOf' : forall s d, G.(Edge') s d -> H.(Edge') (VertexOf' s) (VertexOf' d)
   }.
@@ -20,8 +20,8 @@ Section Graphs.
   Section GraphInterface.
     Context `(T : GraphTranslation).
 
-    Definition VertexOf : G -> H := Eval cbv beta delta [VertexOf'] in T.(VertexOf').
-    Definition EdgeOf : forall s d : G, G.(Edge) s d -> H.(Edge) (VertexOf s) (VertexOf d) :=
+    Polymorphic Definition VertexOf : G -> H := Eval cbv beta delta [VertexOf'] in T.(VertexOf').
+    Polymorphic Definition EdgeOf : forall s d : G, G.(Edge) s d -> H.(Edge) (VertexOf s) (VertexOf d) :=
       Eval cbv beta delta [EdgeOf'] in T.(EdgeOf').
   End GraphInterface.
 End Graphs.
@@ -32,7 +32,7 @@ Arguments VertexOf {v G w H} T x : simpl nomatch.
 Arguments EdgeOf {v G w H} T [s d] p : simpl nomatch.
 
 Section GraphTranslations_Equal.
-  Lemma GraphTranslations_Equal v G w H : forall (T U : @GraphTranslation v G w H),
+  Polymorphic Lemma GraphTranslations_Equal v G w H : forall (T U : @GraphTranslation v G w H),
     VertexOf T = VertexOf U
     -> (VertexOf T = VertexOf U -> EdgeOf T == EdgeOf U)
     -> T = U.
@@ -41,7 +41,7 @@ Section GraphTranslations_Equal.
       reflexivity.
   Qed.
 
-  Lemma GraphTranslations_JMeq v G w H v' G' w' H' :
+  Polymorphic Lemma GraphTranslations_JMeq v G w H v' G' w' H' :
     forall (T : @GraphTranslation v G w H) (U : @GraphTranslation v' G' w' H'),
       v = v'
       -> w = w'
@@ -75,7 +75,7 @@ Section GraphTranslationComposition.
   Context `(D : @Graph vertD).
   Context `(E : @Graph vertE).
 
-  Definition ComposeGraphTranslations (G : GraphTranslation D E) (F : GraphTranslation C D) : GraphTranslation C E :=
+  Polymorphic Definition ComposeGraphTranslations (G : GraphTranslation D E) (F : GraphTranslation C D) : GraphTranslation C E :=
     {| VertexOf' := (fun c => G (F c));
       EdgeOf' := (fun _ _ m => G.(EdgeOf) (F.(EdgeOf) m)) |}.
 End GraphTranslationComposition.
@@ -84,7 +84,7 @@ Section IdentityGraphTranslation.
   Context `(C : @Graph vertC).
 
   (* There is an identity graph translation.  It does the obvious thing. *)
-  Definition IdentityGraphTranslation : GraphTranslation C C :=
+  Polymorphic Definition IdentityGraphTranslation : GraphTranslation C C :=
     {| VertexOf' := (fun x => x);
       EdgeOf' := (fun _ _ x => x) |}.
 End IdentityGraphTranslation.
@@ -95,7 +95,7 @@ Section GraphTranslationCompositionLemmas.
   Context `(D : @Graph vertD).
   Context `(E : @Graph vertE).
 
-  Lemma ComposeGraphTranslationsAssociativity (F : GraphTranslation B C) (G : GraphTranslation C D) (H : GraphTranslation D E) :
+  Polymorphic Lemma ComposeGraphTranslationsAssociativity (F : GraphTranslation B C) (G : GraphTranslation C D) (H : GraphTranslation D E) :
     ComposeGraphTranslations (ComposeGraphTranslations H G) F = ComposeGraphTranslations H (ComposeGraphTranslations G F).
   Proof.
     reflexivity.

@@ -50,29 +50,29 @@ Section CommaSpecializedCategory.
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
+  Polymorphic Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
-  Definition CommaSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_CommaSpecializedCategory_Object.
+  Polymorphic Definition CommaSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_CommaSpecializedCategory_Object.
   Global Identity Coercion CommaSpecializedCategory_Object_Id : CommaSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
+  Polymorphic Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
   Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
 
-  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
+  Polymorphic Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
     { gh : (A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
       Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
     }
   }.
 
-  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT) :=
+  Polymorphic Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT) :=
     Eval hnf in SortPolymorphic_Helper (@Build_CommaSpecializedCategory_Morphism αβf α'β'f').
   Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
-  Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
+  Polymorphic Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
     @Build_CommaSpecializedCategory_Morphism _ _ mem.
   Global Coercion Build_CommaSpecializedCategory_Morphism' : CommaSpecializedCategory_MorphismT >-> CommaSpecializedCategory_Morphism.
 
-  Lemma CommaSpecializedCategory_Morphism_eq αβf α'β'f' αβf2 α'β'f'2
+  Polymorphic Lemma CommaSpecializedCategory_Morphism_eq αβf α'β'f' αβf2 α'β'f'2
         (M : CommaSpecializedCategory_Morphism αβf α'β'f')
         (N : CommaSpecializedCategory_Morphism αβf2 α'β'f'2) :
     αβf = αβf2
@@ -88,7 +88,7 @@ Section CommaSpecializedCategory.
   Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
   Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
 
-  Definition CommaSpecializedCategory_Compose s d d'
+  Polymorphic Definition CommaSpecializedCategory_Compose s d d'
     (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
     CommaSpecializedCategory_MorphismT s d'.
     exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
@@ -108,7 +108,7 @@ Section CommaSpecializedCategory.
 
   Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
 
-  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
+  Polymorphic Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
     exists (Identity (C := A * B) (projT1 o)).
     abstract (
         simpl; autorewrite with category; reflexivity
@@ -129,26 +129,26 @@ Section CommaSpecializedCategory.
     f_equal;
     try reflexivity.
 
-  Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
+  Polymorphic Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
     CommaSpecializedCategory_Compose m3 (CommaSpecializedCategory_Compose m2 m1).
   Proof.
     comma_t.
   Qed.
 
-  Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+  Polymorphic Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
   Proof.
     comma_t.
   Qed.
 
-  Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+  Polymorphic Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
     CommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
   Proof.
     comma_t.
   Qed.
 
-  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
+  Polymorphic Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -170,8 +170,8 @@ Section CommaSpecializedCategory.
   Defined.
 End CommaSpecializedCategory.
 
-Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity : category.
-Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object : category.
+Polymorphic Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity : category.
+Polymorphic Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object : category.
 
 Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
 
@@ -182,14 +182,14 @@ Section SliceSpecializedCategory.
   Variable S : SpecializedFunctor A C.
   Let B := TerminalCategory.
 
-  Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
+  Polymorphic Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
     refine {| ObjectOf' := (fun _ => a);
       MorphismOf' := (fun _ _ _ => Identity a)
     |}; abstract (intros; auto with morphism).
   Defined.
 
-  Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.
-  Definition CosliceSpecializedCategory := CommaSpecializedCategory SliceSpecializedCategory_Functor S.
+  Polymorphic Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.
+  Polymorphic Definition CosliceSpecializedCategory := CommaSpecializedCategory SliceSpecializedCategory_Functor S.
 
   (* [x ↓ F] is a coslice category; [F ↓ x] is a slice category; [x ↓ F] deals with morphisms [x -> F y]; [F ↓ x] has morphisms [F y -> x] *)
 End SliceSpecializedCategory.
@@ -198,12 +198,12 @@ Section SliceSpecializedCategoryOver.
   Context `(C : @SpecializedCategory objC).
   Variable a : C.
 
-  Definition SliceSpecializedCategoryOver := SliceSpecializedCategory a (IdentityFunctor C).
-  Definition CosliceSpecializedCategoryOver := CosliceSpecializedCategory a (IdentityFunctor C).
+  Polymorphic Definition SliceSpecializedCategoryOver := SliceSpecializedCategory a (IdentityFunctor C).
+  Polymorphic Definition CosliceSpecializedCategoryOver := CosliceSpecializedCategory a (IdentityFunctor C).
 End SliceSpecializedCategoryOver.
 
 Section ArrowSpecializedCategory.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
+  Polymorphic Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowSpecializedCategory.

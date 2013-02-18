@@ -9,14 +9,14 @@ Local Infix "==" := JMeq (at level 70).
    [proj1_sig], and [proj2_sig] do the right thing, and I define [projT3],
    [proj3_sig]. *)
 Section sig.
-  Definition sigT_of_sigT2 A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
+  Polymorphic Definition sigT_of_sigT2 A P Q (x : @sigT2 A P Q) := let (a, h, _) := x in existT _ a h.
   Global Coercion sigT_of_sigT2 : sigT2 >-> sigT.
-  Definition projT3 A P Q (x : @sigT2 A P Q) :=
+  Polymorphic Definition projT3 A P Q (x : @sigT2 A P Q) :=
     let (x0, _, h) as x0 return (Q (projT1 x0)) := x in h.
 
-  Definition sig_of_sig2 A P Q (x : @sig2 A P Q) := let (a, h, _) := x in exist _ a h.
+  Polymorphic Definition sig_of_sig2 A P Q (x : @sig2 A P Q) := let (a, h, _) := x in exist _ a h.
   Global Coercion sig_of_sig2 : sig2 >-> sig.
-  Definition proj3_sig A P Q (x : @sig2 A P Q) :=
+  Polymorphic Definition proj3_sig A P Q (x : @sig2 A P Q) :=
     let (x0, _, h) as x0 return (Q (proj1_sig x0)) := x in h.
 End sig.
 
@@ -250,19 +250,19 @@ Ltac solve_repeat_rewrite rew_H tac :=
   solve [ repeat (rewrite rew_H; tac) ] ||
     solve [ repeat (rewrite <- rew_H; tac) ].
 
-Lemma sig_eq A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
+Polymorphic Lemma sig_eq A P (s s' : @sig A P) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
+Polymorphic Lemma sig2_eq A P Q (s s' : @sig2 A P Q) : proj1_sig s = proj1_sig s' -> s = s'.
   destruct s, s'; simpl; intro; subst; f_equal; apply proof_irrelevance.
 Qed.
 
-Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> projT2 s == projT2 s' -> s = s'.
+Polymorphic Lemma sigT_eq A P (s s' : @sigT A P) : projT1 s = projT1 s' -> projT2 s == projT2 s' -> s = s'.
   destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
 Qed.
 
-Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
+Polymorphic Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
   projT1 s = projT1 s'
   -> projT2 s == projT2 s'
   -> projT3 s == projT3 s'
@@ -270,7 +270,7 @@ Lemma sigT2_eq A P Q (s s' : @sigT2 A P Q) :
   destruct s, s'; simpl; intros; firstorder; repeat subst; reflexivity.
 Qed.
 
-Lemma injective_projections_JMeq (A B A' B' : Type) (p1 : A * B) (p2 : A' * B') :
+Polymorphic Lemma injective_projections_JMeq (A B A' B' : Type) (p1 : A * B) (p2 : A' * B') :
   fst p1 == fst p2 -> snd p1 == snd p2 -> p1 == p2.
 Proof.
   destruct p1, p2; simpl; intros H0 H1; subst;
@@ -393,10 +393,10 @@ Ltac subst_body :=
          end.
 
 (* So we know the difference betwen the [sigT]s we're using and the [sigT]s others use *)
-Inductive Common_sigT (A : Type) (P : A -> Type) : Type :=
+Polymorphic Inductive Common_sigT (A : Type) (P : A -> Type) : Type :=
     Common_existT : forall x : A, P x -> Common_sigT P.
-Definition Common_projT1 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (a, _) := x in a.
-Definition Common_projT2 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (x0, h) as x0 return (P (Common_projT1 x0)) := x in h.
+Polymorphic Definition Common_projT1 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (a, _) := x in a.
+Polymorphic Definition Common_projT2 (A : Type) (P : A -> Type) (x : @Common_sigT A P) := let (x0, h) as x0 return (P (Common_projT1 x0)) := x in h.
 
 Ltac uncurryT H :=
   match eval simpl in H with
@@ -424,28 +424,28 @@ Ltac curry H := let HT := type of H in
     | ?H' => H
   end.
 
-Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
+Polymorphic Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
   intros; repeat subst; reflexivity.
 Qed.
 
 Section telescope.
-  Inductive telescope :=
+  Polymorphic Inductive telescope :=
   | Base : forall (A : Type) (B : A -> Type), (forall a, B a) -> (forall a, B a) -> telescope
   | Quant : forall A : Type, (A -> telescope) -> telescope.
 
-  Fixpoint telescopeOut (t : telescope) :=
+  Polymorphic Fixpoint telescopeOut (t : telescope) :=
     match t with
       | Base _ _ x y => x = y
       | Quant _ f => forall x, telescopeOut (f x)
     end.
 
-  Fixpoint telescopeOut' (t : telescope) :=
+  Polymorphic Fixpoint telescopeOut' (t : telescope) :=
     match t with
       | Base _ _ f g => forall x, f x = g x
       | Quant _ f => forall x, telescopeOut' (f x)
     end.
 
-  Theorem generalized_fg_equal : forall (t : telescope),
+  Polymorphic Theorem generalized_fg_equal : forall (t : telescope),
     telescopeOut t
     -> telescopeOut' t.
     induction t; simpl; intuition; subst; auto.
@@ -478,7 +478,7 @@ Ltac fg_equal :=
            | [ H : _ |- _ ] => fg_equal_in H
          end.
 
-Lemma f_equal_helper A0 (A B : A0 -> Type) (f : forall a0, A a0 -> B a0) (x y : forall a0, A a0) :
+Polymorphic Lemma f_equal_helper A0 (A B : A0 -> Type) (f : forall a0, A a0 -> B a0) (x y : forall a0, A a0) :
   (forall a0, x a0 = y a0) -> (forall a0, f a0 (x a0) = f a0 (y a0)).
   intros H a0; specialize (H a0); rewrite H; reflexivity.
 Qed.
@@ -498,27 +498,27 @@ Ltac eta_red :=
            | [ |- appcontext[fun x => ?f x] ] => change (fun x => f x) with f
          end.
 
-Lemma sigT_eta : forall A (P : A -> Type) (x : sigT P),
+Polymorphic Lemma sigT_eta : forall A (P : A -> Type) (x : sigT P),
   x = existT _ (projT1 x) (projT2 x).
   destruct x; reflexivity.
 Qed.
 
-Lemma sigT2_eta : forall A (P Q : A -> Type) (x : sigT2 P Q),
+Polymorphic Lemma sigT2_eta : forall A (P Q : A -> Type) (x : sigT2 P Q),
   x = existT2 _ _ (projT1 x) (projT2 x) (projT3 x).
   destruct x; reflexivity.
 Qed.
 
-Lemma sig_eta : forall A (P : A -> Prop) (x : sig P),
+Polymorphic Lemma sig_eta : forall A (P : A -> Prop) (x : sig P),
   x = exist _ (proj1_sig x) (proj2_sig x).
   destruct x; reflexivity.
 Qed.
 
-Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
+Polymorphic Lemma sig2_eta : forall A (P Q : A -> Prop) (x : sig2 P Q),
   x = exist2 _ _ (proj1_sig x) (proj2_sig x) (proj3_sig x).
   destruct x; reflexivity.
 Qed.
 
-Lemma prod_eta : forall (A B : Type) (x : A * B),
+Polymorphic Lemma prod_eta : forall (A B : Type) (x : A * B),
   x = pair (fst x) (snd x).
   destruct x; reflexivity.
 Qed.
@@ -633,7 +633,7 @@ Ltac use_proj2_sig_with tac :=
 Ltac rewrite_proj2_sig := use_proj2_sig_with recr_destruct_rewrite.
 Ltac rewrite_rev_proj2_sig := use_proj2_sig_with recr_destruct_rewrite_rev.
 
-Definition is_unique (A : Type) (x : A) := forall x' : A, x' = x.
+Polymorphic Definition is_unique (A : Type) (x : A) := forall x' : A, x' = x.
 Implicit Arguments is_unique [A].
 
 Ltac rewrite_unique :=
@@ -888,7 +888,7 @@ Tactic Notation "hideProofs" constr(pf0) constr(pf1) constr(pf2) constr(pf3) con
   := progress (try hideProof' pf0; try hideProof' pf1; try hideProof' pf2; try hideProof' pf3; try hideProof' pf4; try hideProof' pf5).
 
 Section unique.
-  Definition uniqueT (A : Type) (P : A -> Type) (x : A)
+  Polymorphic Definition uniqueT (A : Type) (P : A -> Type) (x : A)
     := P x + {forall x' : A, P x' -> x = x'}.
 End unique.
 
@@ -906,89 +906,89 @@ Ltac destruct_to_empty_set_in_match :=
   end.
 
 Section True.
-  Lemma True_singleton (u : True) : u = I.
+  Polymorphic Lemma True_singleton (u : True) : u = I.
     case u; reflexivity.
   Qed.
 
-  Lemma True_eq (u u' : True) : u = u'.
+  Polymorphic Lemma True_eq (u u' : True) : u = u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma True_eq_singleton (u u' : True) (H : u = u') : H = True_eq _ _.
+  Polymorphic Lemma True_eq_singleton (u u' : True) (H : u = u') : H = True_eq _ _.
     destruct u; destruct H; reflexivity.
   Defined.
 
-  Lemma True_eq_eq (u u' : True) (H H' : u = u') : H = H'.
+  Polymorphic Lemma True_eq_eq (u u' : True) (H H' : u = u') : H = H'.
     transitivity (@True_eq u u');
     destruct_head @eq; subst_body; destruct_head True; reflexivity.
   Defined.
 
-  Lemma True_JMeq (u u' : True) : u == u'.
+  Polymorphic Lemma True_JMeq (u u' : True) : u == u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma False_eq (a b : False) : a = b.
+  Polymorphic Lemma False_eq (a b : False) : a = b.
     destruct a.
   Defined.
 
-  Lemma False_JMeql (a : False) T (b : T) : a == b.
+  Polymorphic Lemma False_JMeql (a : False) T (b : T) : a == b.
     destruct a.
   Defined.
 
-  Lemma False_JMeqr T (a : T) (b : False) : a == b.
+  Polymorphic Lemma False_JMeqr T (a : T) (b : False) : a == b.
     destruct b.
   Defined.
 End True.
 
 Section unit.
-  Lemma unit_singleton (u : unit) : u = tt.
+  Polymorphic Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.
   Qed.
 
-  Lemma unit_eq (u u' : unit) : u = u'.
+  Polymorphic Lemma unit_eq (u u' : unit) : u = u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _.
+  Polymorphic Lemma unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _.
     destruct u; destruct H; reflexivity.
   Defined.
 
-  Lemma unit_eq_eq (u u' : unit) (H H' : u = u') : H = H'.
+  Polymorphic Lemma unit_eq_eq (u u' : unit) (H H' : u = u') : H = H'.
     transitivity (@unit_eq u u');
     destruct_head @eq; subst_body; destruct_head unit; reflexivity.
   Defined.
 
-  Lemma unit_JMeq (u u' : unit) : u == u'.
+  Polymorphic Lemma unit_JMeq (u u' : unit) : u == u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma Empty_set_eq (a b : Empty_set) : a = b.
+  Polymorphic Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
   Defined.
 
-  Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
+  Polymorphic Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
     destruct a.
   Defined.
 
-  Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
+  Polymorphic Lemma Empty_set_JMeqr T (a : T) (b : Empty_set) : a == b.
     destruct b.
   Defined.
 End unit.
 
-Hint Rewrite True_singleton.
-Hint Extern 0 (@eq True _ _) => apply True_eq.
-Hint Extern 0 (@eq (@eq True _ _) _ _) => apply True_eq_eq.
-Hint Extern 0 (@JMeq True _ True _) => apply True_JMeq.
-Hint Extern 0 True => constructor.
-Hint Extern 0 (@eq False _ _) => apply False_eq.
-Hint Extern 0 (@JMeq False _ _ _) => apply False_JMeql.
-Hint Extern 0 (@JMeq _ _ False _) => apply False_JMeqr.
+Polymorphic Hint Rewrite True_singleton.
+Polymorphic Hint Extern 0 (@eq True _ _) => apply True_eq.
+Polymorphic Hint Extern 0 (@eq (@eq True _ _) _ _) => apply True_eq_eq.
+Polymorphic Hint Extern 0 (@JMeq True _ True _) => apply True_JMeq.
+Polymorphic Hint Extern 0 True => constructor.
+Polymorphic Hint Extern 0 (@eq False _ _) => apply False_eq.
+Polymorphic Hint Extern 0 (@JMeq False _ _ _) => apply False_JMeql.
+Polymorphic Hint Extern 0 (@JMeq _ _ False _) => apply False_JMeqr.
 
-Hint Rewrite unit_singleton.
-Hint Extern 0 (@eq unit _ _) => apply unit_eq.
-Hint Extern 0 (@eq (@eq unit _ _) _ _) => apply unit_eq_eq.
-Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
-Hint Extern 0 unit => constructor.
-Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
-Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.
-Hint Extern 0 (@JMeq _ _ Empty_set _) => apply Empty_set_JMeqr.
+Polymorphic Hint Rewrite unit_singleton.
+Polymorphic Hint Extern 0 (@eq unit _ _) => apply unit_eq.
+Polymorphic Hint Extern 0 (@eq (@eq unit _ _) _ _) => apply unit_eq_eq.
+Polymorphic Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
+Polymorphic Hint Extern 0 unit => constructor.
+Polymorphic Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
+Polymorphic Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.
+Polymorphic Hint Extern 0 (@JMeq _ _ Empty_set _) => apply Empty_set_JMeqr.

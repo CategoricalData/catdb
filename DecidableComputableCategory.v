@@ -12,5 +12,5 @@ Section ComputableCategory.
 
   Let eq_dec_on_cat `(C : @SpecializedCategory objC) := forall x y : objC, {x = y} + {x <> y}.
 
-  Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj _ (@ComputableCategory _ _ Index2Cat) (fun C => eq_dec_on_cat C).
+  Polymorphic Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj _ (@ComputableCategory _ _ Index2Cat) (fun C => eq_dec_on_cat C).
 End ComputableCategory.

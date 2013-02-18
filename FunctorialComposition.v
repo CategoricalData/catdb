@@ -10,7 +10,7 @@ Section FunctorialComposition.
   Context `(D : SpecializedCategory objD).
   Context `(E : SpecializedCategory objE).
 
-  Definition FunctorialComposition : SpecializedFunctor ((E ^ D) * (D ^ C)) (E ^ C).
+  Polymorphic Definition FunctorialComposition : SpecializedFunctor ((E ^ D) * (D ^ C)) (E ^ C).
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>

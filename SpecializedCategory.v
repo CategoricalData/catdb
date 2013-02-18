@@ -8,7 +8,7 @@ Generalizable All Variables.
 
 Local Infix "==" := JMeq.
 
-Record ComputationalCategory (obj : Type) :=
+Polymorphic Record ComputationalCategory (obj : Type) :=
   Build_ComputationalCategory {
       Object :> _ := obj;
       Morphism' : obj -> obj -> Type;
@@ -18,7 +18,7 @@ Record ComputationalCategory (obj : Type) :=
     }.
 
 
-Record SpecializedCategory (obj : Type) :=
+Polymorphic Record SpecializedCategory (obj : Type) :=
   Build_SpecializedCategory' {
       UnderlyingCCategory :> ComputationalCategory obj;
 
@@ -52,7 +52,7 @@ Create HintDb category discriminated.
 Create HintDb morphism discriminated.
 
 Section SpecializedCategoryInterface.
-  Definition Build_SpecializedCategory (obj : Type)
+  Polymorphic Definition Build_SpecializedCategory (obj : Type)
     (Morphism' : obj -> obj -> Type)
     (Identity' : forall o : obj, Morphism' o o)
     (Compose' : forall s d d' : obj, Morphism' d d' -> Morphism' s d -> Morphism' s d')
@@ -73,25 +73,25 @@ Section SpecializedCategoryInterface.
   Section Computational.
     Context `(C : @ComputationalCategory obj).
 
-    Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
+    Polymorphic Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
 
     Bind Scope morphism_scope with Morphism.
 
-    Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
-    Definition Compose : forall {s d d' : C} (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
+    Polymorphic Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
+    Polymorphic Definition Compose : forall {s d d' : C} (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
   End Computational.
   Section Specialized.
     Context `(C : @SpecializedCategory obj).
 
     Bind Scope morphism_scope with Morphism.
 
-    Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism C o1 o2) (m2 : Morphism C o2 o3) (m3 : Morphism C o3 o4),
+    Polymorphic Definition Associativity : forall (o1 o2 o3 o4 : C) (m1 : Morphism C o1 o2) (m2 : Morphism C o2 o3) (m3 : Morphism C o3 o4),
                                  Compose _ (Compose _ m3 m2) m1 = Compose _ m3 (Compose _ m2 m1)
       := C.(Associativity').
-    Definition LeftIdentity : forall (a b : C) (f : Morphism C a b),
+    Polymorphic Definition LeftIdentity : forall (a b : C) (f : Morphism C a b),
                                 Compose _ (Identity _ b) f = f
       := C.(LeftIdentity').
-    Definition RightIdentity : forall (a b : C) (f : Morphism C a b),
+    Polymorphic Definition RightIdentity : forall (a b : C) (f : Morphism C a b),
                                  Compose _ f (Identity _ a) = f
       := C.(RightIdentity').
   End Specialized.
@@ -122,8 +122,8 @@ Ltac present_obj from to :=
 
 Ltac present_spcategory := present_obj @Morphism' @Morphism; present_obj @Identity' @Identity; present_obj @Compose' @Compose.
 
-Hint Extern 0 => progress present_spcategory : category.
-Hint Extern 0 => progress present_spcategory : morphism.
+Polymorphic Hint Extern 0 => progress present_spcategory : category.
+Polymorphic Hint Extern 0 => progress present_spcategory : morphism.
 
 (*Ltac present_spcategory_all := present_spcategory;
   repeat match goal with
@@ -142,19 +142,19 @@ Ltac spcategory_hideProofs :=
                hideProofs pf0 pf1 pf2 pf3
          end.
 
-Hint Resolve @LeftIdentity @RightIdentity @Associativity : category.
-Hint Rewrite @LeftIdentity @RightIdentity : category.
-Hint Resolve @LeftIdentity @RightIdentity @Associativity : morphism.
-Hint Rewrite @LeftIdentity @RightIdentity : morphism.
+Polymorphic Hint Resolve @LeftIdentity @RightIdentity @Associativity : category.
+Polymorphic Hint Rewrite @LeftIdentity @RightIdentity : category.
+Polymorphic Hint Resolve @LeftIdentity @RightIdentity @Associativity : morphism.
+Polymorphic Hint Rewrite @LeftIdentity @RightIdentity : morphism.
 
 (* eh, I'm not terribly happy.  meh. *)
-Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
-Definition SmallSpecializedCategory (obj : Set) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
+Polymorphic Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
+Polymorphic Definition SmallSpecializedCategory (obj : Set) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
 Identity Coercion LocallySmallSpecializedCategory_SpecializedCategory_Id : LocallySmallSpecializedCategory >-> SpecializedCategory.
 Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : SmallSpecializedCategory >-> SpecializedCategory.
 
 Section Categories_Equal.
-  Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
+  Polymorphic Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
     @Morphism' _ C = @Morphism' _ D
     -> @Identity' _ C == @Identity' _ D
     -> @Compose' _ C == @Compose' _ D
@@ -164,7 +164,7 @@ Section Categories_Equal.
     f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
+  Polymorphic Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
     objC = objD
     -> @Morphism' _ C == @Morphism' _ D
     -> @Identity' _ C == @Identity' _ D
@@ -196,9 +196,9 @@ Ltac solve_for_identity :=
 
 (** * Version of [Associativity] that avoids going off into the weeds in the presence of unification variables *)
 
-Definition NoEvar T (_ : T) := True.
+Polymorphic Definition NoEvar T (_ : T) := True.
 
-Lemma AssociativityNoEvar `(C : @SpecializedCategory obj) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
+Polymorphic Lemma AssociativityNoEvar `(C : @SpecializedCategory obj) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
   (m2 : C.(Morphism) o2 o3) (m3 : C.(Morphism) o3 o4),
   NoEvar (m1, m2) \/ NoEvar (m2, m3) \/ NoEvar (m1, m3)
   -> Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1).
@@ -210,8 +210,8 @@ Ltac noEvar := match goal with
                    cut (NoEvar X); [ intro; tauto | constructor ]
                end.
 
-Hint Rewrite @AssociativityNoEvar using noEvar : category.
-Hint Rewrite @AssociativityNoEvar using noEvar : morphism.
+Polymorphic Hint Rewrite @AssociativityNoEvar using noEvar : category.
+Polymorphic Hint Rewrite @AssociativityNoEvar using noEvar : morphism.
 
 Ltac try_associativity_quick tac := try_rewrite Associativity tac.
 Ltac try_associativity tac := try_rewrite_by AssociativityNoEvar ltac:(idtac; noEvar) tac.
@@ -249,29 +249,29 @@ Section Category.
     monomorphism (i.e. an epimorphism in a category [C] is a
     monomorphism in the dual category [OppositeCategory C]).
     *)
-  Definition IsEpimorphism' x y (m : C.(Morphism') x y) : Prop :=
+  Polymorphic Definition IsEpimorphism' x y (m : C.(Morphism') x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
       m1 = m2.
-  Definition IsMonomorphism' x y (m : C.(Morphism') x y) : Prop :=
+  Polymorphic Definition IsMonomorphism' x y (m : C.(Morphism') x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
       m1 = m2.
-  Definition IsEpimorphism x y (m : C.(Morphism) x y) : Prop :=
+  Polymorphic Definition IsEpimorphism x y (m : C.(Morphism) x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
       m1 = m2.
-  Definition IsMonomorphism x y (m : C.(Morphism) x y) : Prop :=
+  Polymorphic Definition IsMonomorphism x y (m : C.(Morphism) x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
       m1 = m2.
 
   Section properties.
-    Lemma IdentityIsEpimorphism x : IsEpimorphism _ _ (Identity x).
+    Polymorphic Lemma IdentityIsEpimorphism x : IsEpimorphism _ _ (Identity x).
       repeat intro; autorewrite with category in *; trivial.
     Qed.
 
-    Lemma IdentityIsMonomorphism x : IsMonomorphism _ _ (Identity x).
+    Polymorphic Lemma IdentityIsMonomorphism x : IsMonomorphism _ _ (Identity x).
       repeat intro; autorewrite with category in *; trivial.
     Qed.
 
-    Lemma EpimorphismComposition s d d' m0 m1 :
+    Polymorphic Lemma EpimorphismComposition s d d' m0 m1 :
       IsEpimorphism _ _ m0
       -> IsEpimorphism _ _ m1
       -> IsEpimorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
@@ -280,7 +280,7 @@ Section Category.
       intuition.
     Qed.
 
-    Lemma MonomorphismComposition s d d' m0 m1 :
+    Polymorphic Lemma MonomorphismComposition s d d' m0 m1 :
       IsMonomorphism _ _ m0
       -> IsMonomorphism _ _ m1
       -> IsMonomorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
@@ -291,8 +291,8 @@ Section Category.
   End properties.
 End Category.
 
-Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category.
-Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : morphism.
+Polymorphic Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category.
+Polymorphic Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : morphism.
 
 Arguments IsEpimorphism' {obj} [C x y] m.
 Arguments IsEpimorphism {obj} [C x y] m.
@@ -303,7 +303,7 @@ Section AssociativityComposition.
   Context `(C : @SpecializedCategory obj).
   Variables o0 o1 o2 o3 o4 : C.
 
-  Lemma compose4associativity_helper
+  Polymorphic Lemma compose4associativity_helper
     (a : Morphism _ o3 o4) (b : Morphism _ o2 o3)
     (c : Morphism _ o1 o2) (d : Morphism _ o0 o1) :
     Compose (Compose a b) (Compose c d) = (Compose a (Compose (Compose b c) d)).

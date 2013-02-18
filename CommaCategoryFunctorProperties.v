@@ -36,7 +36,7 @@ Section FCompositionOf.
   Context `(B : @SpecializedCategory objB).
   Context `(C : @SpecializedCategory objC).
 
-  Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
+  Polymorphic Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
         (m1 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)
         (m2 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) d d') :
     CommaCategoryInducedFunctor (Compose m2 m1)
@@ -44,7 +44,7 @@ Section FCompositionOf.
     Time slice_t. (* 44 s *)
   Qed.
 
-  Lemma CommaCategoryInducedFunctor_FIdentityOf (x : (OppositeCategory (C ^ A)) * (C ^ B)) :
+  Polymorphic Lemma CommaCategoryInducedFunctor_FIdentityOf (x : (OppositeCategory (C ^ A)) * (C ^ B)) :
     CommaCategoryInducedFunctor (Identity x)
     = IdentityFunctor _.
     Time slice_t. (* 11 s *)

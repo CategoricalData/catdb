@@ -33,7 +33,7 @@ Section T2.
   Let sig_of_sigT' (A : Type) (P : A -> Prop) (X : sigT P) := exist P (projT1 X) (projT2 X).
   Let sigT_of_sig' (A : Type) (P : A -> Prop) (X : sig P) := existT P (proj1_sig X) (proj2_sig X).
 
-  Definition InducedT2Functor_sigT_sig : SpecializedFunctor sigT_sig_cat0 sigT_sig_cat1.
+  Polymorphic Definition InducedT2Functor_sigT_sig : SpecializedFunctor sigT_sig_cat0 sigT_sig_cat1.
     eapply (ComposeFunctors (sigT_functor_sigT_sig _ _ _ _) (ComposeFunctors _ (sigT_sig_functor_sigT _ _ _ _))).
     Grab Existential Variables.
     eapply (@InducedT2Functor_sigT _ A Pobj0 Pmor0 Pidentity0 Pcompose0 _ _ _ Pobj1 Pmor1 Pidentity1 Pcompose1 _ _ _

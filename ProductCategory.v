@@ -9,7 +9,7 @@ Section ProductCategory.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Definition ProductCategory : @SpecializedCategory (objC * objD)%type.
+  Polymorphic Definition ProductCategory : @SpecializedCategory (objC * objD)%type.
     refine (@Build_SpecializedCategory _
                                        (fun s d => (C.(Morphism) (fst s) (fst d) * D.(Morphism) (snd s) (snd d))%type)
                                        (fun o => (Identity (fst o), Identity (snd o)))
@@ -27,7 +27,7 @@ Section ProductCategoryFunctors.
   Context `{C : @SpecializedCategory objC}.
   Context `{D : @SpecializedCategory objD}.
 
-  Definition fst_Functor : SpecializedFunctor (C * D) C.
+  Polymorphic Definition fst_Functor : SpecializedFunctor (C * D) C.
     refine (Build_SpecializedFunctor (C * D) C
       (@fst _ _)
       (fun _ _ => @fst _ _)
@@ -37,7 +37,7 @@ Section ProductCategoryFunctors.
     abstract eauto.
   Defined.
 
-  Definition snd_Functor : SpecializedFunctor (C * D) D.
+  Polymorphic Definition snd_Functor : SpecializedFunctor (C * D) D.
     refine (Build_SpecializedFunctor (C * D) D
       (@snd _ _)
       (fun _ _ => @snd _ _)

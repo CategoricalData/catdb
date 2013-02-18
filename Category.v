@@ -5,37 +5,37 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Record Category := {
+Polymorphic Record Category := {
   CObject : Type;
 
   UnderlyingCategory :> @SpecializedCategory CObject
 }.
 
-Definition GeneralizeCategory `(C : @SpecializedCategory obj) : Category.
+Polymorphic Definition GeneralizeCategory `(C : @SpecializedCategory obj) : Category.
   refine {| CObject := C.(Object) |}; auto.
 Defined.
 
 Coercion GeneralizeCategory : SpecializedCategory >-> Category.
 
-Record SmallCategory := {
+Polymorphic Record SmallCategory := {
   SObject : Set;
 
   SUnderlyingCategory :> @SmallSpecializedCategory SObject
 }.
 
-Definition GeneralizeSmallCategory `(C : @SmallSpecializedCategory obj) : SmallCategory.
+Polymorphic Definition GeneralizeSmallCategory `(C : @SmallSpecializedCategory obj) : SmallCategory.
   refine {| SObject := obj |}; auto.
 Defined.
 
 Coercion GeneralizeSmallCategory : SmallSpecializedCategory >-> SmallCategory.
 
-Record LocallySmallCategory := {
+Polymorphic Record LocallySmallCategory := {
   LSObject : Type;
 
   LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject
 }.
 
-Definition GeneralizeLocallySmallCategory `(C : @LocallySmallSpecializedCategory obj) : LocallySmallCategory.
+Polymorphic Definition GeneralizeLocallySmallCategory `(C : @LocallySmallSpecializedCategory obj) : LocallySmallCategory.
   refine {| LSObject := obj |}; auto.
 Defined.
 

@@ -13,22 +13,22 @@ Section Schemas.
     Variable vertexOf : C -> D.
     Variable pathOf : forall s d, C.(Edge) s d -> path D (vertexOf s) (vertexOf d).
 
-    Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
+    Polymorphic Fixpoint transferPath s d (p : path C s d) : path D (vertexOf s) (vertexOf d) :=
       match p with
         | NoEdges => NoEdges
         | AddEdge _ _ p' E => concatenate (transferPath p') (pathOf _ _ E)
       end.
 
-    Hint Rewrite concatenate_noedges_p concatenate_p_noedges.
-    Hint Rewrite <- concatenate_associative.
+    Polymorphic Hint Rewrite concatenate_noedges_p concatenate_p_noedges.
+    Polymorphic Hint Rewrite <- concatenate_associative.
 
-    Lemma concatenate_transferPath s d d' (p : path C s d) (p' : path C d d') :
+    Polymorphic Lemma concatenate_transferPath s d d' (p : path C s d) (p' : path C d d') :
       transferPath (concatenate p p') = concatenate (transferPath p) (transferPath p').
       induction p'; t_with t'.
     Qed.
   End transferPath.
 
-  Record Translation := {
+  Polymorphic Record Translation := {
     VertexOf :> C -> D;
     PathOf : forall s d, C.(Edge) s d -> path D (VertexOf s) (VertexOf d);
     TransferPath := (fun s d (p : path C s d) => transferPath VertexOf PathOf p);
@@ -44,22 +44,22 @@ Section Schemas.
     exact (@TEquivalenceOf T s d).
   Qed.
 
-  Lemma concatenate_TransferPath s d d' (p : path C s d) (p' : path C d d') T :
+  Polymorphic Lemma concatenate_TransferPath s d d' (p : path C s d) (p' : path C d d') T :
       TransferPath T (concatenate p p') = concatenate (TransferPath T p) (TransferPath T p').
     unfold TransferPath; simpl.
     apply concatenate_transferPath.
   Qed.
 
-  Lemma TransferPath_NoEdges o T :
+  Polymorphic Lemma TransferPath_NoEdges o T :
     TransferPath T (@NoEdges _ _ o) = NoEdges.
     reflexivity.
   Qed.
 End Schemas.
 
-Hint Rewrite concatenate_transferPath concatenate_TransferPath.
+Polymorphic Hint Rewrite concatenate_transferPath concatenate_TransferPath.
 
 Section Translations_Equal.
-  Lemma translations_equal : forall C D (F G : Translation C D),
+  Polymorphic Lemma translations_equal : forall C D (F G : Translation C D),
     VertexOf F = VertexOf G
     -> (VertexOf F = VertexOf G -> PathOf F == PathOf G)
     -> F = G.
@@ -68,7 +68,7 @@ Section Translations_Equal.
         f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma translations_equal_parts : forall C D (F G : Translation C D),
+  Polymorphic Lemma translations_equal_parts : forall C D (F G : Translation C D),
     F = G -> VertexOf F = VertexOf G /\ PathOf F == PathOf G.
     intros; repeat subst; split; trivial.
   Qed.
@@ -92,9 +92,9 @@ Ltac translation_eq := translation_eq_with idtac.
 Section TranslationComposition.
   Variable B C D E : Schema.
 
-  Hint Resolve concatenate_transferPath.
+  Polymorphic Hint Resolve concatenate_transferPath.
 
-  Lemma compose_transferPath (vertexOf : C -> D) pathOf (vertexOf' : D -> E) pathOf' : forall s d (p : path C s d),
+  Polymorphic Lemma compose_transferPath (vertexOf : C -> D) pathOf (vertexOf' : D -> E) pathOf' : forall s d (p : path C s d),
     (transferPath (fun c : C => vertexOf' (vertexOf c))
       (fun (s0 d0 : C) (e : Edge C s0 d0) =>
         transferPath vertexOf' pathOf' (pathOf s0 d0 e)) p) =
@@ -103,10 +103,10 @@ Section TranslationComposition.
     induction p; reflexivity || symmetry; t_with t'.
   Qed.
 
-  Hint Rewrite compose_transferPath.
-  Hint Resolve TEquivalenceOf.
+  Polymorphic Hint Rewrite compose_transferPath.
+  Polymorphic Hint Resolve TEquivalenceOf.
 
-  Definition ComposeTranslations (G : Translation D E) (F : Translation C D) : Translation C E.
+  Polymorphic Definition ComposeTranslations (G : Translation D E) (F : Translation C D) : Translation C E.
     refine {| VertexOf := (fun c => G (F c));
       PathOf := (fun _ _ e => G.(TransferPath) (F.(PathOf) _ _ e))
     |}; abstract (unfold TransferPath; t_with t'; repeat apply TEquivalenceOf; assumption).
@@ -119,7 +119,7 @@ Section Schema.
   Variable C D : Schema.
 
   (* There is an identity translation.  It does the obvious thing. *)
-  Definition IdentityTranslation : Translation C C.
+  Polymorphic Definition IdentityTranslation : Translation C C.
     refine {| VertexOf := (fun x => x);
       PathOf := (fun _ _ x => AddEdge NoEdges x)
     |}; abstract (
@@ -132,16 +132,16 @@ Section Schema.
     ).
   Defined.
 
-  Hint Unfold ComposeTranslations IdentityTranslation VertexOf PathOf.
+  Polymorphic Hint Unfold ComposeTranslations IdentityTranslation VertexOf PathOf.
 
-  Lemma LeftIdentityTranslation (F : Translation D C) : ComposeTranslations IdentityTranslation F = F.
+  Polymorphic Lemma LeftIdentityTranslation (F : Translation D C) : ComposeTranslations IdentityTranslation F = F.
     translation_eq.
     match goal with
       | [ |- ?a = ?b ] => induction b; t_with t'
     end.
   Qed.
 
-  Lemma RightIdentityTranslation (F : Translation C D) : ComposeTranslations F IdentityTranslation = F.
+  Polymorphic Lemma RightIdentityTranslation (F : Translation C D) : ComposeTranslations F IdentityTranslation = F.
     translation_eq; t_with t'.
   Qed.
 End Schema.
@@ -149,7 +149,7 @@ End Schema.
 Section TranslationCompositionLemmas.
   Variable B C D E : Schema.
 
-  Lemma ComposeTranslationsAssociativity (F : Translation B C) (G : Translation C D) (H : Translation D E) :
+  Polymorphic Lemma ComposeTranslationsAssociativity (F : Translation B C) (G : Translation C D) (H : Translation D E) :
     ComposeTranslations (ComposeTranslations H G) F = ComposeTranslations H (ComposeTranslations G F).
     unfold ComposeTranslations; translation_eq.
     match goal with
@@ -162,13 +162,13 @@ Section TranslationsEquivalent.
   Variables C D : Schema.
   Variables F G : Translation C D.
 
-  Definition TranslationsEquivalent :=
+  Polymorphic Definition TranslationsEquivalent :=
     exists vo po po' eo eo',
       F = {| VertexOf := vo; PathOf := po; TEquivalenceOf := eo |} /\
       G = {| VertexOf := vo; PathOf := po'; TEquivalenceOf := eo' |} /\
       forall s d (e : C.(Edge) s d), PathsEquivalent _ (po _ _ e) (po' _ _ e).
 
-  Lemma translations_equivalent :
+  Polymorphic Lemma translations_equivalent :
     VertexOf F = VertexOf G
     -> (VertexOf F = VertexOf G ->
         forall s d (e : C.(Edge) s d), GeneralizedPathsEquivalent (PathOf F _ _ e) (PathOf G _ _ e))
@@ -202,17 +202,17 @@ Ltac translation_eqv := translation_eqv_with idtac.
 Section TranslationsEquivalent_Relation.
   Variables C D E : Schema.
 
-  Lemma TranslationsEquivalent_refl (T : Translation C D) : TranslationsEquivalent T T.
+  Polymorphic Lemma TranslationsEquivalent_refl (T : Translation C D) : TranslationsEquivalent T T.
     translation_eqv.
   Qed.
 
-  Lemma TranslationsEquivalent_sym (T U : Translation C D) :
+  Polymorphic Lemma TranslationsEquivalent_sym (T U : Translation C D) :
     TranslationsEquivalent T U -> TranslationsEquivalent U T.
     intro H; destruct H; destruct_hypotheses.
     translation_eqv; symmetry; intuition.
   Qed.
 
-  Lemma TranslationsEquivalent_trans (T U V : Translation C D) :
+  Polymorphic Lemma TranslationsEquivalent_trans (T U V : Translation C D) :
     TranslationsEquivalent T U -> TranslationsEquivalent U V -> TranslationsEquivalent T V.
     intros H0 H1; destruct H0, H1; destruct_hypotheses.
     translation_eqv;
@@ -222,16 +222,16 @@ Section TranslationsEquivalent_Relation.
     etransitivity; eauto.
   Qed.
 
-  Hint Resolve TEquivalenceOf.
+  Polymorphic Hint Resolve TEquivalenceOf.
 
-  Lemma PreComposeTranslationsEquivalent (T T' : Translation C D) (U : Translation D E) :
+  Polymorphic Lemma PreComposeTranslationsEquivalent (T T' : Translation C D) (U : Translation D E) :
     TranslationsEquivalent T T' -> TranslationsEquivalent (ComposeTranslations U T) (ComposeTranslations U T').
     intro H; destruct H; translation_eqv_with ltac:(destruct_hypotheses; eauto).
   Qed.
 
-  Hint Resolve concatenate_mor.
+  Polymorphic Hint Resolve concatenate_mor.
 
-  Lemma PostComposeTranslationsEquivalent (T : Translation C D) (U U' : Translation D E) :
+  Polymorphic Lemma PostComposeTranslationsEquivalent (T : Translation C D) (U U' : Translation D E) :
     TranslationsEquivalent U U' -> TranslationsEquivalent (ComposeTranslations U T) (ComposeTranslations U' T).
     intro H; destruct H; translation_eqv_with ltac:(destruct_hypotheses; eauto).
     destruct T; unfold TransferPath; translation_eqv.

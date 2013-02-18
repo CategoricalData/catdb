@@ -136,7 +136,7 @@ Section EnrichedCategory.
 
   Local Notation "x ~> y" := (M.(Morphism) x y).
 
-  Record EnrichedCategory (objC : Type) := {
+  Polymorphic Record EnrichedCategory (objC : Type) := {
     EnrichedObject :> _ := objC;
 
     EnrichedMorphism : objC -> objC -> objM where "'C' ( A , B )" := (@EnrichedMorphism A B);
@@ -214,8 +214,8 @@ End EnrichedCategory.
 Section nCategories.
   Check @EnrichedCategory.
   Require Import DiscreteCategory.
-  Definition TerminalMonoidalCategory : @MonoidalCategory unit (fun _ _ => unit).
-    Hint Extern 1 => repeat esplit; unfold Morphism, Object; intros; simpl; trivial.
+  Polymorphic Definition TerminalMonoidalCategory : @MonoidalCategory unit (fun _ _ => unit).
+    Polymorphic Hint Extern 1 => repeat esplit; unfold Morphism, Object; intros; simpl; trivial.
     refine {| MonoidalUnderlyingCategory := TerminalCategory |};
       eauto.
     Grab Existential Variables.
@@ -241,7 +241,7 @@ Section nCategories.
   Require Import ComputableCategory.
   Print ComputableCategory.
   Section m2Cat.
-    Definition m2Cat := @ComputableCategory unit _ _ (fun _ => TerminalCategory).
+    Polymorphic Definition m2Cat := @ComputableCategory unit _ _ (fun _ => TerminalCategory).
 
     Local Ltac ex_unit_fun := first [
       exists tt
@@ -304,7 +304,7 @@ Section nCategories.
       define_unit_nt.
     Defined.
 
-    Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => SpecializedFunctor TerminalCategory TerminalCategory).
+    Polymorphic Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => SpecializedFunctor TerminalCategory TerminalCategory).
       refine (@Build_MonoidalCategory _ _
         m2Cat
         TensorProduct tt Associator LeftUnitor RightUnitor
@@ -316,8 +316,8 @@ Section nCategories.
     Defined.
   End m2Cat.
 
-  Definition m1Cat : EnrichedCategory m2MonoidalCat.
+  Polymorphic Definition m1Cat : EnrichedCategory m2MonoidalCat.
 Print EnrichedCategory.
-  Definition m2Category : EnrichedCategory TerminalMonoidalCategory .
+  Polymorphic Definition m2Category : EnrichedCategory TerminalMonoidalCategory .
 End nCategories.
 *)

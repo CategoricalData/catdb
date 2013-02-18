@@ -5,8 +5,8 @@ Require Import Common FEqualDep.
 Set Implicit Arguments.
 
 Section SmallCat.
-  Definition SmallCat := ComputableCategory _ SUnderlyingCategory.
-  Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.
+  Polymorphic Definition SmallCat := ComputableCategory _ SUnderlyingCategory.
+  Polymorphic Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.
 End SmallCat.
 
 Local Ltac destruct_simple_types :=
@@ -20,15 +20,15 @@ Local Ltac destruct_simple_types :=
          end.
 
 Section Objects.
-  Hint Unfold Morphism Object.
+  Polymorphic Hint Unfold Morphism Object.
 
   Local Arguments Object / {obj} C : rename.
   Local Arguments Morphism / {obj} _ _ _.
 
-  Hint Extern 1 => destruct_simple_types.
-  Hint Extern 3 => destruct_to_empty_set.
+  Polymorphic Hint Extern 1 => destruct_simple_types.
+  Polymorphic Hint Extern 3 => destruct_to_empty_set.
 
-  Lemma TerminalCategory_Terminal : IsTerminalObject (C := SmallCat) TerminalCategory.
+  Polymorphic Lemma TerminalCategory_Terminal : IsTerminalObject (C := SmallCat) TerminalCategory.
     repeat intro;
     exists (FunctorToTerminal _).
     abstract (
@@ -36,7 +36,7 @@ Section Objects.
       ).
   Defined.
 
-  Lemma InitialCategory_Initial : IsInitialObject (C := SmallCat) InitialCategory.
+  Polymorphic Lemma InitialCategory_Initial : IsInitialObject (C := SmallCat) InitialCategory.
     repeat intro;
     exists (FunctorFromInitial _).
     abstract (

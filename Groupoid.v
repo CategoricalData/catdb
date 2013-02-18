@@ -9,12 +9,12 @@ Generalizable All Variables.
 Section GroupoidOf.
   Context `(C : @SpecializedCategory objC).
 
-  Inductive GroupoidOf_Morphism (s d : objC) :=
+  Polymorphic Inductive GroupoidOf_Morphism (s d : objC) :=
   | hasMorphism : C.(Morphism') s d -> GroupoidOf_Morphism s d
   | hasInverse : C.(Morphism') d s -> GroupoidOf_Morphism s d
   | byComposition : forall e, GroupoidOf_Morphism e d -> GroupoidOf_Morphism s e -> GroupoidOf_Morphism s d.
 
-  Definition GroupoidOf_Compose (s d d' : C) :
+  Polymorphic Definition GroupoidOf_Compose (s d d' : C) :
     inhabited (GroupoidOf_Morphism d d') ->
     inhabited (GroupoidOf_Morphism s d) ->
     inhabited (GroupoidOf_Morphism s d').
@@ -24,7 +24,7 @@ Section GroupoidOf.
   (** Quoting Wikipedia:
      A groupoid is a small category in which every morphism is an isomorphism, and hence invertible.
      *)
-  Definition GroupoidOf : @SpecializedCategory objC.
+  Polymorphic Definition GroupoidOf : @SpecializedCategory objC.
     refine (@Build_SpecializedCategory _
                                        (fun s d => inhabited (GroupoidOf_Morphism s d))
                                        (fun o : C => inhabits (hasMorphism _ _ (Identity o)))
@@ -35,16 +35,16 @@ Section GroupoidOf.
     abstract (simpl; intros; apply proof_irrelevance).
   Defined.
 
-  Definition CategoryIsGroupoid : Prop :=
+  Polymorphic Definition CategoryIsGroupoid : Prop :=
     forall s d : C, forall m : Morphism C s d, IsIsomorphism m.
 End GroupoidOf.
 
-Hint Constructors GroupoidOf_Morphism : category.
+Polymorphic Hint Constructors GroupoidOf_Morphism : category.
 
 Section Groupoid.
   Context `(C : @SpecializedCategory objC).
 
-  Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
+  Polymorphic Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;
       repeat
         match goal with
@@ -60,7 +60,7 @@ Section Groupoid.
         end.
   Qed.
 
-  Definition Groupoid_Functor : SpecializedFunctor C (GroupoidOf C).
+  Polymorphic Definition Groupoid_Functor : SpecializedFunctor C (GroupoidOf C).
     refine (Build_SpecializedFunctor C (GroupoidOf C)
       (fun c => c)
       (fun s d m => inhabits (hasMorphism C _ _ m))

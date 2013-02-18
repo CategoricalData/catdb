@@ -10,15 +10,15 @@ Generalizable All Variables.
 Local Open Scope type_scope.
 
 Section helpers.
-  Definition eq_dec (T : Type) := forall a b : T, {a = b} + {a <> b}.
+  Polymorphic Definition eq_dec (T : Type) := forall a b : T, {a = b} + {a <> b}.
 
-  Theorem JMeq_type_mismatch_absurd A (a : A) B (b : B) : A <> B -> @JMeq A a B b -> False.
+  Polymorphic Theorem JMeq_type_mismatch_absurd A (a : A) B (b : B) : A <> B -> @JMeq A a B b -> False.
     intros H0 H1;
     destruct H1;
     intuition.
   Qed.
 
-  Lemma type_neq_helper (A B : Type) (a : A) : (forall b : B, JMeq a b -> False) -> A <> B.
+  Polymorphic Lemma type_neq_helper (A B : Type) (a : A) : (forall b : B, JMeq a b -> False) -> A <> B.
     intros H0 H1.
     subst.
     specialize (H0 a); intuition.
@@ -32,11 +32,11 @@ Section helpers.
     Hypothesis Veq_dec : eq_dec V.
     Hypothesis Eeq_dec : forall s d, eq_dec (E s d).
 
-    Inductive paths_eq (s : V) : forall d (p : path E s d) d' (p' : path E s d'), Prop :=
+    Polymorphic Inductive paths_eq (s : V) : forall d (p : path E s d) d' (p' : path E s d'), Prop :=
       | noedges_eq : paths_eq NoEdges NoEdges
       | addedge_eq : forall s' (p p' : path E s s') d (e : E s' d), paths_eq p p' -> paths_eq (AddEdge p e) (AddEdge p' e).
 
-    Definition paths_eq_dec' s d (p : path E s d) d' (p' : path E s d') : {paths_eq p p'} + {paths_eq p p' -> False}.
+    Polymorphic Definition paths_eq_dec' s d (p : path E s d) d' (p' : path E s d') : {paths_eq p p'} + {paths_eq p p' -> False}.
       destruct (Veq_dec d d'); subst.
       - induction p.
         + induction p'.
@@ -45,12 +45,12 @@ Section helpers.
 solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
       Focus 2.
 
-    Definition mk_paths_eq s d (p p' : path E s d) : p = p' -> paths_eq p p'.
+    Polymorphic Definition mk_paths_eq s d (p p' : path E s d) : p = p' -> paths_eq p p'.
       intro H.
       subst.
 
 
-    Definition path_JMeq_dec : forall s d (p : path E s d) d' (p' : path E s d'),
+    Polymorphic Definition path_JMeq_dec : forall s d (p : path E s d) d' (p' : path E s d'),
                                  {JMeq p p'} + {not (JMeq p p')}.
       intros s d.
       induction p.
@@ -72,7 +72,7 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
       induction a.
 
 
-  Definition path_eq_dec V E (Veq : eq_dec V) (Eeq : forall s d : V, eq_dec (E s d)) (s d : V) : eq_dec (path E s d).
+  Polymorphic Definition path_eq_dec V E (Veq : eq_dec V) (Eeq : forall s d : V, eq_dec (E s d)) (s d : V) : eq_dec (path E s d).
     destruc
     hnf; induction a.
 
@@ -83,14 +83,14 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
     pose Eeq.
     hnf in e.
 
-  Lemma noedges_not_JMeq_other_dest V (E : V -> V -> Type) (x s : V) :
+  Polymorphic Lemma noedges_not_JMeq_other_dest V (E : V -> V -> Type) (x s : V) :
     x <> s -> forall d (p : path E s d), JMeq (@NoEdges V E x) p -> False.
     intros H0 d p H1.
     hnf in *.
 
 
 
-  Inductive unit' : Set := tt'.
+  Polymorphic Inductive unit' : Set := tt'.
 
   Goal unit <> unit'.
   intro.
@@ -110,7 +110,7 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
   destruct H0.
   Qed.
 
-  Lemma first_neq_implies_path_types_JMeq_absurd V E (s d s' d' : V) p0 p1 :
+  Polymorphic Lemma first_neq_implies_path_types_JMeq_absurd V E (s d s' d' : V) p0 p1 :
     s <> s' -> @JMeq (path E s d) p0 (path E s' d') p1 -> False.
     intros H0 H1; eapply (JMeq_type_mismatch_absurd _ H1).
     Grab Existential Variables.
@@ -218,9 +218,9 @@ Ltac fill_unique_paths_functor := fill_unique_paths_functor' ltac:(idtac; make_i
 
 Section FunctorialDataMigration.
   Section Example22.
-    Inductive C_Objects_Ex22 : Set := SSN_Ex22_C | FirstName_Ex22_C | LastName_Ex22_C | Salary_Ex22_C | T1_Ex22_C | T2_Ex22_C.
-    Inductive D_Objects_Ex22 : Set := SSN_Ex22_D | FirstName_Ex22_D | LastName_Ex22_D | Salary_Ex22_D | U_Ex22_D.
-    Inductive E_Objects_Ex22 : Set := SSN_Ex22_E | FirstName_Ex22_E | LastName_Ex22_E | V_Ex22_E.
+    Polymorphic Inductive C_Objects_Ex22 : Set := SSN_Ex22_C | FirstName_Ex22_C | LastName_Ex22_C | Salary_Ex22_C | T1_Ex22_C | T2_Ex22_C.
+    Polymorphic Inductive D_Objects_Ex22 : Set := SSN_Ex22_D | FirstName_Ex22_D | LastName_Ex22_D | Salary_Ex22_D | U_Ex22_D.
+    Polymorphic Inductive E_Objects_Ex22 : Set := SSN_Ex22_E | FirstName_Ex22_E | LastName_Ex22_E | V_Ex22_E.
 
     Example C_Edges_Ex22 (s d : C_Objects_Ex22) : Set :=
       match (s, d) with
@@ -286,15 +286,15 @@ Section FunctorialDataMigration.
       fill_unique_paths_functor.
     Defined.
 
-    Inductive SSN := SSN_intro : string -> SSN.
-    Inductive FirstName := FirstName_intro : string -> FirstName.
-    Inductive LastName := LastName_intro : string -> LastName.
-    Inductive Salary := Salary_intro : nat -> Salary.
+    Polymorphic Inductive SSN := SSN_intro : string -> SSN.
+    Polymorphic Inductive FirstName := FirstName_intro : string -> FirstName.
+    Polymorphic Inductive LastName := LastName_intro : string -> LastName.
+    Polymorphic Inductive Salary := Salary_intro : nat -> Salary.
 
     Section Example221.
-      Inductive Id_Ex221 := x11_Ex221 | x12_Ex221 | x13_Ex221.
+      Polymorphic Inductive Id_Ex221 := x11_Ex221 | x12_Ex221 | x13_Ex221.
 
-      Definition δ_Functor_Ex221_ObjectOf (x : D_Objects_Ex22) : Set :=
+      Polymorphic Definition δ_Functor_Ex221_ObjectOf (x : D_Objects_Ex22) : Set :=
         match x with
           | SSN_Ex22_D => SSN
           | FirstName_Ex22_D => FirstName
@@ -478,10 +478,10 @@ Section FunctorialDataMigration.
     End Example221.
 
     Section Example222.
-      Inductive T1_Id_Ex222 := x11_Ex222 | x12_Ex222 | x13_Ex222.
-      Inductive T2_Id_Ex222 := y1_Ex222 | y2_Ex222 | y3_Ex222 | y4_Ex222.
+      Polymorphic Inductive T1_Id_Ex222 := x11_Ex222 | x12_Ex222 | x13_Ex222.
+      Polymorphic Inductive T2_Id_Ex222 := y1_Ex222 | y2_Ex222 | y3_Ex222 | y4_Ex222.
 
-      Definition γ_Functor_Ex222_ObjectOf (x : C_Objects_Ex22) : Set :=
+      Polymorphic Definition γ_Functor_Ex222_ObjectOf (x : C_Objects_Ex22) : Set :=
         match x with
           | SSN_Ex22_C => SSN
           | FirstName_Ex22_C => FirstName
@@ -1084,7 +1084,7 @@ Section FunctorialDataMigration.
 
         Require Import InitialTerminalCategory ChainCategory DiscreteCategoryFunctors.
 
-        Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
+        Polymorphic Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
           clear.
           eexists; intros; simpl; eauto.
           Grab Existential Variables.
@@ -1113,7 +1113,7 @@ Section FunctorialDataMigration.
 
         Require Import ProofIrrelevance.
 
-        Definition Functor_01_0 : SpecializedFunctor [0] [1].
+        Polymorphic Definition Functor_01_0 : SpecializedFunctor [0] [1].
           clear.
           eexists (fun _ => exist _ 0 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1122,7 +1122,7 @@ Section FunctorialDataMigration.
           intros; compute; constructor; trivial.
         Defined.
 
-        Definition Functor_01_1 : SpecializedFunctor [0] [1].
+        Polymorphic Definition Functor_01_1 : SpecializedFunctor [0] [1].
           clear.
           eexists (fun _ => exist _ 1 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1238,7 +1238,7 @@ Section FunctorialDataMigration.
 
         Require Import FunctionalExtensionality.
 
-        Definition f_to_functor_MorphismOf (f : [0]%category -> TypeCat) s d (m : Morphism [0] s d) : f s -> f d.
+        Polymorphic Definition f_to_functor_MorphismOf (f : [0]%category -> TypeCat) s d (m : Morphism [0] s d) : f s -> f d.
           revert m; clear; intro; clear m;
           destruct s as [ [ ] ];
           match goal with
@@ -1256,7 +1256,7 @@ Section FunctorialDataMigration.
           exact (@id _).
         Defined.
 
-        Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
+        Polymorphic Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
         Proof.
           revert f; clear; intro.
           exists f (f_to_functor_MorphismOf f); intros; simpl; destruct_sig; simpl in *;
@@ -1283,7 +1283,7 @@ End FunctorialDataMigration.
 Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
 Arguments Functor_01_0 / .
 Arguments f_to_functor / .
-Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_1 (f_to_functor f)).
+Polymorphic Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_1 (f_to_functor f)).
 Let typeof {T} (_ : T) := T.
 Eval compute in typeof foo.
 Require Import ExtrOcamlString.

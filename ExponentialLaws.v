@@ -9,13 +9,13 @@ Generalizable All Variables.
 Section Law0.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1 := FunctorTo1 _.
+  Polymorphic Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1 := FunctorTo1 _.
 
-  Definition ExponentialLaw0Functor_Inverse_ObjectOf : (1 -> C ^ 0)%category := (fun _ => FunctorFrom0 _).
+  Polymorphic Definition ExponentialLaw0Functor_Inverse_ObjectOf : (1 -> C ^ 0)%category := (fun _ => FunctorFrom0 _).
 
   Global Arguments ExponentialLaw0Functor_Inverse_ObjectOf / _.
 
-  Definition ExponentialLaw0Functor_Inverse_MorphismOf s d (m : Morphism 1 s d) :
+  Polymorphic Definition ExponentialLaw0Functor_Inverse_MorphismOf s d (m : Morphism 1 s d) :
     Morphism (C ^ 0) (ExponentialLaw0Functor_Inverse_ObjectOf s) (ExponentialLaw0Functor_Inverse_ObjectOf d)
     := Build_SpecializedNaturalTransformation (ExponentialLaw0Functor_Inverse_ObjectOf s) (ExponentialLaw0Functor_Inverse_ObjectOf d)
                                               (fun c => match c with end)
@@ -23,7 +23,7 @@ Section Law0.
 
   Arguments ExponentialLaw0Functor_Inverse_MorphismOf / _ _ _.
 
-  Definition ExponentialLaw0Functor_Inverse : SpecializedFunctor 1 (C ^ 0).
+  Polymorphic Definition ExponentialLaw0Functor_Inverse : SpecializedFunctor 1 (C ^ 0).
   Proof.
     refine (Build_SpecializedFunctor 1 (C ^ 0)
                                      ExponentialLaw0Functor_Inverse_ObjectOf
@@ -39,7 +39,7 @@ Section Law0.
       ).
   Defined.
 
-  Lemma ExponentialLaw0 : ComposeFunctors ExponentialLaw0Functor ExponentialLaw0Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw0 : ComposeFunctors ExponentialLaw0Functor ExponentialLaw0Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw0Functor_Inverse ExponentialLaw0Functor = IdentityFunctor _.
   Proof.
     split;
@@ -56,16 +56,16 @@ Section Law0'.
   Context `(C : @SpecializedCategory objC).
   Variable c : objC.
 
-  Definition ExponentialLaw0'Functor : SpecializedFunctor (0 ^ C) 0
+  Polymorphic Definition ExponentialLaw0'Functor : SpecializedFunctor (0 ^ C) 0
     := Build_SpecializedFunctor (0 ^ C) 0
                                 (fun F => F c)
                                 (fun s d m => match (s c) with end)
                                 (fun x _ _ _ _ => match (x c) with end)
                                 (fun x => match (x c) with end).
 
-  Definition ExponentialLaw0'Functor_Inverse : SpecializedFunctor 0 (0 ^ C) := FunctorFrom0 _.
+  Polymorphic Definition ExponentialLaw0'Functor_Inverse : SpecializedFunctor 0 (0 ^ C) := FunctorFrom0 _.
 
-  Lemma ExponentialLaw0' : ComposeFunctors ExponentialLaw0'Functor ExponentialLaw0'Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw0' : ComposeFunctors ExponentialLaw0'Functor ExponentialLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw0'Functor_Inverse ExponentialLaw0'Functor = IdentityFunctor _.
   Proof.
     split; functor_eq; destruct_head_hnf Empty_set;
@@ -78,14 +78,14 @@ End Law0'.
 Section Law1.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ExponentialLaw1Functor : SpecializedFunctor (C ^ 1) C
+  Polymorphic Definition ExponentialLaw1Functor : SpecializedFunctor (C ^ 1) C
     := Build_SpecializedFunctor (C ^ 1) C
                                 (fun F => F tt)
                                 (fun s d m => m tt)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition ExponentialLaw1Functor_Inverse_ObjectOf : C -> (C ^ 1)%category.
+  Polymorphic Definition ExponentialLaw1Functor_Inverse_ObjectOf : C -> (C ^ 1)%category.
   Proof.
     refine (fun c => Build_SpecializedFunctor 1 C
       (fun _ => c)
@@ -101,7 +101,7 @@ Section Law1.
 
   Global Arguments ExponentialLaw1Functor_Inverse_ObjectOf / _.
 
-  Definition ExponentialLaw1Functor_Inverse_MorphismOf s d (m : Morphism C s d) :
+  Polymorphic Definition ExponentialLaw1Functor_Inverse_MorphismOf s d (m : Morphism C s d) :
     Morphism (C ^ 1) (ExponentialLaw1Functor_Inverse_ObjectOf s) (ExponentialLaw1Functor_Inverse_ObjectOf d).
   Proof.
     hnf.
@@ -121,7 +121,7 @@ Section Law1.
 
   Global Arguments ExponentialLaw1Functor_Inverse_MorphismOf / _ _ _.
 
-  Definition ExponentialLaw1Functor_Inverse : SpecializedFunctor C (C ^ 1).
+  Polymorphic Definition ExponentialLaw1Functor_Inverse : SpecializedFunctor C (C ^ 1).
   Proof.
     refine (Build_SpecializedFunctor C (C ^ 1)
       ExponentialLaw1Functor_Inverse_ObjectOf
@@ -132,7 +132,7 @@ Section Law1.
     abstract nt_eq.
   Defined.
 
-  Lemma ExponentialLaw1 : ComposeFunctors ExponentialLaw1Functor ExponentialLaw1Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw1 : ComposeFunctors ExponentialLaw1Functor ExponentialLaw1Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw1Functor_Inverse ExponentialLaw1Functor = IdentityFunctor _.
   Proof.
     split; functor_eq; try f_equal;
@@ -151,9 +151,9 @@ End Law1.
 Section Law1'.
   Context `(C : @SpecializedCategory objC).
 
-  Definition ExponentialLaw1'Functor : SpecializedFunctor (1 ^ C) 1 := FunctorTo1 _.
+  Polymorphic Definition ExponentialLaw1'Functor : SpecializedFunctor (1 ^ C) 1 := FunctorTo1 _.
 
-  Definition ExponentialLaw1'Functor_Inverse : SpecializedFunctor 1 (1 ^ C).
+  Polymorphic Definition ExponentialLaw1'Functor_Inverse : SpecializedFunctor 1 (1 ^ C).
   Proof.
     refine (Build_SpecializedFunctor 1 (1 ^ C)
                                      (fun _ => FunctorTo1 _)
@@ -167,7 +167,7 @@ Section Law1'.
     abstract nt_eq.
   Defined.
 
-  Lemma ExponentialLaw1' : ComposeFunctors ExponentialLaw1'Functor ExponentialLaw1'Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw1' : ComposeFunctors ExponentialLaw1'Functor ExponentialLaw1'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw1'Functor_Inverse ExponentialLaw1'Functor = IdentityFunctor _.
   Proof.
     split; functor_eq; try f_equal;
@@ -187,7 +187,7 @@ Section Law1'.
   Qed.
 End Law1'.
 
-Lemma ExponentialLaws_prod_eq_helper (A B C D : Type) : A = B -> C = D -> (A * C)%type = (B * D)%type.
+Polymorphic Lemma ExponentialLaws_prod_eq_helper (A B C D : Type) : A = B -> C = D -> (A * C)%type = (B * D)%type.
   intros; repeat subst; reflexivity.
 Qed.
 
@@ -204,11 +204,11 @@ Section Law2.
       C2 -> D
       := fun x => F (inr x).
 
-    Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_1 (F : SpecializedFunctor (C1 + C2) D)
+    Polymorphic Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_1 (F : SpecializedFunctor (C1 + C2) D)
       s d (m : Morphism C1 s d) :
       Morphism D (ExponentialLaw2Functor_ObjectOf_ObjectOf_1 F s) (ExponentialLaw2Functor_ObjectOf_ObjectOf_1 F d)
       := F.(MorphismOf) (s := inl _) (d := inl _) m.
-    Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_2 (F : SpecializedFunctor (C1 + C2) D)
+    Polymorphic Definition ExponentialLaw2Functor_ObjectOf_MorphismOf_2 (F : SpecializedFunctor (C1 + C2) D)
       s d (m : Morphism C2 s d) :
       Morphism D (ExponentialLaw2Functor_ObjectOf_ObjectOf_2 F s) (ExponentialLaw2Functor_ObjectOf_ObjectOf_2 F d)
       := F.(MorphismOf) (s := inr _) (d := inr _) m.
@@ -216,7 +216,7 @@ Section Law2.
     Arguments ExponentialLaw2Functor_ObjectOf_MorphismOf_1 / _ _ _ _.
     Arguments ExponentialLaw2Functor_ObjectOf_MorphismOf_2 / _ _ _ _.
 
-    Definition ExponentialLaw2Functor_ObjectOf : SpecializedFunctor (C1 + C2) D -> (SpecializedFunctor C1 D) * (SpecializedFunctor C2 D).
+    Polymorphic Definition ExponentialLaw2Functor_ObjectOf : SpecializedFunctor (C1 + C2) D -> (SpecializedFunctor C1 D) * (SpecializedFunctor C2 D).
     Proof.
       intro F.
       match goal with
@@ -243,11 +243,11 @@ Section Law2.
         ).
     Defined.
 
-    Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 s d (m : Morphism (D ^ (C1 + C2)) s d) :
+    Polymorphic Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 s d (m : Morphism (D ^ (C1 + C2)) s d) :
       forall c : C1,
         Morphism D ((fst (ExponentialLaw2Functor_ObjectOf s)) c) ((fst (ExponentialLaw2Functor_ObjectOf d)) c)
         := fun c => m (inl c).
-    Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 s d (m : Morphism (D ^ (C1 + C2)) s d) :
+    Polymorphic Definition ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 s d (m : Morphism (D ^ (C1 + C2)) s d) :
       forall c : C2,
         Morphism D ((snd (ExponentialLaw2Functor_ObjectOf s)) c) ((snd (ExponentialLaw2Functor_ObjectOf d)) c)
         := fun c => m (inr c).
@@ -255,7 +255,7 @@ Section Law2.
     Global Arguments ExponentialLaw2Functor_MorphismOf_ComponentsOf_1 _ _ _ _ /.
     Global Arguments ExponentialLaw2Functor_MorphismOf_ComponentsOf_2 _ _ _ _ /.
 
-    Definition ExponentialLaw2Functor_MorphismOf s d
+    Polymorphic Definition ExponentialLaw2Functor_MorphismOf s d
       (m : Morphism (D ^ (C1 + C2)) s d) :
       Morphism ((D ^ C1) * (D ^ C2)) (ExponentialLaw2Functor_ObjectOf s) (ExponentialLaw2Functor_ObjectOf d).
     Proof.
@@ -278,7 +278,7 @@ Section Law2.
         ).
     Defined.
 
-    Definition ExponentialLaw2Functor : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2)).
+    Polymorphic Definition ExponentialLaw2Functor : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2)).
     Proof.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
@@ -302,7 +302,7 @@ Section Law2.
                      | inr x' => (snd F) x'
                    end).
 
-    Definition ExponentialLaw2Functor_Inverse_ObjectOf_MorphismOf (F : SpecializedFunctor C1 D * SpecializedFunctor C2 D)
+    Polymorphic Definition ExponentialLaw2Functor_Inverse_ObjectOf_MorphismOf (F : SpecializedFunctor C1 D * SpecializedFunctor C2 D)
       s d (m : Morphism (C1 + C2) s d) :
       Morphism D (ExponentialLaw2Functor_Inverse_ObjectOf_ObjectOf F s) (ExponentialLaw2Functor_Inverse_ObjectOf_ObjectOf F d)
       := match (s, d) as sd
@@ -325,7 +325,7 @@ Section Law2.
 
     Arguments ExponentialLaw2Functor_Inverse_ObjectOf_MorphismOf / _ _ _ _.
 
-    Definition ExponentialLaw2Functor_Inverse_ObjectOf : SpecializedFunctor C1 D * SpecializedFunctor C2 D -> SpecializedFunctor (C1 + C2) D.
+    Polymorphic Definition ExponentialLaw2Functor_Inverse_ObjectOf : SpecializedFunctor C1 D * SpecializedFunctor C2 D -> SpecializedFunctor (C1 + C2) D.
     Proof.
       intro F.
       match goal with
@@ -346,7 +346,7 @@ Section Law2.
       ).
     Defined.
 
-    Definition ExponentialLaw2Functor_Inverse_MorphismOf_ComponentsOf (s d : Object ((D ^ C1) * (D ^ C2)))
+    Polymorphic Definition ExponentialLaw2Functor_Inverse_MorphismOf_ComponentsOf (s d : Object ((D ^ C1) * (D ^ C2)))
       (m : Morphism ((D ^ C1) * (D ^ C2)) s d) :
       forall (c : Object (C1 + C2)),
         Morphism D ((ExponentialLaw2Functor_Inverse_ObjectOf s) c) ((ExponentialLaw2Functor_Inverse_ObjectOf d) c)
@@ -366,7 +366,7 @@ Section Law2.
                        | inr o => (snd m) o
                      end).
 
-    Definition ExponentialLaw2Functor_Inverse_MorphismOf (s d : Object ((D ^ C1) * (D ^ C2)))
+    Polymorphic Definition ExponentialLaw2Functor_Inverse_MorphismOf (s d : Object ((D ^ C1) * (D ^ C2)))
       (m : Morphism ((D ^ C1) * (D ^ C2)) s d) :
       Morphism (D ^ (C1 + C2)) (ExponentialLaw2Functor_Inverse_ObjectOf s) (ExponentialLaw2Functor_Inverse_ObjectOf d).
     Proof.
@@ -386,7 +386,7 @@ Section Law2.
       ).
     Defined.
 
-    Definition ExponentialLaw2Functor_Inverse : SpecializedFunctor ((D ^ C1) * (D ^ C2)) (D ^ (C1 + C2)).
+    Polymorphic Definition ExponentialLaw2Functor_Inverse : SpecializedFunctor ((D ^ C1) * (D ^ C2)) (D ^ (C1 + C2)).
     Proof.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
@@ -407,7 +407,7 @@ Section Law2.
     Defined.
   End inverse.
 
-  Lemma ExponentialLaw2 : ComposeFunctors ExponentialLaw2Functor ExponentialLaw2Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw2 : ComposeFunctors ExponentialLaw2Functor ExponentialLaw2Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw2Functor_Inverse ExponentialLaw2Functor = IdentityFunctor _.
   Proof.
     repeat match goal with
@@ -435,7 +435,7 @@ Section Law3.
   Context `(C2 : @SpecializedCategory objC2).
   Context `(D : @SpecializedCategory objD).
 
-  Definition ExponentialLaw3Functor_ObjectOf : ((C1 * C2) ^ D)%category -> (C1 ^ D * C2 ^ D)%category.
+  Polymorphic Definition ExponentialLaw3Functor_ObjectOf : ((C1 * C2) ^ D)%category -> (C1 ^ D * C2 ^ D)%category.
   Proof.
     intro F; hnf in F |- *.
     match goal with
@@ -461,7 +461,7 @@ Section Law3.
     ).
   Defined.
 
-  Definition ExponentialLaw3Functor_MorphismOf s d (m : Morphism ((C1 * C2) ^ D) s d) :
+  Polymorphic Definition ExponentialLaw3Functor_MorphismOf s d (m : Morphism ((C1 * C2) ^ D) s d) :
     Morphism (C1 ^ D * C2 ^ D) (ExponentialLaw3Functor_ObjectOf s) (ExponentialLaw3Functor_ObjectOf d).
   Proof.
     hnf; split; hnf;
@@ -484,7 +484,7 @@ Section Law3.
       ).
   Defined.
 
-  Definition ExponentialLaw3Functor : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
+  Polymorphic Definition ExponentialLaw3Functor : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?F ?G ] =>
@@ -503,7 +503,7 @@ Section Law3.
     ).
   Defined.
 
-  Definition ExponentialLaw3Functor_Inverse_ObjectOf : (C1 ^ D * C2 ^ D)%category -> ((C1 * C2) ^ D)%category.
+  Polymorphic Definition ExponentialLaw3Functor_Inverse_ObjectOf : (C1 ^ D * C2 ^ D)%category -> ((C1 * C2) ^ D)%category.
   Proof.
     intro F; hnf in F |- *.
     match goal with
@@ -524,7 +524,7 @@ Section Law3.
     ).
   Defined.
 
-  Definition ExponentialLaw3Functor_Inverse_MorphismOf s d (m : Morphism (C1 ^ D * C2 ^ D) s d) :
+  Polymorphic Definition ExponentialLaw3Functor_Inverse_MorphismOf s d (m : Morphism (C1 ^ D * C2 ^ D) s d) :
     Morphism ((C1 * C2) ^ D) (ExponentialLaw3Functor_Inverse_ObjectOf s) (ExponentialLaw3Functor_Inverse_ObjectOf d).
   Proof.
     hnf.
@@ -542,7 +542,7 @@ Section Law3.
     ).
   Defined.
 
-  Definition ExponentialLaw3Functor_Inverse : SpecializedFunctor (C1 ^ D * C2 ^ D) ((C1 * C2) ^ D).
+  Polymorphic Definition ExponentialLaw3Functor_Inverse : SpecializedFunctor (C1 ^ D * C2 ^ D) ((C1 * C2) ^ D).
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?F ?G ] =>
@@ -561,7 +561,7 @@ Section Law3.
     ).
   Defined.
 
-  Lemma ExponentialLaw3 : ComposeFunctors ExponentialLaw3Functor ExponentialLaw3Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw3 : ComposeFunctors ExponentialLaw3Functor ExponentialLaw3Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw3Functor_Inverse ExponentialLaw3Functor = IdentityFunctor _.
   Proof.
     repeat match goal with
@@ -603,7 +603,7 @@ Section Law4.
           | _ => repeat rewrite <- Associativity; apply f_equal2; try reflexivity; []
         end).
 
-    Definition ExponentialLaw4Functor_ObjectOf : ((D ^ C1) ^ C2)%category -> (D ^ (C1 * C2))%category.
+    Polymorphic Definition ExponentialLaw4Functor_ObjectOf : ((D ^ C1) ^ C2)%category -> (D ^ (C1 * C2))%category.
     Proof.
       intro F; hnf in F |- *.
       match goal with
@@ -618,7 +618,7 @@ Section Law4.
       abstract do_exponential4.
     Defined.
 
-    Definition ExponentialLaw4Functor_MorphismOf s d (m : Morphism ((D ^ C1) ^ C2) s d) :
+    Polymorphic Definition ExponentialLaw4Functor_MorphismOf s d (m : Morphism ((D ^ C1) ^ C2) s d) :
       Morphism (D ^ (C1 * C2)) (ExponentialLaw4Functor_ObjectOf s) (ExponentialLaw4Functor_ObjectOf d).
     Proof.
       exists (fun c => (m (snd c)) (fst c));
@@ -635,7 +635,7 @@ Section Law4.
         ).
     Defined.
 
-    Definition ExponentialLaw4Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
+    Polymorphic Definition ExponentialLaw4Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
     Proof.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
@@ -668,7 +668,7 @@ Section Law4.
     Section ObjectOf.
       Variable F : SpecializedFunctor (C1 * C2) D.
 
-      Definition ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf : C2 -> (D ^ C1)%category.
+      Polymorphic Definition ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf : C2 -> (D ^ C1)%category.
       Proof.
         intro c2.
         hnf.
@@ -684,14 +684,14 @@ Section Law4.
         abstract do_exponential4_inverse.
       Defined.
 
-      Definition ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf s d (m : Morphism C2 s d) :
+      Polymorphic Definition ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf s d (m : Morphism C2 s d) :
         Morphism (D ^ C1) (ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf s) (ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf d).
       Proof.
         exists (fun c => F.(MorphismOf) (s := (c, s)) (d := (c, d)) (Identity c, m));
           abstract do_exponential4_inverse.
       Defined.
 
-      Definition ExponentialLaw4Functor_Inverse_ObjectOf : ((D ^ C1) ^ C2)%category.
+      Polymorphic Definition ExponentialLaw4Functor_Inverse_ObjectOf : ((D ^ C1) ^ C2)%category.
       Proof.
         hnf.
         match goal with
@@ -708,7 +708,7 @@ Section Law4.
     End ObjectOf.
 
     Section MorphismOf.
-      Definition ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
+      Polymorphic Definition ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
         forall c, Morphism _ ((ExponentialLaw4Functor_Inverse_ObjectOf s) c) ((ExponentialLaw4Functor_Inverse_ObjectOf d) c).
       Proof.
         intro c;
@@ -716,7 +716,7 @@ Section Law4.
             abstract do_exponential4_inverse.
       Defined.
 
-      Definition ExponentialLaw4Functor_Inverse_MorphismOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
+      Polymorphic Definition ExponentialLaw4Functor_Inverse_MorphismOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
         Morphism ((D ^ C1) ^ C2) (ExponentialLaw4Functor_Inverse_ObjectOf s) (ExponentialLaw4Functor_Inverse_ObjectOf d).
       Proof.
         exists (ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf m);
@@ -726,7 +726,7 @@ Section Law4.
 
     Arguments ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf / _ _ _ _.
 
-    Definition ExponentialLaw4Functor_Inverse : SpecializedFunctor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
+    Polymorphic Definition ExponentialLaw4Functor_Inverse : SpecializedFunctor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
     Proof.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
@@ -741,7 +741,7 @@ Section Law4.
     Defined.
   End inverse.
 
-  Lemma ExponentialLaw4 : ComposeFunctors ExponentialLaw4Functor ExponentialLaw4Functor_Inverse = IdentityFunctor _ /\
+  Polymorphic Lemma ExponentialLaw4 : ComposeFunctors ExponentialLaw4Functor ExponentialLaw4Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ExponentialLaw4Functor_Inverse ExponentialLaw4Functor = IdentityFunctor _.
   Proof.
     repeat match goal with

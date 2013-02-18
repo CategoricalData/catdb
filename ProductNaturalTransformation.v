@@ -15,7 +15,7 @@ Section ProductNaturalTransformation.
   Variable T : SpecializedNaturalTransformation F F'.
   Variable U : SpecializedNaturalTransformation G G'.
 
-  Definition ProductNaturalTransformation : SpecializedNaturalTransformation (F * G) (F' * G').
+  Polymorphic Definition ProductNaturalTransformation : SpecializedNaturalTransformation (F * G) (F' * G').
     refine (Build_SpecializedNaturalTransformation (F * G) (F' * G')
       (fun ac : A * C => (T (fst ac), U (snd ac)))
       _
