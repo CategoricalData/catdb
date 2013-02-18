@@ -905,6 +905,41 @@ Ltac destruct_to_empty_set_in_match :=
     | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
   end.
 
+Section True.
+  Lemma True_singleton (u : True) : u = I.
+    case u; reflexivity.
+  Qed.
+
+  Lemma True_eq (u u' : True) : u = u'.
+    case u; case u'; reflexivity.
+  Defined.
+
+  Lemma True_eq_singleton (u u' : True) (H : u = u') : H = True_eq _ _.
+    destruct u; destruct H; reflexivity.
+  Defined.
+
+  Lemma True_eq_eq (u u' : True) (H H' : u = u') : H = H'.
+    transitivity (@True_eq u u');
+    destruct_head @eq; subst_body; destruct_head True; reflexivity.
+  Defined.
+
+  Lemma True_JMeq (u u' : True) : u == u'.
+    case u; case u'; reflexivity.
+  Defined.
+
+  Lemma False_eq (a b : False) : a = b.
+    destruct a.
+  Defined.
+
+  Lemma False_JMeql (a : False) T (b : T) : a == b.
+    destruct a.
+  Defined.
+
+  Lemma False_JMeqr T (a : T) (b : False) : a == b.
+    destruct b.
+  Defined.
+End True.
+
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.
@@ -939,6 +974,15 @@ Section unit.
     destruct b.
   Defined.
 End unit.
+
+Hint Rewrite True_singleton.
+Hint Extern 0 (@eq True _ _) => apply True_eq.
+Hint Extern 0 (@eq (@eq True _ _) _ _) => apply True_eq_eq.
+Hint Extern 0 (@JMeq True _ True _) => apply True_JMeq.
+Hint Extern 0 True => constructor.
+Hint Extern 0 (@eq False _ _) => apply False_eq.
+Hint Extern 0 (@JMeq False _ _ _) => apply False_JMeql.
+Hint Extern 0 (@JMeq _ _ False _) => apply False_JMeqr.
 
 Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
