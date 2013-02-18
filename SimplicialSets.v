@@ -16,4 +16,4 @@ Section SimplicialSets.
   Definition SimplicialProp := SimplicialCategory PropCat.
 End SimplicialSets.
 
-Notation "'SimplicialOf' obj" := (let C := CatOf obj in SimplicialCategory C) (at level 0).
+Notation SimplicialOf obj := (let C := CatOf obj in SimplicialCategory C).

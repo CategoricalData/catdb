@@ -77,24 +77,22 @@ Coercion SpecializedFunctorFrom_Type2Set : SpecializedFunctorFromType >-> Specia
 
 (* There is a category [Set*], where the objects are sets with a distinguished elements and the morphisms are set morphisms *)
 Section PointedSet.
-  Local Notation "'PointedCatOf' obj" := (let pointed_set_fun_eta := ((fun _ _ _ _ _ => eq_refl) :
-                                                                        forall {T : Type} {proj : T -> Type} (a b : T) (f : proj a -> proj b),
-                                                                          (fun x => f x) = f) in
-                                          @Build_SpecializedCategory { A : obj & A }
-                                                                     (fun s d => (projT1 s) -> (projT1 d))
-                                                                     (fun _ => (fun x => x))
-                                                                     (fun _ _ _ f g => (fun x => f (g x)))
-                                                                     (fun _ _ _ _ _ _ _ => eq_refl)
-                                                                     (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))
-                                                                     (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))
-                                         ) (at level 0).
+  Local Notation PointedCatOf obj := (let pointed_set_fun_eta := ((fun _ _ _ _ _ => eq_refl) :
+                                                                    forall {T : Type} {proj : T -> Type} (a b : T) (f : proj a -> proj b),
+                                                                      (fun x => f x) = f) in
+                                      @Build_SpecializedCategory { A : obj & A }
+                                                                 (fun s d => (projT1 s) -> (projT1 d))
+                                                                 (fun _ => (fun x => x))
+                                                                 (fun _ _ _ f g => (fun x => f (g x)))
+                                                                 (fun _ _ _ _ _ _ _ => eq_refl)
+                                                                 (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))
+                                                                 (@pointed_set_fun_eta { A : obj & A } (@projT1 obj _))).
 
-  Local Notation "'PointedCatProjectionOf' obj" := (Build_SpecializedFunctor (PointedCatOf obj) (CatOf obj)
-                                                                             (fun c => projT1 c)
-                                                                             (fun s d (m : (projT1 s) -> (projT1 d)) => m)
-                                                                             (fun _ _ _ _ _ => eq_refl)
-                                                                             (fun _ => eq_refl)
-                                                   ) (at level 0).
+  Local Notation PointedCatProjectionOf obj := (Build_SpecializedFunctor (PointedCatOf obj) (CatOf obj)
+                                                                         (fun c => projT1 c)
+                                                                         (fun s d (m : (projT1 s) -> (projT1 d)) => m)
+                                                                         (fun _ _ _ _ _ => eq_refl)
+                                                                         (fun _ => eq_refl)).
 
   Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := Eval cbv beta zeta in PointedCatOf Type.
   Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
