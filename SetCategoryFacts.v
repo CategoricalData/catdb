@@ -1,19 +1,58 @@
 Require Import FunctionalExtensionality.
 Require Export Category SetCategory DiscreteCategory CategoryIsomorphisms.
-Require Import Common.
+Require Import Common NaturalNumbersObject.
 
 Set Implicit Arguments.
 
+Notation IndexedTInitialOf obj coerce initial_obj :=
+  ((fun o => exist _
+                   (fun x : initial_obj%type => match x with end)
+                   (fun _ => functional_extensionality_dep _ _ (fun x : initial_obj%type => match x with end)))
+   : IsInitialObject (C := IndexedCatOf obj coerce) initial_obj%type).
+
+Notation IndexedTTerminalOf obj coerce terminal_obj constr all_eq :=
+  ((fun o : obj => exist (fun m : o -> terminal_obj => forall x : o -> terminal_obj, x = m)
+                         (fun _ : o => constr)
+                         (fun H : o -> terminal_obj => functional_extensionality_dep H
+                                                                                     (fun _ : o => constr)
+                                                                                     (fun x : o => all_eq _ _)))
+   : IsTerminalObject (C := IndexedCatOf obj coerce) terminal_obj%type).
+
+Notation IndexedEmptySetInitialOf obj coerce := (IndexedTInitialOf obj coerce Empty_set).
+Notation IndexedFalseInitialOf obj coerce := (IndexedTInitialOf obj coerce False).
+
+Notation IndexedUnitTerminalOf obj coerce := (IndexedTTerminalOf obj coerce unit tt unit_eq).
+Notation IndexedTrueTerminalOf obj coerce := (IndexedTTerminalOf obj coerce True I True_eq).
+
+Notation EmptySetInitialOf obj := (IndexedEmptySetInitialOf obj (fun x => x)).
+Notation FalseInitialOf obj := (IndexedFalseInitialOf obj (fun x => x)).
+
+Notation UnitTerminalOf obj := (IndexedUnitTerminalOf obj (fun x => x)).
+Notation TrueTerminalOf obj := (IndexedTrueTerminalOf obj (fun x => x)).
+
+Notation CoercedEmptySetInitialOf obj T := (IndexedEmptySetInitialOf obj (fun x => x : T)).
+Notation CoercedFalseInitialOf obj T := (IndexedFalseInitialOf obj (fun x => x : T)).
+
+Notation CoercedUnitTerminalOf obj T := (IndexedUnitTerminalOf obj (fun x => x : T)).
+Notation CoercedTrueTerminalOf obj T := (IndexedTrueTerminalOf obj (fun x => x : T)).
+
 Section InitialTerminal.
-  Hint Extern 1 (_ = _) => apply (@functional_extensionality_dep _); intro.
-  Hint Extern 2 => destruct_to_empty_set.
+  Definition TypeCatFalseInitial : IsInitialObject (C := TypeCat) False := Eval simpl in FalseInitialOf Type.
+  Definition SetCatFalseInitial : IsInitialObject (C := SetCat) False := Eval simpl in FalseInitialOf Set.
+  Definition PropCatFalseInitial : IsInitialObject (C := PropCat) False := Eval simpl in FalseInitialOf Prop.
 
-  Local Ltac t := repeat (hnf in *; simpl in *; intros; try destruct_exists; try destruct_to_empty_set); auto.
+  Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set := Eval simpl in EmptySetInitialOf Type.
+  Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set := Eval simpl in EmptySetInitialOf Set.
 
-  Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set. t. Defined.
-  Definition TypeCatSingletonTerminal : IsTerminalObject (C := TypeCat) unit. t. Defined.
-  Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set. t. Defined.
-  Definition SetCatSingletonTerminal : IsTerminalObject (C := SetCat) unit. t. Defined.
+  Definition TypeCatTrueTerminal : IsTerminalObject (C := TypeCat) True := Eval simpl in TrueTerminalOf Type.
+  Definition SetCatTrueTerminal : IsTerminalObject (C := SetCat) True := Eval simpl in TrueTerminalOf Set.
+  Definition PropCatTrueTerminal : IsTerminalObject (C := PropCat) True := Eval simpl in TrueTerminalOf Prop.
+
+  Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
+  Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
+
+  Definition TypeCatSingletonTerminal := Eval hnf in TypeCatUnitTerminal.
+  Definition SetCatSingletonTerminal := Eval hnf in SetCatUnitTerminal.
 End InitialTerminal.
 
 Section EpiMono.
@@ -84,3 +123,48 @@ Section EpiMono.
     t.
   Qed.
 End EpiMono.
+
+Section nat.
+  Fixpoint NatBuilderFunction A (o : unit -> A) (s : A -> A) (n : nat) : A
+    := match n with
+         | 0 => o tt
+         | S n' => s (NatBuilderFunction o s n')
+       end.
+
+  Local Ltac t :=
+    simpl in *;
+    repeat (split || intro || apply functional_extensionality_dep);
+    destruct_head unit;
+    split_and;
+    subst;
+    trivial;
+    fg_equal;
+    match goal with | [ n : nat |- _ ] => induction n end;
+    simpl in *;
+    congruence.
+
+  Local Notation PartialBuild_NaturalNumbersPreObject T Cat pf :=
+    (@Build_NaturalNumbersPreObject T Cat
+                                    nat
+                                    (UnitTerminalOf T)
+                                    (fun _ => 0)
+                                    S
+                                    (fun A q f => exist _ (NatBuilderFunction q f) (pf A q f))).
+
+  Local Ltac build_nat T Cat :=
+    let pf := fresh in
+    let pfT := fresh in
+    evar (pfT : Prop);
+      cut pfT; subst pfT;
+      [ intro pf;
+        let t := constr:(PartialBuild_NaturalNumbersPreObject T Cat pf) in
+        let t' := (eval simpl in t) in
+        exact t'
+      | ];
+      instantiate; abstract t.
+
+  Let SetCatNaturalNumbersPreObject' : NaturalNumbersPreObject SetCat. build_nat Set SetCat. Defined.
+  Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
+  Let TypeCatNaturalNumbersPreObject' : NaturalNumbersPreObject TypeCat. build_nat Type TypeCat. Defined.
+  Definition TypeCatNaturalNumbersPreObject := Eval hnf in TypeCatNaturalNumbersPreObject'.
+End nat.
