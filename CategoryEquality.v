@@ -69,7 +69,10 @@ Section RoundtripCat.
   Qed.
 End RoundtripCat.
 
-Polymorphic Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id : category.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments SpecializedCategory_Category_SpecializedCategory_Id [_] _.
+
+Polymorphic Hint Rewrite SpecializedCategory_Category_SpecializedCategory_Id Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripLSCat.
   Context `(C : @LocallySmallSpecializedCategory obj).
@@ -83,8 +86,10 @@ Section RoundtripLSCat.
     cat_eq.
   Qed.
 End RoundtripLSCat.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id [_] _.
 
-Polymorphic Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
+Polymorphic Hint Rewrite LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripSCat.
   Context `(C : @SmallSpecializedCategory obj).
@@ -99,4 +104,7 @@ Section RoundtripSCat.
   Qed.
 End RoundtripSCat.
 
-Polymorphic Hint Rewrite @Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id : category.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments Small_SpecializedCategory_Category_SpecializedCategory_Id [_] _.
+
+Polymorphic Hint Rewrite Small_SpecializedCategory_Category_SpecializedCategory_Id Small_Category_SpecializedCategory_Category_Id : category.

@@ -151,8 +151,8 @@ Section Category.
                | [ |- Isomorphism _ _ ] => eapply Build_Isomorphism
              end.
 
-    Polymorphic Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : category.
-    Polymorphic Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : morphism.
+    Polymorphic Hint Resolve IsomorphismOf_Identity InverseOf ComposeIsomorphismOf : category.
+    Polymorphic Hint Resolve IsomorphismOf_Identity InverseOf ComposeIsomorphismOf : morphism.
     Local Polymorphic Hint Extern 1 => eassumption.
 
     Polymorphic Lemma Isomorphic_refl c : Isomorphic c c.
@@ -197,8 +197,8 @@ Section Category.
   Qed.
 End Category.
 
-Polymorphic Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : category.
-Polymorphic Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : morphism.
+Polymorphic Hint Resolve RightInverse LeftInverse IsomorphismOf_Identity ComposeIsomorphismOf : category.
+Polymorphic Hint Resolve RightInverse LeftInverse IsomorphismOf_Identity ComposeIsomorphismOf : morphism.
 
 Ltac eapply_by_compose H :=
   match goal with

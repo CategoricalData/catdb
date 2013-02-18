@@ -69,7 +69,7 @@ Section DiagonalFunctorLemmas.
   Qed.
 End DiagonalFunctorLemmas.
 
-Polymorphic Hint Rewrite @Compose_DiagonalFunctor.
+Polymorphic Hint Rewrite Compose_DiagonalFunctor.
 
 Section Limit.
   Context `(C : @SpecializedCategory objC).

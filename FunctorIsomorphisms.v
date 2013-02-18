@@ -175,5 +175,5 @@ Section Functor_preserves_isomorphism.
   Defined.
 End Functor_preserves_isomorphism.
 
-Polymorphic Hint Resolve @MorphismOf_IsomorphismOf : category.
-Polymorphic Hint Resolve @MorphismOf_IsomorphismOf : functor.
+Polymorphic Hint Resolve MorphismOf_IsomorphismOf : category.
+Polymorphic Hint Resolve MorphismOf_IsomorphismOf : functor.

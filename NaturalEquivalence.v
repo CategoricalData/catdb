@@ -170,8 +170,7 @@ Section NaturalTransformationInverse.
   Variable T : NaturalTransformation F G.
 
   Polymorphic Hint Unfold InverseOf.
-  Polymorphic Hint Resolve f_equal f_equal2 @Commutes.
-  Polymorphic Hint Rewrite @LeftIdentity @RightIdentity.
+  Polymorphic Hint Resolve f_equal f_equal2 Commutes.
 
   Polymorphic Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
     refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
@@ -203,8 +202,8 @@ End IdentityNaturalTransformation.
 
 Arguments IdentityNaturalEquivalence [C D] F x.
 
-Polymorphic Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquivalence : category.
-Polymorphic Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquivalence : natural_transformation.
+Polymorphic Hint Resolve IdentityNaturalEquivalence NaturalEquivalenceInverse_NaturalEquivalence : category.
+Polymorphic Hint Resolve IdentityNaturalEquivalence NaturalEquivalenceInverse_NaturalEquivalence : natural_transformation.
 
 Section FunctorNaturalEquivalenceRelation.
   Variable C D : Category.
@@ -286,10 +285,10 @@ Section FunctorNaturalEquivalenceLemmas.
   Qed.
 End FunctorNaturalEquivalenceLemmas.
 
-Polymorphic Hint Resolve @PreComposeFunctorsNE @PostComposeFunctorsNE @ComposeFunctorsAssociativityNE : category.
-Polymorphic Hint Rewrite @LeftIdentityFunctorNE @RightIdentityFunctorNE : category.
-Polymorphic Hint Resolve @PreComposeFunctorsNE @PostComposeFunctorsNE @ComposeFunctorsAssociativityNE : natural_transformation.
-Polymorphic Hint Rewrite @LeftIdentityFunctorNE @RightIdentityFunctorNE : natural_transformation.
+Polymorphic Hint Resolve PreComposeFunctorsNE PostComposeFunctorsNE ComposeFunctorsAssociativityNE : category.
+Polymorphic Hint Rewrite LeftIdentityFunctorNE RightIdentityFunctorNE : category.
+Polymorphic Hint Resolve PreComposeFunctorsNE PostComposeFunctorsNE ComposeFunctorsAssociativityNE : natural_transformation.
+Polymorphic Hint Rewrite LeftIdentityFunctorNE RightIdentityFunctorNE : natural_transformation.
 
 Section CategoryNaturalEquivalenceRelation.
 

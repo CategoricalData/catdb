@@ -44,7 +44,11 @@ Section DualCategories.
   Qed.
 End DualCategories.
 
-Polymorphic Hint Rewrite @op_op_id @op_distribute_prod : category.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments op_op_id [_] C.
+Arguments op_distribute_prod [_] C [_] D.
+
+Polymorphic Hint Rewrite op_op_id op_distribute_prod : category.
 
 Section DualObjects.
   Context `(C : @SpecializedCategory objC).

@@ -80,8 +80,8 @@ Ltac fold_NT :=
 
 Arguments Commutes [objC C objD D F G] T _ _ _.
 
-Polymorphic Hint Resolve @Commutes @Commutes' : category.
-Polymorphic Hint Resolve @Commutes @Commutes' : natural_transformation.
+Polymorphic Hint Resolve Commutes Commutes' : category.
+Polymorphic Hint Resolve Commutes Commutes' : natural_transformation.
 
 Ltac present_spnt := present_spcategory; present_spfunctor;
   present_obj_obj @ComponentsOf' @ComponentsOf(*;
@@ -211,8 +211,8 @@ Section NaturalTransformationComposition.
   Variables F F' F'' : SpecializedFunctor C D.
   Variables G G' : SpecializedFunctor D E.
 
-  Polymorphic Hint Resolve @Commutes f_equal f_equal2 : natural_transformation.
-  Polymorphic Hint Rewrite @Associativity : natural_transformation.
+  Polymorphic Hint Resolve Commutes f_equal f_equal2 : natural_transformation.
+  Polymorphic Hint Rewrite Associativity : natural_transformation.
 
   (*
      We have the diagram
@@ -287,7 +287,7 @@ Section NaturalTransformationComposition.
   *)
   (* XXX TODO: Automate this better *)
 
-  Polymorphic Hint Rewrite @Commutes : natural_transformation.
+  Polymorphic Hint Rewrite Commutes : natural_transformation.
   Polymorphic Hint Resolve f_equal2 : natural_transformation.
   Polymorphic Hint Extern 1 (_ = _) => apply @FCompositionOf : natural_transformation.
 
@@ -297,7 +297,7 @@ Section NaturalTransformationComposition.
     intros; symmetry; try_associativity ltac:(eauto with natural_transformation).
   Qed.
 
-  Polymorphic Hint Rewrite @FCompositionOf2 : natural_transformation.
+  Polymorphic Hint Rewrite FCompositionOf2 : natural_transformation.
 
   Polymorphic Definition NTComposeF (U : SpecializedNaturalTransformation G G') (T : SpecializedNaturalTransformation F F'):
     SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
@@ -333,8 +333,12 @@ Section IdentityNaturalTransformation.
   Qed.
 End IdentityNaturalTransformation.
 
-Polymorphic Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : category.
-Polymorphic Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : natural_transformation.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments LeftIdentityNaturalTransformation [_ _ _ _ _ _] _.
+Arguments RightIdentityNaturalTransformation [_ _ _ _ _ _] _.
+
+Polymorphic Hint Rewrite LeftIdentityNaturalTransformation RightIdentityNaturalTransformation : category.
+Polymorphic Hint Rewrite LeftIdentityNaturalTransformation RightIdentityNaturalTransformation : natural_transformation.
 
 Section IdentityNaturalTransformationF.
   Context `(C : @SpecializedCategory objC).
@@ -350,8 +354,11 @@ Section IdentityNaturalTransformationF.
   Qed.
 End IdentityNaturalTransformationF.
 
-Polymorphic Hint Rewrite @NTComposeFIdentityNaturalTransformation : category.
-Polymorphic Hint Rewrite @NTComposeFIdentityNaturalTransformation : natural_transformation.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments NTComposeFIdentityNaturalTransformation [_ _ _ _ _ _] _ _.
+
+Polymorphic Hint Rewrite NTComposeFIdentityNaturalTransformation : category.
+Polymorphic Hint Rewrite NTComposeFIdentityNaturalTransformation : natural_transformation.
 
 Section Associativity.
   Context `(B : @SpecializedCategory objB).
@@ -429,5 +436,5 @@ Section NaturalTransformationExchangeLaw.
   Qed.
 End NaturalTransformationExchangeLaw.
 
-Polymorphic Hint Resolve @NaturalTransformationExchangeLaw : category.
-Polymorphic Hint Resolve @NaturalTransformationExchangeLaw : natural_transformation.
+Polymorphic Hint Resolve NaturalTransformationExchangeLaw : category.
+Polymorphic Hint Resolve NaturalTransformationExchangeLaw : natural_transformation.

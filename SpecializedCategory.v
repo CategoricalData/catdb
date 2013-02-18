@@ -142,10 +142,15 @@ Ltac spcategory_hideProofs :=
                hideProofs pf0 pf1 pf2 pf3
          end.
 
-Polymorphic Hint Resolve @LeftIdentity @RightIdentity @Associativity : category.
-Polymorphic Hint Rewrite @LeftIdentity @RightIdentity : category.
-Polymorphic Hint Resolve @LeftIdentity @RightIdentity @Associativity : morphism.
-Polymorphic Hint Rewrite @LeftIdentity @RightIdentity : morphism.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments LeftIdentity [_] _ _ _ _.
+Arguments RightIdentity [_] _ _ _ _.
+Arguments Associativity [_] _ _ _ _ _ _ _ _.
+
+Polymorphic Hint Resolve LeftIdentity RightIdentity Associativity : category.
+Polymorphic Hint Rewrite LeftIdentity RightIdentity : category.
+Polymorphic Hint Resolve LeftIdentity RightIdentity Associativity : morphism.
+Polymorphic Hint Rewrite LeftIdentity RightIdentity : morphism.
 
 (* eh, I'm not terribly happy.  meh. *)
 Polymorphic Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
@@ -198,7 +203,7 @@ Ltac solve_for_identity :=
 
 Polymorphic Definition NoEvar T (_ : T) := True.
 
-Polymorphic Lemma AssociativityNoEvar `(C : @SpecializedCategory obj) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
+Polymorphic Lemma AssociativityNoEvar obj (C : @SpecializedCategory obj) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
   (m2 : C.(Morphism) o2 o3) (m3 : C.(Morphism) o3 o4),
   NoEvar (m1, m2) \/ NoEvar (m2, m3) \/ NoEvar (m1, m3)
   -> Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1).
@@ -210,8 +215,8 @@ Ltac noEvar := match goal with
                    cut (NoEvar X); [ intro; tauto | constructor ]
                end.
 
-Polymorphic Hint Rewrite @AssociativityNoEvar using noEvar : category.
-Polymorphic Hint Rewrite @AssociativityNoEvar using noEvar : morphism.
+Polymorphic Hint Rewrite AssociativityNoEvar using noEvar : category.
+Polymorphic Hint Rewrite AssociativityNoEvar using noEvar : morphism.
 
 Ltac try_associativity_quick tac := try_rewrite Associativity tac.
 Ltac try_associativity tac := try_rewrite_by AssociativityNoEvar ltac:(idtac; noEvar) tac.
@@ -291,8 +296,8 @@ Section Category.
   End properties.
 End Category.
 
-Polymorphic Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category.
-Polymorphic Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : morphism.
+Polymorphic Hint Immediate IdentityIsEpimorphism IdentityIsMonomorphism MonomorphismComposition EpimorphismComposition : category.
+Polymorphic Hint Immediate IdentityIsEpimorphism IdentityIsMonomorphism MonomorphismComposition EpimorphismComposition : morphism.
 
 Arguments IsEpimorphism' {obj} [C x y] m.
 Arguments IsEpimorphism {obj} [C x y] m.

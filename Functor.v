@@ -80,10 +80,14 @@ Arguments MorphismOf {objC} [C] {objD} [D] F [s d] m : simpl nomatch.
 Arguments FCompositionOf [objC C objD D] F _ _ _ _ _.
 Arguments FIdentityOf [objC C objD D] F _.
 
-Polymorphic Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : category.
-Polymorphic Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : functor.
-Polymorphic Hint Rewrite @FIdentityOf @FIdentityOf' : category.
-Polymorphic Hint Rewrite @FIdentityOf @FIdentityOf' : functor.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments FCompositionOf' [_ _ _ _] _ _ _ _ _ _.
+Arguments FIdentityOf' [_ _ _ _] _ _.
+
+Polymorphic Hint Resolve FCompositionOf FIdentityOf FCompositionOf' FIdentityOf' : category.
+Polymorphic Hint Resolve FCompositionOf FIdentityOf FCompositionOf' FIdentityOf' : functor.
+Polymorphic Hint Rewrite FIdentityOf FIdentityOf' : category.
+Polymorphic Hint Rewrite FIdentityOf FIdentityOf' : functor.
 
 Ltac present_obj_obj from to :=
   repeat match goal with
@@ -219,7 +223,7 @@ Section FunctorComposition.
   Context `(D : @SpecializedCategory objD).
   Context `(E : @SpecializedCategory objE).
 
-  Polymorphic Hint Rewrite @FCompositionOf : functor.
+  Polymorphic Hint Rewrite FCompositionOf : functor.
 
   Polymorphic Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
     refine (Build_SpecializedFunctor C E
@@ -259,10 +263,14 @@ Section IdentityFunctorLemmas.
   Qed.
 End IdentityFunctorLemmas.
 
-Polymorphic Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : category.
-Polymorphic Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category.
-Polymorphic Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
-Polymorphic Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : functor.
+(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
+Arguments LeftIdentityFunctor [_ _ _ _] _.
+Arguments RightIdentityFunctor [_ _ _ _] _.
+
+Polymorphic Hint Rewrite LeftIdentityFunctor RightIdentityFunctor : category.
+Polymorphic Hint Immediate LeftIdentityFunctor RightIdentityFunctor : category.
+Polymorphic Hint Rewrite LeftIdentityFunctor RightIdentityFunctor : functor.
+Polymorphic Hint Immediate LeftIdentityFunctor RightIdentityFunctor : functor.
 
 Section FunctorCompositionLemmas.
   Context `(B : @SpecializedCategory objB).
@@ -276,5 +284,5 @@ Section FunctorCompositionLemmas.
   Qed.
 End FunctorCompositionLemmas.
 
-Polymorphic Hint Resolve @ComposeFunctorsAssociativity : category.
-Polymorphic Hint Resolve @ComposeFunctorsAssociativity : functor.
+Polymorphic Hint Resolve ComposeFunctorsAssociativity : category.
+Polymorphic Hint Resolve ComposeFunctorsAssociativity : functor.
