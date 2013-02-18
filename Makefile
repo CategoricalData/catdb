@@ -22,6 +22,7 @@ MODULES    := Notations \
 	GraphTranslation \
 	ComputableGraphCategory \
 	\
+	NaturalNumbersObject \
 	ChainCategory \
 	BoolCategory \
 	NatCategory \
