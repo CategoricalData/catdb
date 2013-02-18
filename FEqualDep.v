@@ -3,6 +3,8 @@ Require Import Common Notations.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Infix "==" := JMeq.
 
 Section f_equal_dep.

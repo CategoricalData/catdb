@@ -2,6 +2,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section path.
   Variable V : Type.
   Variable E : V -> V -> Type.

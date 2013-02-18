@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section FunctorFromPaths.
   Variable V : Type.
   Variable E : V -> V -> Type.
