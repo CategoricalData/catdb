@@ -49,15 +49,15 @@ Section SetCoercions.
   Context `(C : @SpecializedCategory objC).
 
   Local Ltac build_functor := hnf in *;
-    match goal with
-      | [ F : SpecializedFunctor _ _ |- SpecializedFunctor ?C ?D ] =>
-        exact (Build_SpecializedFunctor C D
-          F.(ObjectOf')
-          F.(MorphismOf')
-          F.(FCompositionOf')
-          F.(FIdentityOf')
-        )
-    end.
+                             match goal with
+                               | [ F : SpecializedFunctor _ _ |- SpecializedFunctor ?C ?D ] =>
+                                 exact (Build_SpecializedFunctor C D
+                                                                 (fun x => F.(ObjectOf') x)
+                                                                 (fun s d m => F.(MorphismOf') s d m)
+                                                                 (fun s d d' m m' => F.(FCompositionOf') s d d' m m')
+                                                                 (fun x => F.(FIdentityOf') x)
+                                       )
+                             end.
 
   Definition SpecializedFunctorTo_Prop2Set (F : SpecializedFunctorToProp C) : SpecializedFunctorToSet C. build_functor. Defined.
   Definition SpecializedFunctorTo_Prop2Type (F : SpecializedFunctorToProp C) : SpecializedFunctorToType C. build_functor. Defined.
