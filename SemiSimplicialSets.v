@@ -34,4 +34,4 @@ Section SemiSimplicialSets.
   Definition SemiSimplicialProp := SemiSimplicialCategory PropCat.
 End SemiSimplicialSets.
 
-Notation "'SemiSimplicialOf' obj" := (let C := CatOf obj in SemiSimplicialCategory C) (at level 0).
+Notation SemiSimplicialOf obj := (let C := CatOf obj in SemiSimplicialCategory C).
