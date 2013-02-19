@@ -67,6 +67,13 @@ Section DiagonalFunctorLemmas.
     ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
     functor_eq.
   Qed.
+
+  Definition Compose_DiagonalFunctor_NT x (F : SpecializedFunctor D' D) :
+    SpecializedNaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F) (DiagonalFunctor _ _ x)
+    := Build_SpecializedNaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F)
+                                              (DiagonalFunctor _ _ x)
+                                              (fun z => Identity x)
+                                              (fun _ _ _ => eq_refl).
 End DiagonalFunctorLemmas.
 
 Hint Rewrite @Compose_DiagonalFunctor.
