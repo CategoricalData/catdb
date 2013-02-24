@@ -115,10 +115,10 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite @LeftIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
-      repeat rewrite @Associativity (* 3 s *).
+      repeat rewrite LeftIdentity (* putting this here shaves off 6 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      repeat rewrite Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
           symmetry; eapply (@eq_trans _ _ (Compose a (Compose _ c')) _);
@@ -136,8 +136,8 @@ Section InducedFunctor.
                       try (rewrite H'; clear H')
       end (* 7 s *);
       simpl;
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
             reflexivity. (* 7 s since [simpl] *)
     Qed.
 
@@ -151,9 +151,9 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite @LeftIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      repeat rewrite LeftIdentity (* putting this here shaves off 2 s *);
+        repeat rewrite FIdentityOf;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
       reflexivity.
     Qed.
 

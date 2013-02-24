@@ -77,6 +77,10 @@ MODULES    := Notations \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
 	PathsCategoryFunctors \
+	\
+	Group \
+	GroupCategory \
+	\
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
@@ -120,7 +124,7 @@ coq: Makefile.coq
 
 # TODO(jgross): Look into combining this with the time-make.sh script
 timed: Makefile.coq
-	$(MAKE) -f Makefile.coq SHELL=./report_time.sh
+	./report_time.sh -c $(MAKE) -f Makefile.coq SHELL=./report_time.sh
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq

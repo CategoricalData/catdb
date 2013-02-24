@@ -12,12 +12,12 @@ Local Notation "a \ C" := (@CosliceSpecializedCategoryOver _ C a) (at level 70) 
 Local Open Scope category_scope.
 
 Local Ltac rewrite_step :=
-  (progress repeat rewrite @LeftIdentity in * )
-    || (progress repeat rewrite @RightIdentity in * )
+  (progress repeat rewrite LeftIdentity in * )
+    || (progress repeat rewrite RightIdentity in * )
     || (progress repeat rewrite @LeftIdentityFunctor in * )
     || (progress repeat rewrite @RightIdentityFunctor in * )
-    || (progress (repeat rewrite @Associativity; (reflexivity || apply f_equal)))
-    || (progress (repeat rewrite <- @Associativity; apply f_equal2; trivial; [])).
+    || (progress (repeat rewrite Associativity; (reflexivity || apply f_equal)))
+    || (progress (repeat rewrite <- Associativity; apply f_equal2; trivial; [])).
 
 Local Ltac quick_step :=
   ((progress repeat subst)

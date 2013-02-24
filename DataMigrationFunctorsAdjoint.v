@@ -161,7 +161,7 @@ Section DataMigrationFunctorsAdjoint.
         | [ |- context[{| ComponentsOf' := ?x |}] ] => let x' := fresh in set (x' := x)
       end.
       intro e0.
-      setoid_rewrite @LeftIdentity in e0.
+      setoid_rewrite LeftIdentity in e0.
       unfold RightPushforwardAlong_pre_Functor in *; simpl in *.
       pose (fun (g : (S ^ C)%functor) (d : D) =>
               (CosliceCategoryProjection d F)).
@@ -335,7 +335,7 @@ rewrite <- H3.
       setoid_rewrite FIdentityOf in H0.
       Require Import Setoid.
       present_spnt.
-      setoid_rewrite @FIdentityOf in H0.
+      setoid_rewrite FIdentityOf in H0.
       clear.
       revert e2.
       nt_hideProofs.

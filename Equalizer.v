@@ -71,7 +71,7 @@ Section Equalizer.
     abstract (
       unfold EqualizerDiagram_MorphismOf; simpl; intros;
         destruct_type EqualizerTwo;
-        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           trivial; try destruct_to_empty_set
     ).
   Defined.

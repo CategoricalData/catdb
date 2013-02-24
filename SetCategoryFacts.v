@@ -51,8 +51,8 @@ Section InitialTerminal.
   Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
   Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
 
-  Definition TypeCatSingletonTerminal := Eval hnf in TypeCatUnitTerminal.
-  Definition SetCatSingletonTerminal := Eval hnf in SetCatUnitTerminal.
+  Definition TypeCatSingletonTerminal : IsTerminalObject (C := TypeCat) unit := Eval hnf in TypeCatUnitTerminal.
+  Definition SetCatSingletonTerminal : IsTerminalObject (C := SetCat) unit := Eval hnf in SetCatUnitTerminal.
 End InitialTerminal.
 
 Section EpiMono.

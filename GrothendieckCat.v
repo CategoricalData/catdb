@@ -86,7 +86,7 @@ Section Grothendieck.
         etransitivity.
         destruct
     Focus 2.
-    rewrite @FIdentityOf.
+    rewrite FIdentityOf.
     destruct H0.
 
     simpl.

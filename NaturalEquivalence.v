@@ -66,9 +66,9 @@ Section NaturalIsomorphism.
       repeat match goal with
                | _ => reflexivity
                | [ H : _ |- _ ] => rewrite H
-               | _ => progress (repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity)
+               | _ => progress (repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
                | _ => progress repeat rewrite <- FCompositionOf
-               | _ => progress repeat rewrite @FIdentityOf
+               | _ => progress repeat rewrite FIdentityOf
                | [ |- appcontext[?E] ] =>
                  match type of E with
                    | IsomorphismOf _ => destruct E; simpl

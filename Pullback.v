@@ -88,7 +88,7 @@ Section Pullback.
       abstract (
           unfold PullbackDiagram_MorphismOf; simpl; intros;
           destruct_type PullbackThree;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           trivial; try destruct_to_empty_set
         ).
     Defined.
@@ -128,7 +128,7 @@ Section Pullback.
       abstract (
           unfold PushoutDiagram_MorphismOf; simpl; intros;
           destruct_type PullbackThree;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           trivial; try destruct_to_empty_set
         ).
     Defined.

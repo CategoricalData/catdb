@@ -13,13 +13,15 @@ Section UniversalMorphism.
   Variables C D : Category.
 
   Local Ltac intro_t :=
+    simpl in *;
     repeat intro;
+    simpl_eq;
     destruct_sig;
     destruct_head_hnf prod;
     destruct_head_hnf unit;
-    simpl_eq;
-    repeat rewrite @RightIdentity in *;
-    repeat rewrite @LeftIdentity in *;
+    destruct_head_hnf and;
+    autorewrite with morphism in *;
+    subst;
     intuition.
 
   Section InitialMorphism.

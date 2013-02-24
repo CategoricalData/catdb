@@ -77,8 +77,8 @@ Section GraphObj.
     abstract (
       unfold UnderlyingGraph_MorphismOf; simpl; intros;
         destruct_type GraphIndex;
-        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
-          trivial; try destruct_to_empty_set
+        autorewrite with morphism;
+        trivial; try destruct_to_empty_set
     ).
   Defined.
 End GraphObj.
