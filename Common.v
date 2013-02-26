@@ -905,6 +905,20 @@ Ltac destruct_to_empty_set_in_match :=
     | [ _ : appcontext[match ?x with end] |- _ ] => solve [ destruct x || let H := fresh in pose x as H; destruct H ]
   end.
 
+Ltac destruct_first_if_not_second a b :=
+  (constr_eq a b; fail 1) || (let H := fresh in set (H := a : unit) in *; destruct H).
+
+Ltac destruct_singleton_constructor c :=
+  let t := type of c in
+  repeat match goal with
+           | [ H : t |- _ ] => destruct H
+           | [ H : context[?e] |- _ ] => destruct_first_if_not_second e c
+           | [ |- context[?e] ] => destruct_first_if_not_second e c
+         end.
+
+Ltac destruct_units := destruct_singleton_constructor tt.
+Ltac destruct_Trues := destruct_singleton_constructor I.
+
 Section True.
   Lemma True_singleton (u : True) : u = I.
     case u; reflexivity.
