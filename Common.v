@@ -1,4 +1,4 @@
-Require Import JMeq ProofIrrelevance.
+Require Import JMeq ProofIrrelevance Eqdep_dec.
 
 Set Implicit Arguments.
 
@@ -294,6 +294,18 @@ Ltac simpl_eq' :=
 Ltac simpl_eq := intros; repeat (
   simpl_eq'; simpl in *
 ).
+
+(* For things with decidable equality, we have [forall x (P : x = x),
+   P = eq_refl].  So replace such hypotheses with [eq_refl]. *)
+Ltac subst_eq_refl :=
+  repeat match goal with
+           | [ H : ?a = ?a |- _ ] => clear H
+           | [ H : ?a = ?a |- _ ] => assert (eq_refl = H) by abstract (
+                                                                 apply K_dec;
+                                                                 solve [ try decide equality; try congruence ]
+                                                               );
+                                    subst H
+         end.
 
 (* Coq's build in tactics don't work so well with things like [iff]
    so split them up into multiple hypotheses *)
