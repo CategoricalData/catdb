@@ -8,19 +8,18 @@ Generalizable All Variables.
 Local Open Scope category_scope.
 
 Section swap.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Definition SwapFunctor `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  : SpecializedFunctor (C * D) (D * C)
+    := Build_SpecializedFunctor (C * D) (D * C)
+                                (fun cd => (snd cd, fst cd))
+                                (fun _ _ m => (snd m, fst m))
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition SwapFunctor : SpecializedFunctor (C * D) (D * C).
-    refine (Build_SpecializedFunctor (C * D) (D * C)
-                                     (fun cd => (snd cd, fst cd))
-                                     (fun _ _ m => (snd m, fst m))
-                                     _
-                                     _);
-    abstract (
-        intros; simpl; present_spcategory; simpl_eq; reflexivity
-      ).
-  Defined.
+  Lemma ProductLawSwap `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
+    functor_eq; intuition.
+  Qed.
 End swap.
 
 Section Law0.
