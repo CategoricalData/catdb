@@ -1,5 +1,5 @@
 Require Export Limits.
-Require Import Common Duals.
+Require Import Common Duals SpecializedCommaCategory FunctorCategory.
 
 Set Implicit Arguments.
 
@@ -19,8 +19,8 @@ Section Pullback.
    *)
 
   Context `(C : @SpecializedCategory objC).
-  Variables a b c : objC.
   Section pullback.
+    Variables a b c : objC.
     Variable f : C.(Morphism) a c.
     Variable g : C.(Morphism) b c.
 
@@ -97,12 +97,64 @@ Section Pullback.
     Definition IsPullback := IsLimit (F := PullbackDiagram).
   End pullback.
 
+  Section pullback_functorial.
+    Local Infix "/" := SliceSpecializedCategoryOver.
+
+    Variable c : C.
+
+    Definition PullbackDiagramFunctor_ObjectOf : ((C / c) * (C / c)) -> (C ^ PullbackIndex)%category
+      := fun fg => PullbackDiagram _ _ c (projT2 (fst fg)) (projT2 (snd fg)).
+
+    Definition PullbackDiagramFunctor_MorphismOf_ComponentsOf s d (m : Morphism ((C / c) * (C / c)) s d)
+    : forall x, Morphism _ (PullbackDiagramFunctor_ObjectOf s x) (PullbackDiagramFunctor_ObjectOf d x)
+      := fun x => match x with
+                    | PullbackA => (fst (proj1_sig (fst m)))
+                    | PullbackB => (fst (proj1_sig (snd m)))
+                    | PullbackC => Identity _
+                  end.
+
+    Definition PullbackDiagramFunctor_MorphismOf s d (m : Morphism ((C / c) * (C / c)) s d)
+    : Morphism (C ^ PullbackIndex) (PullbackDiagramFunctor_ObjectOf s) (PullbackDiagramFunctor_ObjectOf d).
+      exists (PullbackDiagramFunctor_MorphismOf_ComponentsOf m).
+      present_spfunctor.
+      abstract (
+          destruct m as [[[]] [[]]];
+          simpl in *;
+            intros [] [] [];
+          simpl in *;
+            autorewrite with morphism in *;
+            trivial
+        ).
+    Defined.
+
+    Definition PullbackDiagramFunctor : SpecializedFunctor ((C / c) * (C / c)) (C ^ PullbackIndex).
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+                                           PullbackDiagramFunctor_ObjectOf
+                                           PullbackDiagramFunctor_MorphismOf
+                                           _
+                                           _)
+      end;
+      present_spfunctor;
+      abstract (
+          repeat intros [[[[? []] ?]] [[[? []] ?]]];
+          simpl in *;
+            nt_eq;
+          destruct_head PullbackThree;
+          autorewrite with morphism;
+          trivial
+        ).
+    Defined.
+  End pullback_functorial.
+
   Section pushout.
+    Variables a b c : objC.
     Variable f : C.(Morphism) c a.
     Variable g : C.(Morphism) c b.
 
     Definition PushoutIndex := OppositeCategory PullbackIndex.
-    Definition PushoutDiagram_ObjectOf := PullbackDiagram_ObjectOf.
+    Definition PushoutDiagram_ObjectOf := PullbackDiagram_ObjectOf a b c.
 
     Global Arguments PushoutDiagram_ObjectOf x / .
 
@@ -136,6 +188,57 @@ Section Pullback.
     Definition Pushout := Colimit PushoutDiagram.
     Definition IsPushout := IsColimit (F := PushoutDiagram).
   End pushout.
+
+  Section pushout_functorial.
+    Local Notation "a /  C" := (CosliceSpecializedCategoryOver C a).
+
+    Variable c : C.
+
+    Definition PushoutDiagramFunctor_ObjectOf : ((c / C) * (c / C)) -> (C ^ PushoutIndex)%category
+      := fun fg => PushoutDiagram _ _ c (projT2 (fst fg)) (projT2 (snd fg)).
+
+    Definition PushoutDiagramFunctor_MorphismOf_ComponentsOf s d (m : Morphism ((c / C) * (c / C)) s d)
+    : forall x, Morphism _ (PushoutDiagramFunctor_ObjectOf s x) (PushoutDiagramFunctor_ObjectOf d x)
+      := fun x => match x with
+                    | PullbackA => (snd (proj1_sig (fst m)))
+                    | PullbackB => (snd (proj1_sig (snd m)))
+                    | PullbackC => Identity _
+                  end.
+
+    Definition PushoutDiagramFunctor_MorphismOf s d (m : Morphism ((c / C) * (c / C)) s d)
+    : Morphism (C ^ PushoutIndex) (PushoutDiagramFunctor_ObjectOf s) (PushoutDiagramFunctor_ObjectOf d).
+      exists (PushoutDiagramFunctor_MorphismOf_ComponentsOf m).
+      present_spfunctor.
+      abstract (
+          destruct m as [[[]] [[]]];
+          simpl in *;
+            intros [] [] [];
+          simpl in *;
+            autorewrite with morphism in *;
+            trivial
+        ).
+    Defined.
+
+    Definition PushoutDiagramFunctor : SpecializedFunctor ((c / C) * (c / C)) (C ^ PushoutIndex).
+      match goal with
+        | [ |- SpecializedFunctor ?C ?D ] =>
+          refine (Build_SpecializedFunctor C D
+                                           PushoutDiagramFunctor_ObjectOf
+                                           PushoutDiagramFunctor_MorphismOf
+                                           _
+                                           _)
+      end;
+      present_spfunctor;
+      abstract (
+          repeat intros [[[[? []] ?]] [[[? []] ?]]];
+          simpl in *;
+            nt_eq;
+          destruct_head PullbackThree;
+          autorewrite with morphism;
+          trivial
+        ).
+    Defined.
+  End pushout_functorial.
 End Pullback.
 
 Section PullbackObjects.
