@@ -333,8 +333,6 @@ Section IdentityNaturalTransformation.
   Qed.
 End IdentityNaturalTransformation.
 
-Coercion IdentityNaturalTransformation : SpecializedFunctor >-> SpecializedNaturalTransformation.
-
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : category.
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : natural_transformation.
 
@@ -439,9 +437,9 @@ Ltac nt_solve_associator' :=
            | _ => exact (ComposeFunctorsAssociator1 _ _ _)
            | _ => exact (ComposeFunctorsAssociator2 _ _ _)
            | [ |- SpecializedNaturalTransformation (ComposeFunctors ?F _) (ComposeFunctors ?F _) ] =>
-             refine (NTComposeF F _)
+             refine (NTComposeF (IdentityNaturalTransformation F) _)
            | [ |- SpecializedNaturalTransformation (ComposeFunctors _ ?F) (ComposeFunctors _ ?F) ] =>
-             refine (NTComposeF _ F)
+             refine (NTComposeF _ (IdentityNaturalTransformation F))
          end.
 Ltac nt_solve_associator :=
   repeat match goal with

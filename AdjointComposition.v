@@ -24,7 +24,7 @@ Section compose.
     pose (projT1 (A : AdjunctionUnit _ _)) as η.
     pose (projT1 (A' : AdjunctionUnit _ _)) as η'.
     refine (NTComposeT _ (* associator *)
-                       (NTComposeT (NTComposeF G (NTComposeF η' F))
+                       (NTComposeT (NTComposeF (IdentityNaturalTransformation G) (NTComposeF η' (IdentityNaturalTransformation F)))
                                    (NTComposeT _ (* identity *)
                                                η)));
       nt_solve_associator.
