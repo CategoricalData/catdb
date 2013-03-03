@@ -42,6 +42,7 @@ Section compose.
       ).
   Defined.
 
+  (* TODO(jgross): speed this up, automate it more *)
   Definition ComposeAdjunctions : Adjunction (ComposeFunctors F' F) (ComposeFunctors G G').
     refine (_ : AdjunctionUnit (ComposeFunctors F' F) (ComposeFunctors G G')).
     exists ComposeAdjunctionsUnitMorphism.
