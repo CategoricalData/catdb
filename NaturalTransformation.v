@@ -333,6 +333,8 @@ Section IdentityNaturalTransformation.
   Qed.
 End IdentityNaturalTransformation.
 
+Coercion IdentityNaturalTransformation : SpecializedFunctor >-> SpecializedNaturalTransformation.
+
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : category.
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : natural_transformation.
 
@@ -431,3 +433,21 @@ End NaturalTransformationExchangeLaw.
 
 Hint Resolve @NaturalTransformationExchangeLaw : category.
 Hint Resolve @NaturalTransformationExchangeLaw : natural_transformation.
+
+Ltac nt_solve_associator' :=
+  repeat match goal with
+           | _ => exact (ComposeFunctorsAssociator1 _ _ _)
+           | _ => exact (ComposeFunctorsAssociator2 _ _ _)
+           | [ |- SpecializedNaturalTransformation (ComposeFunctors ?F _) (ComposeFunctors ?F _) ] =>
+             refine (NTComposeF F _)
+           | [ |- SpecializedNaturalTransformation (ComposeFunctors _ ?F) (ComposeFunctors _ ?F) ] =>
+             refine (NTComposeF _ F)
+         end.
+Ltac nt_solve_associator :=
+  repeat match goal with
+           | _ => refine (NTComposeT (ComposeFunctorsAssociator1 _ _ _) _); progress nt_solve_associator'
+           | _ => refine (NTComposeT _ (ComposeFunctorsAssociator1 _ _ _)); progress nt_solve_associator'
+           | _ => refine (NTComposeT (ComposeFunctorsAssociator2 _ _ _) _); progress nt_solve_associator'
+           | _ => refine (NTComposeT _ (ComposeFunctorsAssociator2 _ _ _)); progress nt_solve_associator'
+           | _ => progress nt_solve_associator'
+         end.

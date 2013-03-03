@@ -74,6 +74,7 @@ MODULES    := Notations \
 	AdjointUnit \
 	Adjoint \
 	AdjointUniversalMorphisms \
+	AdjointComposition \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
 	PathsCategoryFunctors \
