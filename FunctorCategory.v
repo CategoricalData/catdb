@@ -24,5 +24,4 @@ Section FunctorCategory.
   Defined.
 End FunctorCategory.
 
-Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
 Notation "C ^ D" := (FunctorCategory D C) : category_scope.
