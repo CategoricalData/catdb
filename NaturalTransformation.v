@@ -390,6 +390,48 @@ Section Associativity.
   Defined.
 End Associativity.
 
+Section IdentityFunctor.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+
+  Local Ltac t :=
+    repeat match goal with
+             | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+               refine (Build_SpecializedNaturalTransformation F G
+                                                              (fun _ => Identity _)
+                                                              _);
+                 present_spfunctor
+             | _ => abstract (simpl; intros; autorewrite with morphism; reflexivity)
+             | _ => split; nt_eq
+           end.
+
+  Section left.
+    Variable F : SpecializedFunctor D C.
+
+    Definition LeftIdentityFunctorNaturalTransformation1 : SpecializedNaturalTransformation (ComposeFunctors (IdentityFunctor _) F) F. t. Defined.
+    Definition LeftIdentityFunctorNaturalTransformation2 : SpecializedNaturalTransformation F (ComposeFunctors (IdentityFunctor _) F). t. Defined.
+
+    Theorem LeftIdentityFunctorNT_Isomorphism
+    : NTComposeT LeftIdentityFunctorNaturalTransformation1 LeftIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
+      /\ NTComposeT LeftIdentityFunctorNaturalTransformation2 LeftIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+      t.
+    Qed.
+  End left.
+
+  Section right.
+    Variable F : SpecializedFunctor C D.
+
+    Definition RightIdentityFunctorNaturalTransformation1 : SpecializedNaturalTransformation (ComposeFunctors F (IdentityFunctor _)) F. t. Defined.
+    Definition RightIdentityFunctorNaturalTransformation2 : SpecializedNaturalTransformation F (ComposeFunctors F (IdentityFunctor _)). t. Defined.
+
+    Theorem RightIdentityFunctorNT_Isomorphism
+    : NTComposeT RightIdentityFunctorNaturalTransformation1 RightIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
+      /\ NTComposeT RightIdentityFunctorNaturalTransformation2 RightIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+      t.
+    Qed.
+  End right.
+End IdentityFunctor.
+
 Section NaturalTransformationExchangeLaw.
   Context `(C : SpecializedCategory objC).
   Context `(D : SpecializedCategory objD).
