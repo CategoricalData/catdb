@@ -1,4 +1,4 @@
-Require Export FunctorCategory.
+Require Export FunctorCategory NaturalTransformation.
 Require Import Common Notations SmallCat ProductCategory Duals ExponentialLaws.
 
 Set Implicit Arguments.
@@ -86,3 +86,168 @@ Section FunctorCategoryFunctor.
   (* Definition FunctorCategoryFunctor : ((LocallySmallCat ^ LocallySmallCat) ^ (OppositeCategory LocallySmallCat))%category
     := ExponentialLaw4Functor_Inverse _ _ _ FunctorCategoryUncurriedFunctor. *)
 End FunctorCategoryFunctor.
+
+Notation "F ^ G" := (FunctorCategoryFunctor_MorphismOf F G) : functor_scope.
+
+Section NaturalTransformation.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(C' : @SpecializedCategory objC').
+  Context `(D' : @SpecializedCategory objD').
+
+  Variables F G : SpecializedFunctor C D.
+  Variables F' G' : SpecializedFunctor C' D'.
+
+  Variable T : SpecializedNaturalTransformation F G.
+  Variable T' : SpecializedNaturalTransformation F' G'.
+
+  Definition LiftNaturalTransformationPointwise : SpecializedNaturalTransformation (F ^ F') (G ^ G').
+    match goal with
+      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+        refine (Build_SpecializedNaturalTransformation F G
+                                                       (fun _ => NTComposeF T (NTComposeF (IdentityNaturalTransformation _) T'))
+                                                       _)
+    end;
+    present_spfunctor;
+    abstract (
+        intros;
+        simpl in *;
+          nt_eq;
+        autorewrite with category;
+        repeat (
+            reflexivity
+              || (progress repeat rewrite <- FCompositionOf)
+              || (progress repeat rewrite Commutes)
+              || (progress try_associativity ltac:(apply f_equal2; try reflexivity; [])))
+      ).
+  Defined.
+End NaturalTransformation.
+
+Notation "T ^ U" := (LiftNaturalTransformationPointwise T U) : natural_transformation_scope.
+
+Section NaturalTransformation_Properties.
+  Section identity.
+    Context `(C : @SpecializedCategory objC).
+    Context `(D : @SpecializedCategory objD).
+
+    Local Ltac t := intros; simpl; nt_eq; autorewrite with category; try reflexivity.
+
+    Section lift.
+      Let LiftIdentityPointwise'
+      : SpecializedNaturalTransformation (IdentityFunctor (C ^ D)) (IdentityFunctor C ^ IdentityFunctor D).
+        match goal with
+          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+            refine (Build_SpecializedNaturalTransformation F G
+                                                           (fun x => (Build_SpecializedNaturalTransformation (F x) (G x)
+                                                                                                             (fun y => Identity (x y))
+                                                                                                             _))
+                                                           _)
+        end;
+        t.
+        Grab Existential Variables.
+        present_spfunctor; abstract t.
+      Defined.
+
+      Let LiftIdentityPointwise''
+      : SpecializedNaturalTransformation (IdentityFunctor (C ^ D)) (IdentityFunctor C ^ IdentityFunctor D).
+        nt_simpl_abstract_trailing_props LiftIdentityPointwise'.
+      Defined.
+
+      Definition LiftIdentityPointwise
+      : SpecializedNaturalTransformation (IdentityFunctor (C ^ D)) (IdentityFunctor C ^ IdentityFunctor D)
+        := Eval hnf in LiftIdentityPointwise''.
+    End lift.
+
+    Section inverse.
+      Let LiftIdentityPointwise'_Inverse
+      : SpecializedNaturalTransformation (IdentityFunctor C ^ IdentityFunctor D) (IdentityFunctor (C ^ D)).
+        match goal with
+          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
+            refine (Build_SpecializedNaturalTransformation F G
+                                                           (fun x => (Build_SpecializedNaturalTransformation (F x) (G x)
+                                                                                                             (fun y => Identity (x y))
+                                                                                                             _))
+                                                           _)
+        end;
+        t.
+        Grab Existential Variables.
+        present_spfunctor; abstract t.
+      Defined.
+
+      Let LiftIdentityPointwise''_Inverse
+      : SpecializedNaturalTransformation (IdentityFunctor C ^ IdentityFunctor D) (IdentityFunctor (C ^ D)).
+        nt_simpl_abstract_trailing_props LiftIdentityPointwise'_Inverse.
+      Defined.
+
+      Definition LiftIdentityPointwise_Inverse
+      : SpecializedNaturalTransformation (IdentityFunctor C ^ IdentityFunctor D) (IdentityFunctor (C ^ D))
+        := Eval hnf in LiftIdentityPointwise''_Inverse.
+    End inverse.
+
+    Section theorem.
+      Theorem LiftIdentityPointwise_Isomorphism
+      : NTComposeT LiftIdentityPointwise LiftIdentityPointwise_Inverse = IdentityNaturalTransformation _
+        /\ NTComposeT LiftIdentityPointwise_Inverse LiftIdentityPointwise = IdentityNaturalTransformation _.
+        split; nt_eq; autorewrite with morphism; reflexivity.
+      Qed.
+    End theorem.
+  End identity.
+
+  Section compose.
+    Context `(C : @SpecializedCategory objC).
+    Context `(D : @SpecializedCategory objD).
+    Context `(E : @SpecializedCategory objE).
+    Context `(C' : @SpecializedCategory objC').
+    Context `(D' : @SpecializedCategory objD').
+    Context `(E' : @SpecializedCategory objE').
+
+    Variable G : SpecializedFunctor D E.
+    Variable F : SpecializedFunctor C D.
+    Variable F' : SpecializedFunctor D' E'.
+    Variable G' : SpecializedFunctor C' D'.
+
+    Section lift.
+      Let LiftComposeFunctorsPointwise_ComponentsOf x
+      : SpecializedNaturalTransformation
+          (ComposeFunctors (ComposeFunctors G F)
+                           (ComposeFunctors x (ComposeFunctors F' G')))
+          (ComposeFunctors G
+                           (ComposeFunctors (ComposeFunctors F (ComposeFunctors x F')) G')).
+        nt_solve_associator.
+      Defined.
+
+      Definition LiftComposeFunctorsPointwise : SpecializedNaturalTransformation (ComposeFunctors G F ^ ComposeFunctors F' G')
+                                                                                 (ComposeFunctors (G ^ G') (F ^ F')).
+        exists LiftComposeFunctorsPointwise_ComponentsOf;
+        present_spcategory; subst_body; simpl.
+        abstract (intros; nt_eq; autorewrite with category; reflexivity).
+      Defined.
+    End lift.
+
+    Section inverse.
+      Let LiftComposeFunctorsPointwise_Inverse_ComponentsOf x
+      : SpecializedNaturalTransformation
+          (ComposeFunctors G
+                           (ComposeFunctors (ComposeFunctors F (ComposeFunctors x F')) G'))
+          (ComposeFunctors (ComposeFunctors G F)
+                           (ComposeFunctors x (ComposeFunctors F' G'))).
+        nt_solve_associator.
+      Defined.
+
+      Definition LiftComposeFunctorsPointwise_Inverse : SpecializedNaturalTransformation (ComposeFunctors (G ^ G') (F ^ F'))
+                                                                                         (ComposeFunctors G F ^ ComposeFunctors F' G').
+        exists LiftComposeFunctorsPointwise_Inverse_ComponentsOf;
+        present_spcategory; subst_body; simpl.
+        abstract (intros; nt_eq; autorewrite with category; reflexivity).
+      Defined.
+    End inverse.
+
+    Section theorem.
+      Theorem LiftComposeFunctorsPointwise_Isomorphism
+      : NTComposeT LiftComposeFunctorsPointwise LiftComposeFunctorsPointwise_Inverse = IdentityNaturalTransformation _
+        /\ NTComposeT LiftComposeFunctorsPointwise_Inverse LiftComposeFunctorsPointwise = IdentityNaturalTransformation _.
+        split; nt_eq; autorewrite with category; reflexivity.
+      Qed.
+    End theorem.
+  End compose.
+End NaturalTransformation_Properties.
