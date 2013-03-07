@@ -260,6 +260,65 @@ Section AdjunctionEquivalences.
                 auto with category
     ).
   Defined.
+
+  (** Quoting Wikipedia on Adjoint Functors:
+
+      The naturality of [Φ] implies the naturality of [ε] and [η], and
+      the two formulas
+
+      [Φ_{Y,X}(f) = G(f) o η_Y]
+
+      [Φ_{Y,X}⁻¹(g) = ε_X o F(g)]
+
+      for each [f: F Y → X] and [g : Y → G X] (which completely
+      determine [Φ]). *)
+  Lemma UnitCounitOf_Helper1 (Φ : HomAdjunction F G) (ε := projT1 (CounitOf Φ)) (η := projT1 (UnitOf Φ))
+  : forall X Y (f : Morphism _ (F Y) X), Φ Y X f = Compose (G.(MorphismOf) f) (η Y).
+    intros.
+    destruct Φ as [ ? ? ACommutes'0 ]; simpl in *.
+    subst_body.
+    pose proof (fg_equal (ACommutes'0 _ _ _ _ (Identity _) f) (Identity _)) as H.
+    simpl in *.
+    autorewrite with functor morphism in H.
+    assumption.
+  Qed.
+
+  Lemma UnitCounitOf_Helper2
+        (Φ : HomAdjunction F G)
+        (ε := projT1 (CounitOf Φ))
+        (η := projT1 (UnitOf Φ))
+        (Φ_Inverse := fun Y X g => proj1_sig ((AIsomorphism Φ) Y X) g)
+  : forall X Y (g : Morphism _ Y (G X)), Φ_Inverse Y X g = Compose (ε X) (F.(MorphismOf) g).
+    pose proof (ACommutes_Inverse Φ) as ACommutes_Inverse'.
+    destruct Φ as [ ? ? ACommutes'0 ]; simpl in *.
+    subst_body.
+    simpl in *.
+    intros X Y g.
+    pose proof (fg_equal (ACommutes_Inverse' _ _ _ _ g (Identity _)) (Identity _)) as H.
+    simpl in *.
+    autorewrite with functor morphism in H.
+    symmetry.
+    assumption.
+  Qed.
+
+  Local Ltac UnitCounitOf_helper make_H :=
+    let H := fresh in
+    intro X;
+      let HT := constr:(make_H X) in
+      pose proof HT as H;
+        subst_body;
+        symmetry; etransitivity; [ | apply H ];
+        destruct_head @HomAdjunction; simpl in *;
+        intro_proj2_sig_from_goal;
+        fg_equal;
+        intuition.
+
+  Definition UnitCounitOf (A : HomAdjunction F G) : AdjunctionUnitCounit F G.
+    exists (projT1 (UnitOf A))
+           (projT1 (CounitOf A));
+    [ abstract UnitCounitOf_helper (fun Y => UnitCounitOf_Helper2 A (F Y) Y (projT1 (UnitOf A)(*η*) Y))
+    | abstract UnitCounitOf_helper (fun X => UnitCounitOf_Helper1 A X (G X) (projT1 (CounitOf A)(*ε*) X)) ].
+  Defined.
 End AdjunctionEquivalences.
 
 Section AdjunctionEquivalences'.
@@ -276,7 +335,7 @@ Section AdjunctionEquivalences'.
               solve [
                 intro_proj2_sig_from_goal;
                 destruct_hypotheses;
-                auto with category
+                auto with morphism
                 |
                   repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
                     simpl_do do_rewrite_rev (Commutes T); reflexivity
@@ -293,7 +352,7 @@ Section AdjunctionEquivalences'.
     )
     |};
     simpl; present_spnt;
-      try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
+    try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
         abstract (
           elim T; clear T; intros T s; repeat split; intros; simpl in *;
             apply functional_extensionality_dep; intros; simpl;
@@ -301,10 +360,11 @@ Section AdjunctionEquivalences'.
               unfold unique in *;
                 split_and';
               repeat match goal with
-                       | [ H : _ |- _ ] => rewrite (H _ (eq_refl _)); auto with category
+                       | [ H : _ |- _ ] => rewrite (H _ (eq_refl _))
                      end;
+              auto with morphism;
               repeat match goal with
-                       | [ H : _ |- _ ] => apply H; auto with category
+                       | [ H : _ |- _ ] => apply H
                      end;
               intro_proj2_sig_from_goal;
               destruct_hypotheses;
@@ -313,6 +373,24 @@ Section AdjunctionEquivalences'.
                   repeat try_associativity ltac:(apply f_equal2; trivial)
         ).
   Defined.
+
+  Definition HomAdjunctionOfUnitCounit  (T : AdjunctionUnitCounit F G) : HomAdjunction F G.
+    refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (Adjunction_Unit T c)) |};
+    [ intros; present_spfunctor; exists (fun f => Compose (Adjunction_Counit T A') (F.(MorphismOf) f)) | ];
+    abstract (
+        repeat intro; repeat split; simpl in *; repeat (apply functional_extensionality_dep; intro);
+        destruct T;
+        repeat rewrite FCompositionOf;
+        repeat try_associativity ltac:(apply f_equal2; try reflexivity; []);
+        destruct Adjunction_Counit, Adjunction_Unit;
+        simpl in *;
+        repeat try_associativity ltac:(idtac;
+                                       match goal with
+                                         | [ H : _ |- _ ] => (rewrite H; clear H; autorewrite with morphism; try reflexivity)
+                                         | [ H : _ |- _ ] => (rewrite <- H; clear H; autorewrite with morphism; try reflexivity)
+                                       end)
+      ).
+  Defined.
 End AdjunctionEquivalences'.
 
 Coercion HomAdjunction2Adjunction : HomAdjunction >-> Adjunction.
@@ -320,6 +398,8 @@ Coercion Adjunction2HomAdjunction : Adjunction >-> HomAdjunction.
 
 Coercion UnitOf : HomAdjunction >-> AdjunctionUnit.
 Coercion CounitOf : HomAdjunction >-> AdjunctionCounit.
+Coercion UnitCounitOf : HomAdjunction >-> AdjunctionUnitCounit.
 
 Coercion HomAdjunctionOfUnit : AdjunctionUnit >-> HomAdjunction.
 Coercion HomAdjunctionOfCounit : AdjunctionCounit >-> HomAdjunction.
+Coercion HomAdjunctionOfUnitCounit : AdjunctionUnitCounit >-> HomAdjunction.
