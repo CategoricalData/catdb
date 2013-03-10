@@ -319,3 +319,171 @@ Ltac rsimplify_morphisms :=
   instantiate;
   simpl;
   present_spnt.
+
+
+(**************** example **********************)
+Require Export Adjoint.
+Require Import Notations Common FunctorCategoryFunctorial Duals.
+
+Set Implicit Arguments.
+
+Generalizable All Variables.
+
+Section AdjointPointwise.
+  Context `(C : @SpecializedCategory objC).
+  Context `(D : @SpecializedCategory objD).
+  Context `(E : @SpecializedCategory objE).
+  Context `(C' : @SpecializedCategory objC').
+  Context `(D' : @SpecializedCategory objD').
+
+  Variable F : SpecializedFunctor C D.
+  Variable G : SpecializedFunctor D C.
+
+  Variable A : HomAdjunction F G.
+
+  Variables F' G' : SpecializedFunctor C' D'.
+
+(*  Variable T' : SpecializedNaturalTransformation F' G'.*)
+
+  Definition AdjointPointwise_NT_Unit : SpecializedNaturalTransformation (IdentityFunctor (C ^ E))
+                                                                    (ComposeFunctors (G ^ IdentityFunctor E) (F ^ IdentityFunctor E)).
+    pose proof (A : AdjunctionUnit _ _) as A'.
+    refine (NTComposeT _ (LiftIdentityPointwise _ _)).
+    refine (NTComposeT _ (projT1 A' ^ (IdentityNaturalTransformation (IdentityFunctor E)))).
+    refine (NTComposeT (LiftComposeFunctorsPointwise _ _ (IdentityFunctor E) (IdentityFunctor E)) _).
+    refine (LiftNaturalTransformationPointwise (IdentityNaturalTransformation _) _).
+    exact (LeftIdentityFunctorNaturalTransformation2 _).
+  Defined.
+
+  Definition AdjointPointwise_NT_Counit : SpecializedNaturalTransformation (ComposeFunctors (F ^ IdentityFunctor E) (G ^ IdentityFunctor E))
+                                                                           (IdentityFunctor (D ^ E)).
+    pose proof (A : AdjunctionCounit _ _) as A'.
+    refine (NTComposeT (LiftIdentityPointwise_Inverse _ _) _).
+    refine (NTComposeT (projT1 A' ^ (IdentityNaturalTransformation (IdentityFunctor E))) _).
+    refine (NTComposeT _ (LiftComposeFunctorsPointwise_Inverse _ _ (IdentityFunctor E) (IdentityFunctor E))).
+    refine (LiftNaturalTransformationPointwise (IdentityNaturalTransformation _) _).
+    exact (LeftIdentityFunctorNaturalTransformation1 _).
+  Defined.
+
+  Definition AdjointPointwise : Adjunction (F ^ (IdentityFunctor E)) (G ^ (IdentityFunctor E)).
+    match goal with
+      | [ |- Adjunction ?F ?G ] =>
+        refine (_ : AdjunctionUnitCounit F G)
+    end.
+    exists AdjointPointwise_NT_Unit
+           AdjointPointwise_NT_Counit.
+    nt_eq.
+    present_spfunctor.
+    Focus 2.
+    nt_eq.
+    present_spfunctor.
+    Unfocus.
+    simpl.
+    Require Import FunctorProduct.
+    simpl.
+    Goal forall x (Y : SpecializedFunctor E C) (m :=
+(*Compose
+     (Compose (Identity (F (Y x)))
+        (Compose
+           (Compose
+              (Compose (MorphismOf F (MorphismOf Y (Identity x)))
+                 (Identity (F (Y x))))
+              (proj1_sig
+                 ((let (AComponentsOf', AIsomorphism', _) as h
+                       return
+                         (forall (A0 : C) (A' : objD),
+                          {m' : Morphism C A0 (G A') -> Morphism D (F A0) A'
+                          |
+                          Compose'
+                            {|
+                            Morphism' := fun s d : Type => s -> d;
+                            Identity' := fun (o : Type) (x0 : o) => x0;
+                            Compose' := fun (s d d' : Type)
+                                          (f : d -> d')
+                                          (g : s -> d)
+                                          (x0 : s) =>
+                                        f (g x0) |}
+                            (Morphism D (F A0) A')
+                            (Morphism C A0 (G A'))
+                            (Morphism D (F A0) A') m'
+                            (AComponentsOf' h A0 A') =
+                          Identity'
+                            {|
+                            Morphism' := fun s d : Type => s -> d;
+                            Identity' := fun (o : Type) (x0 : o) => x0;
+                            Compose' := fun (s d d' : Type)
+                                          (f : d -> d')
+                                          (g : s -> d)
+                                          (x0 : s) =>
+                                        f (g x0) |}
+                            (Morphism D (F A0) A') &
+                          Compose'
+                            {|
+                            Morphism' := fun s d : Type => s -> d;
+                            Identity' := fun (o : Type) (x0 : o) => x0;
+                            Compose' := fun (s d d' : Type)
+                                          (f : d -> d')
+                                          (g : s -> d)
+                                          (x0 : s) =>
+                                        f (g x0) |}
+                            (Morphism C A0 (G A'))
+                            (Morphism D (F A0) A')
+                            (Morphism C A0 (G A'))
+                            (AComponentsOf' h A0 A') m' =
+                          Identity'
+                            {|
+                            Morphism' := fun s d : Type => s -> d;
+                            Identity' := fun (o : Type) (x0 : o) => x0;
+                            Compose' := fun (s d d' : Type)
+                                          (f : d -> d')
+                                          (g : s -> d)
+                                          (x0 : s) =>
+                                        f (g x0) |}
+                            (Morphism C A0 (G A'))}) := A in
+                   AIsomorphism') (G (F (Y x))) (F (Y x)))
+                 (Identity (G (F (Y x))))))
+           (Compose
+              (Compose
+                 (MorphismOf F
+                    (MorphismOf G
+                       (Compose (MorphismOf F (MorphismOf Y (Identity x)))
+                          (Identity (F (Y x))))))
+                 (Identity (F (G (F (Y x))))))
+              (Compose (Identity (F (G (F (Y x)))))
+                 (Compose
+                    (MorphismOf F
+                       (Compose
+                          (Compose (MorphismOf G (Identity (F (Y x))))
+                             (Identity (G (F (Y x)))))
+                          (Identity (G (F (Y x))))))
+                    (Identity (F (G (F (Y x))))))))))*)
+     ((*Compose*)
+        ((*MorphismOf F*)
+           ((*Compose (MorphismOf G (MorphismOf F (MorphismOf Y (Identity x))))*)
+              (Compose
+                 ((*Compose
+                    ((*Compose
+                       (Compose
+                          (Compose
+                             (MorphismOf G
+                                (Compose (Identity (F (Y x)))
+                                   (Compose (MorphismOf F (Identity (Y x)))
+                                      (Identity (F (Y x))))))
+                             (Identity (G (F (Y x)))))
+                          (Identity (G (F (Y x)))))*)
+                       (Compose
+                          (MorphismOf G
+                             (MorphismOf F
+                                (Compose (MorphismOf Y (Identity x))
+                                   (Identity (Y x)))))
+                          (Identity (G (F (Y x))))))*)
+                    (Compose
+                       (MorphismOf G
+                          (MorphismOf F
+                             ((*Compose (MorphismOf Y (Identity x))*)
+                                (Identity (Y x)))))
+                       (A (Y x) (F (Y x)) (Identity (F (Y x))))))
+                 (Identity (Y x)))))(* (Identity (F (Y x)))*))
+), m = m.
+    simpl; intros.
+    rsimplify_morphisms.
