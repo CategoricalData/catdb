@@ -18,6 +18,8 @@ MODULES    := Notations \
 	NaturalTransformation \
 	NaturalEquivalence \
 	\
+	TypeclassSimplification \
+	\
 	Graph \
 	GraphTranslation \
 	ComputableGraphCategory \
