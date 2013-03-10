@@ -286,7 +286,7 @@ Section SimplifiedMorphism.
   End natural_transformation.
 End SimplifiedMorphism.
 
-Ltac simplify_morphisms :=
+Ltac rsimplify_morphisms :=
   match goal with
     | [ |- @eq (Morphism _ _ _) ?A ?B ] =>
       erewrite (SimplifyReifiyMorphismOk (m := A));
