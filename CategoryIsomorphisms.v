@@ -108,7 +108,7 @@ Section Category.
     Definition IsIsomorphism {s d : C} (m : C.(Morphism) s d) : Prop :=
       exists m', IsInverseOf m m'.
 
-    Lemma IsmorphismOf_IsIsomorphism {s d : C} (m : C.(Morphism) s d) : IsomorphismOf m -> IsIsomorphism m.
+    Lemma IsomrphismOf_IsIsomorphism {s d : C} (m : C.(Morphism) s d) : IsomorphismOf m -> IsIsomorphism m.
       intro i; hnf.
       exists (Inverse i);
         destruct i; simpl;
@@ -116,7 +116,7 @@ Section Category.
             assumption.
     Qed.
 
-    Lemma IsIsomorphism_IsmorphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
+    Lemma IsIsomorphism_IsomrphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
       eexists; eassumption.
@@ -127,10 +127,10 @@ Section Category.
     Definition Isomorphic (s d : C) : Prop :=
       exists (m : C.(Morphism) s d) (m' : C.(Morphism) d s), IsInverseOf m m'.
 
-    Lemma Ismorphism_Isomorphic s d : Isomorphism s d -> Isomorphic s d.
+    Lemma Isomrphism_Isomorphic s d : Isomorphism s d -> Isomorphic s d.
       intro i; destruct i as [ m i ].
       exists m.
-      apply IsmorphismOf_IsIsomorphism; assumption.
+      apply IsomrphismOf_IsIsomorphism; assumption.
     Qed.
 
     Lemma Isomorphic_Isomorphism s d : Isomorphic s d -> exists _ : Isomorphism s d, True.
@@ -142,7 +142,7 @@ Section Category.
     Local Ltac t_iso' := intros;
       repeat match goal with
                | [ i : Isomorphic _ _ |- _ ] => destruct (Isomorphic_Isomorphism i) as [ ? [] ] ; clear i
-               | [ |- Isomorphic _ _ ] => apply Ismorphism_Isomorphic
+               | [ |- Isomorphic _ _ ] => apply Isomrphism_Isomorphic
              end.
 
     Local Ltac t_iso:= t_iso';
