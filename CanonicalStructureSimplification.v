@@ -226,29 +226,33 @@ Section SimplifiedMorphism.
 
     (* structure for packaging a morphism and its reification *)
 
+    Structure TaggedMorphism s d := Tag { untag :> Morphism C s d }.
+
     Structure SimplifiedMorphism s d :=
       ReifyMorphism
         {
-          morphism_of : Morphism C s d;
+          morphism_of : TaggedMorphism s d;
           reified_morphism_of : ReifiedMorphism C s d;
-          reified_morphism_ok : morphism_of = ReifiedMorphismDenote reified_morphism_of
+          reified_morphism_ok : untag morphism_of = ReifiedMorphismDenote reified_morphism_of
         }.
+    Global Arguments ReifyMorphism [s d] morphism_of _ _.
 
     (* main overloaded lemma for simplification *)
 
     Lemma rsimplify_morphisms `(r : SimplifiedMorphism s d)
-    : morphism_of r = ReifiedMorphismDenote (ReifiedMorphismSimplify (reified_morphism_of r)).
+    : untag (morphism_of r) = ReifiedMorphismDenote (ReifiedMorphismSimplify (reified_morphism_of r)).
       rewrite <- ReifiedMorphismSimplifyOk.
       destruct r; assumption.
     Qed.
 
     (* tags to control the order of application *)
 
-    Definition generic_ReifyMorphism s d a b c := @ReifyMorphism s d a b c.
-    Definition functor_ReifyMorphism s d a b c := @generic_ReifyMorphism s d a b c.
-    Definition nt_ReifyMorphism s d a b c := @functor_ReifyMorphism s d a b c.
-    Definition compose_ReifyMorphism s d a b c := @nt_ReifyMorphism s d a b c.
-    Definition identity_ReifyMorphism s d a b c := @compose_ReifyMorphism s d a b c.
+
+    Definition generic_tag {s d} := Tag s d.
+    Definition functor_tag {s d} := @generic_tag s d.
+    Definition nt_tag {s d} := @functor_tag s d.
+    Definition compose_tag {s d} := @nt_tag s d.
+    Canonical Structure identity_tag {s d} m := @compose_tag s d m.
   End single_category.
 
   (* canonical instances reifying each propositional constructor *)
@@ -262,7 +266,7 @@ Section SimplifiedMorphism.
     Context `{C : SpecializedCategory objC}.
 
     Lemma reifyGeneric s d (m : Morphism C s d) : m = ReifiedMorphismDenote (ReifiedGenericMorphism C s d m). reflexivity. Qed.
-    Canonical Structure reify_generic_morphism s d m := generic_ReifyMorphism _ (@reifyGeneric s d m).
+    Canonical Structure reify_generic_morphism s d m := ReifyMorphism (generic_tag m) _ (@reifyGeneric s d m).
   End generic.
 
   Section more_single_category.
@@ -270,16 +274,16 @@ Section SimplifiedMorphism.
 
     Global Opaque Identity'.
     Lemma reifyIdentity x : Identity' C x = ReifiedMorphismDenote (ReifiedIdentityMorphism C x). reflexivity. Qed.
-    Canonical Structure reify_identity_morphism x := identity_ReifyMorphism _ (reifyIdentity x).
+    Canonical Structure reify_identity_morphism x := ReifyMorphism (identity_tag _) _ (reifyIdentity x).
 
     Global Opaque Compose'.
     Lemma reifyCompose s d d'
           `(m1' : @SimplifiedMorphism objC C d d') `(m2' : @SimplifiedMorphism objC C s d)
-    : Compose' C s d d' (morphism_of m1') (morphism_of m2')
+    : Compose' C s d d' (untag (morphism_of m1')) (untag (morphism_of m2'))
       = ReifiedMorphismDenote (ReifiedComposedMorphism (reified_morphism_of m1') (reified_morphism_of m2')).
       t.
     Qed.
-    Canonical Structure reify_composition_morphism s d d' m1' m2' := compose_ReifyMorphism _ (@reifyCompose s d d' m1' m2').
+    Canonical Structure reify_composition_morphism s d d' m1' m2' := ReifyMorphism (compose_tag _) _ (@reifyCompose s d d' m1' m2').
   End more_single_category.
 
   Section functor.
@@ -289,10 +293,10 @@ Section SimplifiedMorphism.
 
     Global Opaque MorphismOf'.
     Lemma reifyFunctor `(m' : @SimplifiedMorphism objC C s d)
-    : MorphismOf' F _ _ (morphism_of m') = ReifiedMorphismDenote (ReifiedFunctorMorphism F (reified_morphism_of m')).
+    : MorphismOf' F _ _ (untag (morphism_of m')) = ReifiedMorphismDenote (ReifiedFunctorMorphism F (reified_morphism_of m')).
       t.
     Qed.
-    Canonical Structure reify_functor_morphism s d m' := functor_ReifyMorphism _ (@reifyFunctor s d m').
+    Canonical Structure reify_functor_morphism s d m' := ReifyMorphism (functor_tag _) _ (@reifyFunctor s d m').
   End functor.
 
   Section natural_transformation.
@@ -303,7 +307,7 @@ Section SimplifiedMorphism.
 
     Global Opaque ComponentsOf'.
     Lemma reifyNT (x : C) : ComponentsOf' T x = ReifiedMorphismDenote (ReifiedNaturalTransformationMorphism T x). reflexivity. Qed.
-    Canonical Structure reify_nt_morphism x := nt_ReifyMorphism _ (@reifyNT x).
+    Canonical Structure reify_nt_morphism x := ReifyMorphism (nt_tag _) _ (@reifyNT x).
   End natural_transformation.
 End SimplifiedMorphism.
 
@@ -320,7 +324,19 @@ Ltac rsimplify_morphisms :=
   simpl;
   present_spnt.
 
+Goal forall objC (C : SpecializedCategory objC) (x : C), Compose' C _ _ _ (Identity' C x) (Identity' C x) = Identity' C x.
+intros.
+change @Identity with @Identity';
+  change @MorphismOf with @MorphismOf';
+  change @Compose with @Compose';
+  change @ComponentsOf with @ComponentsOf';
+  change @ObjectOf with @ObjectOf';
+  simpl.
+  etransitivity.
+  apply rsimplify_morphisms.
 
+
+(*
 (**************** example **********************)
 Require Export Adjoint.
 Require Import Notations Common FunctorCategoryFunctorial Duals.
@@ -381,6 +397,17 @@ Section AdjointPointwise.
     simpl.
     Require Import FunctorProduct.
     simpl.
+    Goal forall x : C, Compose' C _ _ _ (Identity' C x) (Identity' C x) = Identity' C x.
+    intro.
+    change @Identity with @Identity';
+  change @MorphismOf with @MorphismOf';
+  change @Compose with @Compose';
+  change @ComponentsOf with @ComponentsOf';
+  change @ObjectOf with @ObjectOf';
+  simpl.
+  etransitivity.
+  apply rsimplify_morphisms.
+
     Goal forall x (Y : SpecializedFunctor E C) (m :=
 (*Compose
      (Compose (Identity (F (Y x)))
@@ -487,3 +514,6 @@ Section AdjointPointwise.
 ), m = m.
     simpl; intros.
     rsimplify_morphisms.
+
+    simpl.
+    hnf.*)
