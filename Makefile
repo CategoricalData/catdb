@@ -19,6 +19,7 @@ MODULES    := Notations \
 	NaturalEquivalence \
 	\
 	TypeclassSimplification \
+	CanonicalStructureSimplification \
 	\
 	Graph \
 	GraphTranslation \

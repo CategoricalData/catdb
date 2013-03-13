@@ -4,107 +4,6 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-(*
-Require Import Setoid.
-Set Implicit Arguments.
-Generalizable All Variables.
-
-(* the reification datatype and *)
-(* denotation and simplification functions *)
-
-Structure reified :=
-  RT | RF | RAnd : reified -> reified -> reified | RProp : Prop -> reified.
-
-Fixpoint denote r :=
-  match r with
-      RT => True
-    | RF => False
-    | RAnd a b => denote a /\ denote b
-    | RProp p => p
-  end.
-
-Fixpoint simplify_and r1 r2 :=
-  match r1, r2 with
-      RT, r2' => r2'
-    | RF, _ => RF
-    | r1', RT => r1'
-    | _, RF => RF
-    | r1', r2' => RAnd r1' r2'
-  end.
-
-Fixpoint simplify r :=
-  match r with
-      RT => RT
-    | RF => RF
-    | RAnd r1 r2 => simplify_and (simplify r1) (simplify r2)
-    | RProp p => RProp p
-  end.
-
-Lemma simplify_and_sound r1 r2 :
-  denote (RAnd r1 r2) <-> denote (simplify_and r1 r2).
-Proof. case r1, r2; simpl; intuition. Qed.
-
-Lemma simplify_sound r : denote r <-> denote (simplify r).
-Proof.
-  induction r; simpl; intuition;
-  try rewrite <- simplify_and_sound in *; simpl in *; intuition.
-Qed.
-
-(* structure for packaging a prop and its reification *)
-
-Structure reify := Reify {
-                       prop_of :> Prop;
-                       reified_of : reified;
-                       _ : prop_of <-> denote reified_of}.
-
-(* main overloaded lemma for simplification *)
-(* when this lemma is applied to a proposition, it will *)
-(* scan over it, trying to build the canonical instance r *)
-(* thus obtaining the reified version of the proposition *)
-(* then the reified version is simplifed, thus replacing the *)
-(* old proposition with a simpler, but equivalent form. *)
-
-Lemma rsimpl (r : reify) :
-  r <-> denote (simplify (reified_of r)).
-Proof.
-  induction r; simpl in *; intuition;
-  rewrite <- simplify_sound in *; intuition.
-Qed.
-
-(* canonical instances reifying each propositional constructor *)
-(* into a respective value from reified *)
-
-Lemma reifyTrueAx : True <-> denote RT. Proof. tauto. Qed.
-Canonical Structure reifyTrue := Reify _ reifyTrueAx.
-
-Lemma reifyFalseAx : False <-> denote RF. Proof. tauto. Qed.
-Canonical Structure reifyFalse := Reify _ reifyFalseAx.
-
-Lemma reifyAndAx (r1 r2 : reify) :
-  r1 /\ r2 <-> denote (RAnd (reified_of r1) (reified_of r2)).
-Proof.
-  induction r1, r2; simpl in *; intuition.
-Qed.
-
-Canonical Structure reifyAnd r1 r2 := Reify _ (reifyAndAx r1 r2).
-
-(* default case, when no other propositional constructors match *)
-
-Lemma reifyPropAx P : P <-> denote (RProp P). Proof. tauto. Qed.
-Canonical Structure reifyProp P := Reify _ (reifyPropAx P).
-
-(* example *)
-
-Example xx : True /\ (1 = 1) <-> True.
-Proof.
-  split; intro;
-  rewrite rsimpl.
-  simpl.
-  constructor.
-  simpl.
-  constructor.
-Qed.
-*)
 Section SimplifiedMorphism.
   Inductive ReifiedMorphism : forall objC (C : SpecializedCategory objC), C -> C -> Type :=
   | ReifiedIdentityMorphism : forall objC C x, @ReifiedMorphism objC C x x
@@ -262,13 +161,6 @@ Section SimplifiedMorphism.
                  repeat rewrite <- reified_morphism_ok;
                  reflexivity.
 
-  Section generic.
-    Context `{C : SpecializedCategory objC}.
-
-    Lemma reifyGeneric s d (m : Morphism C s d) : m = ReifiedMorphismDenote (ReifiedGenericMorphism C s d m). reflexivity. Qed.
-    Canonical Structure reify_generic_morphism s d m := ReifyMorphism (generic_tag m) _ (@reifyGeneric s d m).
-  End generic.
-
   Section more_single_category.
     Context `{C : SpecializedCategory objC}.
 
@@ -309,6 +201,13 @@ Section SimplifiedMorphism.
     Lemma reifyNT (x : C) : ComponentsOf' T x = ReifiedMorphismDenote (ReifiedNaturalTransformationMorphism T x). reflexivity. Qed.
     Canonical Structure reify_nt_morphism x := ReifyMorphism (nt_tag _) _ (@reifyNT x).
   End natural_transformation.
+  Section generic.
+    Context `{C : SpecializedCategory objC}.
+
+    Lemma reifyGeneric s d (m : Morphism C s d) : m = ReifiedMorphismDenote (ReifiedGenericMorphism C s d m). reflexivity. Qed.
+    Canonical Structure reify_generic_morphism s d m := ReifyMorphism (generic_tag m) _ (@reifyGeneric s d m).
+  End generic.
+
 End SimplifiedMorphism.
 
 Ltac rsimplify_morphisms :=
@@ -318,214 +217,16 @@ Ltac rsimplify_morphisms :=
   change @ComponentsOf with @ComponentsOf';
   change @ObjectOf with @ObjectOf';
   simpl;
-  etransitivity; [ apply rsimplify_morphisms | ];
-  etransitivity; [ | symmetry; apply rsimplify_morphisms ];
+  (* [refine] uses a unification algorithm compatible with
+     ssreflect-style canonical structures; [apply] is not (but
+     [apply:] in ssreflect is *)
+  etransitivity; [ refine (rsimplify_morphisms _) | ];
+  etransitivity; [ | symmetry; refine (rsimplify_morphisms _) ];
   instantiate;
   simpl;
-  present_spnt.
-
-Goal forall objC (C : SpecializedCategory objC) (x : C), Compose' C _ _ _ (Identity' C x) (Identity' C x) = Identity' C x.
-intros.
-change @Identity with @Identity';
-  change @MorphismOf with @MorphismOf';
-  change @Compose with @Compose';
-  change @ComponentsOf with @ComponentsOf';
-  change @ObjectOf with @ObjectOf';
+  change @Identity' with @Identity;
+  change @MorphismOf' with @MorphismOf;
+  change @Compose' with @Compose;
+  change @ComponentsOf' with @ComponentsOf;
+  change @ObjectOf' with @ObjectOf;
   simpl.
-  etransitivity.
-  apply rsimplify_morphisms.
-  (* The above gives [ReifiedMorphismDenote
-     (ReifiedMorphismSimplify
-        (reified_morphism_of
-           (reify_generic_morphism x x
-              (Compose' C x x x (Identity' C x) (Identity' C x))))) =
-   Identity' C x] if I have the CS instance for generic uncommented, or
-[ReifiedMorphismDenote
-     (ReifiedMorphismSimplify
-        (reified_morphism_of
-           (reify_composition_morphism (reify_identity_morphism x)
-              (reify_identity_morphism x)))) = Identity' C x], if I have it commented out.
-This should not be, as the generic one should be unified after the composition and identity ones *)
-
-
-(*
-(**************** example **********************)
-Require Export Adjoint.
-Require Import Notations Common FunctorCategoryFunctorial Duals.
-
-Set Implicit Arguments.
-
-Generalizable All Variables.
-
-Section AdjointPointwise.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(E : @SpecializedCategory objE).
-  Context `(C' : @SpecializedCategory objC').
-  Context `(D' : @SpecializedCategory objD').
-
-  Variable F : SpecializedFunctor C D.
-  Variable G : SpecializedFunctor D C.
-
-  Variable A : HomAdjunction F G.
-
-  Variables F' G' : SpecializedFunctor C' D'.
-
-(*  Variable T' : SpecializedNaturalTransformation F' G'.*)
-
-  Definition AdjointPointwise_NT_Unit : SpecializedNaturalTransformation (IdentityFunctor (C ^ E))
-                                                                    (ComposeFunctors (G ^ IdentityFunctor E) (F ^ IdentityFunctor E)).
-    pose proof (A : AdjunctionUnit _ _) as A'.
-    refine (NTComposeT _ (LiftIdentityPointwise _ _)).
-    refine (NTComposeT _ (projT1 A' ^ (IdentityNaturalTransformation (IdentityFunctor E)))).
-    refine (NTComposeT (LiftComposeFunctorsPointwise _ _ (IdentityFunctor E) (IdentityFunctor E)) _).
-    refine (LiftNaturalTransformationPointwise (IdentityNaturalTransformation _) _).
-    exact (LeftIdentityFunctorNaturalTransformation2 _).
-  Defined.
-
-  Definition AdjointPointwise_NT_Counit : SpecializedNaturalTransformation (ComposeFunctors (F ^ IdentityFunctor E) (G ^ IdentityFunctor E))
-                                                                           (IdentityFunctor (D ^ E)).
-    pose proof (A : AdjunctionCounit _ _) as A'.
-    refine (NTComposeT (LiftIdentityPointwise_Inverse _ _) _).
-    refine (NTComposeT (projT1 A' ^ (IdentityNaturalTransformation (IdentityFunctor E))) _).
-    refine (NTComposeT _ (LiftComposeFunctorsPointwise_Inverse _ _ (IdentityFunctor E) (IdentityFunctor E))).
-    refine (LiftNaturalTransformationPointwise (IdentityNaturalTransformation _) _).
-    exact (LeftIdentityFunctorNaturalTransformation1 _).
-  Defined.
-
-  Definition AdjointPointwise : Adjunction (F ^ (IdentityFunctor E)) (G ^ (IdentityFunctor E)).
-    match goal with
-      | [ |- Adjunction ?F ?G ] =>
-        refine (_ : AdjunctionUnitCounit F G)
-    end.
-    exists AdjointPointwise_NT_Unit
-           AdjointPointwise_NT_Counit.
-    nt_eq.
-    present_spfunctor.
-    Focus 2.
-    nt_eq.
-    present_spfunctor.
-    Unfocus.
-    simpl.
-    Require Import FunctorProduct.
-    simpl.
-    Goal forall x : C, Compose' C _ _ _ (Identity' C x) (Identity' C x) = Identity' C x.
-    intro.
-    change @Identity with @Identity';
-  change @MorphismOf with @MorphismOf';
-  change @Compose with @Compose';
-  change @ComponentsOf with @ComponentsOf';
-  change @ObjectOf with @ObjectOf';
-  simpl.
-  etransitivity.
-  apply rsimplify_morphisms.
-
-    Goal forall x (Y : SpecializedFunctor E C) (m :=
-(*Compose
-     (Compose (Identity (F (Y x)))
-        (Compose
-           (Compose
-              (Compose (MorphismOf F (MorphismOf Y (Identity x)))
-                 (Identity (F (Y x))))
-              (proj1_sig
-                 ((let (AComponentsOf', AIsomorphism', _) as h
-                       return
-                         (forall (A0 : C) (A' : objD),
-                          {m' : Morphism C A0 (G A') -> Morphism D (F A0) A'
-                          |
-                          Compose'
-                            {|
-                            Morphism' := fun s d : Type => s -> d;
-                            Identity' := fun (o : Type) (x0 : o) => x0;
-                            Compose' := fun (s d d' : Type)
-                                          (f : d -> d')
-                                          (g : s -> d)
-                                          (x0 : s) =>
-                                        f (g x0) |}
-                            (Morphism D (F A0) A')
-                            (Morphism C A0 (G A'))
-                            (Morphism D (F A0) A') m'
-                            (AComponentsOf' h A0 A') =
-                          Identity'
-                            {|
-                            Morphism' := fun s d : Type => s -> d;
-                            Identity' := fun (o : Type) (x0 : o) => x0;
-                            Compose' := fun (s d d' : Type)
-                                          (f : d -> d')
-                                          (g : s -> d)
-                                          (x0 : s) =>
-                                        f (g x0) |}
-                            (Morphism D (F A0) A') &
-                          Compose'
-                            {|
-                            Morphism' := fun s d : Type => s -> d;
-                            Identity' := fun (o : Type) (x0 : o) => x0;
-                            Compose' := fun (s d d' : Type)
-                                          (f : d -> d')
-                                          (g : s -> d)
-                                          (x0 : s) =>
-                                        f (g x0) |}
-                            (Morphism C A0 (G A'))
-                            (Morphism D (F A0) A')
-                            (Morphism C A0 (G A'))
-                            (AComponentsOf' h A0 A') m' =
-                          Identity'
-                            {|
-                            Morphism' := fun s d : Type => s -> d;
-                            Identity' := fun (o : Type) (x0 : o) => x0;
-                            Compose' := fun (s d d' : Type)
-                                          (f : d -> d')
-                                          (g : s -> d)
-                                          (x0 : s) =>
-                                        f (g x0) |}
-                            (Morphism C A0 (G A'))}) := A in
-                   AIsomorphism') (G (F (Y x))) (F (Y x)))
-                 (Identity (G (F (Y x))))))
-           (Compose
-              (Compose
-                 (MorphismOf F
-                    (MorphismOf G
-                       (Compose (MorphismOf F (MorphismOf Y (Identity x)))
-                          (Identity (F (Y x))))))
-                 (Identity (F (G (F (Y x))))))
-              (Compose (Identity (F (G (F (Y x)))))
-                 (Compose
-                    (MorphismOf F
-                       (Compose
-                          (Compose (MorphismOf G (Identity (F (Y x))))
-                             (Identity (G (F (Y x)))))
-                          (Identity (G (F (Y x))))))
-                    (Identity (F (G (F (Y x))))))))))*)
-     ((*Compose*)
-        ((*MorphismOf F*)
-           ((*Compose (MorphismOf G (MorphismOf F (MorphismOf Y (Identity x))))*)
-              (Compose
-                 ((*Compose
-                    ((*Compose
-                       (Compose
-                          (Compose
-                             (MorphismOf G
-                                (Compose (Identity (F (Y x)))
-                                   (Compose (MorphismOf F (Identity (Y x)))
-                                      (Identity (F (Y x))))))
-                             (Identity (G (F (Y x)))))
-                          (Identity (G (F (Y x)))))*)
-                       (Compose
-                          (MorphismOf G
-                             (MorphismOf F
-                                (Compose (MorphismOf Y (Identity x))
-                                   (Identity (Y x)))))
-                          (Identity (G (F (Y x))))))*)
-                    (Compose
-                       (MorphismOf G
-                          (MorphismOf F
-                             ((*Compose (MorphismOf Y (Identity x))*)
-                                (Identity (Y x)))))
-                       (A (Y x) (F (Y x)) (Identity (F (Y x))))))
-                 (Identity (Y x)))))(* (Identity (F (Y x)))*))
-), m = m.
-    simpl; intros.
-    rsimplify_morphisms.
-
-    simpl.
-    hnf.*)
