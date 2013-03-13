@@ -334,6 +334,18 @@ change @Identity with @Identity';
   simpl.
   etransitivity.
   apply rsimplify_morphisms.
+  (* The above gives [ReifiedMorphismDenote
+     (ReifiedMorphismSimplify
+        (reified_morphism_of
+           (reify_generic_morphism x x
+              (Compose' C x x x (Identity' C x) (Identity' C x))))) =
+   Identity' C x] if I have the CS instance for generic uncommented, or
+[ReifiedMorphismDenote
+     (ReifiedMorphismSimplify
+        (reified_morphism_of
+           (reify_composition_morphism (reify_identity_morphism x)
+              (reify_identity_morphism x)))) = Identity' C x], if I have it commented out.
+This should not be, as the generic one should be unified after the composition and identity ones *)
 
 
 (*
