@@ -220,3 +220,22 @@ Ltac rsimplify_morphisms :=
   etransitivity; [ | symmetry; refine (rsimplify_morphisms _) ];
   instantiate;
   simpl.
+
+(***************************************************)
+(* Confusing examples that don't quite work *)
+Section bad_examples.
+  Require Import SumCategory.
+  Context `(C0 : SpecializedCategory objC0).
+  Context `(C1 : SpecializedCategory objC1).
+  Context `(D : SpecializedCategory objD).
+
+  Variables s d d' : C0.
+  Variable m1 : Morphism C0 s d.
+  Variable m2 : Morphism C0 d d'.
+  Variable F : SpecializedFunctor (C0 + C1) D.
+
+  Goal MorphismOf F (s := inl _) (d := inl _) (Compose m2 m1) = Compose (MorphismOf F (s := inl _) (d := inl _) m2) (MorphismOf F (s := inl _) (d := inl _) m1).
+  simpl in *.
+  etransitivity; [ refine (rsimplify_morphisms _) | ].
+  Abort.
+End bad_examples.
