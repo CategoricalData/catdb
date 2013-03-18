@@ -79,9 +79,10 @@ Section CommaSpecializedCategory.
     -> α'β'f' = α'β'f'2
     -> proj1_sig M == proj1_sig N
     -> M == N.
-    clear; intros; destruct N as [ [ ] ], M as [ [ ] ]; simpl in *;
-    repeat subst;
-    apply eq_JMeq;
+    clear; intros; subst.
+    destruct N as [ [ ] ], M as [ [ ] ]; simpl in *.
+    subst.
+    apply eq_JMeq.
     f_equal; simpl_eq; reflexivity.
   Qed.
 
@@ -99,10 +100,7 @@ Section CommaSpecializedCategory.
         unfold Morphism in *;
           destruct_hypotheses;
         repeat rewrite FCompositionOf;
-        repeat rewrite <- Associativity;
-        t_rev_with t';
-        repeat rewrite Associativity;
-        t_rev_with t'
+        repeat try_associativity ltac:(t_rev_with t')
       ).
   Defined.
 
@@ -133,19 +131,23 @@ Section CommaSpecializedCategory.
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
     CommaSpecializedCategory_Compose m3 (CommaSpecializedCategory_Compose m2 m1).
   Proof.
-    comma_t.
+    abstract (
+        simpl_eq;
+        repeat rewrite Associativity;
+        reflexivity
+      ).
   Qed.
 
   Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
   Proof.
-    comma_t.
+    abstract comma_t.
   Qed.
 
   Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
     CommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
   Proof.
-    comma_t.
+    abstract comma_t.
   Qed.
 
   Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
