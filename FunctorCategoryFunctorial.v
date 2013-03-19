@@ -1,5 +1,5 @@
 Require Export FunctorCategory NaturalTransformation.
-Require Import Common Notations SmallCat ProductCategory Duals ExponentialLaws.
+Require Import Common Notations SmallCat ProductCategory Duals ExponentialLaws CanonicalStructureSimplification FEqualDep.
 
 Set Implicit Arguments.
 
@@ -31,12 +31,9 @@ Section FunctorCategoryParts.
     Definition FunctorCategoryFunctor_MorphismOf : SpecializedFunctor (C ^ D) (C' ^ D').
       exists FunctorCategoryFunctor_MorphismOf_ObjectOf FunctorCategoryFunctor_MorphismOf_MorphismOf;
       abstract (
-          repeat intro;
-          simpl in *; unfold Object in *;
-          nt_eq;
-          repeat autorewrite with category;
-          present_spfunctor;
-          try rewrite <- FCompositionOf;
+          intros; simpl;
+          apply NaturalTransformation_eq;
+          rsimplify_morphisms;
           reflexivity
         ).
     Defined.
@@ -47,7 +44,7 @@ Section FunctorCategoryParts.
     Context `(D : @SpecializedCategory objD).
 
     Lemma FunctorCategoryFunctor_FIdentityOf : FunctorCategoryFunctor_MorphismOf (IdentityFunctor C) (IdentityFunctor D) = IdentityFunctor _.
-      repeat (functor_eq; nt_eq); autorewrite with category; reflexivity.
+      repeat (intro || apply Functor_eq || nt_eq); simpl; rsimplify_morphisms; reflexivity.
     Qed.
   End FIdentityOf.
 
@@ -66,7 +63,7 @@ Section FunctorCategoryParts.
 
     Lemma FunctorCategoryFunctor_FCompositionOf : FunctorCategoryFunctor_MorphismOf (ComposeFunctors F' F) (ComposeFunctors G' G)
                                                   = ComposeFunctors (FunctorCategoryFunctor_MorphismOf F' G) (FunctorCategoryFunctor_MorphismOf F G').
-      repeat (functor_eq; nt_eq); autorewrite with category; reflexivity.
+      abstract (repeat (intro || apply Functor_eq || nt_eq); simpl; rsimplify_morphisms; reflexivity).
     Qed.
   End FCompositionOf.
 End FunctorCategoryParts.
@@ -81,7 +78,6 @@ Section FunctorCategoryFunctor.
     simpl;
     abstract (intros; apply FunctorCategoryFunctor_FCompositionOf || apply FunctorCategoryFunctor_FIdentityOf).
   Defined.
-
 
   (* Definition FunctorCategoryFunctor : ((LocallySmallCat ^ LocallySmallCat) ^ (OppositeCategory LocallySmallCat))%category
     := ExponentialLaw4Functor_Inverse _ _ _ FunctorCategoryUncurriedFunctor. *)
@@ -108,11 +104,13 @@ Section NaturalTransformation.
                                                        (fun _ => NTComposeF T (NTComposeF (IdentityNaturalTransformation _) T'))
                                                        _)
     end;
-    present_spfunctor;
+    present_spfunctor.
     abstract (
         intros;
+        simpl;
+        apply NaturalTransformation_eq;
         simpl in *;
-          nt_eq;
+          intros;
         autorewrite with category;
         repeat (
             reflexivity
@@ -130,7 +128,7 @@ Section NaturalTransformation_Properties.
     Context `(C : @SpecializedCategory objC).
     Context `(D : @SpecializedCategory objD).
 
-    Local Ltac t := intros; simpl; nt_eq; autorewrite with category; try reflexivity.
+    Local Ltac t := intros; simpl; nt_eq; rsimplify_morphisms; try reflexivity.
 
     Section lift.
       Let LiftIdentityPointwise'
@@ -188,7 +186,7 @@ Section NaturalTransformation_Properties.
       Theorem LiftIdentityPointwise_Isomorphism
       : NTComposeT LiftIdentityPointwise LiftIdentityPointwise_Inverse = IdentityNaturalTransformation _
         /\ NTComposeT LiftIdentityPointwise_Inverse LiftIdentityPointwise = IdentityNaturalTransformation _.
-        split; nt_eq; autorewrite with morphism; reflexivity.
+        abstract (split; nt_eq; autorewrite with morphism; reflexivity).
       Qed.
     End theorem.
   End identity.
@@ -220,7 +218,7 @@ Section NaturalTransformation_Properties.
                                                                                  (ComposeFunctors (G ^ G') (F ^ F')).
         exists LiftComposeFunctorsPointwise_ComponentsOf;
         present_spcategory; subst_body; simpl.
-        abstract (intros; nt_eq; autorewrite with category; reflexivity).
+        abstract (intros; apply NaturalTransformation_eq; rsimplify_morphisms; reflexivity).
       Defined.
     End lift.
 
@@ -238,7 +236,7 @@ Section NaturalTransformation_Properties.
                                                                                          (ComposeFunctors G F ^ ComposeFunctors F' G').
         exists LiftComposeFunctorsPointwise_Inverse_ComponentsOf;
         present_spcategory; subst_body; simpl.
-        abstract (intros; nt_eq; autorewrite with category; reflexivity).
+        abstract (intros; apply NaturalTransformation_eq; rsimplify_morphisms; reflexivity).
       Defined.
     End inverse.
 
@@ -246,7 +244,11 @@ Section NaturalTransformation_Properties.
       Theorem LiftComposeFunctorsPointwise_Isomorphism
       : NTComposeT LiftComposeFunctorsPointwise LiftComposeFunctorsPointwise_Inverse = IdentityNaturalTransformation _
         /\ NTComposeT LiftComposeFunctorsPointwise_Inverse LiftComposeFunctorsPointwise = IdentityNaturalTransformation _.
-        split; nt_eq; autorewrite with category; reflexivity.
+        abstract (
+            split;
+            repeat (apply NaturalTransformation_eq || intro || simpl);
+            rsimplify_morphisms; reflexivity
+          ).
       Qed.
     End theorem.
   End compose.
