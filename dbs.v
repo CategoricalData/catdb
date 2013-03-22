@@ -39,13 +39,13 @@ Inductive Database : DatabaseType -> Type :=
 
 (** * Operations *)
 
-Definition RowHd T Ts (r : Row (T :: Ts)) : T :=
+Definition RowHead T Ts (r : Row (T :: Ts)) : T :=
   match r with
     | RNil => tt
     | RCons _ _ v _ => v
   end.
 
-Definition RowTl T Ts (r : Row (T :: Ts)) : Row Ts :=
+Definition RowTail T Ts (r : Row (T :: Ts)) : Row Ts :=
   match r with
     | RNil => tt
     | RCons _ _ _ r' => r'
@@ -53,17 +53,17 @@ Definition RowTl T Ts (r : Row (T :: Ts)) : Row Ts :=
 
 Fixpoint getColumn T R (c : Column T R) : Row R -> T :=
   match c with
-    | CFirst _ => fun r => RowHd r
-    | CNext _ _ c' => fun r => getColumn c' (RowTl r)
+    | CFirst _ => fun r => RowHead r
+    | CNext _ _ c' => fun r => getColumn c' (RowTail r)
   end.
 
-Definition DatabaseHd R Rs (d : Database (R :: Rs)) : Table R :=
+Definition DatabaseHead R Rs (d : Database (R :: Rs)) : Table R :=
   match d with
     | DNil => tt
     | DCons _ _ r _ => r
   end.
 
-Definition DatabaseTl R Rs (d : Database (R :: Rs)) : Database Rs :=
+Definition DatabaseTail R Rs (d : Database (R :: Rs)) : Database Rs :=
   match d with
     | DNil => tt
     | DCons _ _ _ d' => d'
@@ -71,6 +71,21 @@ Definition DatabaseTl R Rs (d : Database (R :: Rs)) : Database Rs :=
 
 Fixpoint getTable R Rs (tn : TableName R Rs) : Database Rs -> Table R :=
   match tn with
-    | TFirst _ => fun d => DatabaseHd d
-    | TNext _ _ tn' => fun d => getTable tn' (DatabaseTl d)
+    | TFirst _ => fun d => DatabaseHead d
+    | TNext _ _ tn' => fun d => getTable tn' (DatabaseTail d)
   end.
+
+(** A [ColumnList] on an [r : RowType] is a list of columns in [r];
+    the types of these columns gives a new [RowType], which must be
+    passed as the second parameter to this type. *)
+Inductive ColumnList : RowType -> RowType -> Type :=
+| CNil : ColumnList nil nil
+| CCons : forall T fromTs toTs, Column T fromTs -> ColumnList fromTs toTs -> ColumnList fromTs (T :: toTs).
+
+Fixpoint SelectFromTable fromR toR (cs : ColumnList fromR toR) : Row fromR -> Row toR
+  := match cs in (ColumnList fromR toR) return (Row fromR -> Row toR) with
+       | CNil =>
+         fun r => r
+       | CCons T fromTs toTs c cs' =>
+         fun r => RCons (getColumn c r) (SelectFromTable cs' r)
+     end.
