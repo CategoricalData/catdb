@@ -5,76 +5,72 @@ Set Implicit Arguments.
 
 (** * Types *)
 
-Definition rowTy := list Type.
+(** Every cell in a row has a [Type]; a row is an ordered list of cells *)
+Definition RowType := list Type.
 
-Inductive column (T : Type) : rowTy -> Type :=
-| CFirst : forall Ts, column T (T :: Ts)
-| CNext : forall T' Ts, column T Ts -> column T (T' :: Ts).
+(** A [Column] is a fancy way of indexing into a [Row].  It's typed
+    with the type of the relevant cell in the row, for convenience *)
+Inductive Column (T : Type) : RowType -> Type :=
+| CFirst : forall Ts, Column T (T :: Ts)
+| CNext : forall T' Ts, Column T Ts -> Column T (T' :: Ts).
 
-Inductive row : rowTy -> Type :=
-| RNil : row nil
-| RCons : forall T Ts, T -> row Ts -> row (T :: Ts).
+(** A [Row] is a list of cells, each cell having the type specified by the [RowType] *)
+Inductive Row : RowType -> Type :=
+| RNil : Row nil
+| RCons : forall T Ts, T -> Row Ts -> Row (T :: Ts).
 
-Definition table (R : rowTy) := list (row R).
+(** A [Table] of a particular [RowType] is a list of [Row]s of that type. *)
+Definition Table (R : RowType) := list (Row R).
 (* Might be nicer to use a multiset type instead of [list]. *)
 
-Definition dbTy := list rowTy.
+(** A database is typed as a collection of [Table]s, each having a [RowType] *)
+Definition DatabaseType := list RowType.
 
-Inductive tableName (R : rowTy) : dbTy -> Type :=
-| TFirst : forall Rs, tableName R (R :: Rs)
-| TNext : forall R' Rs, tableName R Rs -> tableName R (R' :: Rs).
+(** A [TableName] is a fancy way of indexing into a [Database]. *)
+Inductive TableName (R : RowType) : DatabaseType -> Type :=
+| TFirst : forall Rs, TableName R (R :: Rs)
+| TNext : forall R' Rs, TableName R Rs -> TableName R (R' :: Rs).
 
-Inductive db : dbTy -> Type :=
-| DNil : db nil
-| DCons : forall R Rs, table R -> db Rs -> db (R :: Rs).
+(** A database is a list of tables *)
+Inductive Database : DatabaseType -> Type :=
+| DNil : Database nil
+| DCons : forall R Rs, Table R -> Database Rs -> Database (R :: Rs).
 
 
 (** * Operations *)
 
-Definition rowHd T Ts (r : row (T :: Ts)) : T :=
-  match r in row R return match R with
-                            | nil => unit
-                            | T :: _ => T
-                          end with
+Definition RowHd T Ts (r : Row (T :: Ts)) : T :=
+  match r with
     | RNil => tt
     | RCons _ _ v _ => v
   end.
 
-Definition rowTl T Ts (r : row (T :: Ts)) : row Ts :=
-  match r in row R return match R with
-                            | nil => unit
-                            | _ :: Ts => row Ts
-                          end with
+Definition RowTl T Ts (r : Row (T :: Ts)) : Row Ts :=
+  match r with
     | RNil => tt
     | RCons _ _ _ r' => r'
   end.
 
-Fixpoint getColumn T R (c : column T R) : row R -> T :=
+Fixpoint getColumn T R (c : Column T R) : Row R -> T :=
   match c with
-    | CFirst _ => fun r => rowHd r
-    | CNext _ _ c' => fun r => getColumn c' (rowTl r)
+    | CFirst _ => fun r => RowHd r
+    | CNext _ _ c' => fun r => getColumn c' (RowTl r)
   end.
 
-Definition dbHd R Rs (d : db (R :: Rs)) : table R :=
-  match d in db Rs return match Rs with
-                            | nil => unit
-                            | R :: _ => table R
-                          end with
+Definition DatabaseHd R Rs (d : Database (R :: Rs)) : Table R :=
+  match d with
     | DNil => tt
     | DCons _ _ r _ => r
   end.
 
-Definition dbTl R Rs (d : db (R :: Rs)) : db Rs :=
-  match d in db R return match R with
-                            | nil => unit
-                            | _ :: Rs => db Rs
-                          end with
+Definition DatabaseTl R Rs (d : Database (R :: Rs)) : Database Rs :=
+  match d with
     | DNil => tt
     | DCons _ _ _ d' => d'
   end.
 
-Fixpoint getTable R Rs (tn : tableName R Rs) : db Rs -> table R :=
+Fixpoint getTable R Rs (tn : TableName R Rs) : Database Rs -> Table R :=
   match tn with
-    | TFirst _ => fun d => dbHd d
-    | TNext _ _ tn' => fun d => getTable tn' (dbTl d)
+    | TFirst _ => fun d => DatabaseHd d
+    | TNext _ _ tn' => fun d => getTable tn' (DatabaseTl d)
   end.
