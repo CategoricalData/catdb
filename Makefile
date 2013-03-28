@@ -105,7 +105,6 @@ MODULES    := Notations \
 	SetColimits \
 	SetCategoryFacts \
 	Yoneda \
-	DataMigrationFunctors \
 	\
 	Schema \
 	SmallSchema \
@@ -117,12 +116,20 @@ MODULES    := Notations \
 	MetaEquivalence \
 	Examples \
 	Theorems # \
+	DataMigrationFunctors \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
 VDS	   := $(MODULES:%=%.v.d)
 
-.PHONY: coq clean timed
+NEW_TIME_FILE=time-of-build-after.log
+OLD_TIME_FILE=time-of-build-before.log
+BOTH_TIME_FILE=time-of-build-both.log
+TIME_SHELF_NAME=time-of-build-shelf
+
+
+
+.PHONY: coq clean timed pretty-timed pretty-timed-files
 
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
@@ -130,6 +137,17 @@ coq: Makefile.coq
 # TODO(jgross): Look into combining this with the time-make.sh script
 timed: Makefile.coq
 	./report_time.sh -c $(MAKE) -f Makefile.coq SHELL=./report_time.sh
+
+pretty-timed:
+	./make-each-time-file.sh "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)"
+	$(MAKE) combine-pretty-timed
+
+combine-pretty-timed:
+	$(MAKE) $(BOTH_TIME_FILE)
+	cat "$(BOTH_TIME_FILE)"
+
+$(BOTH_TIME_FILE):
+	python ./make-both-time-files.py "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)" "$(BOTH_TIME_FILE)"
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq
