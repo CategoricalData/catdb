@@ -43,9 +43,9 @@ def make_table_string(left_times_dict, right_times_dict,
                       descending=True,
                       left_tag="After", right_tag="Before"):
     names = get_sorted_file_list_from_times_dict(left_times_dict, descending=descending)
-    left_width = max(map(len, left_times_dict.values()))
-    right_width = max(map(len, right_times_dict.values()))
-    middle_width = max(map(len, names + ["File Name"]))
+    left_width = max(max(map(len, left_times_dict.values())), len(sum_times(left_times_dict.values())))
+    right_width = max(max(map(len, right_times_dict.values())), len(sum_times(right_times_dict.values())))
+    middle_width = max(map(len, names + ["File Name", "Total"]))
     format_string = "%%-%ds | %%-%ds | %%-%ds" % (left_width, middle_width, right_width)
     header = format_string % (left_tag, "File Name", right_tag)
     footer = format_string % (sum_times(left_times_dict.values()),
