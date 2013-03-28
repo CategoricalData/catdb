@@ -148,7 +148,7 @@ combine-pretty-timed:
 	cat "$(BOTH_TIME_FILE)"
 
 Makefile.coq: Makefile $(VS)
-	coq_makefile $(VS) -o Makefile.coq
+	coq_makefile $(VS) -arg -dont-load-proofs -o Makefile.coq
 
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean
