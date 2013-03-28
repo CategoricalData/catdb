@@ -143,11 +143,8 @@ pretty-timed:
 	$(MAKE) combine-pretty-timed
 
 combine-pretty-timed:
-	$(MAKE) $(BOTH_TIME_FILE)
-	cat "$(BOTH_TIME_FILE)"
-
-$(BOTH_TIME_FILE):
 	python ./make-both-time-files.py "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)" "$(BOTH_TIME_FILE)"
+	cat "$(BOTH_TIME_FILE)"
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -o Makefile.coq
