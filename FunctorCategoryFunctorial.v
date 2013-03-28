@@ -103,8 +103,7 @@ Section NaturalTransformation.
         refine (Build_SpecializedNaturalTransformation F G
                                                        (fun _ => NTComposeF T (NTComposeF (IdentityNaturalTransformation _) T'))
                                                        _)
-    end;
-    present_spfunctor.
+    end.
     abstract (
         intros;
         simpl;
@@ -143,7 +142,7 @@ Section NaturalTransformation_Properties.
         end;
         t.
         Grab Existential Variables.
-        present_spfunctor; abstract t.
+        abstract t.
       Defined.
 
       Let LiftIdentityPointwise''
@@ -169,7 +168,7 @@ Section NaturalTransformation_Properties.
         end;
         t.
         Grab Existential Variables.
-        present_spfunctor; abstract t.
+        abstract t.
       Defined.
 
       Let LiftIdentityPointwise''_Inverse
@@ -217,7 +216,7 @@ Section NaturalTransformation_Properties.
       Definition LiftComposeFunctorsPointwise : SpecializedNaturalTransformation (ComposeFunctors G F ^ ComposeFunctors F' G')
                                                                                  (ComposeFunctors (G ^ G') (F ^ F')).
         exists LiftComposeFunctorsPointwise_ComponentsOf;
-        present_spcategory; subst_body; simpl.
+        subst_body; simpl.
         abstract (intros; apply NaturalTransformation_eq; rsimplify_morphisms; reflexivity).
       Defined.
     End lift.
@@ -235,7 +234,7 @@ Section NaturalTransformation_Properties.
       Definition LiftComposeFunctorsPointwise_Inverse : SpecializedNaturalTransformation (ComposeFunctors (G ^ G') (F ^ F'))
                                                                                          (ComposeFunctors G F ^ ComposeFunctors F' G').
         exists LiftComposeFunctorsPointwise_Inverse_ComponentsOf;
-        present_spcategory; subst_body; simpl.
+        subst_body; simpl.
         abstract (intros; apply NaturalTransformation_eq; rsimplify_morphisms; reflexivity).
       Defined.
     End inverse.

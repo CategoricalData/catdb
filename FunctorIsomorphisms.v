@@ -88,8 +88,8 @@ Section FunctorIsomorphism.
       intro i; hnf.
       exists (InverseFunctor i);
         destruct i; simpl;
-          split; present_spcategory;
-            assumption.
+        split;
+        assumption.
     Qed.
 
     Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
@@ -175,5 +175,4 @@ Section Functor_preserves_isomorphism.
   Defined.
 End Functor_preserves_isomorphism.
 
-Hint Resolve @MorphismOf_IsomorphismOf : category.
-Hint Resolve @MorphismOf_IsomorphismOf : functor.
+Hint Resolve @MorphismOf_IsomorphismOf : category functor.

@@ -11,15 +11,14 @@ Section FunctorFromDiscrete.
   Context `(D : @SpecializedCategory objD).
   Variable objOf : O -> objD.
 
-  Let FunctorFromDiscrete_MorphismOf s d (m : Morphism' (DiscreteCategory O) s d) : Morphism' D (objOf s) (objOf d)
+  Let FunctorFromDiscrete_MorphismOf s d (m : Morphism (DiscreteCategory O) s d) : Morphism D (objOf s) (objOf d)
     := match m with
          | eq_refl => Identity _
        end.
 
   Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
   Proof.
-    refine {| ObjectOf' := objOf; MorphismOf' := FunctorFromDiscrete_MorphismOf |};
-      present_spcategory;
+    refine {| ObjectOf := objOf; MorphismOf := FunctorFromDiscrete_MorphismOf |};
       abstract (
         intros; hnf in *; subst; simpl;
           auto with category
@@ -33,7 +32,7 @@ Section Obj.
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
           (fun C' => Index2Object C')
-          (fun _ _ F => ObjectOf' F)
+          (fun _ _ F => ObjectOf F)
           _
           _
         )
@@ -80,11 +79,11 @@ Section Mor.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
-          (fun C' => { sd : Index2Object C' * Index2Object C' & (Index2Cat C').(Morphism') (fst sd) (snd sd) } )
+          (fun C' => { sd : Index2Object C' * Index2Object C' & (Index2Cat C').(Morphism) (fst sd) (snd sd) } )
           (fun _ _ F => (fun sdm =>
-            existT (fun sd => Morphism' _ (fst sd) (snd sd))
+            existT (fun sd => Morphism _ (fst sd) (snd sd))
             (F (fst (projT1 sdm)), F (snd (projT1 sdm)))
-            (MorphismOf' F (fst (projT1 sdm)) (snd (projT1 sdm)) (projT2 sdm))
+            (MorphismOf F (s := fst (projT1 sdm)) (d := snd (projT1 sdm)) (projT2 sdm))
           ))
           _
           _

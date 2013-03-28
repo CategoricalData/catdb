@@ -129,7 +129,6 @@ Section CorrespondenceCategory.
         unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
           destruct_type @Empty_set; trivial; autorewrite with functor; auto with morphism;
         destruct M as [ MO MM MI MC ]; simpl in *; fg_equal_in MI; fg_equal_in MC;
-        present_spcategory;
         match goal with | [ H : _ |- _ ] => do 2 (try rewrite <- H); simpl; autorewrite with morphism; reflexivity end
       ).
   Defined.
@@ -210,7 +209,7 @@ Section From_Functor_to_1.
           _
         )
     end;
-    simpl in *; present_spfunctor; subst_body;
+    simpl in *; subst_body;
       abstract (
         intros; destruct_hypotheses;
           apply functional_extensionality_dep; intro;

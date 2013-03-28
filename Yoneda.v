@@ -116,12 +116,14 @@ Section CoYonedaLemma.
   Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
-  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
+  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp)
+  : Morphism TypeCat (Morphism (TypeCat ^ COp) (CoYoneda C c) X) (X c).
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
 
-  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
+  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp)
+  : Morphism TypeCat (X c) (Morphism (TypeCat ^ COp) (CoYoneda C c) X).
     simpl; intro Xc.
     hnf.
     match goal with
@@ -142,11 +144,11 @@ Section CoYonedaLemma.
 
   Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     exists (@CoYonedaLemmaMorphismInverse c X).
-    split; simpl; nt_eq; clear; present_spcategory;
+    split; simpl; nt_eq; clear;
     [ | pose (FIdentityOf X); fg_equal; trivial ];
     pose (FCompositionOf X);
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;
-    simpl; present_spcategory;
+    simpl;
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 End CoYonedaLemma.
@@ -170,7 +172,7 @@ Section FullyFaithful.
     exists (CoYonedaLemmaMorphism (X := ContravariantHomFunctor C c')).
     t_with t'; nt_eq; autorewrite with morphism; trivial.
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;
-      simpl; present_spcategory;
+      simpl;
       apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 End FullyFaithful.

@@ -116,7 +116,6 @@ Section Pullback.
     Definition PullbackDiagramFunctor_MorphismOf s d (m : Morphism ((C / c) * (C / c)) s d)
     : Morphism (C ^ PullbackIndex) (PullbackDiagramFunctor_ObjectOf s) (PullbackDiagramFunctor_ObjectOf d).
       exists (PullbackDiagramFunctor_MorphismOf_ComponentsOf m).
-      present_spfunctor.
       abstract (
           destruct m as [[[]] [[]]];
           simpl in *;
@@ -136,7 +135,6 @@ Section Pullback.
                                            _
                                            _)
       end;
-      present_spfunctor;
       abstract (
           repeat intros [[[[? []] ?]] [[[? []] ?]]];
           simpl in *;
@@ -208,7 +206,6 @@ Section Pullback.
     Definition PushoutDiagramFunctor_MorphismOf s d (m : Morphism ((c / C) * (c / C)) s d)
     : Morphism (C ^ PushoutIndex) (PushoutDiagramFunctor_ObjectOf s) (PushoutDiagramFunctor_ObjectOf d).
       exists (PushoutDiagramFunctor_MorphismOf_ComponentsOf m).
-      present_spfunctor.
       abstract (
           destruct m as [[[]] [[]]];
           simpl in *;
@@ -228,7 +225,6 @@ Section Pullback.
                                            _
                                            _)
       end;
-      present_spfunctor;
       abstract (
           repeat intros [[[[? []] ?]] [[[? []] ?]]];
           simpl in *;
@@ -284,7 +280,7 @@ Section PullbackObjects.
                        | PullbackB => j
                        | PullbackC => Compose f i
                      end);
-      simpl; present_spcategory;
+      simpl;
       abstract t.
   Defined.
 
@@ -314,7 +310,7 @@ Section PullbackObjects.
                        | PullbackB => j
                        | PullbackC => Compose i f
                      end);
-      simpl; present_spcategory;
+      simpl;
       abstract t.
   Defined.
 

@@ -93,7 +93,7 @@ Section Law1.
                                      _
                                      _);
     abstract (
-        intros; simpl in *; present_spcategory; simpl_eq; reflexivity
+        intros; simpl in *; simpl_eq; reflexivity
       ).
   Defined.
 

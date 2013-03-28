@@ -95,7 +95,7 @@ Section LaxSliceSpecializedCategory.
     end.
     abstract (
       subst_body;
-      intros; simpl; present_spnt;
+      intros; simpl;
       autorewrite with morphism;
       reflexivity
     ).
@@ -125,7 +125,7 @@ Section LaxSliceSpecializedCategory.
         )
     end.
     abstract (
-        intros; simpl; present_spnt;
+        intros; simpl;
         autorewrite with morphism;
         reflexivity
       ).
@@ -269,7 +269,7 @@ Section LaxCosliceSpecializedCategory.
     end.
     abstract (
       subst_body;
-      intros; simpl; present_spnt;
+      intros; simpl;
         repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           reflexivity
     ).
@@ -299,7 +299,7 @@ Section LaxCosliceSpecializedCategory.
         )
     end.
     abstract (
-      intros; simpl; present_spnt;
+      intros; simpl;
         repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           reflexivity
     ).

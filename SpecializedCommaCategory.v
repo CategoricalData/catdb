@@ -95,7 +95,6 @@ Section CommaSpecializedCategory.
     exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
     hnf in *; simpl in *.
     abstract (
-        present_spcategory;
         destruct_all_hypotheses;
         unfold Morphism in *;
           destruct_hypotheses;
@@ -121,9 +120,8 @@ Section CommaSpecializedCategory.
     );
     destruct_hypotheses;
     simpl in *;
-    present_spcategory;
     simpl_eq;
-    present_spcategory; autorewrite with category;
+    autorewrite with category;
     f_equal;
     try reflexivity.
 
@@ -185,8 +183,8 @@ Section SliceSpecializedCategory.
   Let B := TerminalCategory.
 
   Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
-    refine {| ObjectOf' := (fun _ => a);
-      MorphismOf' := (fun _ _ _ => Identity a)
+    refine {| ObjectOf := (fun _ => a);
+      MorphismOf := (fun _ _ _ => Identity a)
     |}; abstract (intros; auto with morphism).
   Defined.
 

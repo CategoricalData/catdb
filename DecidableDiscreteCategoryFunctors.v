@@ -18,7 +18,7 @@ Section Obj.
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
           (fun C' => existT _ (Index2Object (projT1 C')) (projT2 C'))
-          (fun _ _ F => ObjectOf' F)
+          (fun _ _ F => ObjectOf F)
           _
           _
         )
@@ -95,7 +95,7 @@ Section InducedFunctor.
   Hint Unfold DiscreteCategoryDec_Compose.
   Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Local Arguments Compose {obj} [C s d d'] / _ _ : simpl nomatch.
+  Local Arguments Compose {obj} [C s d d'] / _ _ : rename, simpl nomatch.
 
   Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
     match goal with

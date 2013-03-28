@@ -10,8 +10,8 @@ Section GroupoidOf.
   Context `(C : @SpecializedCategory objC).
 
   Inductive GroupoidOf_Morphism (s d : objC) :=
-  | hasMorphism : C.(Morphism') s d -> GroupoidOf_Morphism s d
-  | hasInverse : C.(Morphism') d s -> GroupoidOf_Morphism s d
+  | hasMorphism : C.(Morphism) s d -> GroupoidOf_Morphism s d
+  | hasInverse : C.(Morphism) d s -> GroupoidOf_Morphism s d
   | byComposition : forall e, GroupoidOf_Morphism e d -> GroupoidOf_Morphism s e -> GroupoidOf_Morphism s d.
 
   Definition GroupoidOf_Compose (s d d' : C) :

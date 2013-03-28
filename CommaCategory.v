@@ -8,7 +8,6 @@ Local Open Scope category_scope.
 
 Local Ltac fold_functor :=
   change CObject with (fun C => @Object (CObject C) C) in *;
-    present_spcategory;
     change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *.
 
 Section CommaCategory.
@@ -58,7 +57,7 @@ Section CommaCategory.
 
   Let CommaCategory_Morphism' (XG X'G' : CommaCategory_Object) := Eval hnf in CommaSpecializedCategory_MorphismT (S := S) (T := T) XG X'G'.
   Let CommaCategory_Morphism'' (XG X'G' : CommaCategory_Object) : Type.
-    simpl_definition_by_tac_and_exact (CommaCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spfunctor).
+    simpl_definition_by_tac_and_exact (CommaCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition CommaCategory_Morphism (XG X'G' : CommaCategory_Object) := Eval hnf in CommaCategory_Morphism'' XG X'G'.
 
@@ -66,7 +65,7 @@ Section CommaCategory.
     := Eval hnf in CommaSpecializedCategory_Compose (S := S) (T := T) (s := s) (d := d) (d' := d') Fα F'α'.
   Let CommaCategory_Compose'' s d d' (Fα : CommaCategory_Morphism d d') (F'α' : CommaCategory_Morphism s d) :
     CommaCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@CommaCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spfunctor).
+    simpl_definition_by_tac_and_exact (@CommaCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition CommaCategory_Compose s d d' (Fα : CommaCategory_Morphism d d') (F'α' : CommaCategory_Morphism s d) :
     CommaCategory_Morphism s d'
@@ -74,7 +73,7 @@ Section CommaCategory.
 
   Let CommaCategory_Identity' o := Eval hnf in CommaSpecializedCategory_Identity (S := S) (T := T) o.
   Let CommaCategory_Identity'' (o : CommaCategory_Object) : CommaCategory_Morphism o o.
-    simpl_definition_by_tac_and_exact (@CommaCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spfunctor).
+    simpl_definition_by_tac_and_exact (@CommaCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition CommaCategory_Identity (o : CommaCategory_Object) : CommaCategory_Morphism o o
     := Eval hnf in @CommaCategory_Identity'' o.
@@ -123,8 +122,8 @@ Section SliceCategory.
   Let B := TerminalCategory.
 
   Definition SliceCategory_Functor : Functor B C.
-    refine {| ObjectOf' := (fun _ => a);
-      MorphismOf' := (fun _ _ _ => Identity a)
+    refine {| ObjectOf := (fun _ => a);
+      MorphismOf := (fun _ _ _ => Identity a)
     |}; abstract (intros; auto with morphism).
   Defined.
 

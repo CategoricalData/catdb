@@ -11,37 +11,20 @@ Local Infix "==" := JMeq.
 Record ComputationalCategory (obj : Type) :=
   Build_ComputationalCategory {
       Object :> _ := obj;
-      Morphism' : obj -> obj -> Type;
+      Morphism : obj -> obj -> Type;
 
-      Identity' : forall o, Morphism' o o;
-      Compose' : forall s d d', Morphism' d d' -> Morphism' s d -> Morphism' s d'
+      Identity : forall x, Morphism x x;
+      Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d'
     }.
 
 Bind Scope category_scope with ComputationalCategory.
 Bind Scope object_scope with Object.
-Bind Scope morphism_scope with Morphism'.
-
-Arguments Object {obj%type} C%category : rename.
-Arguments Identity' {obj%type} C%category o%object : rename.
-Arguments Compose' {obj%type} C%category s%object d%object d'%object m1%morphism m2%morphism : rename.
-
-Section ComputationalCategoryInterface.
-  Context `(C : @ComputationalCategory obj).
-
-  Definition Morphism : forall s d : C, _ := Eval cbv beta delta [Morphism'] in C.(Morphism').
-
-  Bind Scope morphism_scope with Morphism.
-
-  Definition Identity : forall o : C, Morphism o o := Eval cbv beta delta [Identity'] in C.(Identity').
-  Definition Compose : forall {s d d' : C} (m : Morphism d d') (m0 : Morphism s d), Morphism s d' := Eval cbv beta delta [Compose'] in C.(Compose').
-End ComputationalCategoryInterface.
-
 Bind Scope morphism_scope with Morphism.
 
-Arguments Object {obj} !C / : rename (*, simpl never *).
-Arguments Morphism {obj} !C s d : rename. (* , simpl nomatch. *)
-Arguments Compose {obj} [!C s d d'] m m0. (* : simpl nomatch. *)
-Arguments Identity {obj} [!C] o. (* : simpl nomatch. *)
+Arguments Object {obj%type} !C%category / : rename.
+Arguments Morphism {obj%type} !C%category s d : rename. (* , simpl nomatch. *)
+Arguments Identity {obj%type} [!C%category] x%object : rename.
+Arguments Compose {obj%type} [!C%category s%object d%object d'%object] m1%morphism m2%morphism : rename.
 
 Class IsSpecializedCategory (obj : Type) (C : ComputationalCategory obj) : Prop :=
   {
@@ -59,16 +42,7 @@ Class IsSpecializedCategory (obj : Type) (C : ComputationalCategory obj) : Prop 
     LeftIdentity : forall a b (f : Morphism C a b), Compose (Identity b) f = f;
     RightIdentity : forall a b (f : Morphism C a b), Compose f (Identity a) = f
   }.
-(*
-Section IsSpecializedCategoryInterface.
-  Context `(H : @IsSpecializedCategory obj C).
 
-  Definition Associativity := Associativity' H.
-  Definition Associativity_sym := Associativity_sym' H.
-  Definition LeftIdentity := LeftIdentity' H.
-  Definition RightIdentity := RightIdentity' H.
-End IsSpecializedCategoryInterface.
-*)
 Record SpecializedCategory (obj : Type) :=
   Build_SpecializedCategory' {
       UnderlyingCCategory :> ComputationalCategory obj;
@@ -86,17 +60,17 @@ Bind Scope category_scope with SpecializedCategory.
 
 Section SpecializedCategoryInterface.
   Definition Build_SpecializedCategory (obj : Type)
-    (Morphism' : obj -> obj -> Type)
-    (Identity' : forall o : obj, Morphism' o o)
-    (Compose' : forall s d d' : obj, Morphism' d d' -> Morphism' s d -> Morphism' s d')
-    (Associativity' : forall (o1 o2 o3 o4 : obj) (m1 : Morphism' o1 o2) (m2 : Morphism' o2 o3) (m3 : Morphism' o3 o4),
+    (Morphism : obj -> obj -> Type)
+    (Identity' : forall o : obj, Morphism o o)
+    (Compose' : forall s d d' : obj, Morphism d d' -> Morphism s d -> Morphism s d')
+    (Associativity' : forall (o1 o2 o3 o4 : obj) (m1 : Morphism o1 o2) (m2 : Morphism o2 o3) (m3 : Morphism o3 o4),
       Compose' o1 o2 o4 (Compose' o2 o3 o4 m3 m2) m1 = Compose' o1 o3 o4 m3 (Compose' o1 o2 o3 m2 m1))
-    (LeftIdentity' : forall (a b : obj) (f : Morphism' a b), Compose' a b b (Identity' b) f = f)
-    (RightIdentity' : forall (a b : obj) (f : Morphism' a b), Compose' a a b f (Identity' a) = f) :
+    (LeftIdentity' : forall (a b : obj) (f : Morphism a b), Compose' a b b (Identity' b) f = f)
+    (RightIdentity' : forall (a b : obj) (f : Morphism a b), Compose' a a b f (Identity' a) = f) :
     @SpecializedCategory obj
     := Eval hnf in
         let C := (@Build_ComputationalCategory obj
-                                               Morphism'
+                                               Morphism
                                                Identity' Compose') in
         @Build_SpecializedCategory' obj
                                     C
@@ -114,33 +88,7 @@ Create HintDb morphism discriminated.
 
 Hint Extern 1 => symmetry : category morphism. (* TODO(jgross): Why do I need this? *)
 
-Hint Immediate UnderlyingCCategory_IsSpecializedCategory : category.
-Hint Immediate UnderlyingCCategory_IsSpecializedCategory : morphism.
-
-Ltac sanitize_spcategory :=
-  repeat match goal with
-           | [ _ : appcontext[fun x => ?f x] |- _ ] => progress change (fun x => f x) with f in *
-           | [ |- appcontext[fun x => ?f x] ] => progress change (fun x => f x) with f in *
-           | [ _ : appcontext [?f (@Object ?obj ?C) ?C] |- _ ] => progress change (f (@Object obj C) C) with (f obj C) in *
-           | [ |- appcontext [?f (@Object ?obj ?C) ?C] ] => progress change (f (@Object obj C) C) with (f obj C) in *
-         end.
-
-Ltac present_obj from to :=
-  repeat match goal with
-           | [ _ : appcontext[from ?obj (UnderlyingCCategory ?C)] |- _ ] => progress change (from obj (UnderlyingCCategory C)) with (to obj C) in *
-           | [ |- appcontext[from ?obj (UnderlyingCCategory ?C)] ] => progress change (from obj (UnderlyingCCategory C)) with (to obj C) in *
-         end.
-
-Ltac present_spcategory := present_obj @Morphism' @Morphism; present_obj @Identity' @Identity; present_obj @Compose' @Compose.
-
-(*Hint Extern 0 => progress present_spcategory : category.
-Hint Extern 0 => progress present_spcategory : morphism.*)
-
-(*Ltac present_spcategory_all := present_spcategory;
-  repeat match goal with
-           | [ C : @SpecializedCategory ?obj |- _ ] => progress (change_in_all obj with (@Object obj C); sanitize_spcategory)
-         end;
-  sanitize_spcategory.*)
+Hint Immediate UnderlyingCCategory_IsSpecializedCategory : category morphism.
 
 Ltac spcategory_hideProofs :=
   repeat match goal with
@@ -153,9 +101,8 @@ Ltac spcategory_hideProofs :=
                hideProofs pf0 pf1 pf2 pf3
          end.
 
-Hint Resolve @LeftIdentity @RightIdentity @Associativity : category.
+Hint Resolve @LeftIdentity @RightIdentity @Associativity : category morphism.
 Hint Rewrite @LeftIdentity @RightIdentity using try specialized_category_is_specialized : category.
-Hint Resolve @LeftIdentity @RightIdentity @Associativity : morphism.
 Hint Rewrite @LeftIdentity @RightIdentity using try specialized_category_is_specialized : morphism.
 
 (* eh, I'm not terribly happy.  meh. *)
@@ -166,22 +113,23 @@ Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : 
 
 Section Categories_Equal.
   Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
-    @Morphism' _ C = @Morphism' _ D
-    -> @Identity' _ C == @Identity' _ D
-    -> @Compose' _ C == @Compose' _ D
+    @Morphism _ C = @Morphism _ D
+    -> @Identity _ C == @Identity _ D
+    -> @Compose _ C == @Compose _ D
     -> C = D.
-    intros; intuition; destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
+    intros.
+    destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
     simpl in *; repeat subst;
     f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
     objC = objD
-    -> @Morphism' _ C == @Morphism' _ D
-    -> @Identity' _ C == @Identity' _ D
-    -> @Compose' _ C == @Compose' _ D
+    -> @Morphism _ C == @Morphism _ D
+    -> @Identity _ C == @Identity _ D
+    -> @Compose _ C == @Compose _ D
     -> C == D.
-    intros; intuition; destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
+    intros; destruct_head @SpecializedCategory; destruct_head @ComputationalCategory;
     simpl in *; repeat subst; JMeq_eq;
     f_equal; apply proof_irrelevance.
   Qed.
@@ -190,7 +138,7 @@ End Categories_Equal.
 Ltac spcat_eq_step_with tac :=
   structures_eq_step_with_tac ltac:(apply SpecializedCategory_eq || apply SpecializedCategory_JMeq) tac.
 
-Ltac spcat_eq_with tac := present_spcategory; repeat spcat_eq_step_with tac.
+Ltac spcat_eq_with tac := repeat spcat_eq_step_with tac.
 
 Ltac spcat_eq_step := spcat_eq_step_with idtac.
 Ltac spcat_eq := spcategory_hideProofs; spcat_eq_with idtac.
@@ -261,12 +209,6 @@ Section Category.
     monomorphism (i.e. an epimorphism in a category [C] is a
     monomorphism in the dual category [OppositeCategory C]).
     *)
-  Definition IsEpimorphism' x y (m : C.(Morphism') x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
-      m1 = m2.
-  Definition IsMonomorphism' x y (m : C.(Morphism') x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
-      m1 = m2.
   Definition IsEpimorphism x y (m : C.(Morphism) x y) : Prop :=
     forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
       m1 = m2.
@@ -303,12 +245,9 @@ Section Category.
   End properties.
 End Category.
 
-Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category.
-Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : morphism.
+Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category morphism.
 
-Arguments IsEpimorphism' {obj} [C x y] m.
 Arguments IsEpimorphism {obj} [C x y] m.
-Arguments IsMonomorphism' {obj} [C x y] m.
 Arguments IsMonomorphism {obj} [C x y] m.
 
 Section AssociativityComposition.
@@ -316,8 +255,8 @@ Section AssociativityComposition.
   Variables o0 o1 o2 o3 o4 : C.
 
   Lemma compose4associativity_helper
-    (a : Morphism _ o3 o4) (b : Morphism _ o2 o3)
-    (c : Morphism _ o1 o2) (d : Morphism _ o0 o1) :
+    (a : Morphism C o3 o4) (b : Morphism C o2 o3)
+    (c : Morphism C o1 o2) (d : Morphism C o0 o1) :
     Compose (Compose a b) (Compose c d) = (Compose a (Compose (Compose b c) d)).
     repeat rewrite Associativity; reflexivity.
   Qed.

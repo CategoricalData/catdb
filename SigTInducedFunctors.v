@@ -48,7 +48,7 @@ Section T2.
     end;
     subst_body;
     abstract (
-      present_spcategory; simpl in *; intros; unfold Morphism; simpl_eq; try reflexivity; JMeq_eq;
+      simpl in *; intros; unfold Morphism; simpl_eq; try reflexivity; JMeq_eq;
         apply @P_CompositionOf || apply @P_IdentityOf
     ).
   Defined.

@@ -1,5 +1,5 @@
 Require Export LimitFunctorTheorems SpecializedLaxCommaCategory.
-Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation Duals.
+Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation Duals CanonicalStructureSimplification.
 
 Set Implicit Arguments.
 
@@ -22,7 +22,7 @@ Section InducedFunctor.
 
   Section Limit.
     Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
-      (m : Morphism _ s d) :
+      (m : Morphism (CAT ⇑ D) s d) :
       Morphism D (LimitObject limS) (LimitObject limD)
       := InducedLimitMap (projT2 m) _ _.
 
@@ -37,9 +37,7 @@ Section InducedFunctor.
         | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite RightIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      rsimplify_morphisms (* 11 s *).
       repeat rewrite Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
@@ -59,9 +57,8 @@ Section InducedFunctor.
                         clear H'
       end (* 7 s *);
       simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-            reflexivity. (* 7 s since [simpl] *)
+      rsimplify_morphisms;
+      reflexivity (* 6 s since [simpl] *).
     Qed.
 
     Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
@@ -74,10 +71,8 @@ Section InducedFunctor.
         | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite RightIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
-      reflexivity.
+      rsimplify_morphisms;
+      reflexivity. (* 2 s *)
     Qed.
 
     Variable HasLimits : forall C : CAT ⇑ D, Limit (projT2 C).
@@ -100,7 +95,7 @@ Section InducedFunctor.
 
   Section Colimit.
     Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
-      (m : Morphism _ s d) :
+      (m : Morphism (CAT ⇓ D) s d) :
       Morphism D (ColimitObject colimS) (ColimitObject colimD)
       := InducedColimitMap (projT2 m) _ _.
 
@@ -115,9 +110,7 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite LeftIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      rsimplify_morphisms (* 8 s *).
       repeat rewrite Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
@@ -136,9 +129,8 @@ Section InducedFunctor.
                       try (rewrite H'; clear H')
       end (* 7 s *);
       simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-            reflexivity. (* 7 s since [simpl] *)
+      rsimplify_morphisms;
+      reflexivity (* 4 s since [simpl] *).
     Qed.
 
     Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
@@ -151,9 +143,7 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite LeftIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      rsimplify_morphisms. (* 1.5 s *)
       reflexivity.
     Qed.
 

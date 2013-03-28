@@ -128,7 +128,7 @@ Section AdjunctionFromUniversal.
                                                        (InitialProperty_Morphism (M Y0) _ (Compose ηY1 f)))
                                        _
                                        _);
-      simpl in *; present_spcategory;
+      simpl in *;
       abstract solve_adjoint_functor M.
     Defined.
 
@@ -157,7 +157,7 @@ Section AdjunctionFromUniversal.
                                                        (TerminalProperty_Morphism (M X1) _ (Compose g εX0)))
                                        _
                                        _);
-      simpl in *; present_spcategory;
+      simpl in *;
       abstract solve_adjoint_functor M.
     Defined.
 

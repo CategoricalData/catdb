@@ -281,8 +281,8 @@ Section UniversalMorphism.
                | inr _ => Morphism C (U Y) X
              end) :
         match M with
-          | inl _ => Morphism _ UniversalMorphism_Object Y
-          | inr _ => Morphism _ Y UniversalMorphism_Object
+          | inl _ => Morphism D UniversalMorphism_Object Y
+          | inr _ => Morphism D Y UniversalMorphism_Object
         end.
         unfold UniversalMorphism_Object; destruct M; simpl;
           eapply InitialProperty_Morphism || eapply TerminalProperty_Morphism;

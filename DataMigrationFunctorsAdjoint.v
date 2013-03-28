@@ -100,14 +100,14 @@ Section DataMigrationFunctorsAdjoint.
       Morphism (S ^ C) ((ComposeFunctors Δ_F Π_F) G) ((IdentityFunctor _) G).
       exists (Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf G).
       unfold Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf;
-        present_spfunctor; simpl;
+        simpl;
         intros.
       unfold RightPushforwardAlong_ObjectOf_MorphismOf, InducedLimitFunctor_MorphismOf, InducedLimitMap, InducedLimitMapNT, LimitObject; simpl.
       (* nt_hideProofs. *)
       unfold ComposeFunctorsAssociator1; simpl. (* ; nt_hideProofs. *)
       unfold NTComposeT, NTComposeF; simpl. (* ; nt_hideProofs. *)
       nt_hideProofs.
-      simpl in *; present_spcategory.
+      simpl in *.
       (* setoid_rewrite FIdentityOf. (* fails with "Error: build_signature: no constraint can apply on a dependent argument" *) *)
       match goal with
         | [ |- ?A = _ ] =>
@@ -667,7 +667,7 @@ rewrite <- H3.
           )
       end;
       abstract (
-        simpl; present_spnt; intros ? ? m0;
+        simpl; intros ? ? m0;
           destruct m0 as [ [ m0 ] ]; simpl;
             rewrite LeftIdentity; rewrite RightIdentity;
               reflexivity
@@ -716,7 +716,7 @@ rewrite <- H3.
       nt_hideProofs;
       unfold NTComposeF, NTComposeT; simpl;
       nt_hideProofs;
-      clear; simpl in *; present_spcategory.
+      clear; simpl in *.
 
 
     Lemma RightPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
@@ -812,7 +812,7 @@ Time pre_anihilate.
           )
       end;
       abstract (
-        present_spnt; repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in *);
+        repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in *);
           match goal with
             | [ H : _ |- _ ] => rewrite RightIdentity in H
             | [ H : _ |- _ ] => rewrite LeftIdentity in H
@@ -1048,10 +1048,10 @@ Time pre_anihilate.
          c0 : CommaSpecializedCategory_Object
                 (SliceSpecializedCategory_Functor D c) F,
        CMorphism S
-         (ObjectOf'
+         (ObjectOf
             (ComposeFunctors (RightPushforwardAlong_pre_Functor s c)
                (IdentityFunctor (c ↓ F))) c0)
-         (ObjectOf' (RightPushforwardAlong_pre_Functor d c) c0)).
+         (ObjectOf (RightPushforwardAlong_pre_Functor d c) c0)).
       present_spnt.
       intro c0; destruct c0 as [ [ [ [] c0 ] cm ] ]; simpl in *.
       match goal with
@@ -1092,7 +1092,7 @@ Time pre_anihilate.
      Definition RightPushforwardAlong : Functor (S ^ C) (S ^ D).
        Check @MorphismOf' _ _ (S ^ C) _ _ (S ^ D) _.
 
-       refine {| ObjectOf' := (fun
+       refine {| ObjectOf := (fun
 *)
 (*
  & Adjunction PushforwardAlong PullbackAlong }.
@@ -1219,7 +1219,7 @@ Time pre_anihilate.
           )
       end;
       abstract (
-        simpl; present_spnt; intros ? ? m0;
+        simpl; intros ? ? m0;
           destruct m0 as [ [ m0 ] ]; simpl;
             rewrite LeftIdentity; rewrite RightIdentity;
               reflexivity
@@ -1268,7 +1268,7 @@ Time pre_anihilate.
       nt_hideProofs;
       unfold NTComposeF, NTComposeT; simpl;
       nt_hideProofs;
-      clear; simpl in *; present_spcategory.
+      clear; simpl in *.
 
 
     Lemma LeftPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
@@ -1368,7 +1368,7 @@ Time pre_anihilate.
                  )
       end;
         abstract (
-            present_spnt; repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
+            repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
             match goal with
               | [ H : _ |- _ ] => rewrite RightIdentity in H
               | [ H : _ |- _ ] => rewrite LeftIdentity in H

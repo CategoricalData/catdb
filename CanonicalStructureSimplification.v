@@ -207,11 +207,6 @@ Section SimplifiedMorphism.
 End SimplifiedMorphism.
 
 Ltac rsimplify_morphisms :=
-  change @Identity' with @Identity;
-  change @MorphismOf' with @MorphismOf;
-  change @Compose' with @Compose;
-  change @ComponentsOf' with @ComponentsOf;
-  change @ObjectOf' with @ObjectOf;
   simpl;
   (* [refine] uses a unification algorithm compatible with
      ssreflect-style canonical structures; [apply] is not (but

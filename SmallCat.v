@@ -23,7 +23,7 @@ Section Objects.
   Hint Unfold Morphism Object.
 
   Local Arguments Object / {obj} C : rename.
-  Local Arguments Morphism / {obj} _ _ _.
+  Local Arguments Morphism / {obj} _ _ _ : rename.
 
   Hint Extern 1 => destruct_simple_types.
   Hint Extern 3 => destruct_to_empty_set.

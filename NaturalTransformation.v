@@ -30,32 +30,13 @@ Section SpecializedNaturalTransformation.
       V    G m     V
      G A --------> G B
      **)
-  Record SpecializedNaturalTransformation := {
-    ComponentsOf' : forall c, D.(Morphism') (F.(ObjectOf') c) (G.(ObjectOf') c);
-    Commutes' : forall s d (m : C.(Morphism') s d),
-      D.(Compose') _ _ _ (ComponentsOf' d) (F.(MorphismOf') _ _ m) = D.(Compose') _ _ _ (G.(MorphismOf') _ _ m) (ComponentsOf' s)
-  }.
+  Record SpecializedNaturalTransformation :=
+    {
+      ComponentsOf :> forall c, D.(Morphism) (F c) (G c);
+      Commutes : forall s d (m : C.(Morphism) s d),
+                   Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
+    }.
 End SpecializedNaturalTransformation.
-
-Bind Scope natural_transformation_scope with SpecializedNaturalTransformation.
-
-Create HintDb natural_transformation discriminated.
-
-Section NaturalTransformationInterface.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Variables F G : SpecializedFunctor C D.
-
-  Variable T : SpecializedNaturalTransformation F G.
-
-  Definition ComponentsOf : forall c : C, D.(Morphism) (F c) (G c) := Eval cbv beta delta [ComponentsOf'] in T.(ComponentsOf').
-  Definition Commutes : forall (s d : C) (m : C.(Morphism) s d),
-    Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
-    := T.(Commutes').
-End NaturalTransformationInterface.
-
-Arguments ComponentsOf {objC C objD D F G} T c : simpl nomatch.
-Global Coercion ComponentsOf : SpecializedNaturalTransformation >-> Funclass.
 
 Section NaturalTransformation.
   Variable C D : Category.
@@ -64,7 +45,13 @@ Section NaturalTransformation.
   Definition NaturalTransformation := SpecializedNaturalTransformation F G.
 End NaturalTransformation.
 
+Bind Scope natural_transformation_scope with SpecializedNaturalTransformation.
 Bind Scope natural_transformation_scope with NaturalTransformation.
+
+Create HintDb natural_transformation discriminated.
+
+Arguments ComponentsOf {objC%type C%category objD%type D%category F%functor G%functor} T%natural_transformation c%object : rename, simpl nomatch.
+Arguments Commutes [objC C objD D F G] T _ _ _ : rename.
 
 Identity Coercion NaturalTransformation_SpecializedNaturalTransformation_Id : NaturalTransformation >-> SpecializedNaturalTransformation.
 Definition GeneralizeNaturalTransformation `(T : @SpecializedNaturalTransformation objC C objD D F G) :
@@ -72,35 +59,18 @@ Definition GeneralizeNaturalTransformation `(T : @SpecializedNaturalTransformati
 Global Coercion GeneralizeNaturalTransformation : SpecializedNaturalTransformation >-> NaturalTransformation.
 
 Arguments GeneralizeNaturalTransformation [objC C objD D F G] T /.
-Hint Extern 0 => unfold GeneralizeNaturalTransformation : category.
-Hint Extern 0 => unfold GeneralizeNaturalTransformation : natural_transformation.
+Hint Extern 0 => unfold GeneralizeNaturalTransformation : category natural_transformation.
 Ltac fold_NT :=
   change @SpecializedNaturalTransformation with
     (fun objC (C : SpecializedCategory objC) objD (D : SpecializedCategory objD) => @NaturalTransformation C D) in *; simpl in *.
 
-Arguments Commutes [objC C objD D F G] T _ _ _.
-
-Hint Resolve @Commutes @Commutes' : category.
-Hint Resolve @Commutes @Commutes' : natural_transformation.
-
-Ltac present_spnt := present_spcategory; present_spfunctor;
-  present_obj_obj @ComponentsOf' @ComponentsOf(*;
-  repeat match goal with
-           | [ H : appcontext[@ObjectOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
-           | [ H : appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
-           | [ |- appcontext[@ObjectOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
-           | [ |- appcontext[@ObjectOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
-           | [ H : appcontext[@MorphismOf (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
-           | [ H : appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] |- _ ] => change (@Object obj mor C) with obj in H
-           | [ |- appcontext[@MorphismOf (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
-           | [ |- appcontext[@MorphismOf _ _ (@Object ?obj ?mor ?C)] ] => change (@Object obj mor C) with obj
-         end*).
+Hint Resolve @Commutes : category natural_transformation.
 
 Ltac nt_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               ComponentsOf' := _;
-                               Commutes' := ?pf
+                               ComponentsOf := _;
+                               Commutes := ?pf
                              |}] ] =>
                hideProofs pf
          end.
@@ -255,7 +225,6 @@ Section NaturalTransformationComposition.
     exists (fun c => Compose (T' c) (T c));
     (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
     abstract (
-        present_spcategory;
         intros;
         transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _)));
         try_associativity ltac:(eauto with natural_transformation)
@@ -303,7 +272,6 @@ Section NaturalTransformationComposition.
     SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
     exists (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)));
     abstract (
-        present_spcategory;
         simpl; intros; autorewrite with category;
         repeat try_associativity ltac:(repeat rewrite <- @Commutes; repeat rewrite <- @FCompositionOf);
         reflexivity
@@ -319,7 +287,7 @@ Section IdentityNaturalTransformation.
   (* There is an identity natrual transformation. *)
   Definition IdentityNaturalTransformation : SpecializedNaturalTransformation F F.
     exists (fun c => Identity (F c));
-    abstract (present_spcategory; intros; autorewrite with morphism; reflexivity).
+    abstract (intros; autorewrite with morphism; reflexivity).
   Defined.
 
   Lemma LeftIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F' F) :
@@ -371,7 +339,6 @@ Section Associativity.
                                                    _
            );
     abstract (
-        present_spcategory;
         simpl; intros;
         autorewrite with morphism; reflexivity
       ).
@@ -383,7 +350,6 @@ Section Associativity.
                                                    _
            );
     abstract (
-        present_spcategory;
         simpl; intros;
         autorewrite with morphism; reflexivity
       ).
@@ -399,8 +365,7 @@ Section IdentityFunctor.
              | [ |- SpecializedNaturalTransformation ?F ?G ] =>
                refine (Build_SpecializedNaturalTransformation F G
                                                               (fun _ => Identity _)
-                                                              _);
-                 present_spfunctor
+                                                              _)
              | _ => abstract (simpl; intros; autorewrite with morphism; reflexivity)
              | _ => split; nt_eq
            end.

@@ -31,7 +31,6 @@ Section Law0.
                                      _
                                      _
            );
-    present_spcategory;
     abstract (
         intros;
         nt_eq;
@@ -93,7 +92,6 @@ Section Law1.
       _
       _
     );
-    present_spcategory;
     abstract (
       intros; auto with morphism
     ).
@@ -112,7 +110,7 @@ Section Law1.
           _
         )
     end;
-    simpl; present_spnt;
+    simpl;
       abstract (
         intros; autorewrite with morphism;
           reflexivity
@@ -234,7 +232,7 @@ Section Law2.
             _
           )
       end;
-      simpl; subst_body; simpl; present_spcategory;
+      simpl; subst_body; simpl;
         abstract (
           intros; simpl;
             try rewrite <- FCompositionOf;
@@ -271,7 +269,7 @@ Section Law2.
             _
           )
       end;
-      present_spfunctor; simpl; subst_body; simpl;
+      simpl; subst_body; simpl;
         abstract (
           intros; simpl;
             auto with natural_transformation
@@ -289,7 +287,7 @@ Section Law2.
             _
           )
       end;
-      present_spnt; intros;
+      intros;
         abstract (intros; simpl; simpl_eq; nt_eq).
     Defined.
   End functor.
@@ -341,7 +339,7 @@ Section Law2.
         simpl in *; subst_body; simpl in *;
           destruct_hypotheses;
           repeat (let H := fresh in intro H; destruct H; simpl in *);
-            intros; destruct_type Empty_set; present_spcategory;
+            intros; destruct_type Empty_set;
               auto with functor
       ).
     Defined.
@@ -379,7 +377,7 @@ Section Law2.
           )
       end;
       abstract (
-        present_spfunctor; repeat (let H := fresh in intro H; destruct H);
+        repeat (let H := fresh in intro H; destruct H);
           simpl in *;
             intros;
               auto with natural_transformation
@@ -397,7 +395,7 @@ Section Law2.
             _
           )
       end;
-      simpl in *; present_spnt;
+      simpl in *;
       abstract (
           nt_eq; intros;
           destruct_head_hnf @prod;
@@ -453,10 +451,10 @@ Section Law3.
         )
     end;
     abstract (
-      intros; present_spcategory;
+      intros;
         repeat rewrite FCompositionOf;
           repeat rewrite FIdentityOf;
-            simpl; present_spcategory;
+            simpl;
               reflexivity
     ).
   Defined.
@@ -478,7 +476,7 @@ Section Law3.
           )
       end;
       abstract (
-        simpl; present_spcategory; intros s0 d0 m0;
+        simpl; intros s0 d0 m0;
           apply (f_equal (@fst _ _) (Commutes m s0 d0 m0)) ||
             apply (f_equal (@snd _ _) (Commutes m s0 d0 m0))
       ).
@@ -496,7 +494,7 @@ Section Law3.
         )
     end;
     abstract (
-      intros; present_spfunctor;
+      intros;
         simpl;
           simpl_eq;
           nt_eq
@@ -516,10 +514,10 @@ Section Law3.
         )
     end;
     abstract (
-      intros; present_spcategory;
+      intros;
         repeat rewrite FCompositionOf;
           repeat rewrite FIdentityOf;
-            simpl; present_spcategory;
+            simpl;
               reflexivity
     ).
   Defined.
@@ -536,7 +534,7 @@ Section Law3.
         )
     end;
     abstract (
-      simpl; intros; present_spfunctor;
+      simpl; intros;
         simpl_eq; destruct m; simpl in *;
           apply Commutes
     ).
@@ -554,7 +552,7 @@ Section Law3.
         )
     end;
     abstract (
-      intros; present_spfunctor;
+      intros;
         simpl;
           simpl_eq;
           nt_eq
@@ -590,7 +588,7 @@ Section Law4.
   Context `(D : @SpecializedCategory objD).
 
   Section functor.
-    Local Ltac do_exponential4 := intros; simpl; present_spfunctor;
+    Local Ltac do_exponential4 := intros; simpl;
       repeat (simpl;
         match goal with
           | _ => reflexivity
@@ -651,7 +649,7 @@ Section Law4.
   End functor.
 
   Section inverse.
-    Local Ltac do_exponential4_inverse := intros; simpl; present_spfunctor;
+    Local Ltac do_exponential4_inverse := intros; simpl;
       repeat (simpl;
         match goal with
           | _ => reflexivity
@@ -709,7 +707,7 @@ Section Law4.
 
     Section MorphismOf.
       Definition ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf s d (m : Morphism (D ^ (C1 * C2)) s d) :
-        forall c, Morphism _ ((ExponentialLaw4Functor_Inverse_ObjectOf s) c) ((ExponentialLaw4Functor_Inverse_ObjectOf d) c).
+        forall c, Morphism (D ^ C1) ((ExponentialLaw4Functor_Inverse_ObjectOf s) c) ((ExponentialLaw4Functor_Inverse_ObjectOf d) c).
       Proof.
         intro c;
           exists (fun c' => m (c', c));

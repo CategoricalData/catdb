@@ -1062,8 +1062,8 @@ Section FunctorialDataMigration.
         assert (forall
         c : CommaSpecializedCategory_ObjectT
               {|
-              ObjectOf' := fun _ : unit => U_Ex22_D;
-              MorphismOf' := fun _ _ _ : unit => NoEdges;
+              ObjectOf := fun _ : unit => U_Ex22_D;
+              MorphismOf := fun _ _ _ : unit => NoEdges;
               FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                    D_Category_Ex22 U_Ex22_D;
               FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
@@ -1153,7 +1153,7 @@ Section FunctorialDataMigration.
         Example Π_F_01_F_ObjectOf_ObjectOf F x (x' : [1]%category) := Eval hnf in (@Π_F_01_F_ObjectOf F x x').
         Example Π_F_01_F_ObjectOf_MorhismOf F x s d (m : Morphism [1] s d) := Eval simpl in (MorphismOf (@Π_F_01_F_ObjectOf F x) m).
 
-        Example Π_F_01_F_ObjectOf'_ObjectOf F x x' : typeof (@Π_F_01_F_ObjectOf_ObjectOf F x x').
+        Example Π_F_01_F_ObjectOf_ObjectOf F x x' : typeof (@Π_F_01_F_ObjectOf_ObjectOf F x x').
         Proof.
           clear.
           pose (Π_F_01_F_ObjectOf_ObjectOf F x x') as f.
@@ -1185,12 +1185,12 @@ Section FunctorialDataMigration.
           exact f.
         Defined.
 
-        Example Π_F_01_F_ObjectOf'_ObjectOf' (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
-          typeof (Π_F_01_F_ObjectOf'_ObjectOf F x x').
+        Example Π_F_01_F_ObjectOf_ObjectOf (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
+          typeof (Π_F_01_F_ObjectOf_ObjectOf F x x').
         Proof.
           hnf in *; simpl in *.
-          assert (Hf : focus (Π_F_01_F_ObjectOf'_ObjectOf F x x')) by constructor.
-          unfold Π_F_01_F_ObjectOf'_ObjectOf in Hf; simpl in Hf.
+          assert (Hf : focus (Π_F_01_F_ObjectOf_ObjectOf F x x')) by constructor.
+          unfold Π_F_01_F_ObjectOf_ObjectOf in Hf; simpl in Hf.
           revert Hf; clear; intro.
           unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in Hf.
           simpl in Hf.
@@ -1234,7 +1234,7 @@ Section FunctorialDataMigration.
           end.
         Defined.
 
-        Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+        Arguments Π_F_01_F_ObjectOf_ObjectOf / .
 
         Require Import FunctionalExtensionality.
 
@@ -1280,10 +1280,10 @@ Section FunctorialDataMigration.
     End Example222.
   End Example22.
 End FunctorialDataMigration.
-Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+Arguments Π_F_01_F_ObjectOf_ObjectOf / .
 Arguments Functor_01_0 / .
 Arguments f_to_functor / .
-Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_1 (f_to_functor f)).
+Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_1 (f_to_functor f)).
 Let typeof {T} (_ : T) := T.
 Eval compute in typeof foo.
 Require Import ExtrOcamlString.
@@ -1294,7 +1294,7 @@ Extraction Π_F__γ__U_Ex222''''''.
 Extraction path.
         Example F01_0 (f : [0]%category -> TypeCat) : Type.
         Proof.
-          pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0 (f_to_functor f)) as f'.
+          pose (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_0 (f_to_functor f)) as f'.
           hnf in *; revert f'; clear; intro.
           simpl in *.
 
@@ -1302,12 +1302,12 @@ Extraction path.
           simpl in *.
           revert f';
         Goal Type.
-        pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0) as f; hnf in f; unfold typeof in f; simpl in f; revert f; clear; intro.
+        pose (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_0) as f; hnf in f; unfold typeof in f; simpl in f; revert f; clear; intro.
         unfold MorphismOf in f; simpl in f.
         apply f.
         assert (f' : [0]%category -> TypeCat) by admit.
 
-        Goal forall x y : @Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0, x = y.
+        Goal forall x y : @Π_F_01_F_ObjectOf_ObjectOf Functor_01_0, x = y.
 
           Set Printing All.
 
@@ -1323,7 +1323,7 @@ Extraction path.
           unfold MorphismOf in f; simpl in f.
           compute in f.
           simpl in *.
-        Print Π_F_01_F_ObjectOf'_ObjectOf'.
+        Print Π_F_01_F_ObjectOf_ObjectOf.
           match goal with
             | [ f := { S0 : ?ST |
                        forall (c c' : ?C)
@@ -1353,7 +1353,7 @@ Extraction path.
 
         Print Π_F_01_F_ObjectOf.
 
-        Example Π_F_C'_ObjectOf' objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
+        Example Π_F_C'_ObjectOf objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
         Proof.
           pose (@Π_F_C'_ObjectOf objC C g) as f; hnf in f |- *; revert f; clear; intro.
           hnf in *.
@@ -1402,8 +1402,8 @@ Extraction path.
 
             CommaSpecializedCategory_Object
               {|
-                ObjectOf' := fun _ : unit => U_Ex22_D;
-                MorphismOf' := fun _ _ _ : unit => NoEdges;
+                ObjectOf := fun _ : unit => U_Ex22_D;
+                MorphismOf := fun _ _ _ : unit => NoEdges;
                 FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                      D_Category_Ex22 U_Ex22_D;
                 FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
@@ -1469,8 +1469,8 @@ Extraction path.
 
                     Check (CommaSpecializedCategory_ObjectT _ _ : CommaSpecializedCategory_Object
                                                                     {|
-                                                                      ObjectOf' := fun _ : unit => U_Ex22_D;
-                                                                      MorphismOf' := fun _ _ _ : unit => NoEdges;
+                                                                      ObjectOf := fun _ : unit => U_Ex22_D;
+                                                                      MorphismOf := fun _ _ _ : unit => NoEdges;
                                                                       FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                                                                            D_Category_Ex22 U_Ex22_D;
                                                                       FIdentityOf' := SliceSpecializedCategory_Functor_subproof0

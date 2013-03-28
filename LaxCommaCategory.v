@@ -38,7 +38,7 @@ Section LaxSliceCategory.
 
   Let LaxSliceCategory_Morphism' (XG X'G' : LaxSliceCategory_Object) := Eval hnf in @LaxSliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
   Let LaxSliceCategory_Morphism'' (XG X'G' : LaxSliceCategory_Object) : Type.
-    simpl_definition_by_tac_and_exact (LaxSliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (LaxSliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxSliceCategory_Morphism (XG X'G' : LaxSliceCategory_Object) := Eval hnf in LaxSliceCategory_Morphism'' XG X'G'.
 
@@ -46,7 +46,7 @@ Section LaxSliceCategory.
     := Eval hnf in @LaxSliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
   Let LaxSliceCategory_Compose'' s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
     LaxSliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxSliceCategory_Compose s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
     LaxSliceCategory_Morphism s d'
@@ -54,7 +54,7 @@ Section LaxSliceCategory.
 
   Let LaxSliceCategory_Identity' o := Eval hnf in @LaxSliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
   Let LaxSliceCategory_Identity'' (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o.
-    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxSliceCategory_Identity (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o
     := Eval hnf in @LaxSliceCategory_Identity'' o.
@@ -112,7 +112,7 @@ Section LaxCosliceCategory.
 
   Let LaxCosliceCategory_Morphism' (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in @LaxCosliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
   Let LaxCosliceCategory_Morphism'' (XG X'G' : LaxCosliceCategory_Object) : Type.
-    simpl_definition_by_tac_and_exact (LaxCosliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (LaxCosliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in LaxCosliceCategory_Morphism'' XG X'G'.
 
@@ -120,7 +120,7 @@ Section LaxCosliceCategory.
     := Eval hnf in @LaxCosliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
   Let LaxCosliceCategory_Compose'' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxCosliceCategory_Compose s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'
@@ -128,7 +128,7 @@ Section LaxCosliceCategory.
 
   Let LaxCosliceCategory_Identity' o := Eval hnf in @LaxCosliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
   Let LaxCosliceCategory_Identity'' (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o.
-    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
   Definition LaxCosliceCategory_Identity (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o
     := Eval hnf in @LaxCosliceCategory_Identity'' o.

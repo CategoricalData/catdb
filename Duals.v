@@ -13,9 +13,9 @@ Local Open Scope category_scope.
 Section OppositeCategory.
   Definition OppositeComputationalCategory `(C : @ComputationalCategory objC) : ComputationalCategory objC :=
     @Build_ComputationalCategory objC
-                                 (fun s d => Morphism' C d s)
-                                 (Identity' C)
-                                 (fun _ _ _ m1 m2 => Compose' C _ _ _ m2 m1).
+                                 (fun s d => Morphism C d s)
+                                 (Identity (C := C))
+                                 (fun _ _ _ m1 m2 => Compose m2 m1).
 
   Instance OppositeIsSpecializedCategory `(H : @IsSpecializedCategory objC C) : IsSpecializedCategory (OppositeComputationalCategory C) :=
     @Build_IsSpecializedCategory objC (OppositeComputationalCategory C)

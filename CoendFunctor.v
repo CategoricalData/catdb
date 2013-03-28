@@ -76,16 +76,14 @@ Section Coend.
 
   Global Arguments CoendFunctor_Diagram_ObjectOf_pre _ /.
 
-  Hint Extern 0 => present_spcategory : morphism.
   Hint Extern 1 (Morphism _ ?X ?X) => apply Identity : morphism.
-(*  Hint Extern 1 (Morphism' _ _ _) => hnf. *)
+(*  Hint Extern 1 (Morphism _ _ _) => hnf. *)
 
   Definition CoendFunctor_Diagram_MorphismOf_pre s d :
     CoendFunctor_Index_Morphism s d
     -> Morphism (COp * C) (CoendFunctor_Diagram_ObjectOf_pre s) (CoendFunctor_Diagram_ObjectOf_pre d).
   Proof.
     destruct s, d; simpl in *; intros; split;
-    present_spcategory;
     repeat match goal with
              | _ => discriminate
              | _ => assumption

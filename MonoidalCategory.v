@@ -137,8 +137,8 @@ Section PreMonoidalCategory.
     );
     subst_body;
     abstract (
-      intros; destruct_hypotheses; simpl; present_spcategory;
-        repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl; present_spcategory);
+      intros; destruct_hypotheses; simpl;
+        repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl);
           repeat rewrite FIdentityOf;
             reflexivity
     ).
@@ -153,8 +153,8 @@ Section PreMonoidalCategory.
     );
     subst_body;
     abstract (
-      intros; destruct_hypotheses; simpl; present_spcategory;
-        repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl; present_spcategory);
+      intros; destruct_hypotheses; simpl;
+        repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl);
           repeat rewrite FIdentityOf;
             reflexivity
     ).
@@ -196,14 +196,14 @@ Section PreMonoidalCategory.
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
       TriMonoidalProductL_ObjectOf TriMonoidalProductR_ObjectOf.
-    refine {| ObjectOf' := (fun A => I ⊗ A);
-      MorphismOf' := (fun s d (m : Morphism C s d) => Identity I ⊗m m)
+    refine {| ObjectOf := (fun A => I ⊗ A);
+      MorphismOf := (fun s d (m : Morphism C s d) => Identity (C := C) I ⊗m m)
     |}; subst_body;
     abstract (
-      intros; simpl; present_spcategory;
+      intros; simpl;
         etransitivity; try (apply FCompositionOf || apply FIdentityOf);
           f_equal;
-          unfold ProductCategory; simpl; present_spcategory;
+          unfold ProductCategory; simpl;
             try rewrite RightIdentity;
               reflexivity
     ).
@@ -214,14 +214,14 @@ Section PreMonoidalCategory.
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
       TriMonoidalProductL_ObjectOf TriMonoidalProductR_ObjectOf.
-    refine {| ObjectOf' := (fun A => A ⊗ I);
-      MorphismOf' := (fun s d (m : Morphism C s d) => m ⊗m Identity I)
+    refine {| ObjectOf := (fun A => A ⊗ I);
+      MorphismOf := (fun s d (m : Morphism C s d) => m ⊗m Identity (C := C) I)
     |}; subst_body;
     abstract (
-      intros; simpl; present_spcategory;
+      intros; simpl;
         etransitivity; try (apply FCompositionOf || apply FIdentityOf);
           f_equal;
-          unfold ProductCategory; simpl; present_spcategory;
+          unfold ProductCategory; simpl;
             try rewrite RightIdentity;
               reflexivity
     ).
@@ -255,11 +255,11 @@ Section PreMonoidalCategory.
 
     (* going from top-left *)
     Let AssociatorCoherenceConditionT0 : Morphism C (((a ⊗ b) ⊗ c) ⊗ d) ((a ⊗ (b ⊗ c)) ⊗ d)
-      := α (a, b, c) ⊗m Identity d.
+      := α (a, b, c) ⊗m Identity (C := C) d.
     Let AssociatorCoherenceConditionT1 : Morphism C ((a ⊗ (b ⊗ c)) ⊗ d) (a ⊗ ((b ⊗ c) ⊗ d))
       := α (a, b ⊗ c, d).
     Let AssociatorCoherenceConditionT2 : Morphism C (a ⊗ ((b ⊗ c) ⊗ d)) (a ⊗ (b ⊗ (c ⊗ d)))
-      := Identity a ⊗m α (b, c, d).
+      := Identity (C := C) a ⊗m α (b, c, d).
     Let AssociatorCoherenceConditionB0 : Morphism C (((a ⊗ b) ⊗ c) ⊗ d) ((a ⊗ b) ⊗ (c ⊗ d))
       := α (a ⊗ b, c, d).
     Let AssociatorCoherenceConditionB1 : Morphism C ((a ⊗ b) ⊗ (c ⊗ d)) (a ⊗ (b ⊗ (c ⊗ d)))
@@ -290,8 +290,8 @@ Section PreMonoidalCategory.
      commutes;
      *)
   Definition UnitorCoherenceCondition := forall A B : C,
-    Compose ((Identity A) ⊗m (λ B)) (α (A, I, B))
-    = (ρ A) ⊗m (Identity B).
+    Compose ((Identity (C := C) A) ⊗m (λ B)) (α (A, I, B))
+    = (ρ A) ⊗m (Identity (C := C) B).
 End PreMonoidalCategory.
 
 Section MonoidalCategory.

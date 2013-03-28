@@ -17,7 +17,7 @@ Local Ltac pre_anihilate :=
   nt_hideProofs;
   unfold NTComposeF, NTComposeT; simpl;
   nt_hideProofs;
-  clear; simpl in *; present_spcategory.
+  clear; simpl in *.
 
 (* TODO(jgross): Check if [simpl in *] would make this faster. *)
 Local Ltac step := clear; subst_body;
@@ -319,7 +319,6 @@ Section DataMigrationFunctors.
         end.
         exists (fun c : d' ↓ F => m (snd (projT1 c)) : Morphism S _ _).
         simpl;
-          present_spcategory;
           abstract (
               intros; rewrite Commutes; reflexivity
             ).
@@ -395,7 +394,7 @@ Section DataMigrationFunctors.
         exists (tt, CosliceCategoryInducedFunctor d' d md mF);
           exists (fun c : CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D d') F'
                   => mg (snd (projT1 c)));
-          simpl; subst_body; present_spcategory;
+          simpl; subst_body;
           abstract (
               intros;
               destruct_head @CommaSpecializedCategory_Object;
@@ -466,7 +465,7 @@ Section DataMigrationFunctors.
                    )
         end;
           abstract (
-              present_spnt; repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
+              repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
               match goal with
                 | [ H : _ |- _ ] => rewrite RightIdentity in H
                 | [ H : _ |- _ ] => rewrite LeftIdentity in H
@@ -488,7 +487,6 @@ Section DataMigrationFunctors.
         SpecializedNaturalTransformation (RightPushforwardAlong_ObjectOf s) (RightPushforwardAlong_ObjectOf d).
       Proof.
         exists (@RightPushforwardAlong_MorphismOf_ComponentsOf s d m).
-        present_spnt.
         rename d into t.
         intros d d' g.
         unfold RightPushforwardAlong_MorphismOf_ComponentsOf, RightPushforwardAlong_ObjectOf, RightPushforwardAlong_ObjectOf_MorphismOf; simpl.
@@ -574,7 +572,6 @@ Section DataMigrationFunctors.
         end.
         exists (fun c : F ↓ d => m (fst (projT1 c)) : Morphism S _ _).
         simpl;
-          present_spcategory;
           abstract (
               intros; rewrite Commutes; reflexivity
             ).
@@ -650,7 +647,7 @@ Section DataMigrationFunctors.
         exists (SliceCategoryInducedFunctor d d' md mF, tt);
           exists (fun c : CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D d)
                   => mg (fst (projT1 c)));
-          simpl; subst_body; present_spcategory;
+          simpl; subst_body;
           abstract (
               intros;
               destruct_head @CommaSpecializedCategory_Object;

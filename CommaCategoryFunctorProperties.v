@@ -26,8 +26,7 @@ Local Ltac slice_t :=
              progress (
                destruct_type @CommaSpecializedCategory_Object;
                destruct_type @CommaSpecializedCategory_Morphism;
-               destruct_sig;
-               present_spcategory
+               destruct_sig
              )
          end.
 

@@ -11,9 +11,9 @@ Section FunctorFromPaths.
   Variable E : V -> V -> Type.
   Context `(D : @SpecializedCategory objD).
   Variable objOf : V -> objD.
-  Variable morOf : forall s d, E s d -> Morphism' D (objOf s) (objOf d).
+  Variable morOf : forall s d, E s d -> Morphism D (objOf s) (objOf d).
 
-  Fixpoint path_compose s d (m : Morphism' (PathsCategory E) s d) : Morphism' D (objOf s) (objOf d) :=
+  Fixpoint path_compose s d (m : Morphism (PathsCategory E) s d) : Morphism D (objOf s) (objOf d) :=
     match m with
       | NoEdges => Identity _
       | AddEdge _ _ m' e => Compose (morOf e) (path_compose m')
@@ -28,11 +28,11 @@ Section FunctorFromPaths.
   Definition FunctorFromPaths : SpecializedFunctor (PathsCategory E) D.
   Proof.
     refine {|
-      ObjectOf' := objOf;
-      MorphismOf' := path_compose;
-      FCompositionOf' := FunctorFromPaths_FCompositionOf
+      ObjectOf := objOf;
+      MorphismOf := path_compose;
+      FCompositionOf := FunctorFromPaths_FCompositionOf
     |};
-    present_spcategory; abstract intuition.
+    abstract intuition.
   Defined.
 End FunctorFromPaths.
 

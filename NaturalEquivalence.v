@@ -32,7 +32,6 @@ Section NaturalIsomorphism.
     Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
       exists (fun x => Inverse (NaturalIsomorphism_Isomorphism T x)).
       abstract (
-          present_spcategory;
           intros;
           repeat match goal with
                    | [ |- appcontext[?E] ] => match type of E with | IsomorphismOf _ => destruct E; simpl end
@@ -40,7 +39,6 @@ Section NaturalIsomorphism.
                  end;
           destruct T as [ [ ] ];
           simpl in *;
-            present_spcategory;
           pre_compose_to_identity; post_compose_to_identity;
           auto with functor
         ).
@@ -174,11 +172,10 @@ Section NaturalTransformationInverse.
   Hint Rewrite @LeftIdentity @RightIdentity.
 
   Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
-    refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
+    refine (fun X => {| ComponentsOf := (fun c => proj1_sig (X c)) |});
       abstract (
         intros; destruct (X s); destruct (X d);
           simpl; unfold InverseOf in *; destruct_hypotheses;
-            present_spnt; present_spcategory;
             pre_compose_to_identity; post_compose_to_identity;
             auto
       ).

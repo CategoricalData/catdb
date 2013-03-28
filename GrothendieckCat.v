@@ -68,7 +68,7 @@ Section Grothendieck.
 
   Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
     refine {|
-        Morphism' := (fun s d => _);
+        Morphism := (fun s d => _);
         Compose' := (fun _ _ _ m1 m2 => CatGrothendieckCompose m1 m2);
         Identity' := (fun o => CatGrothendieckIdentity (CatGrothendieckC o) (CatGrothendieckX o))
       |};
@@ -110,8 +110,8 @@ Section Grothendieck.
 
   Definition CatGrothendieckProjectionFunctor1 : SpecializedFunctor CategoryOfCatElements C.
     refine {|
-        ObjectOf' := (fun o : CategoryOfCatElements => CatGrothendieckC o);
-        MorphismOf' := (fun s d (m : CategoryOfCatElements.(Morphism') s d) => proj1_sig m)
+        ObjectOf := (fun o : CategoryOfCatElements => CatGrothendieckC o);
+        MorphismOf := (fun s d (m : CategoryOfCatElements.(Morphism) s d) => proj1_sig m)
       |};
     abstract (eauto with category; intros; simpl; reflexivity).
   Defined. *)

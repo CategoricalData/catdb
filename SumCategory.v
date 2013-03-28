@@ -28,8 +28,8 @@ Section SumCategory.
 
   Definition SumCategory_Compose (s d d' : C + D) (m1 : SumCategory_Morphism d d') (m2 : SumCategory_Morphism s d) : SumCategory_Morphism s d'.
     (* XXX NOTE: try to use typeclasses and work up to existance of morphisms here *)
-    case s, d, d'; simpl in *; try destruct_to_empty_set; present_spcategory;
-      eapply Compose; eassumption.
+    case s, d, d'; simpl in *; try destruct_to_empty_set;
+    eapply Compose; eassumption.
   Defined.
 
   Global Arguments SumCategory_Compose [_ _ _] _ _ /.

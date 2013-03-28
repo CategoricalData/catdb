@@ -45,13 +45,13 @@ Section Adjunction.
      ]]
      *)
   Record HomAdjunction := {
-    AComponentsOf' : forall A A', D.(Morphism') (F A) A' -> C.(Morphism') A (G A');
+    AComponentsOf' : forall A A', D.(Morphism) (F A) A' -> C.(Morphism) A (G A');
     (* [IsomorphismOf] is sort-polymorphic, but it picks up the type of morphisms in [TypeCat].  The [IsInverseOf']s don't *)
     AIsomorphism' : forall A A', { m' : _ |
-      IsInverseOf'1 (C := TypeCat) _ _ (@AComponentsOf' A A') m' &
-      IsInverseOf'2 (C := TypeCat) _ _ (@AComponentsOf' A A') m'
+      IsInverseOf1 (C := TypeCat) _ _ (@AComponentsOf' A A') m' &
+      IsInverseOf2 (C := TypeCat) _ _ (@AComponentsOf' A A') m'
     };
-    ACommutes' : forall A A' B B' (m : C.(Morphism') B A) (m' : D.(Morphism') A' B'),
+    ACommutes' : forall A A' B B' (m : C.(Morphism) B A) (m' : D.(Morphism) A' B'),
       Compose (C := TypeCat)
       (@AComponentsOf' B B') ((HomFunctor D).(MorphismOf) (s := (F A, A')) (d := (F B, B')) (F.(MorphismOf) m, m'))
       = Compose (C := TypeCat)
@@ -157,7 +157,7 @@ Section AdjunctionEquivalences.
     exists (fun c d => ComponentsOf A (c, d));
       simpl;
         [ exact (fun A0 A' => A.(NaturalIsomorphism_Isomorphism) (A0, A')) |
-          exact (fun A0 A' B B' m m' => A.(Commutes') (A0, A') (B, B') (m, m')) ].
+          exact (fun A0 A' B B' m m' => A.(Commutes) (A0, A') (B, B') (m, m')) ].
   Defined.
 
   Lemma adjunction_naturality_pre (A : HomAdjunction F G) c d d' (f : D.(Morphism) (F c) d) (g : D.(Morphism) d d') :
@@ -351,7 +351,7 @@ Section AdjunctionEquivalences'.
             inverseOf _ _ AComponentsOf_Inverse
     )
     |};
-    simpl; present_spnt;
+    simpl;
     try (intros; exists (fun f => Compose (projT1 T _) (F.(MorphismOf) f)));
         abstract (
           elim T; clear T; intros T s; repeat split; intros; simpl in *;
@@ -376,7 +376,7 @@ Section AdjunctionEquivalences'.
 
   Definition HomAdjunctionOfUnitCounit  (T : AdjunctionUnitCounit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (Adjunction_Unit T c)) |};
-    [ intros; present_spfunctor; exists (fun f => Compose (Adjunction_Counit T A') (F.(MorphismOf) f)) | ];
+    [ intros; exists (fun f => Compose (Adjunction_Counit T A') (F.(MorphismOf) f)) | ];
     abstract (
         repeat intro; repeat split; simpl in *; repeat (apply functional_extensionality_dep; intro);
         destruct T;

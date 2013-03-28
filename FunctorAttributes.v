@@ -60,7 +60,7 @@ Section FullFaithful.
     unfold IsEpimorphism, IsMonomorphism in *; simpl in *.
     unfold IsIsomorphism; simpl.
     eexists;
-      split; present_spcategory.
+      split.
     destruct C, D, F; simpl in *; clear C D F.
     *)
 End FullFaithful.

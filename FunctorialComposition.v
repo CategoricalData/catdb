@@ -22,7 +22,7 @@ Section FunctorialComposition.
         )
     end;
     abstract (
-      intros; present_spnt;
+      intros;
         destruct_hypotheses;
         auto with category;
           nt_eq;

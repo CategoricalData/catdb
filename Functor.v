@@ -24,35 +24,13 @@ Section SpecializedFunctor.
      **)
   Record SpecializedFunctor :=
     {
-      ObjectOf' : objC -> objD;
-      MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
-      FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
-                          MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
-      FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
+      ObjectOf :> objC -> objD;
+      MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
+      FCompositionOf : forall s d d' (m1 : C.(Morphism) s d) (m2: C.(Morphism) d d'),
+                          MorphismOf _ _ (Compose m2 m1) = Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1);
+      FIdentityOf : forall x, MorphismOf _ _ (Identity x) = Identity (ObjectOf x)
     }.
 End SpecializedFunctor.
-
-Bind Scope functor_scope with SpecializedFunctor.
-
-Create HintDb functor discriminated.
-
-Section FunctorInterface.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-
-  Variable F : SpecializedFunctor C D.
-
-  Definition ObjectOf : C -> D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
-  Definition MorphismOf : forall {s d : C} (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
-    := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
-  Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
-    MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
-    := F.(FCompositionOf').
-  Definition FIdentityOf : forall (o : C), MorphismOf (Identity o) = Identity (ObjectOf o)
-    := F.(FIdentityOf').
-End FunctorInterface.
-
-Global Coercion ObjectOf : SpecializedFunctor >-> Funclass.
 
 Section Functor.
   Variable C D : Category.
@@ -60,7 +38,10 @@ Section Functor.
   Definition Functor := SpecializedFunctor C D.
 End Functor.
 
+Bind Scope functor_scope with SpecializedFunctor.
 Bind Scope functor_scope with Functor.
+
+Create HintDb functor discriminated.
 
 Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor.
 Definition GeneralizeFunctor objC C objD D (F : @SpecializedFunctor objC C objD D) : Functor C D := F.
@@ -69,38 +50,27 @@ Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
 (* try to always unfold [GeneralizeFunctor]; it's in there
    only for coercions *)
 Arguments GeneralizeFunctor [objC C objD D] F /.
-Hint Extern 0 => unfold GeneralizeFunctor : category.
-Hint Extern 0 => unfold GeneralizeFunctor : functor.
+Hint Extern 0 => unfold GeneralizeFunctor : category functor.
 
 Arguments SpecializedFunctor {objC} C {objD} D.
 Arguments Functor C D.
-Arguments ObjectOf {objC C objD D} F c : simpl nomatch.
-Arguments MorphismOf {objC} [C] {objD} [D] F [s d] m : simpl nomatch.
+Arguments ObjectOf {objC%type C%category objD%type D%category} F%functor c%object : rename, simpl nomatch.
+Arguments MorphismOf {objC%type} [C%category] {objD%type} [D%category] F%functor [s%object d%object] m%morphism : rename, simpl nomatch.
 
-Arguments FCompositionOf [objC C objD D] F _ _ _ _ _.
-Arguments FIdentityOf [objC C objD D] F _.
+Arguments FCompositionOf [objC C objD D] F _ _ _ _ _ : rename.
+Arguments FIdentityOf [objC C objD D] F _ : rename.
 
-Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : category.
-Hint Resolve @FCompositionOf @FIdentityOf @FCompositionOf' @FIdentityOf' : functor.
-Hint Rewrite @FIdentityOf @FIdentityOf' : category.
-Hint Rewrite @FIdentityOf @FIdentityOf' : functor.
-
-Ltac present_obj_obj from to :=
-  repeat match goal with
-           | [ _ : appcontext[from ?obj ?C ?obj'] |- _ ] => change (from obj C obj') with (to obj C obj') in *
-           | [ |- appcontext[from ?obj ?C ?obj'] ] => change (from obj C obj') with (to obj C obj') in *
-         end.
-
-Ltac present_spfunctor := present_spcategory;
-  present_obj_obj @ObjectOf' @ObjectOf; present_obj_obj @MorphismOf' @MorphismOf.
+Hint Resolve @FCompositionOf @FIdentityOf : category functor.
+Hint Rewrite @FIdentityOf : category.
+Hint Rewrite @FIdentityOf : functor.
 
 Ltac functor_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               ObjectOf' := _;
-                               MorphismOf' := _;
-                               FCompositionOf' := ?pf0;
-                               FIdentityOf' := ?pf1
+                               ObjectOf := _;
+                               MorphismOf := _;
+                               FCompositionOf := ?pf0;
+                               FIdentityOf := ?pf1
                              |}] ] =>
                hideProofs pf0 pf1
          end.
@@ -228,7 +198,6 @@ Section FunctorComposition.
                                      _
                                      _);
     abstract (
-        present_spcategory;
         intros; autorewrite with functor; reflexivity
       ).
   Defined.
@@ -239,9 +208,9 @@ Section IdentityFunctor.
 
   (* There is an identity functor.  It does the obvious thing. *)
   Definition IdentityFunctor : SpecializedFunctor C C.
-    refine {| ObjectOf' := (fun x => x);
-      MorphismOf' := (fun _ _ x => x)
-    |};
+    refine {| ObjectOf := (fun x => x);
+              MorphismOf := (fun _ _ x => x)
+           |};
     abstract t.
   Defined.
 End IdentityFunctor.
@@ -260,9 +229,8 @@ Section IdentityFunctorLemmas.
 End IdentityFunctorLemmas.
 
 Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : category.
-Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category.
 Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
-Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : functor.
+Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category functor.
 
 Section FunctorCompositionLemmas.
   Context `(B : @SpecializedCategory objB).
@@ -276,5 +244,4 @@ Section FunctorCompositionLemmas.
   Qed.
 End FunctorCompositionLemmas.
 
-Hint Resolve @ComposeFunctorsAssociativity : category.
-Hint Resolve @ComposeFunctorsAssociativity : functor.
+Hint Resolve @ComposeFunctorsAssociativity : category functor.

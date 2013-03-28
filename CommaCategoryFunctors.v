@@ -202,7 +202,7 @@ Section SliceCategoryInducedFunctor.
       SpecializedNaturalTransformation (SliceSpecializedCategory_Functor D s)
                                        (SliceSpecializedCategory_Functor D d).
       exists (fun _ : unit => m).
-      simpl; intros; present_spcategory; clear;
+      simpl; intros; clear;
       abstract (autorewrite with category; reflexivity).
     Defined.
 
@@ -377,7 +377,7 @@ Section CommaCategoryProjectionFunctor.
                                      CommaCategoryProjectionFunctor_MorphismOf
                                      _
                                      _);
-    intros; present_spcategory;
+    intros;
     [ apply CommaCategoryProjectionFunctor_FCompositionOf
     | apply CommaCategoryProjectionFunctor_FIdentityOf ].
   Defined.

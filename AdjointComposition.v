@@ -34,7 +34,7 @@ Section compose.
                                                        (fun _ => Identity _)
                                                        _)
     end.
-    simpl; present_spfunctor.
+    simpl;
     abstract (
         intros;
         autorewrite with morphism;

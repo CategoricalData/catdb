@@ -94,7 +94,7 @@ Section preobject.
   Record NaturalNumbersPreObject :=
     {
       NaturalNumbersPreObject_Object :> E where "'ℕ'" := NaturalNumbersPreObject_Object;
-      NaturalNumbersPreObject_TerminalObject : TerminalObject E where "1" := NaturalNumbersPreObject_TerminalObject;
+      NaturalNumbersPreObject_TerminalObject : TerminalObject E where "1" := (NaturalNumbersPreObject_TerminalObject : E);
       NaturalNumbersPreObject_Zero : Morphism E 1 ℕ where "0" := NaturalNumbersPreObject_Zero;
       NaturalNumbersPreObject_Successor : Morphism E ℕ ℕ where "'S'" := NaturalNumbersPreObject_Successor;
       NaturalNumbersPreObject_Property : forall A (q : Morphism E 1 A) (f : Morphism E A A),

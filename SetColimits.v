@@ -46,7 +46,7 @@ Section SetColimits.
   Variable F : SpecializedFunctor C SetCat.
   Let F' : SpecializedFunctorToType _ := F : SpecializedFunctorToSet _.
 
-  Definition SetColimit_Object_pre := SetGrothendieckPair F. (* { c : objC & F.(ObjectOf') c }.*)
+  Definition SetColimit_Object_pre := SetGrothendieckPair F. (* { c : objC & F.(ObjectOf) c }.*)
   Global Arguments SetColimit_Object_pre /.
   Definition SetColimit_Object_equiv_sig :=
     generateEquivalence (fun x y : SetColimit_Object_pre => inhabited (Morphism (CategoryOfElements F') x y)).
@@ -68,7 +68,7 @@ Section SetColimits.
     clearbody a b; clear c x c' x'.
     intro H; induction H; try solve [ etransitivity; eauto ].
     destruct H as [ [ p H ] ].
-    pose (fg_equal (m.(Commutes') _ _ p)) as e; simpl in *.
+    pose (fg_equal (m.(Commutes) _ _ p)) as e; simpl in *.
     unfold SetGrothendieckC, SetGrothendieckX.
     t_rev_with t'.
   Qed.
@@ -171,7 +171,7 @@ Section TypeColimits.
   Context `(C : @SpecializedCategory objC).
   Variable F : SpecializedFunctor C TypeCat.
 
-  Definition TypeColimit_Object_pre := GrothendieckPair F. (* { c : objC & F.(ObjectOf') c }. *)
+  Definition TypeColimit_Object_pre := GrothendieckPair F. (* { c : objC & F.(ObjectOf) c }. *)
   Global Arguments TypeColimit_Object_pre /.
   Definition TypeColimit_Object_equiv_sig :=
     generateEquivalence (fun x y : TypeColimit_Object_pre => inhabited (Morphism (CategoryOfElements F) x y)).
@@ -193,7 +193,7 @@ Section TypeColimits.
     clearbody a b; clear c x c' x'.
     intro H; induction H; try solve [ etransitivity; eauto ].
     destruct H as [ [ p H ] ].
-    pose (fg_equal (m.(Commutes') _ _ p)) as e; simpl in *.
+    pose (fg_equal (m.(Commutes) _ _ p)) as e; simpl in *.
     unfold GrothendieckC, GrothendieckX in *.
     t_rev_with t'.
   Qed.

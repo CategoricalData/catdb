@@ -52,10 +52,10 @@ Section SetCoercions.
                              match goal with
                                | [ F : SpecializedFunctor _ _ |- SpecializedFunctor ?C ?D ] =>
                                  exact (Build_SpecializedFunctor C D
-                                                                 (fun x => F.(ObjectOf') x)
-                                                                 (fun s d m => F.(MorphismOf') s d m)
-                                                                 (fun s d d' m m' => F.(FCompositionOf') s d d' m m')
-                                                                 (fun x => F.(FIdentityOf') x)
+                                                                 (fun x => F.(ObjectOf) x)
+                                                                 (fun s d m => F.(MorphismOf) m)
+                                                                 (fun s d d' m m' => F.(FCompositionOf) s d d' m m')
+                                                                 (fun x => F.(FIdentityOf) x)
                                        )
                              end.
 

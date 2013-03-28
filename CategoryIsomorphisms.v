@@ -12,18 +12,16 @@ Section Category.
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   (* [Definitions] don't get sort-polymorphism :-(  *)
-  Definition IsInverseOf'1 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    C.(Compose') _ _ _ m' m = C.(Identity') s.
-  Definition IsInverseOf'2 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    C.(Compose') _ _ _ m m' = C.(Identity') d.
+  Definition IsInverseOf1 (s d : C) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
+    Compose m' m = Identity s.
+  Definition IsInverseOf2 (s d : C) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
+    Compose m m' = Identity d.
 
-  Global Arguments IsInverseOf'1 / _ _ _ _.
-  Global Arguments IsInverseOf'2 / _ _ _ _.
+  Global Arguments IsInverseOf1 / _ _ _ _.
+  Global Arguments IsInverseOf2 / _ _ _ _.
 
-  Definition IsInverseOf' {s d : obj} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
-    @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
-  Definition IsInverseOf {s d} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
-    @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
+  Definition IsInverseOf {s d : C} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
+    @IsInverseOf1 s d m m' /\ @IsInverseOf2 s d m m'.
 
   Lemma IsInverseOf_sym s d m m' : @IsInverseOf s d m m' -> @IsInverseOf d s m' m.
     firstorder.
@@ -112,8 +110,8 @@ Section Category.
       intro i; hnf.
       exists (Inverse i);
         destruct i; simpl;
-          split; present_spcategory;
-            assumption.
+        split;
+        assumption.
     Qed.
 
     Lemma IsIsomorphism_IsomrphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
@@ -151,8 +149,7 @@ Section Category.
                | [ |- Isomorphism _ _ ] => eapply Build_Isomorphism
              end.
 
-    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : category.
-    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : morphism.
+    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : category morphism.
     Local Hint Extern 1 => eassumption.
 
     Lemma Isomorphic_refl c : Isomorphic c c.
@@ -181,24 +178,21 @@ Section Category.
   End Isomorphic.
 
   (* XXX TODO: Automate this better. *)
-  Lemma iso_is_epi s d (m : _ s d) : IsIsomorphism m -> IsEpimorphism' (C := C) m.
+  Lemma iso_is_epi s d (m : _ s d) : IsIsomorphism m -> IsEpimorphism (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
-    present_spcategory.
     transitivity (Compose m1 (Compose m x)); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
     transitivity (Compose m2 (Compose m x)); [ repeat rewrite <- Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 
   (* XXX TODO: Automate this better. *)
-  Lemma iso_is_mono s d (m : _ s d) : IsIsomorphism m -> IsMonomorphism' (C := C) m.
+  Lemma iso_is_mono s d (m : _ s d) : IsIsomorphism m -> IsMonomorphism (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
-    present_spcategory.
     transitivity (Compose (Compose x m) m1); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
     transitivity (Compose (Compose x m) m2); [ repeat rewrite Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 End Category.
 
-Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : category.
-Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : morphism.
+Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : category morphism.
 
 Ltac eapply_by_compose H :=
   match goal with
@@ -250,7 +244,7 @@ Section CategoryObjects1.
     Record TerminalObject :=
       {
         TerminalObject_Object' : obj;
-        TerminalObject_Morphism : forall o, Morphism' C o TerminalObject_Object';
+        TerminalObject_Morphism : forall o, Morphism C o TerminalObject_Object';
         TerminalObject_Property : forall o, is_unique (TerminalObject_Morphism o)
       }.
 
@@ -279,7 +273,7 @@ Section CategoryObjects1.
     Record InitialObject :=
       {
         InitialObject_Object' :> obj;
-        InitialObject_Morphism : forall o, Morphism' C InitialObject_Object' o;
+        InitialObject_Morphism : forall o, Morphism C InitialObject_Object' o;
         InitialObject_Property : forall o, is_unique (InitialObject_Morphism o)
       }.
 

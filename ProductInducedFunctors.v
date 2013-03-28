@@ -6,7 +6,6 @@ Set Implicit Arguments.
 Generalizable All Variables.
 
 Local Ltac t :=
-  present_spfunctor;
   intros; simpl; repeat (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
   apply f_equal; expand; autorewrite with morphism;
   reflexivity.
@@ -19,15 +18,15 @@ Section ProductInducedFunctors.
   Variable F : SpecializedFunctor (C * D) E.
 
   Definition InducedProductFstFunctor (d : D) : SpecializedFunctor C E.
-    refine {| ObjectOf' := (fun c => F (c, d));
-      MorphismOf' := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
+    refine {| ObjectOf := (fun c => F (c, d));
+      MorphismOf := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
     |};
     abstract t.
   Defined.
 
   Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
-    refine {| ObjectOf' := (fun d => F (c, d));
-      MorphismOf' := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
+    refine {| ObjectOf := (fun d => F (c, d));
+      MorphismOf := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
     |};
     abstract t.
   Defined.
