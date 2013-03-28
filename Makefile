@@ -136,10 +136,11 @@ coq: Makefile.coq
 
 # TODO(jgross): Look into combining this with the time-make.sh script
 timed: Makefile.coq
+	chmod +x ./report_time.sh
 	./report_time.sh -c $(MAKE) -f Makefile.coq SHELL=./report_time.sh
 
 pretty-timed:
-	./make-each-time-file.sh "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)"
+	sh ./make-each-time-file.sh "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)"
 	$(MAKE) combine-pretty-timed
 
 combine-pretty-timed:
