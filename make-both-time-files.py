@@ -30,7 +30,7 @@ def get_sorted_file_list_from_times_dict(times_dict, descending=True):
 
 def make_table_string(left_times_dict, right_times_dict,
                       descending=True,
-                      left_tag="Before", right_tag="After"):
+                      left_tag="After", right_tag="Before"):
     names = get_sorted_file_list_from_times_dict(left_times_dict, descending=descending)
     left_width = max(map(len, left_times_dict.values()))
     right_width = max(map(len, right_times_dict.values()))
