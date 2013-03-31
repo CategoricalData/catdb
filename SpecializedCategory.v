@@ -21,7 +21,7 @@ Bind Scope category_scope with ComputationalCategory.
 Bind Scope object_scope with Object.
 Bind Scope morphism_scope with Morphism.
 
-Arguments Object {obj%type} !C%category / : rename.
+Arguments Object {obj%type} C%category / : rename.
 Arguments Morphism {obj%type} !C%category s d : rename. (* , simpl nomatch. *)
 Arguments Identity {obj%type} [!C%category] x%object : rename.
 Arguments Compose {obj%type} [!C%category s%object d%object d'%object] m1%morphism m2%morphism : rename.

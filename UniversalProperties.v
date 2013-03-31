@@ -113,8 +113,7 @@ Section UniversalMorphism.
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
-          simpl in *.
+        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *.
         split;
         [ intro_proj2_sig_from_goal; autorewrite with morphism in *; assumption
         | abstract (
@@ -130,7 +129,8 @@ Section UniversalMorphism.
               exact (f_equal (@snd _ _)
                              (f_equal (@proj1_sig _ _)
                                       (InitialObject_Property M (existT _ (tt, _) f) (exist _ (unit_eq _ _, _) H))))
-            ) ].
+            )
+        ].
       Qed.
     End EliminationAbstractionBarrier.
   End InitialMorphism.
@@ -227,7 +227,8 @@ Section UniversalMorphism.
           simpl in *.
         split;
         [ intro_proj2_sig_from_goal; symmetry in H (* WTF? *); autorewrite with morphism in *; assumption
-        | abstract (
+        | unfold InitialMorphism, TerminalMorphism in *; (* WTF type error *)
+          abstract (
               intros ? H;
               (* make sure the type of H is right *)
               match type of H with
@@ -239,7 +240,8 @@ Section UniversalMorphism.
               exact (f_equal (@fst _ _)
                              (f_equal (@proj1_sig _ _)
                                       (TerminalObject_Property M (existT _ (_, tt) f) (exist _ (_, unit_eq _ _) H))))
-        ) ].
+            )
+        ].
       Qed.
     End AbstractionBarrier.
   End TerminalMorphism.
