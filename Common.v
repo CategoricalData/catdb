@@ -918,7 +918,11 @@ Ltac destruct_to_empty_set_in_match :=
   end.
 
 Ltac destruct_first_if_not_second a b :=
-  (constr_eq a b; fail 1) || (let H := fresh in set (H := a : unit) in *; destruct H).
+  (constr_eq a b; fail 1)
+    || (let t := type of b in
+        let H := fresh in
+        set (H := a : t) in *;
+          destruct H).
 
 Ltac destruct_singleton_constructor c :=
   let t := type of c in
@@ -952,6 +956,22 @@ Section True.
   Lemma True_JMeq (u u' : True) : u == u'.
     case u; case u'; reflexivity.
   Defined.
+
+  Lemma True_eqT_eq (u u' v v' : True) : @eq Type (u = u') (v = v').
+    destruct_head True; reflexivity.
+  Qed.
+
+  Lemma True_eqS_eq (u u' v v' : True) : @eq Set (u = u') (v = v').
+    destruct_head True; reflexivity.
+  Qed.
+
+  Lemma True_eqP_eq (u u' v v' : True) : @eq Prop (u = u') (v = v').
+    destruct_head True; reflexivity.
+  Qed.
+
+  Lemma True_eq_JMeq (u u' v v' : True) (H : u = u') (H' : v = v') : H == H'.
+    subst; destruct_head True; reflexivity.
+  Qed.
 
   Lemma False_eq (a b : False) : a = b.
     destruct a.
@@ -988,6 +1008,22 @@ Section unit.
     case u; case u'; reflexivity.
   Defined.
 
+  Lemma unit_eqT_eq (u u' v v' : unit) : @eq Type (u = u') (v = v').
+    destruct_head unit; reflexivity.
+  Qed.
+
+  Lemma unit_eqS_eq (u u' v v' : unit) : @eq Set (u = u') (v = v').
+    destruct_head unit; reflexivity.
+  Qed.
+
+  Lemma unit_eqP_eq (u u' v v' : unit) : @eq Prop (u = u') (v = v').
+    destruct_head unit; reflexivity.
+  Qed.
+
+  Lemma unit_eq_JMeq (u u' v v' : unit) (H : u = u') (H' : v = v') : H == H'.
+    subst; destruct_head unit; reflexivity.
+  Qed.
+
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
   Defined.
@@ -1005,6 +1041,10 @@ Hint Rewrite True_singleton.
 Hint Extern 0 (@eq True _ _) => apply True_eq.
 Hint Extern 0 (@eq (@eq True _ _) _ _) => apply True_eq_eq.
 Hint Extern 0 (@JMeq True _ True _) => apply True_JMeq.
+Hint Extern 0 (@JMeq (@eq True _ _) _ (@eq True _ _) _) => apply True_eq_JMeq.
+Hint Extern 0 (@eq Set (@eq True _ _) (@eq True _ _)) => apply True_eqS_eq.
+Hint Extern 0 (@eq Prop (@eq True _ _) (@eq True _ _)) => apply True_eqP_eq.
+Hint Extern 0 (@eq Type (@eq True _ _) (@eq True _ _)) => apply True_eqT_eq.
 Hint Extern 0 True => constructor.
 Hint Extern 0 (@eq False _ _) => apply False_eq.
 Hint Extern 0 (@JMeq False _ _ _) => apply False_JMeql.
@@ -1014,6 +1054,10 @@ Hint Rewrite unit_singleton.
 Hint Extern 0 (@eq unit _ _) => apply unit_eq.
 Hint Extern 0 (@eq (@eq unit _ _) _ _) => apply unit_eq_eq.
 Hint Extern 0 (@JMeq unit _ unit _) => apply unit_JMeq.
+Hint Extern 0 (@JMeq (@eq unit _ _) _ (@eq unit _ _) _) => apply unit_eq_JMeq.
+Hint Extern 0 (@eq Set (@eq unit _ _) (@eq unit _ _)) => apply unit_eqS_eq.
+Hint Extern 0 (@eq Prop (@eq unit _ _) (@eq unit _ _)) => apply unit_eqP_eq.
+Hint Extern 0 (@eq Type (@eq unit _ _) (@eq unit _ _)) => apply unit_eqT_eq.
 Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
 Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.

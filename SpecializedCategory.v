@@ -43,7 +43,7 @@ Class IsSpecializedCategory (obj : Type) (C : ComputationalCategory obj) : Prop 
     RightIdentity : forall a b (f : Morphism C a b), Compose f (Identity a) = f
   }.
 
-Record SpecializedCategory (obj : Type) :=
+Record > SpecializedCategory (obj : Type) :=
   Build_SpecializedCategory' {
       UnderlyingCCategory :> ComputationalCategory obj;
       UnderlyingCCategory_IsSpecializedCategory :> IsSpecializedCategory UnderlyingCCategory
