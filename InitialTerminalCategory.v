@@ -58,11 +58,6 @@ Section FunctorsUnique.
       F = F'.
   Proof.
     functor_eq; auto.
-    match goal with
-      | [ |- @JMeq.JMeq (@eq unit ?x ?y) ?a (@eq unit ?z ?w) ?b ]
-        => destruct a, b, x, z, y, w;
-          reflexivity
-    end.
   Qed.
 
   Lemma TerminalCategoryTerminal
