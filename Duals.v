@@ -80,8 +80,8 @@ Section OppositeFunctor.
     refine (Build_SpecializedFunctor COp DOp
       (fun c : COp => F c : DOp)
       (fun (s d : COp) (m : C.(Morphism) d s) => MorphismOf F (s := d) (d := s) m)
-      (fun d' d s m1 m2 => FCompositionOf F s d d' m2 m1)
-      (FIdentityOf F)
+      (fun d' d s m1 m2 => FCompositionOf (F := F) s d d' m2 m1)
+      (FIdentityOf (F := F))
     ).
   Defined.
 End OppositeFunctor.
