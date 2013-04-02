@@ -128,7 +128,7 @@ Section OppositeNaturalTransformation_Id.
   Variable T : SpecializedNaturalTransformation F G.
 
   Lemma op_op_nt_id : OppositeNaturalTransformation (OppositeNaturalTransformation T) == T.
-    nt_eq; intros; try functor_eq; autorewrite with category; trivial.
+    nt_eq; intros; try functor_eq; autorewrite with category; subst; trivial.
   Qed.
 End OppositeNaturalTransformation_Id.
 
