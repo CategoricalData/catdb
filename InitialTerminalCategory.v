@@ -25,3 +25,49 @@ Section Functors.
     := Build_SpecializedFunctor 0 C (fun x => match x with end) (fun x _ _ => match x with end) (fun x _ _ _ _ => match x with end) (fun x => match x with end).
   Definition FunctorFromInitial : SpecializedFunctor InitialCategory C := FunctorFrom0.
 End Functors.
+
+Section FunctorsUnique.
+  Context `(C : @SpecializedCategory objC).
+
+  Lemma InitialCategoryFunctorUnique
+  : forall F F' : SpecializedFunctor InitialCategory C,
+      F = F'.
+  Proof.
+    functor_eq; destruct_head_hnf @Empty_set.
+  Qed.
+
+  Lemma InitialCategoryFunctor'Unique
+  : forall F F' : SpecializedFunctor C InitialCategory,
+      F = F'.
+  Proof.
+    intros F F'.
+    functor_eq; auto.
+    match goal with
+      | [ x : _ |- _ ] => solve [ destruct (F x) ]
+    end.
+  Qed.
+
+  Lemma InitialCategoryInitial
+  : forall F, F = FunctorFromInitial C.
+  Proof.
+    intros; apply InitialCategoryFunctorUnique.
+  Qed.
+
+  Lemma TerminalCategoryFunctorUnique
+  : forall F F' : SpecializedFunctor C TerminalCategory,
+      F = F'.
+  Proof.
+    functor_eq; auto.
+    match goal with
+      | [ |- @JMeq.JMeq (@eq unit ?x ?y) ?a (@eq unit ?z ?w) ?b ]
+        => destruct a, b, x, z, y, w;
+          reflexivity
+    end.
+  Qed.
+
+  Lemma TerminalCategoryTerminal
+  : forall F, F = FunctorToTerminal C.
+  Proof.
+    intros; apply TerminalCategoryFunctorUnique.
+  Qed.
+End FunctorsUnique.
