@@ -155,24 +155,13 @@ Hint Extern 0 (_ = _) => eassumption : typeclass_instances.
 Ltac rsimplify_morphisms_in_all :=
   unfold Object in *;
   simpl in *;
-  progress (
-      repeat (match goal with
-                | [ H : @eq (Morphism _ _ _) ?A ?B |- _ ] =>
-                  progress (
-                      try erewrite (simplified_morphism_ok (m_orig := A)) in H;
-                      try erewrite (simplified_morphism_ok (m_orig := B)) in H;
-                      []
-                    )
-                | [ |- @eq (Morphism _ _ _) ?A ?B ] =>
-                  progress (
-                      try erewrite (simplified_morphism_ok (m_orig := A));
-                      try erewrite (simplified_morphism_ok (m_orig := B));
-                      []
-                    )
-              end;
-              simpl
-             )
-    ).
+  progress
+    repeat match goal with
+             | [ H : context[?m] |- _ ] =>
+               progress erewrite (simplified_morphism_ok (m_orig := m)) in H by typeclasses eauto
+             | [ |- context[?m] ] =>
+               progress erewrite (simplified_morphism_ok (m_orig := m)) by typeclasses eauto
+           end.
 
 Ltac rsimplify_morphisms :=
   unfold Object in *;
