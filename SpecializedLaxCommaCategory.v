@@ -323,7 +323,8 @@ Section LaxCosliceSpecializedCategory.
                 repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
                   repeat rewrite Associativity;
                     try reflexivity;
-                      trivial.
+                    subst;
+                    trivial.
 
   Lemma LaxCosliceSpecializedCategory_Associativity : forall (o1 o2 o3 o4 : LaxCosliceSpecializedCategory_ObjectT)
     (m1 : LaxCosliceSpecializedCategory_MorphismT o1 o2)
