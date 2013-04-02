@@ -114,7 +114,7 @@ Section NaturalTransformations_Equal.
     apply functional_extensionality_dep; trivial.
   Qed.
 
-  Lemma NaturalTransformation_JMeq objC C objD D objC' C' objD' D' :
+  Lemma NaturalTransformation_JMeq' objC C objD D objC' C' objD' D' :
     forall F G F' G'
       (T : @SpecializedNaturalTransformation objC C objD D F G) (U : @SpecializedNaturalTransformation objC' C' objD' D' F' G'),
       objC = objC'
@@ -128,6 +128,22 @@ Section NaturalTransformations_Equal.
     simpl; intros; intuition; destruct T, U; simpl in *; repeat subst;
       JMeq_eq.
     f_equal; apply proof_irrelevance.
+  Qed.
+  Lemma NaturalTransformation_JMeq objC C objD D objC' C' objD' D' :
+    forall F G F' G'
+      (T : @SpecializedNaturalTransformation objC C objD D F G) (U : @SpecializedNaturalTransformation objC' C' objD' D' F' G'),
+      objC = objC'
+      -> objD = objD'
+      -> C == C'
+      -> D == D'
+      -> F == F'
+      -> G == G'
+      -> (forall x x', x == x' -> ComponentsOf T x == ComponentsOf U x')
+      -> T == U.
+    intros; apply NaturalTransformation_JMeq'; trivial;
+    destruct T, U; simpl in *; repeat subst.
+    apply functional_extensionality_dep_JMeq; trivial.
+    intuition.
   Qed.
 End NaturalTransformations_Equal.
 
