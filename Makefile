@@ -41,6 +41,7 @@ MODULES    := Notations \
 	FunctorProduct \
 	ProductNaturalTransformation \
 	ProductInducedFunctors \
+	SumInducedFunctors \
 	ExponentialLaws \
 	ProductLaws \
 	FunctorialComposition \
