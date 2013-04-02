@@ -9,17 +9,22 @@ MODULES    := Notations \
 	EquivalenceClass \
 	EquivalenceRelationGenerator \
 	Paths \
+	\
 	SpecializedCategory \
+	Functor \
+	NaturalTransformation \
+	ProductCategory \
+	SumCategory \
+	\
+	TypeclassSimplification \
+	TypeclassUnreifiedSimplification \
+	CanonicalStructureSimplification \
+	\
 	Category \
 	CategoryEquality \
 	CategoryIsomorphisms \
-	Functor \
 	FunctorIsomorphisms \
-	NaturalTransformation \
 	NaturalEquivalence \
-	\
-	TypeclassSimplification \
-	CanonicalStructureSimplification \
 	\
 	Graph \
 	GraphTranslation \
@@ -33,11 +38,9 @@ MODULES    := Notations \
 	ComputableCategory \
 	DiscreteCategory \
 	PathsCategory \
-	ProductCategory \
 	FunctorProduct \
 	ProductNaturalTransformation \
 	ProductInducedFunctors \
-	SumCategory \
 	ExponentialLaws \
 	ProductLaws \
 	FunctorialComposition \
