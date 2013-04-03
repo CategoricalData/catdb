@@ -113,6 +113,24 @@ Section CorrespondenceCategory.
 
   Hint Resolve Associativity LeftIdentity RightIdentity.
 
+  Local Ltac simpl_type_cat :=
+    repeat match goal with
+             | [ |- appcontext[@MorphismOf ?objC ?C ?objD ?D ?F ?s ?d ?m] ] =>
+               let Fm := fresh "Fm" in
+               set (Fm := @MorphismOf objC C objD D F s d m)
+             | [ |- context[?f (?g ?x)] ] =>
+               change (f (g x)) with (Compose (C := TypeCat) f g x)
+           end;
+    subst_body.
+
+  Local Ltac rewrite_functor :=
+    repeat match goal with
+             | [ F : SpecializedFunctor _ _ |- _ ] =>
+               rewrite (FIdentityOf (F := F))
+             | [ F : SpecializedFunctor _ _ |- _ ] =>
+               rewrite <- (FCompositionOf (F := F))
+           end.
+
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
   (* TODO(jgross): Rewrite fg_equal_in using typeclasses? for speed *)
@@ -126,10 +144,13 @@ Section CorrespondenceCategory.
                                        _);
     abstract (
         intros; destruct_head_hnf @sum;
-        unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
-          destruct_type @Empty_set; trivial; autorewrite with functor; auto with morphism;
-        destruct M as [ MO MM MI MC ]; simpl in *; fg_equal_in MI; fg_equal_in MC;
-        match goal with | [ H : _ |- _ ] => do 2 (try rewrite <- H); simpl; autorewrite with morphism; reflexivity end
+        destruct_head_hnf Empty_set;
+        eauto with morphism;
+        simpl_type_cat;
+        rewrite_functor;
+        simpl;
+        autorewrite with morphism;
+        reflexivity
       ).
   Defined.
 End CorrespondenceCategory.

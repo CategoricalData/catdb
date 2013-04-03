@@ -27,11 +27,11 @@ Section FunctorFromPaths.
 
   Definition FunctorFromPaths : SpecializedFunctor (PathsCategory E) D.
   Proof.
-    refine {|
-      ObjectOf := objOf;
-      MorphismOf := path_compose;
-      FCompositionOf := FunctorFromPaths_FCompositionOf
-    |};
+    refine (Build_SpecializedFunctor (PathsCategory E) D
+                                     objOf
+                                     path_compose
+                                     FunctorFromPaths_FCompositionOf
+                                     _);
     abstract intuition.
   Defined.
 End FunctorFromPaths.

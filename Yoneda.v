@@ -11,10 +11,11 @@ Local Open Scope category_scope.
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
   repeat (apply functional_extensionality_dep; intro);
     match goal with
-      | [ a : _, f : _ |- _ ] => let H := fresh in
+      | [ a : _, f : _ |- _ ] =>
+        let H := fresh in
         assert (H := fg_equal (Commutes a _ _ f)); simpl in H;
-          let fin_tac := (solve [ etransitivity; try apply H; clear H; tac ]) in
-            fin_tac || symmetry in H; fin_tac
+        let fin_tac := (solve [ etransitivity; try apply H; clear H; tac ]) in
+        fin_tac || symmetry in H; fin_tac
     end.
 
 Section Yoneda.
@@ -94,20 +95,36 @@ Section YonedaLemma.
     end;
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
-        pose (FCompositionOf X);
+        pose (FCompositionOf (F := X));
           simpl in *;
             fg_equal;
             t_with t'
     ).
   Defined.
 
-  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
+  (** XXX TODO(jgross): Figure out what causes this anomaly *)
+  (*Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
     pose (FIdentityOf X).
     pose (FCompositionOf X).
-    split; simpl; nt_eq;
-    simpl in *; autorewrite with functor; simpl; trivial;
+    split; nt_eq.
+    admit.
+    clear.
+    erewrite FIdentityOf.
+    simpl.
+    apply eq_refl. (* Anomaly: File "toplevel/himsg.ml", line 699, characters 2-8: Assertion failed.
+Please report.*)
+    exact eq_refl.
+    refine eq_refl.*)
+
+  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
+    exists (@YonedaLemmaMorphismInverse c X).
+    unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
+    pose (FIdentityOf (F := X)).
+    pose (FCompositionOf (F := X)).
+    split; nt_eq;
+    repeat rewrite FIdentityOf; try reflexivity; [].
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 End YonedaLemma.
@@ -128,14 +145,15 @@ Section CoYonedaLemma.
     hnf.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
-          (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc))
-          _
-        )
+        refine (Build_SpecializedNaturalTransformation
+                  F G
+                  (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc))
+                  _
+               )
     end;
     abstract (
       intros; simpl; apply functional_extensionality_dep; intros; eauto;
-        pose (FCompositionOf X);
+        pose (FCompositionOf (F := X));
           simpl in *;
             fg_equal;
             t_with t'
@@ -145,8 +163,8 @@ Section CoYonedaLemma.
   Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     exists (@CoYonedaLemmaMorphismInverse c X).
     split; simpl; nt_eq; clear;
-    [ | pose (FIdentityOf X); fg_equal; trivial ];
-    pose (FCompositionOf X);
+    [ | pose (FIdentityOf (F := X)); fg_equal; trivial ];
+    pose (FCompositionOf (F := X));
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;
     simpl;
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).

@@ -1,6 +1,6 @@
 Require Import Setoid.
 Require Export Functor CategoryIsomorphisms.
-Require Import Common.
+Require Import Common TypeclassUnreifiedSimplification.
 
 Set Implicit Arguments.
 
@@ -163,13 +163,11 @@ Section Functor_preserves_isomorphism.
   Context `(D : SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
 
-  Hint Rewrite <- FCompositionOf : functor.
-
   Definition MorphismOf_IsomorphismOf s d (m : Morphism C s d) (i : IsomorphismOf m) : IsomorphismOf (F.(MorphismOf) m).
     refine {| Inverse := (F.(MorphismOf) (Inverse i)) |};
     abstract (
         destruct i; simpl;
-        repeat (rewrite_hyp; autorewrite with functor);
+        repeat (rsimplify_morphisms; rewrite_hyp);
         reflexivity
       ).
   Defined.

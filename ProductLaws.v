@@ -18,7 +18,7 @@ Section swap.
 
   Lemma ProductLawSwap `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
   : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
-    functor_eq; intuition.
+    abstract (functor_eq; intuition).
   Qed.
 End swap.
 
@@ -42,38 +42,44 @@ Section Law0.
     repeat esplit;
     intros; destruct_head_hnf Empty_set.
     Grab Existential Variables.
+    repeat esplit;
     intros; destruct_head_hnf Empty_set.
+    Grab Existential Variables.
     intros; destruct_head_hnf Empty_set.
   Defined.
 
   Lemma ProductLaw0 : ComposeFunctors ProductLaw0Functor ProductLaw0Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0Functor_Inverse ProductLaw0Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq;
-    destruct_head_hnf @prod;
-    destruct_head_hnf Empty_set.
+    abstract (
+        split; functor_eq;
+        destruct_head_hnf @prod;
+        destruct_head_hnf Empty_set
+      ).
   Qed.
 End Law0.
 
 Section Law0'.
   Context `(C : @SpecializedCategory objC).
 
-  Let ProductLaw0'Functor' : SpecializedFunctor (0 * C) 0.
-    functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
+  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0.
+    exists (ComposeComputationalFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
+    abstract (refine _).
   Defined.
-  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
 
-  Let ProductLaw0'Functor_Inverse' : SpecializedFunctor 0 (0 * C).
-    functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C)).
+  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C).
+    exists (ComposeComputationalFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C)).
+    abstract (refine _).
   Defined.
-  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
 
   Lemma ProductLaw0' : ComposeFunctors ProductLaw0'Functor ProductLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0'Functor_Inverse ProductLaw0'Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq;
-    destruct_head_hnf @prod;
-    destruct_head_hnf Empty_set.
+    abstract (
+        split; functor_eq;
+        destruct_head_hnf @prod;
+        destruct_head_hnf Empty_set
+      ).
   Qed.
 End Law0'.
 
@@ -84,7 +90,7 @@ Section Law1.
     functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
   Defined.
   Definition ProductLaw1Functor : SpecializedFunctor (C * 1) C
-    := Eval hnf in ProductLaw1Functor'.
+    := Eval cbv beta zeta iota delta [ProductLaw1Functor' UnderlyingCFunctor fst_Functor] in ProductLaw1Functor'.
 
   Definition ProductLaw1Functor_Inverse : SpecializedFunctor C (C * 1).
     refine (Build_SpecializedFunctor C (C * 1)
@@ -100,11 +106,14 @@ Section Law1.
   Lemma ProductLaw1 : ComposeFunctors ProductLaw1Functor ProductLaw1Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1Functor_Inverse ProductLaw1Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq;
-    destruct_head_hnf @prod;
-    destruct_head_hnf @eq;
-    destruct_head_hnf unit;
-    reflexivity.
+    abstract (
+        split; try (apply SpecializedFunctor_eq; reflexivity);
+        functor_eq;
+        destruct_head_hnf @prod;
+        destruct_head_hnf @eq;
+        destruct_head_hnf unit;
+        reflexivity
+      ).
   Qed.
 End Law1.
 
@@ -124,10 +133,13 @@ Section Law1'.
   Lemma ProductLaw1' : ComposeFunctors ProductLaw1'Functor ProductLaw1'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1'Functor_Inverse ProductLaw1'Functor = IdentityFunctor _.
   Proof.
-    split; functor_eq;
-    destruct_head_hnf @prod;
-    destruct_head_hnf @eq;
-    destruct_head_hnf unit;
-    reflexivity.
+    abstract (
+        split; try (apply SpecializedFunctor_eq; reflexivity);
+        functor_eq;
+        destruct_head_hnf @prod;
+        destruct_head_hnf @eq;
+        destruct_head_hnf unit;
+        reflexivity
+      ).
   Qed.
 End Law1'.

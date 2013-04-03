@@ -78,6 +78,7 @@ Section SimplifiedMorphism.
     simpl;
     repeat rewrite Associativity;
     repeat rewrite FCompositionOf;
+    repeat rewrite FIdentityOf;
     autorewrite with category;
     try reflexivity.
 

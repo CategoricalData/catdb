@@ -18,10 +18,14 @@ Section FunctorFromDiscrete.
 
   Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
   Proof.
-    refine {| ObjectOf := objOf; MorphismOf := FunctorFromDiscrete_MorphismOf |};
-      abstract (
+    refine (Build_SpecializedFunctor (DiscreteCategory O) D
+                                     objOf
+                                     FunctorFromDiscrete_MorphismOf
+                                     _
+                                     _);
+    abstract (
         intros; hnf in *; subst; simpl;
-          auto with category
+        auto with category
       ).
   Defined.
 End FunctorFromDiscrete.
@@ -201,15 +205,17 @@ Section Adjoints.
     try abstract trivial;
       simpl; intros.
     exists (fun f => (InducedDiscreteFunctor _ f));
-      abstract (repeat match goal with
-                         | _ => progress trivial
-                         | _ => progress repeat (apply functional_extensionality_dep; intro)
-                         | _ => hnf in *;
-                           match goal with
-                             | [ H : _ = _ |- _ ] => destruct H; simpl in *
-                           end
-                         | _ => rewrite FIdentityOf
-                         | _ => progress functor_eq
-                       end).
+      abstract (
+          repeat match goal with
+                   | _ => progress trivial
+                   | _ => progress repeat (apply functional_extensionality_dep; intro)
+                   | _ => hnf in *;
+                         match goal with
+                           | [ H : _ = _ |- _ ] => destruct H; simpl in *
+                         end
+                   | [ F : SpecializedFunctor _ _ |- _ ] => rewrite (FIdentityOf (F := F))
+                   | _ => progress functor_eq
+                 end
+        ).
   Defined.
 End Adjoints.

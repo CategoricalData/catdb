@@ -1,5 +1,5 @@
 Require Export Adjoint.
-Require Import Common Notations.
+Require Import Common Notations TypeclassUnreifiedSimplification.
 
 Set Implicit Arguments.
 
@@ -54,22 +54,18 @@ Section compose.
         subst_body; intro_proj2_sig_from_goal;
         hnf in *; split_and; split;
         simpl in *;
-          autorewrite with category;
-        [ try_associativity ltac:(progress repeat rewrite <- FCompositionOf);
-          simpl in *;
-          repeat match goal with
-                   | [ H : _ |- _ ] => apply f_equal; solve [ trivial ]
-                   | [ H : _ |- _ ] => symmetry; rewrite <- H at 1; apply f_equal2; try reflexivity; []; symmetry
-                 end
-        | intros x' H;
-          repeat match goal with
-                   | [ H : _ |- _ ] => apply H
-                   | [ H : _ |- _ ] => symmetry; apply H
-                 end;
-          rewrite <- H;
-          try_associativity ltac:(progress repeat rewrite FCompositionOf);
-          autorewrite with morphism;
-          reflexivity ]
+          [
+          | intros x' H;
+            repeat match goal with
+                     | [ H : _ |- _ ] => apply H
+                     | [ H : _ |- _ ] => symmetry; apply H
+                   end;
+            rewrite <- H ];
+        rsimplify_morphisms;
+        simpl in *;
+          try_associativity ltac:(progress repeat rewrite <- FCompositionOf);
+        rewrite_hyp;
+        reflexivity
       ).
   Defined.
 End compose.

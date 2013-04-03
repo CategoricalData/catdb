@@ -98,9 +98,13 @@ Section Grothendieck.
   Defined.
 
   Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
-    refine {| ObjectOf := (fun o : CategoryOfElements => GrothendieckC o);
-      MorphismOf := (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
-    |}; abstract (eauto with category; intros; destruct_type CategoryOfElements; simpl; reflexivity).
+    refine (Build_SpecializedFunctor
+              CategoryOfElements C
+              (fun o : CategoryOfElements => GrothendieckC o)
+              (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
+              _
+              _);
+    abstract (eauto with category; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
 End Grothendieck.
 

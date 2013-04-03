@@ -139,7 +139,7 @@ Section PreMonoidalCategory.
     abstract (
       intros; destruct_hypotheses; simpl;
         repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl);
-          repeat rewrite FIdentityOf;
+          repeat rewrite (FIdentityOf (F := TensorProduct));
             reflexivity
     ).
   Defined.
@@ -155,7 +155,7 @@ Section PreMonoidalCategory.
     abstract (
       intros; destruct_hypotheses; simpl;
         repeat (rewrite <- FCompositionOf; unfold ProductCategory; simpl);
-          repeat rewrite FIdentityOf;
+          repeat rewrite (FIdentityOf (F := TensorProduct));
             reflexivity
     ).
   Defined.
@@ -196,9 +196,13 @@ Section PreMonoidalCategory.
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
       TriMonoidalProductL_ObjectOf TriMonoidalProductR_ObjectOf.
-    refine {| ObjectOf := (fun A => I ⊗ A);
-      MorphismOf := (fun s d (m : Morphism C s d) => Identity (C := C) I ⊗m m)
-    |}; subst_body;
+    refine (Build_SpecializedFunctor
+              C C
+              (fun A => I ⊗ A)
+              (fun s d (m : Morphism C s d) => Identity (C := C) I ⊗m m)
+              _
+              _);
+      subst_body;
     abstract (
       intros; simpl;
         etransitivity; try (apply FCompositionOf || apply FIdentityOf);
@@ -214,9 +218,13 @@ Section PreMonoidalCategory.
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
       TriMonoidalProductL_ObjectOf TriMonoidalProductR_ObjectOf.
-    refine {| ObjectOf := (fun A => A ⊗ I);
-      MorphismOf := (fun s d (m : Morphism C s d) => m ⊗m Identity (C := C) I)
-    |}; subst_body;
+    refine (Build_SpecializedFunctor
+              C C
+              (fun A => A ⊗ I)
+              (fun s d (m : Morphism C s d) => m ⊗m Identity (C := C) I)
+              _
+              _);
+      subst_body;
     abstract (
       intros; simpl;
         etransitivity; try (apply FCompositionOf || apply FIdentityOf);

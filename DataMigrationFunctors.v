@@ -336,6 +336,96 @@ Section DataMigrationFunctors.
                 (RightPushforwardAlong_pre_curried_MorphismOf m1).
       Proof.
         unfold RightPushforwardAlong_pre_curried_MorphismOf, RightPushforwardAlong_pre_curried_ObjectOf.
+        (*expand.
+        apply f_equal.
+        simpl.
+        Check {|
+        ComponentsOf := fun
+                          x : CommaSpecializedCategory_Object
+                                (SliceSpecializedCategory_Functor D (snd d'))
+                                F => Identity ((fst s) (snd (projT1 x)));
+        Commutes := LaxCosliceSpecializedCategory_Compose'_subproof Index2Cat
+                      (existT
+                         (fun X : unit * D =>
+                          SpecializedFunctor (Index2Cat (snd X)) S)
+                         (tt, snd s)
+                         (RightPushforwardAlong_pre_pre_Functor
+                            (fst s) (snd s)))
+                      (existT
+                         (fun X : unit * D =>
+                          SpecializedFunctor (Index2Cat (snd X)) S)
+                         (tt, snd d)
+                         (RightPushforwardAlong_pre_pre_Functor
+                            (fst d) (snd d)))
+                      (existT
+                         (fun X : unit * D =>
+                          SpecializedFunctor (Index2Cat (snd X)) S)
+                         (tt, snd d')
+                         (RightPushforwardAlong_pre_pre_Functor
+                            (fst d') (snd d')))
+                      (existT
+                         (fun
+                            F0 : unit *
+                                 SpecializedFunctor
+                                   (Index2Cat (snd d'))
+                                   (Index2Cat (snd d)) =>
+                          SpecializedNaturalTransformation
+                            (ComposeFunctors
+                               (RightPushforwardAlong_pre_pre_Functor
+                                  (fst d) (snd d))
+                               (snd F0))
+                            (RightPushforwardAlong_pre_pre_Functor
+                               (fst d') (snd d')))
+                         (tt,
+                         CosliceCategoryMorphismInducedFunctor F
+                           (snd d') (snd d) (snd m2))
+                         {|
+                         ComponentsOf := fun
+                                           c : CommaSpecializedCategory_Object
+                                                 (SliceSpecializedCategory_Functor
+                                                  D (snd d')) F =>
+                                         (fst m2) (snd (projT1 c));
+                         Commutes := RightPushforwardAlong_pre_curried_MorphismOf_pre_subproof
+                                       (snd d) (fst m2)
+                                       (snd m2) |})
+                      (existT
+                         (fun
+                            F0 : unit *
+                                 SpecializedFunctor
+                                   (Index2Cat (snd d))
+                                   (Index2Cat (snd s)) =>
+                          SpecializedNaturalTransformation
+                            (ComposeFunctors
+                               (RightPushforwardAlong_pre_pre_Functor
+                                  (fst s) (snd s))
+                               (snd F0))
+                            (RightPushforwardAlong_pre_pre_Functor
+                               (fst d) (snd d)))
+                         (tt,
+                         CosliceCategoryMorphismInducedFunctor F
+                           (snd d) (snd s) (snd m1))
+                         {|
+                         ComponentsOf := fun
+                                           c : CommaSpecializedCategory_Object
+                                                 (SliceSpecializedCategory_Functor
+                                                  D (snd d)) F =>
+                                         (fst m1) (snd (projT1 c));
+                         Commutes := RightPushforwardAlong_pre_curried_MorphismOf_pre_subproof
+                                       (snd s) (fst m1)
+                                       (snd m1) |})
+                      (NTComposeF
+                         {|
+                         ComponentsOf := fun
+                                           c : CommaSpecializedCategory_Object
+                                                 (SliceSpecializedCategory_Functor
+                                                  D (snd d)) F =>
+                                         (fst m1) (snd (projT1 c));
+                         Commutes := RightPushforwardAlong_pre_curried_MorphismOf_pre_subproof
+                                       (snd s) (fst m1)
+                                       (snd m1) |}
+                         (IdentityNaturalTransformation
+                            (CosliceCategoryMorphismInducedFunctor F
+                               (snd d') (snd d) (snd m2)))) |}.*)
       (*(* for speed *)
       Admitted. *)
         Time pre_anihilate.

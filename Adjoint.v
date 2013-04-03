@@ -1,6 +1,6 @@
 Require Import FunctionalExtensionality.
 Require Export SpecializedCategory Category Functor NaturalTransformation NaturalEquivalence AdjointUnit.
-Require Import Common Hom ProductCategory FunctorProduct Duals.
+Require Import Common Hom ProductCategory FunctorProduct Duals TypeclassUnreifiedSimplification.
 
 Set Implicit Arguments.
 
@@ -164,16 +164,18 @@ Section AdjunctionEquivalences.
     Compose (C := C) (G.(MorphismOf) g) (A.(AComponentsOf) _ _ f) =
     A.(AComponentsOf) _ _ (Compose g f).
     assert (H := fg_equal (A.(ACommutes) _ _ _ _ (Identity c) g) f).
-    simpl in *; autorewrite with category in *.
-    auto with category.
+    rsimplify_morphisms_in_all.
+    intuition.
   Qed.
 
   Lemma adjunction_naturality'_pre (A : HomAdjunction F G) c' c d (f : C.(Morphism) c (G d)) (h : C.(Morphism) c' c) :
     Compose (C := D) (proj1_sig (A.(AIsomorphism) _ _) f) (F.(MorphismOf) h) =
     proj1_sig (A.(AIsomorphism) _ _) (Compose f h).
     assert (H := fg_equal (ACommutes_Inverse A _ _ _ _ h (Identity d)) f).
-    simpl in *; autorewrite with category in *.
-    auto with category.
+    simpl in *; autorewrite with morphism in *;
+    rewrite_hyp;
+    rsimplify_morphisms;
+    reflexivity.
   Qed.
 
   Section typeof.
@@ -224,13 +226,17 @@ Section AdjunctionEquivalences.
       ).
     Grab Existential Variables.
     abstract (
-      intros s d m; simpl in *;
-        repeat rewrite adjunction_naturality, RightIdentity;
-          let H := fresh in assert (H := fg_equal (A.(ACommutes) d (F d) s (F d) m (Identity _)) (Identity _));
-            simpl in *;
-              autorewrite with category in *;
-                auto with category
-    ).
+        intros s d m;
+        simpl in *;
+          repeat rewrite adjunction_naturality, RightIdentity;
+        let H := fresh in
+        assert (H := fg_equal (A.(ACommutes) d (F d) s (F d) m (Identity _)) (Identity _));
+        simpl in *;
+          autorewrite with morphism in *;
+          rewrite_hyp;
+        rsimplify_morphisms;
+        reflexivity
+      ).
   Defined.
 
 
@@ -252,13 +258,16 @@ Section AdjunctionEquivalences.
       ).
     Grab Existential Variables.
     abstract (
-      intros s d m; simpl in *;
-        rewrite (adjunction_naturality' A);
-          let H := fresh in assert (H := fg_equal (ACommutes_Inverse A (G s) s (G s) d (Identity (G s)) m) (Identity _));
-            simpl in *;
-              autorewrite with category in *;
-                auto with category
-    ).
+        intros s d m;
+        simpl in *;
+          rewrite (adjunction_naturality' A);
+        let H := fresh in assert (H := fg_equal (ACommutes_Inverse A (G s) s (G s) d (Identity (G s)) m) (Identity _));
+        simpl in *;
+          autorewrite with morphism in *;
+          rewrite_rev_hyp;
+          rsimplify_morphisms;
+          reflexivity
+      ).
   Defined.
 
   (** Quoting Wikipedia on Adjoint Functors:
@@ -279,8 +288,10 @@ Section AdjunctionEquivalences.
     subst_body.
     pose proof (fg_equal (ACommutes'0 _ _ _ _ (Identity _) f) (Identity _)) as H.
     simpl in *.
-    autorewrite with functor morphism in H.
-    assumption.
+    autorewrite with morphism in H.
+    etransitivity; try eassumption; [].
+    rsimplify_morphisms.
+    reflexivity.
   Qed.
 
   Lemma UnitCounitOf_Helper2
@@ -296,9 +307,11 @@ Section AdjunctionEquivalences.
     intros X Y g.
     pose proof (fg_equal (ACommutes_Inverse' _ _ _ _ g (Identity _)) (Identity _)) as H.
     simpl in *.
-    autorewrite with functor morphism in H.
+    autorewrite with morphism in H.
     symmetry.
-    assumption.
+    etransitivity; try eassumption; [].
+    rsimplify_morphisms.
+    reflexivity.
   Qed.
 
   Local Ltac UnitCounitOf_helper make_H :=
@@ -329,16 +342,20 @@ Section AdjunctionEquivalences'.
   Definition HomAdjunctionOfUnit (T : AdjunctionUnit F G) : HomAdjunction F G.
     refine {| AComponentsOf' := (fun c d (g : Morphism _ (F c) d) => Compose (G.(MorphismOf) g) (projT1 T c)) |};
       try (intros; exists (fun f => proj1_sig (projT2 T _ _ f)));
-        abstract (
-          intros; destruct T as [ T s ]; repeat split; simpl in *;
+      abstract (
+          intros; destruct T as [ T s ];
+          repeat split;
+          simpl in *;
             apply functional_extensionality_dep; intros;
-              solve [
+          try solve [
                 intro_proj2_sig_from_goal;
                 destruct_hypotheses;
                 auto with morphism
-                |
-                  repeat rewrite FCompositionOf; repeat rewrite Associativity; repeat apply f_equal;
-                    simpl_do do_rewrite_rev (Commutes T); reflexivity
+              |
+              repeat rewrite FCompositionOf;
+                repeat rewrite Associativity;
+                repeat apply f_equal;
+                simpl_do do_rewrite_rev (Commutes T); reflexivity
               ]
         ).
   Defined.

@@ -18,16 +18,22 @@ Section ProductInducedFunctors.
   Variable F : SpecializedFunctor (C * D) E.
 
   Definition InducedProductFstFunctor (d : D) : SpecializedFunctor C E.
-    refine {| ObjectOf := (fun c => F (c, d));
-      MorphismOf := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
-    |};
+    refine (Build_SpecializedFunctor
+              C E
+              (fun c => F (c, d))
+              (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
+              _
+              _);
     abstract t.
   Defined.
 
   Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
-    refine {| ObjectOf := (fun d => F (c, d));
-      MorphismOf := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
-    |};
+    refine (Build_SpecializedFunctor
+              D E
+              (fun d => F (c, d))
+              (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
+              _
+              _);
     abstract t.
   Defined.
 End ProductInducedFunctors.

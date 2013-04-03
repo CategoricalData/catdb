@@ -1,6 +1,6 @@
 Require Import JMeq ProofIrrelevance.
 Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common Notations InitialTerminalCategory FEqualDep.
+Require Import Common Notations InitialTerminalCategory FEqualDep TypeclassUnreifiedSimplification.
 
 Set Implicit Arguments.
 
@@ -98,7 +98,7 @@ Section CommaSpecializedCategory.
         destruct_all_hypotheses;
         unfold Morphism in *;
           destruct_hypotheses;
-        repeat rewrite FCompositionOf;
+        repeat erewrite FCompositionOf by typeclasses eauto;
         repeat try_associativity ltac:(t_rev_with t')
       ).
   Defined.
@@ -108,7 +108,7 @@ Section CommaSpecializedCategory.
   Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
     exists (Identity (C := A * B) (projT1 o)).
     abstract (
-        simpl; autorewrite with category; reflexivity
+        simpl; rsimplify_morphisms; reflexivity
       ).
   Defined.
 
@@ -121,7 +121,7 @@ Section CommaSpecializedCategory.
     destruct_hypotheses;
     simpl in *;
     simpl_eq;
-    autorewrite with category;
+    try rsimplify_morphisms;
     f_equal;
     try reflexivity.
 
@@ -183,9 +183,12 @@ Section SliceSpecializedCategory.
   Let B := TerminalCategory.
 
   Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
-    refine {| ObjectOf := (fun _ => a);
-      MorphismOf := (fun _ _ _ => Identity a)
-    |}; abstract (intros; auto with morphism).
+    refine (Build_SpecializedFunctor B C
+                                     (fun _ => a)
+                                     (fun _ _ _ => Identity a)
+                                     _
+                                     _);
+    abstract (intros; auto with morphism).
   Defined.
 
   Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.

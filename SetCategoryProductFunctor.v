@@ -7,6 +7,7 @@ Set Implicit Arguments.
 Local Close Scope nat_scope.
 
 Section ProductFunctor.
+  Hint Extern 0 => simpl.
   Hint Extern 1 (@eq (_ -> _) _ _) => apply functional_extensionality_dep; intro.
   Hint Extern 2 => destruct_head @prod.
 

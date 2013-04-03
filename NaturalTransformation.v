@@ -274,7 +274,7 @@ Section NaturalTransformationComposition.
 
   Hint Rewrite @Commutes : natural_transformation.
   Hint Resolve f_equal2 : natural_transformation.
-  Hint Extern 1 (_ = _) => apply @FCompositionOf : natural_transformation.
+  Hint Extern 1 (_ = _) => eapply @FCompositionOf; typeclasses eauto : natural_transformation.
 
   Lemma FCompositionOf2 : forall `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
     (F : SpecializedFunctor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
@@ -289,7 +289,7 @@ Section NaturalTransformationComposition.
     exists (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)));
     abstract (
         simpl; intros; autorewrite with category;
-        repeat try_associativity ltac:(repeat rewrite <- @Commutes; repeat rewrite <- @FCompositionOf);
+        repeat try_associativity ltac:(repeat rewrite <- @Commutes; repeat rewrite <- FCompositionOf);
         reflexivity
       ).
   Defined.

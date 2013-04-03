@@ -7,7 +7,7 @@ Generalizable All Variables.
 
 Section SimplifiedMorphism.
   Section single_category_definition.
-    Context `{C : SpecializedCategory objC}.
+    Context `{C : @ComputationalCategory objC}.
 
     Class > MorphismSimplifiesTo {s d} (m_orig m_simpl : Morphism C s d) :=
       simplified_morphism_ok :> m_orig = m_simpl.
@@ -25,7 +25,7 @@ Section SimplifiedMorphism.
     trivial.
 
   Section single_category_instances.
-    Context `{C : SpecializedCategory objC}.
+    Context `{H : @IsSpecializedCategory objC C}.
 
     Global Instance LeftIdentitySimplify
            `(@MorphismSimplifiesTo _ C s d m1_orig m1_simpl)
@@ -67,34 +67,36 @@ Section SimplifiedMorphism.
   End single_category_instances.
 
   Section sum_prod_category_instances.
-    Context `{C : SpecializedCategory objC}.
-    Context `{D : SpecializedCategory objD}.
+    Context `{HC : @IsSpecializedCategory objC C}.
+    Context `{HD : @IsSpecializedCategory objD D}.
+
+    Let CpD : ComputationalCategory _ := Eval hnf in (HC + HD)%category.
 
     Global Instance SumCategorySimplify_inl
            `(@MorphismSimplifiesTo _ C s d m_orig m_simpl)
-    : @MorphismSimplifiesTo _ (C + D) (inl s) (inl d) m_orig m_simpl | 100.
+    : @MorphismSimplifiesTo _ CpD (inl s) (inl d) m_orig m_simpl | 100.
     t.
     Qed.
 
     Global Instance SumCategorySimplify_inr
            `(@MorphismSimplifiesTo _ D s d m_orig m_simpl)
-    : @MorphismSimplifiesTo _ (C + D) (inr s) (inr d) m_orig m_simpl | 100.
+    : @MorphismSimplifiesTo _ CpD (inr s) (inr d) m_orig m_simpl | 100.
     t.
     Qed.
 
     Global Instance SumComposeSimplify_inl
            `(@MorphismSimplifiesTo _ C s d m1_orig m1_simpl)
            `(@MorphismSimplifiesTo _ C d d' m2_orig m2_simpl)
-    : MorphismSimplifiesTo (@Compose _ (C + D) (inl s) (inl d) (inl d') m2_orig m1_orig)
-                           (@Compose _ (C + D) (inl s) (inl d) (inl d') m2_simpl m1_simpl) | 50.
+    : MorphismSimplifiesTo (@Compose _ (CpD) (inl s) (inl d) (inl d') m2_orig m1_orig)
+                           (@Compose _ (CpD) (inl s) (inl d) (inl d') m2_simpl m1_simpl) | 50.
     t.
     Qed.
 
     Global Instance SumComposeSimplify_inr
            `(@MorphismSimplifiesTo _ D s d m1_orig m1_simpl)
            `(@MorphismSimplifiesTo _ D d d' m2_orig m2_simpl)
-    : MorphismSimplifiesTo (@Compose _ (C + D) (inr s) (inr d) (inr d') m2_orig m1_orig)
-                           (@Compose _ (C + D) (inr s) (inr d) (inr d') m2_simpl m1_simpl) | 50.
+    : MorphismSimplifiesTo (@Compose _ (CpD) (inr s) (inr d) (inr d') m2_orig m1_orig)
+                           (@Compose _ (CpD) (inr s) (inr d) (inr d') m2_simpl m1_simpl) | 50.
     t.
     Qed.
 
@@ -233,3 +235,34 @@ Section bad2.
   rsimplify_morphisms; rsimplify_morphisms; reflexivity.
   Qed.
 End bad2.
+
+Section bad3.
+  Local Close Scope nat_scope.
+  Goal
+    forall (objD : Type) (D : SpecializedCategory objD)
+           (objC1 : Type) (C1 : SpecializedCategory objC1)
+           (objC2 : Type) (C2 : SpecializedCategory objC2)
+           (d : SpecializedFunctor (C1 + C2) D) (x : objC2),
+      MorphismSimplifiesTo
+        (MorphismOf
+                    (C := {|
+                      Morphism := SumCategory_Morphism C1 C2;
+                      Identity := SumCategory_Identity C1 C2;
+                      Compose := SumCategory_Compose C1 C2 |}) (D := D) d
+                    (s := inr x) (d := inr x) (Identity x)) (Identity (d (inr x))).
+  Fail typeclasses eauto.
+  Abort.
+End bad3.
+
+Section bad4.
+  Goal forall (objC1 : Type) (C1 : SpecializedCategory objC1)
+     (objC2 : Type) (C2 : SpecializedCategory objC2)
+     (objD : Type) (D : SpecializedCategory objD)
+     (x : SpecializedFunctor (C1 * C2) D) (o1 : objC1)
+     (o2 : objC2) (o : objC1) (o0 : objC2) (m : Morphism C1 o1 o)
+     (m0 : Morphism C2 o2 o0),
+   Compose (MorphismOf x (s := (_, _)) (d := (_, _)) (m, Identity o0)) (MorphismOf x (s := (_, _)) (d := (_, _)) (Identity o1, m0)) =
+   MorphismOf x (s := (_, _)) (d := (_, _)) (m, m0).
+  Fail rsimplify_morphisms.
+  Abort.
+End bad4.

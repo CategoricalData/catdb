@@ -24,9 +24,12 @@ Section DiagonalFunctor.
      **)
 
   Definition diagonal_functor_object_of (c : C) : C ^ D.
-    refine {| ObjectOf := fun _ => c;
-      MorphismOf := (fun _ _ _ => Identity c)
-    |}; abstract t.
+    refine (Build_SpecializedFunctor D C
+                                     (fun _ => c)
+                                     (fun _ _ _ => Identity c)
+                                     _
+                                     _);
+    abstract t.
   Defined.
 
   Definition diagonal_functor_morphism_of o1 o2 : C.(Morphism) o1 o2 -> (C ^ D).(Morphism) (diagonal_functor_object_of o1) (diagonal_functor_object_of o2).

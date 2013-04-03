@@ -122,9 +122,12 @@ Section SliceCategory.
   Let B := TerminalCategory.
 
   Definition SliceCategory_Functor : Functor B C.
-    refine {| ObjectOf := (fun _ => a);
-      MorphismOf := (fun _ _ _ => Identity a)
-    |}; abstract (intros; auto with morphism).
+    refine (Build_SpecializedFunctor B C
+                                     (fun _ => a)
+                                     (fun _ _ _ => Identity a)
+                                     _
+                                     _);
+    abstract (intros; auto with morphism).
   Defined.
 
   Definition SliceCategory := CommaCategory S SliceCategory_Functor.
