@@ -43,7 +43,7 @@ Section FunctorsUnique.
     intros F F'.
     functor_eq; auto.
     match goal with
-      | [ x : _ |- _ ] => solve [ destruct (F x) ]
+      | [ x : _ |- _ ] => solve [ let H := fresh in assert (H := F x); destruct H ]
     end.
   Qed.
 
