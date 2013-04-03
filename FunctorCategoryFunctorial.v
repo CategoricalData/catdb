@@ -29,7 +29,12 @@ Section FunctorCategoryParts.
     Global Arguments FunctorCategoryFunctor_MorphismOf_MorphismOf _ _ _ / .
 
     Definition FunctorCategoryFunctor_MorphismOf : SpecializedFunctor (C ^ D) (C' ^ D').
-      exists FunctorCategoryFunctor_MorphismOf_ObjectOf FunctorCategoryFunctor_MorphismOf_MorphismOf;
+      refine (Build_SpecializedFunctor
+                (C ^ D) (C' ^ D')
+                FunctorCategoryFunctor_MorphismOf_ObjectOf
+                FunctorCategoryFunctor_MorphismOf_MorphismOf
+                _
+                _);
       abstract (
           intros; simpl;
           apply NaturalTransformation_eq;
@@ -44,7 +49,7 @@ Section FunctorCategoryParts.
     Context `(D : @SpecializedCategory objD).
 
     Lemma FunctorCategoryFunctor_FIdentityOf : FunctorCategoryFunctor_MorphismOf (IdentityFunctor C) (IdentityFunctor D) = IdentityFunctor _.
-      repeat (intro || apply Functor_eq || nt_eq); simpl; rsimplify_morphisms; reflexivity.
+      repeat (intro || apply Functor_eq || nt_eq); simpl; subst; JMeq_eq; rsimplify_morphisms; reflexivity.
     Qed.
   End FIdentityOf.
 
@@ -63,7 +68,7 @@ Section FunctorCategoryParts.
 
     Lemma FunctorCategoryFunctor_FCompositionOf : FunctorCategoryFunctor_MorphismOf (ComposeFunctors F' F) (ComposeFunctors G' G)
                                                   = ComposeFunctors (FunctorCategoryFunctor_MorphismOf F' G) (FunctorCategoryFunctor_MorphismOf F G').
-      abstract (repeat (intro || apply Functor_eq || nt_eq); simpl; rsimplify_morphisms; reflexivity).
+      abstract (repeat (intro || apply Functor_eq || nt_eq); simpl; subst; JMeq_eq; rsimplify_morphisms; reflexivity).
     Qed.
   End FCompositionOf.
 End FunctorCategoryParts.
@@ -110,7 +115,8 @@ Section NaturalTransformation.
         apply NaturalTransformation_eq;
         simpl in *;
           intros;
-        autorewrite with category;
+        rsimplify_morphisms;
+        autorewrite with morphism;
         repeat (
             reflexivity
               || (progress repeat rewrite <- FCompositionOf)
