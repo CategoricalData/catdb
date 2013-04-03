@@ -413,6 +413,7 @@ Section Law2.
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
              | [ H : Empty_set |- _ ] => destruct H
              | _ => split
+             | _ => progress subst
              | _ => progress simpl_eq
              | _ => progress functor_eq
              | _ => progress nt_eq
@@ -567,6 +568,7 @@ Section Law3.
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
              | [ H : Empty_set |- _ ] => destruct H
              | _ => split
+             | _ => progress subst
              | _ => progress simpl_eq
              | _ => progress functor_eq
              | _ => progress nt_eq
@@ -747,6 +749,7 @@ Section Law4.
              | [ |- @eq ?T ?a ?b ] => let T' := eval hnf in T in progress change (@eq T' a b)
              | [ H : Empty_set |- _ ] => destruct H
              | _ => split
+             | _ => progress subst
              | _ => progress simpl_eq
              | _ => progress functor_eq
              | _ => progress nt_eq
