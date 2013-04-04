@@ -208,7 +208,9 @@ Section InClass_classOf.
   Qed.
 
   Let C_Equivalence : Equivalence equiv
-    := Build_Equivalence _ _ (ClassEquivalent_refl C) (ClassEquivalent_sym C) (ClassEquivalent_trans C).
+    := {| Equivalence_Reflexive := ClassEquivalent_refl C;
+          Equivalence_Symmetric := ClassEquivalent_sym C;
+          Equivalence_Transitive := ClassEquivalent_trans C |}.
 
   Definition InClass_classOf_eq' : forall v, InClass C v -> C = classOf C_Equivalence v
     := InClass_classOf_eq C_Equivalence.

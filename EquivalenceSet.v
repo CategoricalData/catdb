@@ -233,7 +233,9 @@ Section InSet_setOf.
   Qed.
 
   Let C_Equivalence : Equivalence equiv
-    := Build_Equivalence _ _ (SetEquivalent_refl C) (SetEquivalent_sym C) (SetEquivalent_trans C).
+    := {| Equivalence_Reflexive := SetEquivalent_refl C;
+          Equivalence_Symmetric := SetEquivalent_sym C;
+          Equivalence_Transitive := SetEquivalent_trans C |}.
 
   Definition InSet_setOf_eq' : forall v, InSet C v -> C = setOf C_Equivalence equiv_dec v
     := InSet_setOf_eq C_Equivalence.
