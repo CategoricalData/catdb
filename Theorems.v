@@ -56,6 +56,7 @@ Section Categories.
   Variable C : Category.
 
   Hint Resolve LeftIdentity RightIdentity.
+  Hint Extern 1 => symmetry.
 
   Theorem identity_unique : forall a (id' : C.(Morphism) a a),
     (forall f : C.(Morphism) a a, Compose id' f = f) ->
