@@ -233,7 +233,7 @@ Definition emailsSchema : Schema.
   refine {| Vertex := emailsV;
     Edge := emailsE;
     PathsEquivalent := emailsEq
-    |}; abstract (repeat destructor; hnf; destructor).
+    |}; abstract (repeat destructor; try split; hnf; destructor).
 Defined.
 
 Definition emailsTypeof (v : emailsSchema) : Set :=
