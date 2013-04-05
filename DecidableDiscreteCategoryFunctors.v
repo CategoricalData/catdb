@@ -79,11 +79,11 @@ Section InducedFunctor.
              | [ H : False |- _ ] => destruct H
              | [ H : Empty_set |- _ ] => destruct H
              | [ H : unit |- _ ] => destruct H
-             | [ H : _ = _ |- _ ] => case H; try clear H
              | [ |- _ = _ ] => progress (repeat rewrite RightIdentity; repeat rewrite LeftIdentity; repeat rewrite Associativity)
              | [ H : ?a = ?a |- _ ] => pose proof (UIP_refl _ _ H); subst H
              | [ H : _ |- _ ] => unique_pose (H eq_refl)
              | [ H : Morphism _ _ _ |- _ ] => hnf in H
+             | [ H : _ = _ |- _ ] => case H; try clear H
            end.
 
   Definition InducedDiscreteFunctorDec_MorphismOf s d (m : Morphism (DiscreteCategoryDec eq_dec) s d) :
