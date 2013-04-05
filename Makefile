@@ -9,6 +9,8 @@ MODULES    := Notations \
 	EquivalenceClass \
 	EquivalenceRelationGenerator \
 	Paths \
+	EqdepFacts_one_variable \
+	Eqdep_dec_one_variable \
 	\
 	SpecializedCategory \
 	Functor \
