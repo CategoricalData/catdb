@@ -131,6 +131,7 @@ VDS	   := $(MODULES:%=%.v.d)
 NEW_TIME_FILE=time-of-build-after.log
 OLD_TIME_FILE=time-of-build-before.log
 BOTH_TIME_FILE=time-of-build-both.log
+NEW_PRETTY_TIME_FILE=time-of-build-after-pretty.log
 TIME_SHELF_NAME=time-of-build-shelf
 
 
@@ -145,13 +146,17 @@ timed: Makefile.coq
 	chmod +x ./report_time.sh
 	./report_time.sh -c $(MAKE) -f Makefile.coq SHELL=./report_time.sh
 
-pretty-timed:
+pretty-timed-diff:
 	sh ./make-each-time-file.sh "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)"
 	$(MAKE) combine-pretty-timed
 
 combine-pretty-timed:
 	python ./make-both-time-files.py "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)" "$(BOTH_TIME_FILE)"
 	cat "$(BOTH_TIME_FILE)"
+
+pretty-timed:
+	sh ./make-each-time-file.sh "$(NEW_TIME_FILE)"
+	python ./make-one-time-file.py "$(NEW_TIME_FILE)" "$(NEW_PRETTY_TIME_FILE)"
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) -arg -dont-load-proofs -o Makefile.coq
