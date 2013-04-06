@@ -41,11 +41,11 @@ Section Coend.
     -> CoendFunctor_Index_Morphism s d'.
   Proof.
     destruct s, d, d'; simpl; intros;
-      try abstract congruence;
-        match goal with
-          | [ H : _ + _ |- _ ] => destruct H; [ left | right ];
-            abstract congruence
-        end.
+    match goal with
+      | [ H : _ + _ |- _ ] => destruct H; [ left | right ];
+                              abstract congruence
+      | _ => abstract congruence
+    end.
   Defined.
 
   Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
