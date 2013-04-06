@@ -5,41 +5,23 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Record Category := {
+Record > Category := {
   CObject : Type;
 
   UnderlyingCategory :> @SpecializedCategory CObject
 }.
 
-Definition GeneralizeCategory `(C : @SpecializedCategory obj) : Category.
-  refine {| CObject := C.(Object) |}; auto.
-Defined.
-
-Coercion GeneralizeCategory : SpecializedCategory >-> Category.
-
-Record SmallCategory := {
+Record > SmallCategory := {
   SObject : Set;
 
   SUnderlyingCategory :> @SmallSpecializedCategory SObject
 }.
 
-Definition GeneralizeSmallCategory `(C : @SmallSpecializedCategory obj) : SmallCategory.
-  refine {| SObject := obj |}; auto.
-Defined.
-
-Coercion GeneralizeSmallCategory : SmallSpecializedCategory >-> SmallCategory.
-
-Record LocallySmallCategory := {
+Record > LocallySmallCategory := {
   LSObject : Type;
 
   LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject
 }.
-
-Definition GeneralizeLocallySmallCategory `(C : @LocallySmallSpecializedCategory obj) : LocallySmallCategory.
-  refine {| LSObject := obj |}; auto.
-Defined.
-
-Coercion GeneralizeLocallySmallCategory : LocallySmallSpecializedCategory >-> LocallySmallCategory.
 
 Bind Scope category_scope with Category.
 Bind Scope category_scope with SmallCategory.
