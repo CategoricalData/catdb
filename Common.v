@@ -297,14 +297,56 @@ Ltac simpl_eq := intros; repeat (
 
 (* For things with decidable equality, we have [forall x (P : x = x),
    P = eq_refl].  So replace such hypotheses with [eq_refl]. *)
-Ltac subst_eq_refl :=
+Ltac subst_eq_refl_dec :=
   repeat match goal with
            | [ H : ?a = ?a |- _ ] => clear H
-           | [ H : ?a = ?a |- _ ] => assert (eq_refl = H) by abstract (
-                                                                 apply K_dec;
-                                                                 solve [ try decide equality; try congruence ]
-                                                               );
+           | [ H : ?a = ?a |- _ ] => assert (eq_refl = H)
+                                    by abstract solve
+                                                [ apply K_dec;
+                                                  solve [ try decide equality; try congruence ]
+                                                | assumption
+                                                | easy ];
                                     subst H
+         end.
+
+Ltac subst_eq_refl :=
+  repeat match goal with
+           | _ => progress subst_eq_refl_dec
+           | [ H : ?a = ?a |- _ ] => assert (eq_refl = H) by apply ProofIrrelevance.proof_irrelevance;
+                                    subst H
+         end.
+
+(** Finds things of the form [match E with _ => _ end] in the goal and
+    tries to replace them with [eq_refl] *)
+
+Ltac subst_eq_refl_dec_in_match :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with _ => _ end] ] =>
+             let H := fresh in
+             set (H := E) in *;
+               clearbody H;
+               hnf in H;
+               simpl in H;
+               match type of H with
+                 | ?a = ?a => idtac
+                 | _ = _ => compute in H
+               end;
+               progress subst_eq_refl_dec; simpl in *
+         end.
+
+Ltac subst_eq_refl_in_match :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with _ => _ end] ] =>
+             let H := fresh in
+             set (H := E) in *;
+               clearbody H;
+               hnf in H;
+               simpl in H;
+               match type of H with
+                 | ?a = ?a => idtac
+                 | _ = _ => compute in H
+               end;
+               progress subst_eq_refl; simpl in *
          end.
 
 (* Coq's build in tactics don't work so well with things like [iff]
