@@ -20,11 +20,11 @@ Section PreMonoidalCategory.
     *)
   Variable TensorProduct : SpecializedFunctor (C * C) C.
 
-  Let src {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := s.
-  Let dst {C : @SpecializedCategory objC} {s d} (_ : Morphism C s d) := d.
+  Let src {s d} (_ : Morphism C s d) := s.
+  Let dst {s d} (_ : Morphism C s d) := d.
 
   Local Notation "A ⊗ B" := (TensorProduct (A, B)).
-  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism).
+  Local Notation "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ A, @src _ _ B)) (d := (@dst _ _ A, @dst _ _ B)) (A, B)%morphism).
 
   Let TriMonoidalProductL_ObjectOf (abc : C * C * C) : C :=
     (fst (fst abc) ⊗ snd (fst abc)) ⊗ snd abc.
