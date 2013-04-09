@@ -56,6 +56,13 @@ Lemma RowEta T Ts r : RCons (@RowHead T Ts r) (@RowTail T Ts r) = r.
   reflexivity.
 Qed.
 
+Fixpoint RowApp rt1 (r1 : Row rt1) rt2 (r2 : Row rt2)
+: Row (rt1 ++ rt2)
+  := match r1 in (Row r) return (Row (r ++ rt2)) with
+       | RNil => r2
+       | RCons _ _ a r1s => RCons a (RowApp r1s r2)
+     end.
+
 Fixpoint getColumn T R (c : Column T R) : Row R -> T :=
   match c with
     | CFirst _ => fun r => RowHead r
@@ -229,10 +236,6 @@ Fixpoint unique_from A (eq_dec : forall x y : A, {x = y} + {x <> y})
   end.
 Arguments unique_from _ _ !l / .
 
-Inductive list_duplicate_free A : list A -> Prop :=
-| nil_duplicate_free : list_duplicate_free nil
-| cons_duplicate_free : forall x l, list_duplicate_free l -> ~In x l -> list_duplicate_free (x :: l).
-
 Lemma unique_no_change_in A (l : list A) eq_dec
 : forall x, In x l <-> In x (@unique_from  A eq_dec l).
   intro x; split; intro;
@@ -248,8 +251,8 @@ Lemma unique_no_change_in A (l : list A) eq_dec
          end.
 Qed.
 
-Lemma unique_from_no_duplicates A (l : list A) eq_dec
-: list_duplicate_free l -> @unique_from A eq_dec l = l.
+Lemma unique_from_NoDup A (l : list A) eq_dec
+: NoDup l -> @unique_from A eq_dec l = l.
   intro H.
   induction H; [ reflexivity | ].
   simpl.
@@ -261,8 +264,8 @@ Lemma unique_from_no_duplicates A (l : list A) eq_dec
   assumption.
 Qed.
 
-Lemma no_duplicates_unique_from A (l : list A) eq_dec
-: list_duplicate_free (@unique_from A eq_dec l).
+Lemma NoDup_unique_from A (l : list A) eq_dec
+: NoDup (@unique_from A eq_dec l).
   induction l; [ simpl; constructor | ].
   repeat match goal with
            | _ => progress simpl in *
@@ -285,3 +288,59 @@ Definition UnionTables2 (r : RowType) (H : RowTypeDecidable _ _ r) (t1 t2 : Tabl
     removes duplicates. *)
 Definition UnionTables (r : RowType) (H : RowTypeDecidable _ _ r) (ts : list (Table r)) : Table r
   := unique_from (Row_eq H) (UnionAllTables ts).
+
+
+(** ** CROSS JOIN *)
+(** Quoting Wikipedia (http://en.wikipedia.org/wiki/Join_(SQL)):
+
+    CROSS JOIN returns the Cartesian product of rows from tables in
+    the join. In other words, it will produce rows which combine each
+    row from the first table with each row from the second table.[1]
+
+    Example of an explicit cross join:
+
+<<
+    SELECT *
+    FROM employee CROSS JOIN department;
+>>
+
+    Example of an implicit cross join:
+
+<<
+    SELECT *
+    FROM employee, department;
+>>
+    *)
+
+(** [app_list [a b c ...] = a ++ b ++ c ++ ...] *)
+Definition app_list A := fold_right (@app A) nil.
+Arguments app_list / .
+
+Definition CrossJoinRowTypes2 (r1 r2 : RowType) : RowType := r1 ++ r2.
+Definition CrossJoinRowTypes (rs : list RowType) : RowType := app_list rs.
+
+Fixpoint CrossJoinTables2_helper r1 (t10 : Row r1) r2 (t2 : Table r2)
+: Table (CrossJoinRowTypes2 r1 r2)
+  := match t2 with
+       | nil => nil
+       | t20 :: t2s => (RowApp t10 t20)
+                         :: CrossJoinTables2_helper t10 t2s
+     end.
+
+(** [CrossJoinTables2 r1 t1 r2 t2] is the SQL query [SELECT * FROM t1
+    CROSS JOIN t2].  It contains all pairs of rows from [t1] and [t2]. *)
+Fixpoint CrossJoinTables2 r1 (t1 : Table r1) r2 (t2 : Table r2)
+: Table (CrossJoinRowTypes2 r1 r2)
+  := match t1 with
+       | nil => nil
+       | t10 :: t1s => (CrossJoinTables2_helper t10 t2)
+                         ++ CrossJoinTables2 t1s t2
+     end.
+
+(** A [Database] is a list of tables.  We can cross join all of them. *)
+Fixpoint CrossJoinTables (DT : list RowType) (ts : Database DT)
+: Table (CrossJoinRowTypes DT)
+  := match ts with
+       | DNil => nil
+       | DCons _ _ t ts => CrossJoinTables2 t (CrossJoinTables ts)
+     end.
