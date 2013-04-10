@@ -63,6 +63,21 @@ Fixpoint RowApp rt1 (r1 : Row rt1) rt2 (r2 : Row rt2)
        | RCons _ _ a r1s => RCons a (RowApp r1s r2)
      end.
 
+(** Lift [Column]s to concatenations of row types *)
+Fixpoint Column_RowApp_Left (rt1 rt2 : RowType) T (c : Column T rt1)
+: Column T (rt1 ++ rt2)
+  := match c in (Column _ r) return (Column T (r ++ rt2)) with
+       | CFirst Ts => CFirst T (Ts ++ rt2)
+       | CNext T' Ts c0 => CNext T' (@Column_RowApp_Left Ts rt2 T c0)
+     end.
+
+Fixpoint Column_RowApp_Right (rt1 rt2 : RowType) T {struct rt1}
+: Column T rt2 -> Column T (rt1 ++ rt2)
+  := match rt1 as l return (Column T rt2 -> Column T (l ++ rt2)) with
+       | nil => fun x : Column T rt2 => x
+       | T0 :: rt3 => fun c : Column T rt2 => CNext T0 (@Column_RowApp_Right rt3 rt2 T c)
+     end.
+
 Fixpoint getColumn T R (c : Column T R) : Row R -> T :=
   match c with
     | CFirst _ => fun r => RowHead r
@@ -344,3 +359,35 @@ Fixpoint CrossJoinTables (DT : list RowType) (ts : Database DT)
        | DNil => nil
        | DCons _ _ t ts => CrossJoinTables2 t (CrossJoinTables ts)
      end.
+
+(** [Filter1 r T P c t] is the SQL query [SELECT * FROM t WHERE P(c)]
+    *)
+
+Definition Filter1 (r : RowType) T (P : T -> bool) (c : Column T r)
+: Table r -> Table r
+  := filter (fun r0 : Row r => P (getColumn c r0)).
+Definition Filter2 (r : RowType) T1 T2 (P : T1 -> T2 -> bool) (c1 : Column T1 r) (c2 : Column T2 r)
+: Table r -> Table r
+  := filter (fun r0 : Row r => P (getColumn c1 r0) (getColumn c2 r0)).
+
+(* TODO(jgross): Add [Filter n] for arbitrary [n] *)
+
+(** [FilterEqual r T eq_dec c1 c2 t] is the SQL query [SELECT * FROM t WHERE c1
+    = c2]. *)
+Definition FilterEqual r T (eq_dec : forall x y : T, {x = y} + {x <> y})
+  := @Filter2 r T T (fun x y => if eq_dec x y then true else false).
+
+(** [InnerJoinTables2 r1 t1 r2 t2 T c1 c2] is the SQL query [SELECT * FROM t1
+    INNTER JOIN t2 ON t1.c1 = t2.c2]. *)
+Definition InnerJoinTables2 r1 (t1 : Table r1) r2 (t2 : Table r2)
+           T
+           (eq_dec : forall x y : T, {x = y} + {x <> y})
+           (c1 : Column T r1)
+           (c2 : Column T r2)
+           (t1 : Table r1)
+           (t2 : Table r2)
+: Table (CrossJoinRowTypes2 r1 r2)
+  := FilterEqual eq_dec
+                 (@Column_RowApp_Left r1 r2 T c1)
+                 (@Column_RowApp_Right r1 r2 T c2)
+                 (CrossJoinTables2 t1 t2).
