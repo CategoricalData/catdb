@@ -127,10 +127,7 @@ Definition UnionAllTables2 (r : RowType) (t1 t2 : Table r) : Table r
     FROM t1 UNION ALL SELECT * FROM t2 UNION ALL ... UNION ALL SELECT
     * FROM tn]. *)
 Definition UnionAllTables (r : RowType) (ts : list (Table r)) : Table r
-  := match ts with
-       | nil => nil
-       | t :: ts => fold_left (@UnionAllTables2 r) ts t
-     end.
+  := fold_left (@UnionAllTables2 r) ts nil.
 
 Lemma RNil_unique : forall x : Row nil, x = RNil.
   intros; refine (match x in Row Ts return match Ts return Row Ts -> Prop with
@@ -215,30 +212,27 @@ Defined.
 
 (** If a type has decidable equality, so does [In] *)
 Fixpoint In_dec A (eq_dec : forall x y : A, {x = y} + {x <> y}) (l : list A)
-: forall x, {In x l} + {~In x l}
-  := match l as l return forall x, {In x l} + {~In x l} with
-       | nil
-         => fun _ => right (fun x : False => match x with end)
-       | b :: m
-         => fun x
-            => match eq_dec b x with
-                 | left H
-                   => left (or_introl H)
-                 | right not_eq
-                   => match In_dec eq_dec m x with
-                        | left H
-                          => left (or_intror H)
-                        | right not_in
-                          => right (fun H'
-                                    => match H' return False with
-                                         | or_introl H''
-                                           => not_eq H''
-                                         | or_intror H''
-                                           => not_in H''
-                                       end)
-                      end
-               end
-     end.
+: forall x, {In x l} + {~In x l}.
+Proof.
+  refine match l with
+           | nil
+             => fun _
+                => right _
+           | b :: m
+             => fun x
+                => match eq_dec b x with
+                     | left H
+                       => left _
+                     | right not_eq
+                       => match In_dec _ eq_dec m x with
+                            | left H => left _
+                            | right not_in => right _
+                          end
+                   end
+         end;
+  clear In_dec eq_dec;
+  abstract firstorder.
+Defined.
 
 (** Takes in a list, and returns the list of unique elements in that list *)
 Fixpoint unique_from A (eq_dec : forall x y : A, {x = y} + {x <> y})
