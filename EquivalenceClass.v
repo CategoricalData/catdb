@@ -405,3 +405,62 @@ Proof.
           try apply f_mor;
             eauto; reflexivity || (symmetry; assumption).
 Qed.
+
+Section description.
+  (** Can be imported from Coq.Logic.ClassicalDescription,
+      Coq.Logic.ClassicalEpsilon, Coq.Logic.ConstructiveEpsilon,
+      Coq.Logic.Epsilon, Coq.Logic.IndefiniteDescription, or, for the
+      axiom, Coq.Logic.Description *)
+
+  Hypothesis constructive_definite_description :
+    forall (A : Type) (P : A->Prop),
+      (exists! x, P x) -> { x : A | P x }.
+
+  Variable T : Type.
+
+  Definition EquivalenceClass_eq_lift
+  : EquivalenceClass (@eq T) -> T.
+    intro x.
+    cut (exists! u, InClass x u).
+    - apply constructive_definite_description.
+    - destruct (ClassInhabited x) as [u H].
+      exists u.
+      abstract (
+          split; [ exact H
+                 | intros; apply (ClassElementsEquivalent x); assumption ]
+        ).
+  Defined.
+
+  Definition EquivalenceClass_eq_proj
+  : T -> EquivalenceClass (@eq T).
+    apply classOf; abstract typeclasses eauto.
+  Defined.
+
+  Lemma EquivalenceClass_eq_iso1
+  : forall x, EquivalenceClass_eq_lift (EquivalenceClass_eq_proj x) = x.
+    intros.
+    expand.
+    match goal with
+      | [ |- appcontext[match ?E with _ => _ end] ] => case E
+    end.
+    intros; subst; reflexivity.
+  Qed.
+
+  Lemma EquivalenceClass_eq_iso2
+  : forall x, EquivalenceClass_eq_proj (EquivalenceClass_eq_lift x) = x.
+    intros.
+    apply sameClass_eq; simpl.
+    split;
+      intros;
+      simpl in *;
+      subst;
+      hnf;
+      unfold EquivalenceClass_eq_lift;
+      repeat match goal with
+               | [ |- appcontext[match ?E with _ => _ end] ] => case E; simpl; intros
+             end;
+      subst;
+      intuition.
+    apply (ClassElementsEquivalent x); assumption.
+  Qed.
+End description.

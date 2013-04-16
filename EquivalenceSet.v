@@ -429,3 +429,74 @@ Proof.
       clear_InSet; eauto; try reflexivity.
 Qed.
 *)
+
+Section description.
+  (** Can be imported from Coq.Logic.ClassicalDescription,
+      Coq.Logic.ClassicalEpsilon, Coq.Logic.ConstructiveEpsilon,
+      Coq.Logic.Epsilon, Coq.Logic.IndefiniteDescription, or, for the
+      axiom, Coq.Logic.Description *)
+
+  Hypothesis constructive_definite_description :
+    forall (A : Type) (P : A->Prop),
+      (exists! x, P x) -> { x : A | P x }.
+
+  Variable T : Set.
+  Hypothesis eq_dec : forall v v' : T, {v = v'} + {v <> v'}.
+
+  Definition EquivalenceSet_eq_lift
+  : EquivalenceSet (@eq T) -> T.
+    intro x.
+    cut (exists! u, InSet x u).
+    - apply constructive_definite_description.
+    - destruct (SetInhabited x) as [u H].
+      exists u.
+      abstract (
+          split; [ exact H
+                 | intros; apply (@SetElementsEquivalent _ _ x); assumption ]
+        ).
+  Defined.
+
+  Definition EquivalenceSet_eq_proj
+  : T -> EquivalenceSet (@eq T).
+    apply setOf; try assumption; abstract typeclasses eauto.
+  Defined.
+
+  Lemma EquivalenceSet_eq_iso1
+  : forall x, EquivalenceSet_eq_lift (EquivalenceSet_eq_proj x) = x.
+    intros.
+    expand.
+    repeat match goal with
+             | _ => progress intuition
+             | _ => intro
+             | [ |- appcontext[match ?E with _ => _ end] ] => case E
+             | [ H : appcontext[match ?E with _ => _ end] |- _ ] => destruct E
+             | [ H : _ |- _ ] => solve [ inversion H ]
+             | _ => progress (hnf in *; simpl in *; idtac)
+           end.
+  Qed.
+
+  Lemma EquivalenceSet_eq_iso2
+  : forall x, EquivalenceSet_eq_proj (EquivalenceSet_eq_lift x) = x.
+    intros.
+    apply sameSet_eq; simpl.
+    split;
+      intros;
+      simpl in *;
+      subst;
+      hnf;
+      unfold EquivalenceSet_eq_lift;
+      hnf in *;
+      simpl in *;
+      repeat match goal with
+               | _ => progress intuition
+               | _ => intro
+               | [ |- appcontext[match ?E with _ => _ end] ] => case E
+               | [ H : appcontext[match ?E with _ => _ end] |- _ ] => destruct E
+               | [ H : _ |- _ ] => solve [ inversion H ]
+               | _ => progress unfold EquivalenceSet_eq_lift
+               | _ => progress (hnf in *; simpl in *; idtac)
+               | _ => progress subst
+               | [ H : _, H' : _ |- _ ] => unique_pose (SetElementsEquivalent H H')
+             end.
+  Qed.
+End description.
