@@ -108,6 +108,7 @@ MODULES    := Notations \
 	CoendFunctor \
 	SubobjectClassifier \
 	Grothendieck \
+	GrothendieckFunctorial \
 	SetLimits \
 	SetColimits \
 	SetCategoryFacts \
