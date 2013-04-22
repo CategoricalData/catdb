@@ -138,10 +138,13 @@ TIME_SHELF_NAME=time-of-build-shelf
 
 
 
-.PHONY: coq clean timed pretty-timed pretty-timed-files
+.PHONY: coq clean timed pretty-timed pretty-timed-files html
 
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
+
+html: Makefile.coq
+	$(MAKE) -f Makefile.coq html
 
 # TODO(jgross): Look into combining this with the time-make.sh script
 timed: Makefile.coq
