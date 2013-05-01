@@ -33,7 +33,8 @@ Section SpecializedFunctor.
 End SpecializedFunctor.
 
 Section Functor.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   Definition Functor := SpecializedFunctor C D.
 End Functor.
