@@ -8,6 +8,14 @@ Set Implicit Arguments.
    which are all equivalent to some particular value.
 *)
 
+Local Ltac apply_proof_irrelevance :=
+  match goal with
+    | [ |- @eq ?T _ _ ] => let T' := type of T in
+                           match eval hnf in T' with
+                             | Prop => apply proof_irrelevance
+                           end
+  end.
+
 Local Ltac specialize_with tac fin_tac :=
   match goal with
     | [ x : ?T, H : forall _ : ?T, _ |- _ ] => specialize (H x); tac; specialize_with tac fin_tac
@@ -142,7 +150,7 @@ Section equiv.
                      end;
               subst;
                 split_iff;
-                f_equal; try apply proof_irrelevance;
+                f_equal; try apply_proof_irrelevance;
                   apply functional_extensionality_dep; intro;
                     repeat match goal with
                              | [ H : forall v, ?x v = true -> _ |- context[?x ?v] ] => specialize (H v)
