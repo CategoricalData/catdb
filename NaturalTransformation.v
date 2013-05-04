@@ -39,7 +39,8 @@ Section SpecializedNaturalTransformation.
 End SpecializedNaturalTransformation.
 
 Section NaturalTransformation.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F G : Functor C D.
 
   Definition NaturalTransformation := SpecializedNaturalTransformation F G.

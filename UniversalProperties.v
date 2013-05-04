@@ -10,7 +10,8 @@ Section UniversalMorphism.
      category [C], and let [X] be an object of [C].  Consider the
      following dual (opposite) notions:
      *)
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   Local Ltac intro_t :=
     simpl in *;

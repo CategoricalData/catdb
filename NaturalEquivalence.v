@@ -112,7 +112,8 @@ Section NaturalIsomorphismOfCategories.
 End NaturalIsomorphismOfCategories.
 
 Section NaturalEquivalence.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F G : Functor C D.
 
   Definition NaturalEquivalenceOf (T : NaturalTransformation F G) :=
@@ -133,7 +134,8 @@ Section Coercions.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
-  Variables C' D' : Category.
+  Variable C' : Category.
+  Variable D' : Category.
   Variables F' G' : Functor C' D'.
 
   Definition NaturalEquivalence_of_NaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalEquivalenceOf T
@@ -150,7 +152,8 @@ Coercion NaturalIsomorphism_of_NaturalEquivalence : NaturalEquivalenceOf >-> Nat
 (* gives "Ambiguous paths"... Is this bad? *)
 
 Section NaturalEquivalenceOfCategories.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   Definition NaturalEquivalenceOfCategories (F : Functor C D) (G : Functor D C) : Prop :=
     (FunctorsNaturallyEquivalent (IdentityFunctor C) (ComposeFunctors G F)) /\
@@ -163,7 +166,8 @@ End NaturalEquivalenceOfCategories.
 Arguments NaturalEquivalenceOfCategories [C D] F G.
 
 Section NaturalTransformationInverse.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F G : Functor C D.
   Variable T : NaturalTransformation F G.
 
@@ -188,7 +192,8 @@ Section NaturalTransformationInverse.
 End NaturalTransformationInverse.
 
 Section IdentityNaturalTransformation.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
 
   Theorem IdentityNaturalEquivalence : NaturalEquivalenceOf (IdentityNaturalTransformation F).
@@ -204,7 +209,8 @@ Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquiv
 Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquivalence : natural_transformation.
 
 Section FunctorNaturalEquivalenceRelation.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   Lemma functors_naturally_equivalent_refl (F : Functor C D) : FunctorsNaturallyEquivalent F F.
     exists (IdentityNaturalTransformation F); eauto with category.
@@ -240,7 +246,10 @@ Add Parametric Morphism (C D E : Category) :
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
-  Variable B C D E : Category.
+  Variable B : Category.
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Lemma LeftIdentityFunctorNE (F : Functor D C) : FunctorsNaturallyEquivalent (ComposeFunctors (IdentityFunctor _) F) F.
     match goal with

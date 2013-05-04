@@ -4,7 +4,8 @@ Require Import Common.
 Set Implicit Arguments.
 
 Section Adjunction.
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
   Variable G : Functor D C.
 
