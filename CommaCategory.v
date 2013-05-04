@@ -13,7 +13,9 @@ Local Ltac fold_functor :=
 Section CommaCategory.
   (* [Definition]s are not sort-polymorphic, and it's too slow to not use
      [Definition]s, so we might as well use [Category]s rather than [SpecializedCategory]s. *)
-  Variable A B C : Category.
+  Variable A : Category.
+  Variable B : Category.
+  Variable C : Category.
   Variable S : Functor A C.
   Variable T : Functor B C.
 
@@ -116,7 +118,8 @@ Arguments CommaCategory [A B C] S T.
 Local Notation "S ↓ T" := (CommaCategory S T).
 
 Section SliceCategory.
-  Variables A C : Category.
+  Variable A : Category.
+  Variable C : Category.
   Variable a : C.
   Variable S : Functor A C.
   Let B := TerminalCategory.
