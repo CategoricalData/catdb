@@ -123,7 +123,11 @@ MODULES    := Notations \
 	MetaTranslation \
 	MetaEquivalence \
 	Examples \
-	Theorems # \
+	Theorems \
+	\
+	Database \
+	SQLQueries \
+	DatabaseConstraints # \
 	DataMigrationFunctors \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
