@@ -101,6 +101,50 @@ Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F 
 Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section Functors_Equal.
+  Lemma Functor_contr_eq' objC C objD D (F G : @SpecializedFunctor objC C objD D)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : forall HO : ObjectOf F = ObjectOf G,
+      match HO in (_ = f) return forall s d, Morphism C s d -> Morphism D (f s) (f d) with
+        | eq_refl => MorphismOf F
+      end = MorphismOf G
+      -> F = G.
+    intros.
+    destruct F, G; simpl in *.
+    subst.
+    f_equal;
+      repeat (apply functional_extensionality_dep; intro);
+      trivial.
+  Qed.
+
+  Lemma Functor_contr_eq objC C objD D (F G : @SpecializedFunctor objC C objD D)
+        (D_object_proof_irrelevance
+         : forall (x : D) (pf : x = x),
+             pf = eq_refl)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : forall HO : (forall x, ObjectOf F x = ObjectOf G x),
+      (forall s d (m : Morphism C s d),
+         match HO s in (_ = y) return (Morphism D y _) with
+           | eq_refl =>
+             match HO d in (_ = y) return (Morphism D _ y) with
+               | eq_refl => MorphismOf F m
+             end
+         end = MorphismOf G m)
+      -> F = G.
+    intros HO HM.
+    apply Functor_contr_eq' with (HO := (functional_extensionality_dep F G HO));
+      try assumption.
+    repeat (apply functional_extensionality_dep; intro).
+    rewrite <- HM; clear HM.
+    generalize_eq_match.
+    destruct F, G; simpl in *; subst.
+    subst_eq_refl_dec.
+    reflexivity.
+  Qed.
+
   Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
     -> MorphismOf F == MorphismOf G

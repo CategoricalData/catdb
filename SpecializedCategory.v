@@ -112,6 +112,72 @@ Identity Coercion LocallySmallSpecializedCategory_SpecializedCategory_Id : Local
 Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : SmallSpecializedCategory >-> SpecializedCategory.
 
 Section Categories_Equal.
+  Lemma SpecializedCategory_contr_eq' `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC)
+        (C_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : forall (HM : @Morphism _ C = @Morphism _ D),
+      match HM in (_ = y) return (forall x : objC, y x x) with
+        | eq_refl => Identity (C := C)
+      end = Identity (C := D)
+      -> match
+        HM in (_ = y) return (forall s d d' : objC, y d d' -> y s d -> y s d')
+      with
+        | eq_refl => Compose (C := C)
+      end = Compose (C := D)
+      -> C = D.
+    intros.
+    destruct C as [ [] ], D as [ [] ]; destruct_head_hnf @IsSpecializedCategory;
+    subst_body;
+    intros;
+    simpl in *.
+    subst.
+    repeat f_equal;
+      repeat (apply functional_extensionality_dep; intro);
+      trivial.
+  Qed.
+
+  Lemma SpecializedCategory_contr_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC)
+        (C_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+        (C_morphism_type_contr
+         : forall s d (pf1 pf2 : Morphism C s d = Morphism C s d),
+             pf1 = pf2)
+  : forall (HM : forall s d, @Morphism _ C s d = @Morphism _ D s d),
+      (forall x,
+         match HM x x in (_ = y) return y with
+           | eq_refl => Identity (C := C) x
+         end = Identity (C := D) x)
+      -> (forall s d d' (m : Morphism D d d') (m' : Morphism D s d),
+            match HM s d' in (_ = y) return y with
+              | eq_refl =>
+                match HM s d in (_ = y) return (y -> Morphism C s d') with
+                  | eq_refl =>
+                    match
+                      HM d d' in (_ = y) return (y -> Morphism C s d -> Morphism C s d')
+                    with
+                      | eq_refl => Compose (d':=d')
+                    end m
+                end m'
+            end = Compose m m')
+      -> C = D.
+    intros HM HI HC.
+    assert (HM' : @Morphism _ C = @Morphism _ D)
+      by (repeat (apply functional_extensionality_dep; intro); trivial).
+    apply (SpecializedCategory_contr_eq' _ _ C_morphism_proof_irrelevance HM');
+      revert HI HC C_morphism_proof_irrelevance C_morphism_type_contr;
+      destruct C as [ [] ], D as [ [] ]; simpl in *; clear;
+      intros;
+      subst_body;
+      simpl in *;
+      repeat (subst || intro || apply functional_extensionality_dep);
+      rewrite_rev_hyp;
+      generalize_eq_match;
+      subst_eq_refl_dec;
+      trivial.
+  Qed.
+
   Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
     @Morphism _ C = @Morphism _ D
     -> @Identity _ C == @Identity _ D

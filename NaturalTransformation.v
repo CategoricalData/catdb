@@ -99,20 +99,48 @@ Ltac nt_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun 
 Ltac nt_simpl_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => let T'' := eval simpl in T' in T'').
 
 Section NaturalTransformations_Equal.
+  Lemma NaturalTransformation_contr_eq' objC C objD D F G
+        (T U : @SpecializedNaturalTransformation objC C objD D F G)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : ComponentsOf T = ComponentsOf U
+    -> T = U.
+    destruct T, U; simpl; intros; repeat subst;
+    f_equal;
+    repeat (apply functional_extensionality_dep; intro).
+    trivial.
+  Qed.
+
+  Lemma NaturalTransformation_contr_eq objC C objD D F G
+        (T U : @SpecializedNaturalTransformation objC C objD D F G)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : (forall x, ComponentsOf T x = ComponentsOf U x)
+    -> T = U.
+    intros; apply NaturalTransformation_contr_eq'; try assumption.
+    destruct T, U; simpl in *;
+    repeat (apply functional_extensionality_dep; intro);
+    trivial.
+  Qed.
+
   Lemma NaturalTransformation_eq' objC C objD D F G :
     forall (T U : @SpecializedNaturalTransformation objC C objD D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
-    destruct T, U; simpl; intros; repeat subst;
-      f_equal; apply proof_irrelevance.
+    intros T U.
+    apply NaturalTransformation_contr_eq'.
+    intros; apply proof_irrelevance.
   Qed.
 
   Lemma NaturalTransformation_eq objC C objD D F G :
     forall (T U : @SpecializedNaturalTransformation objC C objD D F G),
     (forall x, ComponentsOf T x = ComponentsOf U x)
     -> T = U.
-    intros; apply NaturalTransformation_eq'; destruct T, U; simpl in *; repeat subst;
-    apply functional_extensionality_dep; trivial.
+    intros T U.
+    apply NaturalTransformation_contr_eq.
+    intros; apply proof_irrelevance.
   Qed.
 
   Lemma NaturalTransformation_JMeq' objC C objD D objC' C' objD' D' :

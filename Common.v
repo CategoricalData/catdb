@@ -349,6 +349,15 @@ Ltac subst_eq_refl_in_match :=
                progress subst_eq_refl; simpl in *
          end.
 
+(** [generalize] any construction in an [eq] match *)
+Ltac generalize_eq_match :=
+  repeat match goal with
+           | [ |- appcontext[match ?f ?x with eq_refl => _ end] ] =>
+             let H := fresh in
+             progress set (H := f x);
+               clearbody H
+         end.
+
 (* Coq's build in tactics don't work so well with things like [iff]
    so split them up into multiple hypotheses *)
 Ltac split_in_context ident funl funr :=
