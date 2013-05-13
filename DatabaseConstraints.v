@@ -50,7 +50,7 @@ Section keys.
                                  -> DatabaseTypeConstraintList D
                                  -> DatabaseTypeConstraintList D.
 
-  Fixpoint DatabaseTypeConstraintListDenote DT (D : Database DT) (l : DatabaseTypeConstraintList DT)
+  Fixpoint DatabaseTypeConstraintListDenote DT (D : DatabaseInstance DT) (l : DatabaseTypeConstraintList DT)
   : Prop
     := match l with
          | DTCNil => True
