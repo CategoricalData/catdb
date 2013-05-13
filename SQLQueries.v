@@ -92,7 +92,7 @@ Section sql.
        end.
 
   (** A [Database] is a list of tables.  We can cross join all of them. *)
-  Fixpoint CrossJoinTables (DT : list RowType) (ts : Database DT)
+  Fixpoint CrossJoinTables (DT : list RowType) (ts : DatabaseInstance DT)
   : Table (CrossJoinRowTypes DT)
     := match ts with
          | DNil => nil
