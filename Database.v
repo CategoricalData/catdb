@@ -31,10 +31,10 @@ Section Database.
   | TFirst : forall Rs, TableName R (R :: Rs)
   | TNext : forall R' Rs, TableName R Rs -> TableName R (R' :: Rs).
 
-  (** A database is a list of tables *)
-  Inductive Database : DatabaseType -> Type :=
-  | DNil : Database nil
-  | DCons : forall R Rs, Table R -> Database Rs -> Database (R :: Rs).
+  (** A database instance is a list of tables *)
+  Inductive DatabaseInstance : DatabaseType -> Type :=
+  | DNil : DatabaseInstance nil
+  | DCons : forall R Rs, Table R -> DatabaseInstance Rs -> DatabaseInstance (R :: Rs).
 
 
   (** * Operations *)
@@ -84,20 +84,20 @@ Section Database.
       | CNext _ _ c' => fun r => getColumn c' (RowTail r)
     end.
 
-  Definition DatabaseHead R Rs (d : Database (R :: Rs)) : Table R :=
+  Definition DatabaseInstanceHead R Rs (d : DatabaseInstance (R :: Rs)) : Table R :=
     match d with
       | DCons _ _ r _ => r
     end.
 
-  Definition DatabaseTail R Rs (d : Database (R :: Rs)) : Database Rs :=
+  Definition DatabaseInstanceTail R Rs (d : DatabaseInstance (R :: Rs)) : DatabaseInstance Rs :=
     match d with
       | DCons _ _ _ d' => d'
     end.
 
-  Fixpoint getTable R Rs (tn : TableName R Rs) : Database Rs -> Table R :=
+  Fixpoint getTable R Rs (tn : TableName R Rs) : DatabaseInstance Rs -> Table R :=
     match tn with
-      | TFirst _ => fun d => DatabaseHead d
-      | TNext _ _ tn' => fun d => getTable tn' (DatabaseTail d)
+      | TFirst _ => fun d => DatabaseInstanceHead d
+      | TNext _ _ tn' => fun d => getTable tn' (DatabaseInstanceTail d)
     end.
 
   (** A [ColumnList] on an [r : RowType] is a list of columns in [r];
