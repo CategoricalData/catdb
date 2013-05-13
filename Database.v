@@ -104,7 +104,7 @@ Section Database.
     the types of these columns gives a new [RowType], which must be
     passed as the second parameter to this type. *)
   Inductive ColumnList : RowType -> RowType -> Type :=
-  | CNil : ColumnList nil nil
+  | CNil : forall fromTs, ColumnList fromTs nil
   | CCons : forall T fromTs toTs, Column T fromTs -> ColumnList fromTs toTs -> ColumnList fromTs (T :: toTs).
 
   Lemma RNil_unique : forall x : Row nil, x = RNil.
