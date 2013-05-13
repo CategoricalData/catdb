@@ -11,8 +11,8 @@ Section sql.
 
   Fixpoint SelectFromTable fromR toR (cs : ColumnList fromR toR) : Row fromR -> Row toR
     := match cs in (ColumnList fromR toR) return (Row fromR -> Row toR) with
-         | CNil =>
-           fun r => r
+         | CNil _ =>
+           fun _ => RNil
          | CCons T fromTs toTs c cs' =>
            fun r => RCons (getColumn c r) (SelectFromTable cs' r)
        end.
