@@ -48,24 +48,20 @@ Identity Coercion SpecializedFunctorFromType_Id : SpecializedFunctorFromType >->
 Section SetCoercions.
   Context `(C : @SpecializedCategory objC).
 
-  Local Ltac build_functor := hnf in *;
-                             match goal with
-                               | [ F : SpecializedFunctor _ _ |- SpecializedFunctor ?C ?D ] =>
-                                 exact (Build_SpecializedFunctor C D
-                                                                 (fun x => F.(ObjectOf) x)
-                                                                 (fun s d m => F.(MorphismOf) m)
-                                                                 (fun s d d' m m' => F.(FCompositionOf) s d d' m m')
-                                                                 (fun x => F.(FIdentityOf) x)
-                                       )
-                             end.
+  Local Notation BuildFunctor C D F :=
+    (Build_SpecializedFunctor C D
+                              (fun x => ObjectOf F%functor x)
+                              (fun s d m => MorphismOf F%functor m)
+                              (fun s d d' m m' => FCompositionOf F%functor s d d' m m')
+                              (fun x => FIdentityOf F%functor x)).
 
-  Definition SpecializedFunctorTo_Prop2Set (F : SpecializedFunctorToProp C) : SpecializedFunctorToSet C. build_functor. Defined.
-  Definition SpecializedFunctorTo_Prop2Type (F : SpecializedFunctorToProp C) : SpecializedFunctorToType C. build_functor. Defined.
-  Definition SpecializedFunctorTo_Set2Type (F : SpecializedFunctorToSet C) : SpecializedFunctorToType C. build_functor. Defined.
+  Definition SpecializedFunctorTo_Prop2Set (F : SpecializedFunctorToProp C) : SpecializedFunctorToSet C := BuildFunctor C SetCat F.
+  Definition SpecializedFunctorTo_Prop2Type (F : SpecializedFunctorToProp C) : SpecializedFunctorToType C := BuildFunctor C TypeCat F.
+  Definition SpecializedFunctorTo_Set2Type (F : SpecializedFunctorToSet C) : SpecializedFunctorToType C := BuildFunctor C TypeCat F.
 
-  Definition SpecializedFunctorFrom_Set2Prop (F : SpecializedFunctorFromSet C) : SpecializedFunctorFromProp C. build_functor. Defined.
-  Definition SpecializedFunctorFrom_Type2Prop (F : SpecializedFunctorFromType C) : SpecializedFunctorFromProp C. build_functor. Defined.
-  Definition SpecializedFunctorFrom_Type2Set (F : SpecializedFunctorFromType C) : SpecializedFunctorFromSet C. build_functor. Defined.
+  Definition SpecializedFunctorFrom_Set2Prop (F : SpecializedFunctorFromSet C) : SpecializedFunctorFromProp C := BuildFunctor PropCat C F.
+  Definition SpecializedFunctorFrom_Type2Prop (F : SpecializedFunctorFromType C) : SpecializedFunctorFromProp C := BuildFunctor PropCat C F.
+  Definition SpecializedFunctorFrom_Type2Set (F : SpecializedFunctorFromType C) : SpecializedFunctorFromSet C := BuildFunctor SetCat C F.
 End SetCoercions.
 
 Coercion SpecializedFunctorTo_Prop2Set : SpecializedFunctorToProp >-> SpecializedFunctorToSet.
