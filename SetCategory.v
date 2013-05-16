@@ -19,11 +19,11 @@ Notation CoercedCatOf obj T := (IndexedCatOf obj (fun x => x : T)).
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
-  Definition TypeCat : @SpecializedCategory Type := CatOf Type.
-  Definition SetCat : @SpecializedCategory Set := CatOf Set.
-  Definition PropCat : @SpecializedCategory Prop := CatOf Prop.
+  Definition TypeCat : @SpecializedCategory Type := Eval cbv beta in CatOf Type.
+  Definition SetCat : @SpecializedCategory Set := Eval cbv beta in CatOf Set.
+  Definition PropCat : @SpecializedCategory Prop := Eval cbv beta in CatOf Prop.
 
-  Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := IndexedCatOf Index Index2Object.
+  Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := Eval cbv beta in IndexedCatOf Index Index2Object.
 End CSet.
 
 Section SetCoercionsDefinitions.
