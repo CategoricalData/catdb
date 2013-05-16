@@ -143,25 +143,19 @@ Section nat.
     simpl in *;
     congruence.
 
-  Local Notation PartialBuild_NaturalNumbersPreObject T Cat pf :=
-    (@Build_NaturalNumbersPreObject T Cat
-                                    nat
-                                    (UnitTerminalOf T)
-                                    (fun _ => 0)
-                                    S
-                                    (fun A q f => exist _ (NatBuilderFunction q f) (pf A q f))).
+  Local Notation PartialBuild_NaturalNumbersPreObject T Cat :=
+    (fun pf => @Build_NaturalNumbersPreObject T Cat
+                                              nat
+                                              (UnitTerminalOf T)
+                                              (fun _ => 0)
+                                              S
+                                              (fun A q f => exist _ (NatBuilderFunction q f) (pf A q f))).
 
   Local Ltac build_nat T Cat :=
-    let pf := fresh in
-    let pfT := fresh in
-    evar (pfT : Prop);
-      cut pfT; subst pfT;
-      [ intro pf;
-        let t := constr:(PartialBuild_NaturalNumbersPreObject T Cat pf) in
-        let t' := (eval simpl in t) in
-        exact t'
-      | ];
-      instantiate; abstract t.
+    let t0 := constr:(PartialBuild_NaturalNumbersPreObject T Cat) in
+    let t0' := (eval simpl in t0) in
+    refine (t0' _);
+      abstract t.
 
   Let SetCatNaturalNumbersPreObject' : NaturalNumbersPreObject SetCat. build_nat Set SetCat. Defined.
   Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
