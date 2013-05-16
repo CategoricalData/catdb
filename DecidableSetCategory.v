@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (* There is a category [Set], where the objects are sets with decidable equality
    and the morphisms are set morphisms *)
 Section CSet.

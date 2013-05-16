@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Ltac t := simpl in *; subst_body;
   repeat (let H := fresh in intro H; hnf in H); subst;
     simpl in *;

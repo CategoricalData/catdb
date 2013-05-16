@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Open Scope type_scope.
 
 Section Coend.

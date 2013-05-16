@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Grothendieck.
   Context `(Index2Cat : forall i : Index, SpecializedCategory (Index2Object i)).
   Let Cat := @ComputableCategory _ Index2Object Index2Cat.

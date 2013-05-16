@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section ChainCat.
   Definition OmegaCategory : @SpecializedCategory nat.
     refine (@Build_SpecializedCategory _

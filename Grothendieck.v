@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Grothendieck.
   (**
      Quoting Wikipedia:

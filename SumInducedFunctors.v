@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section SumCategoryFunctors.
   Section sum_functor.
     Context `(C : @SpecializedCategory objC).

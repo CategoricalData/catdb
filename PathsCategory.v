@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section PCategory.
   Variable V : Type.
   Variable E : V -> V -> Type.

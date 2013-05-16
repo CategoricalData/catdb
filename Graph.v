@@ -6,6 +6,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Graph.
   Record Graph (v : Type) := {
     Vertex :> _ := v;

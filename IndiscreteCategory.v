@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section IndiscreteCategory.
   (** The indiscrete category has exactly one morphism between any two objects. *)
   Variable O : Type.

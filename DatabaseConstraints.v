@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (** * Constraints *)
 Section keys.
   (** A [KeyConstraint] is an assertion that some column in some table

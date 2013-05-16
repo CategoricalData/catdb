@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Notation IndexedCatOf obj coerce := (@Build_SpecializedCategory obj
                                                                 (fun s d => coerce s -> coerce d)
                                                                 (fun _ => (fun x => x))

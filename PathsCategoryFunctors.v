@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section FunctorFromPaths.
   Variable V : Type.
   Variable E : V -> V -> Type.

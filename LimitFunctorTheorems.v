@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section InducedMaps.
   (** Quoting David:
      Given a commutative triangle consisting of

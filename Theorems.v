@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Translation_Instance.
   Variables C D : Schema.
   Variable F : Translation C D.

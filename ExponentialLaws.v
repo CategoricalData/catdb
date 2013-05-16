@@ -10,6 +10,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Hint Immediate
       TerminalCategoryFunctorUnique InitialCategoryFunctorUnique
       InitialCategoryFunctor'Unique.

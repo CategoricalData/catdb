@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section GrothendieckNondependentFunctorial.
   Local Open Scope category_scope.
   Local Notation "Cat / C" := (SliceSpecializedCategoryOver Cat C).

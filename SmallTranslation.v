@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section SmallSchemas.

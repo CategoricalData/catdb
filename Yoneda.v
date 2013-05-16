@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=

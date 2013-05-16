@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)

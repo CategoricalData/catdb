@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Schema_Category_Equivalence.
   Variable C : SmallCategory.
   Variable S : SmallSchema.

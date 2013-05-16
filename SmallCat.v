@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section SmallCat.
   Definition SmallCat := ComputableCategory _ SUnderlyingCategory.
   Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.

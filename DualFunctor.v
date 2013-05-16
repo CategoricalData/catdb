@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section OppositeCategory.
   Definition SmallOppositeFunctor : SpecializedFunctor SmallCat SmallCat.
     refine (Build_SpecializedFunctor SmallCat SmallCat

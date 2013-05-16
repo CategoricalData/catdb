@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section InitialTerminal.
    Definition InitialCategory : SmallSpecializedCategory _ := 0.
    Definition TerminalCategory : SmallSpecializedCategory _ := 1.

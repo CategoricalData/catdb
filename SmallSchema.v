@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Record SmallSchema := {
   SVertex :> Set;
   SEdge : SVertex -> SVertex -> Set;

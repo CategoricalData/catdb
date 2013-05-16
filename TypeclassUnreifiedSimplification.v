@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section SimplifiedMorphism.
   Section single_category_definition.
     Context `{C : SpecializedCategory objC}.

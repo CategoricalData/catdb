@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section SimplicialSets.
   Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
   Local Notation "'Δ'" := SimplexCategory : category_scope.

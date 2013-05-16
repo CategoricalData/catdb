@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (**
    An equivalence class is a non-empty set of all values
    which are all equivalent to some particular value.

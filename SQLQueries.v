@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (** * Operations *)
 Section sql.
   (** [SelectFromTable fromR toR cs] is the SQL query [SELECT cs FROM

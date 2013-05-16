@@ -39,6 +39,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section EqdepDec.
 
   Variable A : Type.

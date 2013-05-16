@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section ProductNaturalTransformation.
   Context `{A : @SpecializedCategory objA}.
   Context `{B : @SpecializedCategory objB}.

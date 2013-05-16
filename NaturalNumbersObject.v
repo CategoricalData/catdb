@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section preobject.
   (** Quoting nCatLab (http://ncatlab.org/nlab/show/natural+numbers+object):
 

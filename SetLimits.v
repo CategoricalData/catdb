@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Ltac limit_t :=
   repeat (repeat intro; repeat split);
   simpl in *;

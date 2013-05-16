@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section FunctorFromDiscrete.
   Variable O : Type.
   Context `(D : @SpecializedCategory objD).

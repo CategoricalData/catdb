@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (* Silly predicate that we can use to get Ltac to help us manipulate terms *)
 Definition focus A (_ : A) := True.
 

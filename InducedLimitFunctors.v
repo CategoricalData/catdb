@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section InducedFunctor.
   (* The components of the functor can be useful even if we don't have
      a category that we're coming from.  So prove them separately, so

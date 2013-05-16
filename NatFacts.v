@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section le_rel.
   Lemma le_refl n : n <= n. trivial. Qed.
 

@@ -7,6 +7,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Pullback.
   (* Quoting nCatLab (http://ncatlab.org/nlab/show/pullback):
 

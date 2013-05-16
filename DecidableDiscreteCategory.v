@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Hint Extern 2 (_ = _) => simpl in *; tauto.
 
 Section DCategoryDec.

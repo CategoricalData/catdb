@@ -6,6 +6,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section SimplifiedMorphism.
   Inductive ReifiedMorphism : forall objC (C : SpecializedCategory objC), C -> C -> Type :=
   | ReifiedIdentityMorphism : forall objC C x, @ReifiedMorphism objC C x x

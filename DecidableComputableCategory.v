@@ -6,6 +6,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section ComputableCategory.
   Variable I : Type.
   Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).

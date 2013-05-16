@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 (* This should be useful for proving that the data migration functors

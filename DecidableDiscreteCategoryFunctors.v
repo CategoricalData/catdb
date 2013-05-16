@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section eq_dec_prop.
   Lemma eq_dec_prop T (eq_dec : forall x y : T, {x = y} + {x <> y}) : forall x y : T, x = y \/ x <> y.
     intros x y; case (eq_dec x y); intuition.

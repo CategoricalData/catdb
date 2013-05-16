@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Ltac colimit_morphism_t chooser_respectful :=
   simpl; intros; hnf;
   repeat (apply functional_extensionality_dep; intro);

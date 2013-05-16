@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Notation "'Δ'" := SimplexCategory : category_scope.
 
 Section SemiSimplicialSets.

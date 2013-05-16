@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section ComputableCategory.
   Variable I : Type.
   Variable Index2Object : I -> Type.

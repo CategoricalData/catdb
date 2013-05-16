@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section MetaEquivalence.
   Variable C D : Schema.
   Variable F G : Translation C D.

@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 (* Largely copied from CPDT *)
 Section ilist.
   Variable A : Type.

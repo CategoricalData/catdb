@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Delimit Scope group_elements_scope with group.
 Delimit Scope groups_scope with groups.
 

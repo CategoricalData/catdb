@@ -8,6 +8,8 @@ Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section Adjunction.
   Context `{C : @SpecializedCategory objC}.
   Context `{D : @SpecializedCategory objD}.
