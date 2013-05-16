@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Ltac destruct_first_if_not_second a b :=
   (constr_eq a b; fail 1) || (let H := fresh in set (H := a : unit) in *; destruct H).
 

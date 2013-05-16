@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section GroupoidOf.
   Context `(C : @SpecializedCategory objC).
 

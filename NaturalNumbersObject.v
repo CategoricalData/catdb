@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section preobject.
   (** Quoting nCatLab (http://ncatlab.org/nlab/show/natural+numbers+object):
 

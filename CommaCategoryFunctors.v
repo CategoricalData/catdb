@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Notation "C / a" := (@SliceSpecializedCategoryOver _ C a) : category_scope.
 Local Notation "a \ C" := (@CosliceSpecializedCategoryOver _ C a) (at level 70) : category_scope.
 

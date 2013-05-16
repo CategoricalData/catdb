@@ -7,6 +7,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Open Scope type_scope.
 
 Section helpers.

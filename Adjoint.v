@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section Adjunction.
   Context `{C : @SpecializedCategory objC}.
   Context `{D : @SpecializedCategory objD}.

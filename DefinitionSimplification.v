@@ -2,6 +2,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (* Silly predicate that we can use to get Ltac to help us manipulate terms *)
 Definition focus A (_ : A) := True.
 

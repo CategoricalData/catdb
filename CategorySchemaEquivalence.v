@@ -5,6 +5,8 @@ Require Import NaturalEquivalence ComputableCategory SNaturalEquivalence Computa
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section Schema_Category_Equivalence.
   Variable C : SmallCategory.
   Variable S : SmallSchema.

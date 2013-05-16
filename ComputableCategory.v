@@ -3,6 +3,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section ComputableCategory.
   Variable I : Type.
   Variable Index2Object : I -> Type.

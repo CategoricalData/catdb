@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section Graph.
   Record Graph (v : Type) := {
     Vertex :> _ := v;

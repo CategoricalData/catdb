@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section InitialTerminal.
    Definition InitialCategory : SmallSpecializedCategory _ := 0.
    Definition TerminalCategory : SmallSpecializedCategory _ := 1.

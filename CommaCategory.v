@@ -4,6 +4,8 @@ Require Import Common Notations InitialTerminalCategory SpecializedCommaCategory
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Open Scope category_scope.
 
 Local Ltac fold_functor :=

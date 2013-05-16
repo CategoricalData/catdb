@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section FunctorFromDiscrete.
   Variable O : Type.
   Context `(D : @SpecializedCategory objD).

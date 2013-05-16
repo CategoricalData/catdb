@@ -4,6 +4,8 @@ Require Import Common NaturalNumbersObject.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Notation IndexedTInitialOf obj coerce initial_obj :=
   ((fun o => exist _
                    (fun x : initial_obj%type => match x with end)

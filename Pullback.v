@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section Pullback.
   (* Quoting nCatLab (http://ncatlab.org/nlab/show/pullback):
 

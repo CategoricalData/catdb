@@ -4,6 +4,8 @@ Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section SmallCat.
   Definition SmallCat := ComputableCategory _ SUnderlyingCategory.
   Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.

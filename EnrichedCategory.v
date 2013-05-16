@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section EnrichedCategory.
   (** Quoting Wikipedia:
      Let [(M, ⊗, I, α, λ, ρ)] be a monoidal category.

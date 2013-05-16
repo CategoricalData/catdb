@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section Equalizer.
   Context `(C : @SpecializedCategory objC).
   Variables A B : objC.

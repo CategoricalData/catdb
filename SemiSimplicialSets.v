@@ -5,6 +5,8 @@ Generalizable Variables objC.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Notation "'Δ'" := SimplexCategory : category_scope.
 
 Section SemiSimplicialSets.

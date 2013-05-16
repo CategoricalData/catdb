@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section InducedMaps.
   (** Quoting David:
      Given a commutative triangle consisting of

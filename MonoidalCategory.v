@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section PreMonoidalCategory.
   (* It's too hard to implement it all inside a record, so first we
      define everything, then we put it in a record *)

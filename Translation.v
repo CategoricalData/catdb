@@ -4,6 +4,8 @@ Require Export Schema.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Infix "==" := JMeq.
 
 Section Schemas.

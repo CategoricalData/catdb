@@ -8,6 +8,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Hint Immediate
       TerminalCategoryFunctorUnique InitialCategoryFunctorUnique
       InitialCategoryFunctor'Unique.

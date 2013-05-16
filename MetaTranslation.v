@@ -4,6 +4,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section MetaTranslation.
   Variable C D : Schema.
   Variable F G : Translation C D.

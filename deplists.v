@@ -2,6 +2,8 @@ Require Import List String.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (* Largely copied from CPDT *)
 Section ilist.
   Variable A : Type.

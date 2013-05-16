@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section SumCategoryFunctors.
   Section sum_functor.
     Context `(C : @SpecializedCategory objC).

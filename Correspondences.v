@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 (** Quoting Jacob Lurie in "Higher Topos Theory", section 2.3.1:
    Let [C] and [C'] be categories. A correspondence from [C] to [C']
    is a functor

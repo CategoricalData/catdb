@@ -4,6 +4,8 @@ Require Import Common Notations FunctorCategory LimitFunctors AdjointUnit Specia
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Open Scope category_scope.
 (*
 Section coslice_initial.

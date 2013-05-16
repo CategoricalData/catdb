@@ -3,6 +3,8 @@ Require Export Database.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (** * Constraints *)
 Section keys.
   (** A [KeyConstraint] is an assertion that some column in some table

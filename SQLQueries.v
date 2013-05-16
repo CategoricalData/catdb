@@ -3,6 +3,8 @@ Require Export Database.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (** * Operations *)
 Section sql.
   (** [SelectFromTable fromR toR cs] is the SQL query [SELECT cs FROM

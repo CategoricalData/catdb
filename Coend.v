@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Ltac t := simpl in *; subst_body;
   repeat (let H := fresh in intro H; hnf in H); subst;
     simpl in *;

@@ -3,6 +3,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section Gen.
   Variable A : Type.
   Variable equiv : relation A.

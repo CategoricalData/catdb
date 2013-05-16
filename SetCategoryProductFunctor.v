@@ -4,6 +4,8 @@ Require Import Common Notations.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Close Scope nat_scope.
 
 Section ProductFunctor.

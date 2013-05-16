@@ -4,6 +4,8 @@ Require Import NatFacts Subcategory DefinitionSimplification.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section ChainCat.
   Definition OmegaCategory : @SpecializedCategory nat.
     refine (@Build_SpecializedCategory _

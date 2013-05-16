@@ -3,6 +3,8 @@ Require Import Bool.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section BoolCat.
   Let obj := bool.
   Let mor s d := if (implb s d) then unit else Empty_set.

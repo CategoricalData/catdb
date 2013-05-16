@@ -2,6 +2,8 @@ Require Import List Setoid Classes.RelationClasses.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 
 (** * Types *)
 Section Database.

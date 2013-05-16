@@ -3,6 +3,8 @@ Require Import Common Notations.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (**
    An equivalence class is a non-empty set of all values
    which are all equivalent to some particular value.

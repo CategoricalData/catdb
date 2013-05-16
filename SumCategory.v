@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section SumCategory.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).

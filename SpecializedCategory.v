@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Infix "==" := JMeq.
 
 Record ComputationalCategory (obj : Type) :=

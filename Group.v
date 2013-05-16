@@ -2,6 +2,8 @@ Require Import Notations.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Delimit Scope group_elements_scope with group.
 Delimit Scope groups_scope with groups.
 

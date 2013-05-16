@@ -4,6 +4,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 (** * Morphisms between database schemas *)
 Section RowTypeMorphisms.
   (** A [RowTypeMorphism r1 r2] is a way of assigning columns of [r1]

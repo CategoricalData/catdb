@@ -3,6 +3,8 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section DCategory.
   Variable O : Type.
 

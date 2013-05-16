@@ -4,6 +4,8 @@ Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Record SmallSchema := {
   SVertex :> Set;
   SEdge : SVertex -> SVertex -> Set;

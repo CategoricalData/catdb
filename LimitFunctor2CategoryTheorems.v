@@ -4,6 +4,8 @@ Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals 
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Open Scope category_scope.
 
 (* This should be useful for proving that the data migration functors

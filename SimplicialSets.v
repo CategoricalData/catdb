@@ -5,6 +5,8 @@ Generalizable Variables objC.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section SimplicialSets.
   Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
   Local Notation "'Δ'" := SimplexCategory : category_scope.

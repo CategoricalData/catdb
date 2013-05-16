@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Ltac colimit_morphism_t chooser_respectful :=
   simpl; intros; hnf;
   repeat (apply functional_extensionality_dep; intro);

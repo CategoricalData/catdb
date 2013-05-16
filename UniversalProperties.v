@@ -3,6 +3,8 @@ Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section UniversalMorphism.
   (**
      Quoting Wikipedia:

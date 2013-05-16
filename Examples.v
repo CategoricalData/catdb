@@ -3,6 +3,8 @@ Require Import Schema Category Instance Translation.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 
 (** * The empty category *)
 

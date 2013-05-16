@@ -4,6 +4,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section SimplifiedMorphism.
   Inductive ReifiedMorphism : forall objC (C : SpecializedCategory objC), C -> C -> Type :=
   | ReifiedIdentityMorphism : forall objC C x, @ReifiedMorphism objC C x x

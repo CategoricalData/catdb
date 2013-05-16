@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Open Scope category_scope.
 
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=

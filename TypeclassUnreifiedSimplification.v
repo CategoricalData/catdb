@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section SimplifiedMorphism.
   Section single_category_definition.
     Context `{C : SpecializedCategory objC}.

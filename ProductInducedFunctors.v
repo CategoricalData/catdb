@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Ltac t :=
   intros; simpl; repeat (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
   apply f_equal; expand; autorewrite with morphism;

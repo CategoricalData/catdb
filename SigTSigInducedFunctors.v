@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)

@@ -2,6 +2,8 @@ Require Import Omega.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section le_rel.
   Lemma le_refl n : n <= n. trivial. Qed.
 

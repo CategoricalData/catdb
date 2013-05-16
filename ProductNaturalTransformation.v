@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section ProductNaturalTransformation.
   Context `{A : @SpecializedCategory objA}.
   Context `{B : @SpecializedCategory objB}.

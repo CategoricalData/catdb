@@ -6,6 +6,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Local Ltac limit_t :=
   repeat (repeat intro; repeat split);
   simpl in *;

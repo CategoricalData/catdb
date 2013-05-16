@@ -2,6 +2,8 @@ Require Import JMeq ProofIrrelevance Eqdep_dec.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Infix "==" := JMeq (at level 70).
 
 (* The standard library does not provide projections of [sigT2] or [sig2].

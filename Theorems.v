@@ -3,6 +3,8 @@ Require Import Common Schema Category Instance Translation.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section Translation_Instance.
   Variables C D : Schema.
   Variable F : Translation C D.

@@ -4,6 +4,8 @@ Require Import Common SmallTranslation EquivalenceClass.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section ComputableSchema.
   Variable O : Type.
   Variable Object2Sch : O -> SmallSchema.

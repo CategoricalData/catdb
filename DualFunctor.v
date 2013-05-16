@@ -2,6 +2,8 @@ Require Export Duals SmallCat.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section OppositeCategory.
   Definition SmallOppositeFunctor : SpecializedFunctor SmallCat SmallCat.
     refine (Build_SpecializedFunctor SmallCat SmallCat

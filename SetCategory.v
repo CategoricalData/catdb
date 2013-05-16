@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Notation IndexedCatOf obj coerce := (@Build_SpecializedCategory obj
                                                                 (fun s d => coerce s -> coerce d)
                                                                 (fun _ => (fun x => x))

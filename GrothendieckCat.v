@@ -5,6 +5,8 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
 Section Grothendieck.
   Context `(Index2Cat : forall i : Index, SpecializedCategory (Index2Object i)).
   Let Cat := @ComputableCategory _ Index2Object Index2Cat.

@@ -4,6 +4,8 @@ Require Import Common Translation SetSchema.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section Schema.
   Variable S : Schema.
 

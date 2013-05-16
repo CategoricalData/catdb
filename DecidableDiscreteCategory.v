@@ -3,6 +3,8 @@ Require Import Common Notations.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Local Hint Extern 2 (_ = _) => simpl in *; tauto.
 
 Section DCategoryDec.

@@ -37,6 +37,8 @@ Table of contents:
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
 Section EqdepDec.
 
   Variable A : Type.
