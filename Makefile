@@ -127,7 +127,8 @@ MODULES    := Notations \
 	\
 	Database \
 	SQLQueries \
-	DatabaseConstraints # \
+	DatabaseConstraints \
+	DatabaseMorphisms # \
 	DataMigrationFunctors \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
