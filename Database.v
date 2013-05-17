@@ -132,13 +132,13 @@ Section Database.
 
   (** Equality of rows is decidable if equality of all constituent types
     is decidable. *)
-  Inductive RowTypeDecidable (P : forall T, relation T) `(forall T, Equivalence (P T))
+  Inductive RowTypeDecidable (P : forall T, relation T) `(H : forall T, Equivalence (P T))
   : RowType -> Type :=
-  | RTDecNil : RowTypeDecidable P _ nil
+  | RTDecNil : RowTypeDecidable P H nil
   | RTDecCons : forall T Ts, (forall t0 t1 : T,
                                 {P T t0 t1} + {~P T t0 t1})
-                             -> RowTypeDecidable P _ Ts
-                             -> RowTypeDecidable P _ (T :: Ts).
+                             -> RowTypeDecidable P H Ts
+                             -> RowTypeDecidable P H (T :: Ts).
 
   Definition RowTypeDecHead P H T Ts (r : RowTypeDecidable P H (T :: Ts))
   : forall t0 t1 : T, {P T t0 t1} + {~ P T t0 t1} :=
