@@ -174,7 +174,7 @@ Section Database.
   Hint Resolve Cons_not_eq.
 
   Fixpoint Row_eq Ts
-  : RowTypeDecidable (@eq) _ Ts -> forall r1 r2 : Row Ts, {r1 = r2} + {r1 <> r2}.
+  : RowTypeDecidable (fun T => @eq T) (@eq_equivalence) Ts -> forall r1 r2 : Row Ts, {r1 = r2} + {r1 <> r2}.
   Proof.
     refine match Ts return RowTypeDecidable _ _ Ts -> forall r1 r2 : Row Ts, {r1 = r2} + {r1 <> r2} with
              | nil => fun _ _ _ => left _
