@@ -12,11 +12,11 @@ Set Universe Polymorphism.
 
 Local Open Scope category_scope.
 
-Local Ltac fold_functor :=
+Local Ltac fold_functor := idtac. (*
   change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *;
     change (@SpecializedNaturalTransformation) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD)
       (F G : SpecializedFunctor C D)
-      => @NaturalTransformation C D F G) in *.
+      => @NaturalTransformation C D F G) in *. *)
 
 Section LaxSliceCategory.
   (* [Definition]s are not sort-polymorphic. *)

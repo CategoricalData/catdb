@@ -10,9 +10,9 @@ Set Universe Polymorphism.
 
 Local Open Scope category_scope.
 
-Local Ltac fold_functor :=
+Local Ltac fold_functor := idtac. (*
   change CObject with (fun C => @Object (CObject C) C) in *;
-    change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *.
+    change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *. *)
 
 Section CommaCategory.
   (* [Definition]s are not sort-polymorphic, and it's too slow to not use
