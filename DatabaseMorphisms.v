@@ -20,7 +20,6 @@ Section RowTypeMorphisms.
                 Column T toTs
                 -> RowTypeMorphism fromTs toTs
                 -> RowTypeMorphism (T :: fromTs) toTs.
-  Print ColumnList.
 
   Fixpoint ColumnListOfRowTypeMorphism r1 r2 (m : RowTypeMorphism r1 r2) : ColumnList r2 r1
     := match m with
