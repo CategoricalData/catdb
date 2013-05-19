@@ -5,8 +5,9 @@ import os, sys, re
 def get_times(file_name):
     with open(file_name, 'r') as f:
         lines = f.readlines()
-    lines = [re.sub('coqc.*?\\s([^\\s]+)$', r'coqc \1', i.replace('\n', '').strip())
-             for i in lines
+    lines = [i for i in
+             [re.sub('"?coqc"?.*?\\s([^\\s]+)$', r'coqc \1', i.replace('\n', '').strip())
+              for i in lines]
              if i[:4] in ('coqc', 'real')]
     times_dict = {}
     for i in range(len(lines) - 1):
