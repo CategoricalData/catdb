@@ -18,6 +18,7 @@ MODULES    := Notations \
 	ProductCategory \
 	SumCategory \
 	\
+	LtacReifiedSimplification \
 	TypeclassSimplification \
 	TypeclassUnreifiedSimplification \
 	CanonicalStructureSimplification \
