@@ -62,29 +62,17 @@ Section SumCategoryFunctors.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Definition inl_Functor : SpecializedFunctor C (C + D).
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@inl _ _)
-          (fun _ _ m => m)
-          _
-          _
-        )
-    end;
-    abstract eauto.
-  Defined.
+  Definition inl_Functor : SpecializedFunctor C (C + D)
+    := Build_SpecializedFunctor C (C + D)
+                                (@inl _ _)
+                                (fun _ _ m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition inr_Functor : SpecializedFunctor D (C + D).
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (@inr _ _)
-          (fun _ _ m => m)
-          _
-          _
-        )
-    end;
-    abstract eauto.
-  Defined.
+  Definition inr_Functor : SpecializedFunctor D (C + D)
+    := Build_SpecializedFunctor D (C + D)
+                                (@inr _ _)
+                                (fun _ _ m => m)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End SumCategoryFunctors.

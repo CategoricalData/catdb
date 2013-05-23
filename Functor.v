@@ -237,10 +237,41 @@ Section FunctorComposition.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
   Context `(E : @SpecializedCategory objE).
+  Variable G : SpecializedFunctor D E.
+  Variable F : SpecializedFunctor C D.
+
+  Definition ComposeFunctors' : SpecializedFunctor C E
+    := Build_SpecializedFunctor C E
+                                (fun c => G (F c))
+                                (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                                (fun _ _ _ m1 m2 =>
+                                   match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
+                                     | eq_refl =>
+                                       match
+                                         FCompositionOf F _ _ _ m1 m2 in (_ = y)
+                                         return
+                                         (MorphismOf G (MorphismOf F (Compose m2 m1)) =
+                                          MorphismOf G y)
+                                       with
+                                         | eq_refl => eq_refl
+                                       end
+                                   end)
+                                (fun x =>
+                                   match FIdentityOf G (F x) with
+                                     | eq_refl =>
+                                       match
+                                         FIdentityOf F x in (_ = y)
+                                         return
+                                         (MorphismOf G (MorphismOf F (Identity x)) =
+                                          MorphismOf G y)
+                                       with
+                                         | eq_refl => eq_refl
+                                       end
+                                   end).
 
   Hint Rewrite @FCompositionOf : functor.
 
-  Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
+  Definition ComposeFunctors : SpecializedFunctor C E.
     refine (Build_SpecializedFunctor C E
                                      (fun c => G (F c))
                                      (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
@@ -255,13 +286,13 @@ End FunctorComposition.
 Section IdentityFunctor.
   Context `(C : @SpecializedCategory objC).
 
-  (* There is an identity functor.  It does the obvious thing. *)
-  Definition IdentityFunctor : SpecializedFunctor C C.
-    refine {| ObjectOf := (fun x => x);
-              MorphismOf := (fun _ _ x => x)
-           |};
-    abstract t.
-  Defined.
+  (** There is an identity functor.  It does the obvious thing. *)
+  Definition IdentityFunctor : SpecializedFunctor C C
+    := Build_SpecializedFunctor C C
+                                (fun x => x)
+                                (fun _ _ x => x)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End IdentityFunctor.
 
 Section IdentityFunctorLemmas.

@@ -31,23 +31,17 @@ Section ProductCategoryFunctors.
   Context `{C : @SpecializedCategory objC}.
   Context `{D : @SpecializedCategory objD}.
 
-  Definition fst_Functor : SpecializedFunctor (C * D) C.
-    refine (Build_SpecializedFunctor (C * D) C
-      (@fst _ _)
-      (fun _ _ => @fst _ _)
-      _
-      _
-    );
-    abstract eauto.
-  Defined.
+  Definition fst_Functor : SpecializedFunctor (C * D) C
+    := Build_SpecializedFunctor (C * D) C
+                                (@fst _ _)
+                                (fun _ _ => @fst _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Definition snd_Functor : SpecializedFunctor (C * D) D.
-    refine (Build_SpecializedFunctor (C * D) D
-      (@snd _ _)
-      (fun _ _ => @snd _ _)
-      _
-      _
-    );
-    abstract eauto.
-  Defined.
+  Definition snd_Functor : SpecializedFunctor (C * D) D
+    := Build_SpecializedFunctor (C * D) D
+                                (@snd _ _)
+                                (fun _ _ => @snd _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End ProductCategoryFunctors.
