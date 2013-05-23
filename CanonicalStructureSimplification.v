@@ -104,7 +104,9 @@ Ltac rsimplify_morphisms :=
   etransitivity; [ refine (rsimplify_morphisms _) | ];
   etransitivity; [ | symmetry; refine (rsimplify_morphisms _) ];
   instantiate;
-  simpl. (* XXX TODO(jgross): Try [lazy] here *)
+  simpl.
+(* Note: Using [lazy] in the above tactic makes ExponentialLaws die on
+   OOM after 1-2 GB of RAM and 40 minutes. *)
 
 (*******************************************************************************)
 (**                Goals which are solved by [rsimplify_morphisms]            **)

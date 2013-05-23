@@ -243,7 +243,9 @@ Ltac Ltac_rsimplify_morphisms :=
   change (ReifiedMorphismDenote m1' = ReifiedMorphismDenote m2');
     rewrite (ReifiedMorphismSimplifyOk m1');
     rewrite (ReifiedMorphismSimplifyOk m2');
-    simpl. (* XXX TODO(jgross): Try [lazy] here *)
+    simpl.
+(* Note: Using [lazy] in the above tactic makes ExponentialLaws die on
+   OOM after 1-2 GB of RAM and 40 minutes. *)
 
 (*******************************************************************************)
 (**                Goals which are solved by [rsimplify_morphisms]            **)
