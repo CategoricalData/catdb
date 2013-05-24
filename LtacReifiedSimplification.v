@@ -47,7 +47,7 @@ End ReifiedMorphism.
 
 Ltac Ltac_reify_morphism m :=
   let objC := match type of m with @Morphism ?objC _ ?s ?d => constr:(objC) end in
-  let C := match type of m with @Morphism ?objC (UnderlyingCCategory ?C) ?s ?d => constr:(C) end in
+  let C := match type of m with @Morphism ?objC ?C ?s ?d => constr:(C) end in
   let s := match type of m with @Morphism ?objC _ ?s ?d => constr:(s) end in
   let d := match type of m with @Morphism ?objC _ ?s ?d => constr:(d) end in
   match m with

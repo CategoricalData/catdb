@@ -20,8 +20,8 @@ Section Categories_Equal.
     -> @Compose _ A == @Compose _ B
     -> A = B.
     unfold Object, Morphism, Identity, Compose; intros;
-      destruct_type @Category; destruct_type @SpecializedCategory; destruct_type @ComputationalCategory; simpl in *;
-        subst_body; repeat subst.
+    destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
+    subst_body; repeat subst.
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
@@ -32,8 +32,8 @@ Section Categories_Equal.
     -> @Compose _ A == @Compose _ B
     -> A = B.
     unfold SObject, Morphism, Identity, Compose; intros;
-      destruct_type @SmallCategory; destruct_type @SmallSpecializedCategory; destruct_type @ComputationalCategory; simpl in *;
-        subst_body; repeat (subst; JMeq_eq).
+    destruct_type @SmallCategory; destruct_type @SmallSpecializedCategory; simpl in *;
+    subst_body; repeat (subst; JMeq_eq).
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
@@ -44,8 +44,8 @@ Section Categories_Equal.
     -> @Compose _ A == @Compose _ B
     -> A = B.
     unfold LSObject, Morphism, Identity, Compose; intros;
-      destruct_type @LocallySmallCategory; destruct_type @LocallySmallSpecializedCategory; destruct_type @ComputationalCategory; simpl in *;
-        subst_body; repeat (subst; JMeq_eq).
+    destruct_type @LocallySmallCategory; destruct_type @LocallySmallSpecializedCategory; simpl in *;
+    subst_body; repeat (subst; JMeq_eq).
     repeat f_equal; apply proof_irrelevance.
   Qed.
 End Categories_Equal.

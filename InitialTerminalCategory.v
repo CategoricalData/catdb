@@ -22,7 +22,7 @@ Section Functors.
   Definition FunctorToTerminal : SpecializedFunctor C TerminalCategory := FunctorTo1.
 
   Definition FunctorFrom1 (c : C) : SpecializedFunctor 1 C
-    := Build_SpecializedFunctor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _ _ _)) (fun _ => eq_refl).
+    := Build_SpecializedFunctor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _ _)) (fun _ => eq_refl).
   Definition FunctorFromTerminal (c : C) : SpecializedFunctor TerminalCategory C := FunctorFrom1 c.
 
   Definition FunctorFrom0 : SpecializedFunctor 0 C
