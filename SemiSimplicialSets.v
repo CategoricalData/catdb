@@ -9,7 +9,7 @@ Set Asymmetric Patterns.
 
 Set Universe Polymorphism.
 
-Local Notation "'Δ'" := SimplexCategory : category_scope.
+Local Notation Δ := SimplexCategory.
 
 Section SemiSimplicialSets.
   (* Quoting David Spivak:
@@ -26,7 +26,7 @@ Section SemiSimplicialSets.
     abstract eauto with morphism.
   Defined.
 
-  Local Notation "'Γ'" := SemiSimplexCategory : category_scope.
+  Local Notation Γ := SemiSimplexCategory.
 
   Definition SemiSimplexCategoryInclusionFunctor : SpecializedFunctor Γ Δ
     := WideSubcategoryInclusionFunctor _ _ _ _.

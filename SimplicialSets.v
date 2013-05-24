@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplicialSets.
   Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
-  Local Notation "'Δ'" := SimplexCategory : category_scope.
+  Local Notation Δ := SimplexCategory.
 
   Definition SimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Δ))%category.
 
