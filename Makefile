@@ -59,6 +59,9 @@ MODULES    := Notations \
 	SpecializedCommaCategory \
 	LaxCommaCategory \
 	SpecializedLaxCommaCategory \
+	CommaCategoryProjection \
+	CommaCategoryInducedFunctors \
+	CommaCategoryProjectionFunctors \
 	CommaCategoryFunctors \
 	CommaCategoryFunctorProperties \
 	UniversalProperties \

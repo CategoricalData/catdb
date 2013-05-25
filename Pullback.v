@@ -9,6 +9,8 @@ Set Asymmetric Patterns.
 
 Set Universe Polymorphism.
 
+Local Open Scope category_scope.
+
 Section Pullback.
   (* Quoting nCatLab (http://ncatlab.org/nlab/show/pullback):
 
@@ -192,14 +194,12 @@ Section Pullback.
   End pushout.
 
   Section pushout_functorial.
-    Local Notation "a /  C" := (CosliceSpecializedCategoryOver C a).
-
     Variable c : C.
 
-    Definition PushoutDiagramFunctor_ObjectOf : ((c / C) * (c / C)) -> (C ^ PushoutIndex)%category
+    Definition PushoutDiagramFunctor_ObjectOf : ((c \ C) * (c \ C)) -> (C ^ PushoutIndex)%category
       := fun fg => PushoutDiagram _ _ c (projT2 (fst fg)) (projT2 (snd fg)).
 
-    Definition PushoutDiagramFunctor_MorphismOf_ComponentsOf s d (m : Morphism ((c / C) * (c / C)) s d)
+    Definition PushoutDiagramFunctor_MorphismOf_ComponentsOf s d (m : Morphism ((c \ C) * (c \ C)) s d)
     : forall x, Morphism _ (PushoutDiagramFunctor_ObjectOf s x) (PushoutDiagramFunctor_ObjectOf d x)
       := fun x => match x with
                     | PullbackA => (snd (proj1_sig (fst m)))
@@ -207,7 +207,7 @@ Section Pullback.
                     | PullbackC => Identity _
                   end.
 
-    Definition PushoutDiagramFunctor_MorphismOf s d (m : Morphism ((c / C) * (c / C)) s d)
+    Definition PushoutDiagramFunctor_MorphismOf s d (m : Morphism ((c \ C) * (c \ C)) s d)
     : Morphism (C ^ PushoutIndex) (PushoutDiagramFunctor_ObjectOf s) (PushoutDiagramFunctor_ObjectOf d).
       exists (PushoutDiagramFunctor_MorphismOf_ComponentsOf m).
       abstract (
@@ -220,7 +220,7 @@ Section Pullback.
         ).
     Defined.
 
-    Definition PushoutDiagramFunctor : SpecializedFunctor ((c / C) * (c / C)) (C ^ PushoutIndex).
+    Definition PushoutDiagramFunctor : SpecializedFunctor ((c \ C) * (c \ C)) (C ^ PushoutIndex).
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D

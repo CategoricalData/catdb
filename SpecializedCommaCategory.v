@@ -1,6 +1,6 @@
 Require Import JMeq ProofIrrelevance.
-Require Export Category SpecializedCategory Functor ProductCategory.
-Require Import Common Notations InitialTerminalCategory FEqualDep.
+Require Export Category SpecializedCategory Functor ProductCategory InitialTerminalCategory.
+Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
@@ -177,23 +177,14 @@ End CommaSpecializedCategory.
 Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity : category.
 Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object : category.
 
-Local Notation "S ↓ T" := (CommaSpecializedCategory S T).
-
 Section SliceSpecializedCategory.
   Context `(A : @SpecializedCategory objA).
   Context `(C : @SpecializedCategory objC).
   Variable a : C.
   Variable S : SpecializedFunctor A C.
-  Let B := TerminalCategory.
 
-  Definition SliceSpecializedCategory_Functor : SpecializedFunctor B C.
-    refine {| ObjectOf := (fun _ => a);
-      MorphismOf := (fun _ _ _ => Identity a)
-    |}; abstract (intros; auto with morphism).
-  Defined.
-
-  Definition SliceSpecializedCategory := CommaSpecializedCategory S SliceSpecializedCategory_Functor.
-  Definition CosliceSpecializedCategory := CommaSpecializedCategory SliceSpecializedCategory_Functor S.
+  Definition SliceSpecializedCategory := CommaSpecializedCategory S (FunctorFromTerminal C a).
+  Definition CosliceSpecializedCategory := CommaSpecializedCategory (FunctorFromTerminal C a) S.
 
   (* [x ↓ F] is a coslice category; [F ↓ x] is a slice category; [x ↓ F] deals with morphisms [x -> F y]; [F ↓ x] has morphisms [F y -> x] *)
 End SliceSpecializedCategory.
@@ -211,3 +202,22 @@ Section ArrowSpecializedCategory.
 
   Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowSpecializedCategory.
+
+Notation "C / a" := (@SliceSpecializedCategoryOver _ C a) : category_scope.
+Notation "a \ C" := (@CosliceSpecializedCategoryOver _ C a) (at level 70) : category_scope.
+
+Definition CC_SpecializedFunctor' `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) := SpecializedFunctor C D.
+Coercion CC_FunctorFromTerminal' `(C : @SpecializedCategory objC) (x : C) : CC_SpecializedFunctor' TerminalCategory C := FunctorFromTerminal C x.
+Arguments CC_SpecializedFunctor' / .
+Arguments CC_FunctorFromTerminal' / .
+
+(* Set some notations for printing *)
+Notation "x ↓ F" := (CosliceSpecializedCategory x F) : category_scope.
+Notation "F ↓ x" := (SliceSpecializedCategory x F) : category_scope.
+Notation "S ↓ T" := (CommaSpecializedCategory S T) : category_scope.
+(* set the notation for parsing *)
+Notation "S ↓ T" := (CommaSpecializedCategory (S : CC_SpecializedFunctor' _ _)
+                                              (T : CC_SpecializedFunctor' _ _)) : category_scope.
+(*Set Printing All.
+Check (fun `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) `(E : @SpecializedCategory objE) (S : SpecializedFunctor C D) (T : SpecializedFunctor E D) => (S ↓ T)%category).
+Check (fun `(D : @SpecializedCategory objD) `(E : @SpecializedCategory objE) (S : SpecializedFunctor E D) (x : D) => (x ↓ S)%category).*)
