@@ -6,7 +6,10 @@ from TimeFileMaker import *
 def make_table_string(left_times_dict, right_times_dict,
                       descending=True,
                       left_tag="After", right_tag="Before"):
-    names = get_sorted_file_list_from_times_dict(left_times_dict, descending=descending)
+    all_names_dict = dict()
+    all_names_dict.update(right_times_dict)
+    all_names_dict.update(left_times_dict) # do the left (after) last, so that we give precedence to those ones
+    names = get_sorted_file_list_from_times_dict(all_names_dict, descending=descending)
     left_width = max(max(map(len, left_times_dict.values())), len(sum_times(left_times_dict.values())))
     right_width = max(max(map(len, right_times_dict.values())), len(sum_times(right_times_dict.values())))
     middle_width = max(map(len, names + ["File Name", "Total"]))
@@ -16,11 +19,12 @@ def make_table_string(left_times_dict, right_times_dict,
                               "Total",
                               sum_times(right_times_dict.values()))
     sep = '-' * len(header)
-    return '\n'.join([header, sep] + [format_string % (left_times_dict[name],
+    left_rep, right_rep = ("%%-%ds" % left_width) % 0, ("%%-%ds" % right_width) % 0
+    return '\n'.join([header, sep] + [format_string % (left_times_dict.get(name, 0),
                                                        name,
-                                                       right_times_dict[name])
+                                                       right_times_dict.get(name, 0))
                                       for name in names] +
-                     [sep, footer])
+                     [sep, footer]).replace(left_rep, 'N/A'.center(len(left_rep))).replace(right_rep, 'N/A'.center(len(right_rep)))
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
