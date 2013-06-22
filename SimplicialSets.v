@@ -5,15 +5,19 @@ Generalizable Variables objC.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section SimplicialSets.
-  Polymorphic Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
-  Local Notation "'Δ'" := SimplexCategory : category_scope.
+  Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
+  Local Notation Δ := SimplexCategory.
 
-  Polymorphic Definition SimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Δ))%category.
+  Definition SimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Δ))%category.
 
-  Polymorphic Definition SimplicialSet := SimplicialCategory SetCat.
-  Polymorphic Definition SimplicialType := SimplicialCategory TypeCat.
-  Polymorphic Definition SimplicialProp := SimplicialCategory PropCat.
+  Definition SimplicialSet := SimplicialCategory SetCat.
+  Definition SimplicialType := SimplicialCategory TypeCat.
+  Definition SimplicialProp := SimplicialCategory PropCat.
 End SimplicialSets.
 
 Notation SimplicialOf obj := (let C := CatOf obj in SimplicialCategory C).

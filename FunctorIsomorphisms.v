@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 Section FunctorIsomorphism.
@@ -15,45 +19,45 @@ Section FunctorIsomorphism.
     Context `{C : @SpecializedCategory objC}.
     Context `{D : @SpecializedCategory objD}.
 
-    Polymorphic Definition FunctorIsInverseOf1 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
+    Definition FunctorIsInverseOf1 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
       ComposeFunctors G F = IdentityFunctor C.
-    Polymorphic Definition FunctorIsInverseOf2 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
+    Definition FunctorIsInverseOf2 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
       ComposeFunctors F G = IdentityFunctor D.
 
     Global Arguments FunctorIsInverseOf1 / _ _.
     Global Arguments FunctorIsInverseOf2 / _ _.
 
-    Polymorphic Definition FunctorIsInverseOf (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop := Eval simpl in
+    Definition FunctorIsInverseOf (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop := Eval simpl in
       FunctorIsInverseOf1 F G /\ FunctorIsInverseOf2 F G.
   End FunctorIsInverseOf.
 
-  Polymorphic Lemma FunctorIsInverseOf_sym `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD}
+  Lemma FunctorIsInverseOf_sym `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD}
     (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) :
     FunctorIsInverseOf F G -> FunctorIsInverseOf G F.
     intros; hnf in *; split_and; split; trivial.
   Qed.
 
   Section FunctorIsomorphismOf.
-    Polymorphic Record FunctorIsomorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) := {
+    Record FunctorIsomorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) := {
       FunctorIsomorphismOf_Functor :> _ := F;
       InverseFunctor : SpecializedFunctor D C;
       LeftInverseFunctor : ComposeFunctors InverseFunctor F = IdentityFunctor C;
       RightInverseFunctor : ComposeFunctors F InverseFunctor = IdentityFunctor D
     }.
 
-    Polymorphic Hint Resolve RightInverseFunctor LeftInverseFunctor : category.
-    Polymorphic Hint Resolve RightInverseFunctor LeftInverseFunctor : functor.
+    Hint Resolve RightInverseFunctor LeftInverseFunctor : category.
+    Hint Resolve RightInverseFunctor LeftInverseFunctor : functor.
 
-    Polymorphic Definition FunctorIsomorphismOf_Identity `(C : @SpecializedCategory objC) : FunctorIsomorphismOf (IdentityFunctor C).
+    Definition FunctorIsomorphismOf_Identity `(C : @SpecializedCategory objC) : FunctorIsomorphismOf (IdentityFunctor C).
       exists (IdentityFunctor _); eauto with functor.
     Defined.
 
-    Polymorphic Definition InverseOfFunctor `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D)
+    Definition InverseOfFunctor `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D)
       (i : FunctorIsomorphismOf F) : FunctorIsomorphismOf (InverseFunctor i).
       exists i; auto with functor.
     Defined.
 
-    Polymorphic Definition ComposeFunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} `{E : @SpecializedCategory objE}
+    Definition ComposeFunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} `{E : @SpecializedCategory objE}
       {F : SpecializedFunctor D E} {G : SpecializedFunctor C D} (i1 : FunctorIsomorphismOf F) (i2 : FunctorIsomorphismOf G) :
       FunctorIsomorphismOf (ComposeFunctors F G).
       exists (ComposeFunctors (InverseFunctor i2) (InverseFunctor i1));
@@ -71,7 +75,7 @@ Section FunctorIsomorphism.
   End FunctorIsomorphismOf.
 
   Section IsomorphismOfCategories.
-    Polymorphic Record IsomorphismOfCategories `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) := {
+    Record IsomorphismOfCategories `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) := {
       IsomorphismOfCategories_Functor : SpecializedFunctor C D;
       IsomorphismOfCategories_Of :> FunctorIsomorphismOf IsomorphismOfCategories_Functor
     }.
@@ -80,19 +84,19 @@ Section FunctorIsomorphism.
   End IsomorphismOfCategories.
 
   Section FunctorIsIsomorphism.
-    Polymorphic Definition FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) : Prop :=
+    Definition FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) : Prop :=
       exists G, FunctorIsInverseOf F G.
 
-    Polymorphic Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
       FunctorIsomorphismOf F -> FunctorIsIsomorphism F.
       intro i; hnf.
       exists (InverseFunctor i);
         destruct i; simpl;
-          split; present_spcategory;
-            assumption.
+        split;
+        assumption.
     Qed.
 
-    Polymorphic Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : @SpecializedCategory objC} `{D : @SpecializedCategory objD} (F : SpecializedFunctor C D) :
       FunctorIsIsomorphism F -> exists _ : FunctorIsomorphismOf F, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
@@ -101,17 +105,17 @@ Section FunctorIsomorphism.
   End FunctorIsIsomorphism.
 
   Section CategoriesIsomorphic.
-    Polymorphic Definition CategoriesIsomorphic (C D : Category) : Prop :=
+    Definition CategoriesIsomorphic (C D : Category) : Prop :=
       exists (F : SpecializedFunctor C D) (G : SpecializedFunctor D C), FunctorIsInverseOf F G.
 
-    Polymorphic Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
+    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
       IsomorphismOfCategories C D -> CategoriesIsomorphic C D.
       intro i; destruct i as [ m i ].
       exists m.
       apply FunctorIsmorphismOf_FunctorIsIsomorphism; assumption.
     Qed.
 
-    Polymorphic Lemma CategoriesIsomorphic_IsomorphismOfCategories (C D : Category) :
+    Lemma CategoriesIsomorphic_IsomorphismOfCategories (C D : Category) :
       CategoriesIsomorphic C D -> exists _ : IsomorphismOfCategories C D, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
@@ -130,12 +134,12 @@ Section FunctorIsomorphism.
                | [ |- IsomorphismOfCategories _ _ ] => eapply Build_IsomorphismOfCategories
              end.
 
-    Polymorphic Lemma CategoriesIsomorphic_refl (C : Category) : CategoriesIsomorphic C C.
+    Lemma CategoriesIsomorphic_refl (C : Category) : CategoriesIsomorphic C C.
       t_iso.
       apply FunctorIsomorphismOf_Identity.
     Qed.
 
-    Polymorphic Lemma CategoriesIsomorphic_sym (C D : Category) :
+    Lemma CategoriesIsomorphic_sym (C D : Category) :
       CategoriesIsomorphic C D -> CategoriesIsomorphic D C.
       t_iso.
       eapply InverseOfFunctor.
@@ -143,7 +147,7 @@ Section FunctorIsomorphism.
       eauto.
     Qed.
 
-    Polymorphic Lemma CategoriesIsomorphic_trans (C D E : Category) :
+    Lemma CategoriesIsomorphic_trans (C D E : Category) :
       CategoriesIsomorphic C D -> CategoriesIsomorphic D E -> CategoriesIsomorphic C E.
       t_iso.
       apply @ComposeFunctorIsmorphismOf;
@@ -163,9 +167,9 @@ Section Functor_preserves_isomorphism.
   Context `(D : SpecializedCategory objD).
   Variable F : SpecializedFunctor C D.
 
-  Polymorphic Hint Rewrite <- FCompositionOf : functor.
+  Hint Rewrite <- FCompositionOf : functor.
 
-  Polymorphic Definition MorphismOf_IsomorphismOf s d (m : Morphism C s d) (i : IsomorphismOf m) : IsomorphismOf (F.(MorphismOf) m).
+  Definition MorphismOf_IsomorphismOf s d (m : Morphism C s d) (i : IsomorphismOf m) : IsomorphismOf (F.(MorphismOf) m).
     refine {| Inverse := (F.(MorphismOf) (Inverse i)) |};
     abstract (
         destruct i; simpl;
@@ -175,5 +179,4 @@ Section Functor_preserves_isomorphism.
   Defined.
 End Functor_preserves_isomorphism.
 
-Polymorphic Hint Resolve MorphismOf_IsomorphismOf : category.
-Polymorphic Hint Resolve MorphismOf_IsomorphismOf : functor.
+Hint Resolve @MorphismOf_IsomorphismOf : category functor.

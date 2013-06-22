@@ -5,14 +5,16 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section f_equal_dep.
-  Polymorphic Theorem f_type_equal {A B A' B'} : A = A' -> B = B' -> (A -> B) = (A' -> B').
+  Theorem f_type_equal {A B A' B'} : A = A' -> B = B' -> (A -> B) = (A' -> B').
     intros; repeat subst; reflexivity.
   Qed.
 
-  Polymorphic Theorem forall_extensionality_dep : forall {A}
+  Theorem forall_extensionality_dep : forall {A}
     (f g : A -> Type),
     (forall x, f x = g x) -> (forall x, f x) = (forall x, g x).
     intros.
@@ -20,7 +22,7 @@ Section f_equal_dep.
     apply functional_extensionality_dep; auto.
   Qed.
 
-  Polymorphic Theorem forall_extensionality_dep_JMeq : forall {A B}
+  Theorem forall_extensionality_dep_JMeq : forall {A B}
     (f : A -> Type) (g : B -> Type),
     A = B -> (A = B -> forall x y, x == y -> f x == g y) -> (forall x, f x) = (forall x, g x).
     intros; firstorder; intuition; repeat subst.
@@ -31,17 +33,17 @@ Section f_equal_dep.
   Qed.
 
 
-  Polymorphic Lemma JMeq_eqT A B (x : A) (y : B) : x == y -> A = B.
+  Lemma JMeq_eqT A B (x : A) (y : B) : x == y -> A = B.
     intro H; destruct H; reflexivity.
   Qed.
 
-  Polymorphic Lemma fg_equal_JMeq A B B' (f : forall a : A, B a) (g : forall a : A, B' a) x :
+  Lemma fg_equal_JMeq A B B' (f : forall a : A, B a) (g : forall a : A, B' a) x :
     f == g -> (f == g -> B = B') -> f x == g x.
     intros.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma f_equal_JMeq A A' B B' a b (f : forall a : A, A' a) (g : forall b : B, B' b) :
+  Lemma f_equal_JMeq A A' B B' a b (f : forall a : A, A' a) (g : forall b : B, B' b) :
     f == g -> (f == g -> A' == B') -> (f == g -> a == b) -> f a == g b.
     intros.
     firstorder.
@@ -49,14 +51,14 @@ Section f_equal_dep.
     repeat subst; reflexivity.
   Qed.
 
-  Polymorphic Lemma f_equal1_JMeq A0 B a0 b0 (f : forall (a0 : A0), B a0) :
+  Lemma f_equal1_JMeq A0 B a0 b0 (f : forall (a0 : A0), B a0) :
     a0 = b0
     -> f a0 == f b0.
     intros.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma f_equal2_JMeq A0 A1 B a0 b0 a1 b1 (f : forall (a0 : A0) (a1 : A1 a0), B a0 a1) :
+  Lemma f_equal2_JMeq A0 A1 B a0 b0 a1 b1 (f : forall (a0 : A0) (a1 : A1 a0), B a0 a1) :
     a0 = b0
     -> (a0 = b0 -> a1 == b1)
     -> f a0 a1 == f b0 b1.
@@ -64,7 +66,7 @@ Section f_equal_dep.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma f_equal3_JMeq A0 A1 A2 B a0 b0 a1 b1 a2 b2 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), B a0 a1 a2) :
+  Lemma f_equal3_JMeq A0 A1 A2 B a0 b0 a1 b1 a2 b2 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1), B a0 a1 a2) :
     a0 = b0
     -> (a0 = b0 -> a1 == b1)
     -> (a0 = b0 -> a1 == b1 -> a2 == b2)
@@ -73,7 +75,7 @@ Section f_equal_dep.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma f_equal4_JMeq A0 A1 A2 A3 B a0 b0 a1 b1 a2 b2 a3 b3 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), B a0 a1 a2 a3) :
+  Lemma f_equal4_JMeq A0 A1 A2 A3 B a0 b0 a1 b1 a2 b2 a3 b3 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2), B a0 a1 a2 a3) :
     a0 = b0
     -> (a0 = b0 -> a1 == b1)
     -> (a0 = b0 -> a1 == b1 -> a2 == b2)
@@ -83,7 +85,7 @@ Section f_equal_dep.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma f_equal5_JMeq A0 A1 A2 A3 A4 B a0 b0 a1 b1 a2 b2 a3 b3 a4 b4 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), B a0 a1 a2 a3 a4) :
+  Lemma f_equal5_JMeq A0 A1 A2 A3 A4 B a0 b0 a1 b1 a2 b2 a3 b3 a4 b4 (f : forall (a0 : A0) (a1 : A1 a0) (a2 : A2 a0 a1) (a3 : A3 a0 a1 a2) (a4 : A4 a0 a1 a2 a3), B a0 a1 a2 a3 a4) :
     a0 = b0
     -> (a0 = b0 -> a1 == b1)
     -> (a0 = b0 -> a1 == b1 -> a2 == b2)
@@ -94,11 +96,11 @@ Section f_equal_dep.
     repeat (firstorder; repeat subst).
   Qed.
 
-  Polymorphic Lemma eq_JMeq T (A B : T) : A = B -> A == B.
+  Lemma eq_JMeq T (A B : T) : A = B -> A == B.
     intro; subst; reflexivity.
   Qed.
 
-  Polymorphic Theorem functional_extensionality_dep_JMeq : forall {A} {B1 B2 : A -> Type},
+  Theorem functional_extensionality_dep_JMeq : forall {A} {B1 B2 : A -> Type},
     forall (f : forall x : A, B1 x) (g : forall x : A, B2 x),
       (forall x, B1 x = B2 x)
       -> (forall x, f x == g x) -> f == g.
@@ -108,7 +110,7 @@ Section f_equal_dep.
     subst; reflexivity.
   Qed.
 
-  Polymorphic Theorem functional_extensionality_dep_JMeq' : forall {A1 A2} {B1 : A1 -> Type} {B2 : A2 -> Type},
+  Theorem functional_extensionality_dep_JMeq' : forall {A1 A2} {B1 : A1 -> Type} {B2 : A2 -> Type},
     forall (f : forall x : A1, B1 x) (g : forall x : A2, B2 x),
       A1 = A2
       -> (A1 = A2 -> forall x y, x == y -> B1 x = B2 y)
@@ -120,18 +122,18 @@ Section f_equal_dep.
   Qed.
 End f_equal_dep.
 
-Polymorphic Inductive identity_dep (A : Type) (a : A) : forall B : Type, B -> Type :=
+Inductive identity_dep (A : Type) (a : A) : forall B : Type, B -> Type :=
   identity_dep_refl : identity_dep a a.
 
 Section f_identity_dep.
   Local Infix "~" := identity (at level 50).
   Local Infix "~~" := identity_dep (at level 50).
-  Polymorphic Definition f_identity (A B : Type) (f : A -> B) (x y : A) (H : x ~ y) : f x ~ f y
+  Definition f_identity (A B : Type) (f : A -> B) (x y : A) (H : x ~ y) : f x ~ f y
     := match H in (_ ~ y0) return (f x ~ f y0) with
          | identity_refl => identity_refl (f x)
        end.
 
-  Polymorphic Definition f_type_identity {A B A' B'} : A ~ A' -> B ~ B' -> (A -> B) ~ (A' -> B').
+  Definition f_type_identity {A B A' B'} : A ~ A' -> B ~ B' -> (A -> B) ~ (A' -> B').
     intros; destruct_head identity; reflexivity.
   Defined.
 
@@ -140,9 +142,9 @@ Section f_identity_dep.
 
   Axiom identity_dep_identity : forall A (x y : A), x ~~ y -> x ~ y.
 
-  Polymorphic Definition functional_extensionality_identity {A B : Type} := fun (f g : A -> B) (H : forall x : A, f x ~ g x) => functional_extensionality_dep_identity f g H.
+  Definition functional_extensionality_identity {A B : Type} := fun (f g : A -> B) (H : forall x : A, f x ~ g x) => functional_extensionality_dep_identity f g H.
 
-  Polymorphic Theorem forall_extensionality_dep_identity : forall {A}
+  Theorem forall_extensionality_dep_identity : forall {A}
                                                       (f g : A -> Type),
                                                  (forall x, f x ~ g x) -> (forall x, f x) ~ (forall x, g x).
     intros.
@@ -150,7 +152,7 @@ Section f_identity_dep.
     apply functional_extensionality_dep_identity; assumption.
   Qed.
 
-  Polymorphic Theorem forall_extensionality_dep_identity_dep : forall {A B}
+  Theorem forall_extensionality_dep_identity_dep : forall {A B}
                                                           (f : A -> Type) (g : B -> Type),
                                                      A ~ B -> (A ~ B -> forall x y, x ~~ y -> f x ~~ g y) -> (forall x, f x) ~ (forall x, g x).
     intros; intuition; destruct_head identity.
@@ -160,7 +162,7 @@ Section f_identity_dep.
     match goal with | [ H : _ |- _ ] => apply H; reflexivity end.
   Qed.
 
-  Polymorphic Definition identity_dep_identityT A B (x : A) (y : B) : x ~~ y -> A ~ B
+  Definition identity_dep_identityT A B (x : A) (y : B) : x ~~ y -> A ~ B
     := fun H => match H in (_ ~~ b) return _ with
                   | identity_dep_refl => identity_refl A
                 end.
@@ -192,7 +194,7 @@ Ltac f_equal_dep := intros; f_equal; simpl in *;
          end; f_equal_dep_cleanup.
 
 Section misc.
-  Polymorphic Lemma sig_JMeq A0 A1 B0 B1 (a : @sig A0 A1) (b : @sig B0 B1) : A1 == B1 -> proj1_sig a == proj1_sig b -> a == b.
+  Lemma sig_JMeq A0 A1 B0 B1 (a : @sig A0 A1) (b : @sig B0 B1) : A1 == B1 -> proj1_sig a == proj1_sig b -> a == b.
     intros.
     destruct_sig.
     repeat destruct_type @JMeq.

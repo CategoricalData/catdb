@@ -1,9 +1,13 @@
 Require Export LimitFunctorTheorems SpecializedLaxCommaCategory.
-Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation Duals.
+Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation Duals CanonicalStructureSimplification.
 
 Set Implicit Arguments.
 
 Generalizable All Variables.
+
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
 
 Section InducedFunctor.
   (* The components of the functor can be useful even if we don't have
@@ -21,12 +25,12 @@ Section InducedFunctor.
   Let DOp := OppositeCategory D.
 
   Section Limit.
-    Polymorphic Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
-      (m : Morphism _ s d) :
+    Definition InducedLimitFunctor_MorphismOf (s d : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d))
+      (m : Morphism (CAT ⇑ D) s d) :
       Morphism D (LimitObject limS) (LimitObject limD)
       := InducedLimitMap (projT2 m) _ _.
 
-    Polymorphic Lemma InducedLimitFunctor_FCompositionOf (s d d' : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
+    Lemma InducedLimitFunctor_FCompositionOf (s d d' : CAT ⇑ D) (limS : Limit (projT2 s)) (limD : Limit (projT2 d)) (limD' : Limit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedLimitFunctor_MorphismOf limS limD' (Compose m2 m1) =
       Compose (InducedLimitFunctor_MorphismOf limD limD' m2) (InducedLimitFunctor_MorphismOf limS limD m1).
@@ -37,9 +41,7 @@ Section InducedFunctor.
         | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite RightIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
+      rsimplify_morphisms (* 11 s *).
       repeat rewrite Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
@@ -59,12 +61,11 @@ Section InducedFunctor.
                         clear H'
       end (* 7 s *);
       simpl;
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-            reflexivity. (* 7 s since [simpl] *)
+      rsimplify_morphisms;
+      reflexivity (* 6 s since [simpl] *).
     Qed.
 
-    Polymorphic Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
+    Lemma InducedLimitFunctor_FIdentityOf (x : CAT ⇑ D) (limX : Limit (projT2 x)) :
       InducedLimitFunctor_MorphismOf limX limX (Identity x) =
       Identity (LimitObject limX).
     Proof.
@@ -74,17 +75,15 @@ Section InducedFunctor.
         | [ |- TerminalProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (TerminalProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite RightIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite FIdentityOf;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
-      reflexivity.
+      rsimplify_morphisms;
+      reflexivity. (* 2 s *)
     Qed.
 
     Variable HasLimits : forall C : CAT ⇑ D, Limit (projT2 C).
 
-    Polymorphic Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
+    Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
-    Polymorphic Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
+    Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D
@@ -99,12 +98,12 @@ Section InducedFunctor.
   End Limit.
 
   Section Colimit.
-    Polymorphic Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
-      (m : Morphism _ s d) :
+    Definition InducedColimitFunctor_MorphismOf (s d : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d))
+      (m : Morphism (CAT ⇓ D) s d) :
       Morphism D (ColimitObject colimS) (ColimitObject colimD)
       := InducedColimitMap (projT2 m) _ _.
 
-    Polymorphic Lemma InducedColimitFunctor_FCompositionOf (s d d' : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
+    Lemma InducedColimitFunctor_FCompositionOf (s d d' : CAT ⇓ D) (colimS : Colimit (projT2 s)) (colimD : Colimit (projT2 d)) (colimD' : Colimit (projT2 d'))
       (m1 : Morphism _ s d) (m2 : Morphism _ d d') :
       InducedColimitFunctor_MorphismOf colimS colimD' (Compose m2 m1) =
       Compose (InducedColimitFunctor_MorphismOf colimD colimD' m2) (InducedColimitFunctor_MorphismOf colimS colimD m1).
@@ -115,10 +114,8 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite @LeftIdentity (* putting this here shaves off 6 s *);
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 13 s for this block of [repeat rewrite]s *)
-      repeat rewrite @Associativity (* 3 s *).
+      rsimplify_morphisms (* 8 s *).
+      repeat rewrite Associativity (* 3 s *).
       match goal with
         | [ |- Compose ?a (Compose ?b ?c) = Compose ?a' (Compose ?b' ?c') ] =>
           symmetry; eapply (@eq_trans _ _ (Compose a (Compose _ c')) _);
@@ -136,12 +133,11 @@ Section InducedFunctor.
                       try (rewrite H'; clear H')
       end (* 7 s *);
       simpl;
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
-            reflexivity. (* 7 s since [simpl] *)
+      rsimplify_morphisms;
+      reflexivity (* 4 s since [simpl] *).
     Qed.
 
-    Polymorphic Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
+    Lemma InducedColimitFunctor_FIdentityOf (x : CAT ⇓ D) (colimX : Colimit (projT2 x)) :
       InducedColimitFunctor_MorphismOf colimX colimX (Identity x) =
       Identity (ColimitObject colimX).
     Proof.
@@ -151,17 +147,15 @@ Section InducedFunctor.
         | [ |- InitialProperty_Morphism ?a ?b ?c = _ ] => apply (proj2 (InitialProperty a b c))
       end (* 3 s *).
       nt_eq (* 4 s *).
-      repeat rewrite @LeftIdentity (* putting this here shaves off 2 s *);
-        repeat rewrite @FIdentityOf;
-          repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity. (* 10 s for this block of [repeat rewrite]s *)
+      rsimplify_morphisms. (* 1.5 s *)
       reflexivity.
     Qed.
 
     Variable HasColimits : forall C : CAT ⇓ D, Colimit (projT2 C).
 
-    Polymorphic Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
+    Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
-    Polymorphic Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
+    Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor C D

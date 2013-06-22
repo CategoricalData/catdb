@@ -9,13 +9,24 @@ MODULES    := Notations \
 	EquivalenceClass \
 	EquivalenceRelationGenerator \
 	Paths \
+	EqdepFacts_one_variable \
+	Eqdep_dec_one_variable \
+	\
 	SpecializedCategory \
+	Functor \
+	NaturalTransformation \
+	ProductCategory \
+	SumCategory \
+	\
+	LtacReifiedSimplification \
+	TypeclassSimplification \
+	TypeclassUnreifiedSimplification \
+	CanonicalStructureSimplification \
+	\
 	Category \
 	CategoryEquality \
 	CategoryIsomorphisms \
-	Functor \
 	FunctorIsomorphisms \
-	NaturalTransformation \
 	NaturalEquivalence \
 	\
 	Graph \
@@ -29,12 +40,12 @@ MODULES    := Notations \
 	FunctorCategory \
 	ComputableCategory \
 	DiscreteCategory \
+	IndiscreteCategory \
 	PathsCategory \
-	ProductCategory \
 	FunctorProduct \
 	ProductNaturalTransformation \
 	ProductInducedFunctors \
-	SumCategory \
+	SumInducedFunctors \
 	ExponentialLaws \
 	ProductLaws \
 	FunctorialComposition \
@@ -48,6 +59,9 @@ MODULES    := Notations \
 	SpecializedCommaCategory \
 	LaxCommaCategory \
 	SpecializedLaxCommaCategory \
+	CommaCategoryProjection \
+	CommaCategoryInducedFunctors \
+	CommaCategoryProjectionFunctors \
 	CommaCategoryFunctors \
 	CommaCategoryFunctorProperties \
 	UniversalProperties \
@@ -74,9 +88,15 @@ MODULES    := Notations \
 	AdjointUnit \
 	Adjoint \
 	AdjointUniversalMorphisms \
+	AdjointComposition \
+	AdjointPointwise \
 	DiscreteCategoryFunctors \
 	DecidableDiscreteCategoryFunctors \
 	PathsCategoryFunctors \
+	\
+	Group \
+	GroupCategory \
+	\
 	Limits \
 	LimitFunctors \
 	LimitFunctorTheorems \
@@ -92,11 +112,11 @@ MODULES    := Notations \
 	CoendFunctor \
 	SubobjectClassifier \
 	Grothendieck \
+	GrothendieckFunctorial \
 	SetLimits \
 	SetColimits \
 	SetCategoryFacts \
 	Yoneda \
-	DataMigrationFunctors \
 	\
 	Schema \
 	SmallSchema \
@@ -107,23 +127,53 @@ MODULES    := Notations \
 	MetaTranslation \
 	MetaEquivalence \
 	Examples \
-	Theorems # \
+	Theorems \
+	\
+	Database \
+	SQLQueries \
+	DatabaseConstraints \
+	DatabaseMorphisms # \
+	DataMigrationFunctors \
 	CategorySchemaEquivalence \
 	ComputableSchemaCategory
 VS         := $(MODULES:%=%.v)
 VDS	   := $(MODULES:%=%.v.d)
 
-.PHONY: coq clean timed
+NEW_TIME_FILE=time-of-build-after.log
+OLD_TIME_FILE=time-of-build-before.log
+BOTH_TIME_FILE=time-of-build-both.log
+NEW_PRETTY_TIME_FILE=time-of-build-after-pretty.log
+TIME_SHELF_NAME=time-of-build-shelf
+
+
+
+.PHONY: coq clean timed pretty-timed pretty-timed-files html
 
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
 
+html: Makefile.coq
+	$(MAKE) -f Makefile.coq html
+
 # TODO(jgross): Look into combining this with the time-make.sh script
 timed: Makefile.coq
-	$(MAKE) -f Makefile.coq SHELL=./report_time.sh
+	chmod +x ./report_time.sh
+	./report_time.sh -c $(MAKE) -f Makefile.coq SHELL=./report_time.sh
+
+pretty-timed-diff:
+	sh ./make-each-time-file.sh "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)"
+	$(MAKE) combine-pretty-timed
+
+combine-pretty-timed:
+	python ./make-both-time-files.py "$(NEW_TIME_FILE)" "$(OLD_TIME_FILE)" "$(BOTH_TIME_FILE)"
+	cat "$(BOTH_TIME_FILE)"
+
+pretty-timed:
+	sh ./make-each-time-file.sh "$(NEW_TIME_FILE)"
+	python ./make-one-time-file.py "$(NEW_TIME_FILE)" "$(NEW_PRETTY_TIME_FILE)"
 
 Makefile.coq: Makefile $(VS)
-	coq_makefile $(VS) -o Makefile.coq
+	coq_makefile $(VS) -arg -dont-load-proofs -o Makefile.coq
 
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean

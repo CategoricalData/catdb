@@ -4,12 +4,16 @@ Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section SmallSchemas.
   Variables C D : SmallSchema.
 
-  Polymorphic Record SmallTranslation := {
+  Record SmallTranslation := {
     SVertexOf :> C -> D;
     SPathOf : forall s d, C.(SEdge) s d -> spath D (SVertexOf s) (SVertexOf d);
     STransferPath := (fun s d (p : spath C s d) => (@transferPath C D) SVertexOf SPathOf _ _ p);
@@ -25,22 +29,22 @@ Section SmallSchemas.
     exact (@STEquivalenceOf T s d).
   Qed.
 
-  Polymorphic Lemma concatenate_STransferPath s d d' (p : spath C s d) (p' : spath C d d') T :
+  Lemma concatenate_STransferPath s d d' (p : spath C s d) (p' : spath C d d') T :
       STransferPath T (concatenate p p') = concatenate (STransferPath T p) (STransferPath T p').
     unfold STransferPath; simpl.
     apply concatenate_transferPath.
   Qed.
 
-  Polymorphic Lemma STransferPath_SNoEdges o T :
+  Lemma STransferPath_SNoEdges o T :
     STransferPath T (@NoEdges _ _ o) = NoEdges.
     reflexivity.
   Qed.
 End SmallSchemas.
 
-Polymorphic Hint Rewrite concatenate_STransferPath.
+Hint Rewrite concatenate_STransferPath.
 
 Section SmallTranslations_Equal.
-  Polymorphic Lemma stranslations_equal : forall C D (F G : SmallTranslation C D),
+  Lemma stranslations_equal : forall C D (F G : SmallTranslation C D),
     SVertexOf F = SVertexOf G
     -> (SVertexOf F = SVertexOf G -> SPathOf F == SPathOf G)
     -> F = G.
@@ -49,7 +53,7 @@ Section SmallTranslations_Equal.
         f_equal; apply proof_irrelevance.
   Qed.
 
-  Polymorphic Lemma stranslations_equal_parts : forall C D (F G : SmallTranslation C D),
+  Lemma stranslations_equal_parts : forall C D (F G : SmallTranslation C D),
     F = G -> SVertexOf F = SVertexOf G /\ SPathOf F == SPathOf G.
     intros; repeat subst; split; trivial.
   Qed.
@@ -73,12 +77,12 @@ Ltac stranslation_eq := stranslation_eq_with idtac.
 Section SmallTranslationComposition.
   Variable B C D E : SmallSchema.
 
-  Polymorphic Hint Resolve concatenate_transferPath.
+  Hint Resolve concatenate_transferPath.
 
-  Polymorphic Hint Rewrite compose_transferPath.
-  Polymorphic Hint Resolve STEquivalenceOf.
+  Hint Rewrite compose_transferPath.
+  Hint Resolve STEquivalenceOf.
 
-  Polymorphic Definition ComposeSmallTranslations (G : SmallTranslation D E) (F : SmallTranslation C D) : SmallTranslation C E.
+  Definition ComposeSmallTranslations (G : SmallTranslation D E) (F : SmallTranslation C D) : SmallTranslation C E.
     refine {| SVertexOf := (fun c => G (F c));
       SPathOf := (fun _ _ e => G.(STransferPath) (F.(SPathOf) _ _ e))
     |}; abstract (unfold STransferPath; t_with t'; repeat apply STEquivalenceOf; assumption).
@@ -91,7 +95,7 @@ Section SmallSchema.
   Variable C D : SmallSchema.
 
   (* There is an identity stranslation.  It does the obvious thing. *)
-  Polymorphic Definition IdentitySmallTranslation : SmallTranslation C C.
+  Definition IdentitySmallTranslation : SmallTranslation C C.
     refine {| SVertexOf := (fun x => x);
       SPathOf := (fun _ _ x => AddEdge NoEdges x)
     |}; abstract (
@@ -104,16 +108,16 @@ Section SmallSchema.
     ).
   Defined.
 
-  Polymorphic Hint Unfold ComposeSmallTranslations IdentitySmallTranslation SVertexOf SPathOf.
+  Hint Unfold ComposeSmallTranslations IdentitySmallTranslation SVertexOf SPathOf.
 
-  Polymorphic Lemma LeftIdentitySmallTranslation (F : SmallTranslation D C) : ComposeSmallTranslations IdentitySmallTranslation F = F.
+  Lemma LeftIdentitySmallTranslation (F : SmallTranslation D C) : ComposeSmallTranslations IdentitySmallTranslation F = F.
     stranslation_eq.
     match goal with
       | [ |- ?a = ?b ] => induction b; t_with t'
     end.
   Qed.
 
-  Polymorphic Lemma RightIdentitySmallTranslation (F : SmallTranslation C D) : ComposeSmallTranslations F IdentitySmallTranslation = F.
+  Lemma RightIdentitySmallTranslation (F : SmallTranslation C D) : ComposeSmallTranslations F IdentitySmallTranslation = F.
     stranslation_eq; t_with t'.
   Qed.
 End SmallSchema.
@@ -121,7 +125,7 @@ End SmallSchema.
 Section SmallTranslationCompositionLemmas.
   Variable B C D E : SmallSchema.
 
-  Polymorphic Lemma ComposeSmallTranslationsAssociativity (F : SmallTranslation B C) (G : SmallTranslation C D) (H : SmallTranslation D E) :
+  Lemma ComposeSmallTranslationsAssociativity (F : SmallTranslation B C) (G : SmallTranslation C D) (H : SmallTranslation D E) :
     ComposeSmallTranslations (ComposeSmallTranslations H G) F = ComposeSmallTranslations H (ComposeSmallTranslations G F).
     unfold ComposeSmallTranslations; stranslation_eq.
     match goal with
@@ -134,13 +138,13 @@ Section SmallTranslationsEquivalent.
   Variables C D : SmallSchema.
   Variables F G : SmallTranslation C D.
 
-  Polymorphic Definition SmallTranslationsEquivalent :=
+  Definition SmallTranslationsEquivalent :=
     exists vo po po' eo eo',
       F = {| SVertexOf := vo; SPathOf := po; STEquivalenceOf := eo |} /\
       G = {| SVertexOf := vo; SPathOf := po'; STEquivalenceOf := eo' |} /\
       forall s d (e : C.(SEdge) s d), SPathsEquivalent _ (po _ _ e) (po' _ _ e).
 
-  Polymorphic Lemma stranslations_equivalent :
+  Lemma stranslations_equivalent :
     SVertexOf F = SVertexOf G
     -> (SVertexOf F = SVertexOf G ->
         forall s d (e : C.(SEdge) s d), GeneralizedSPathsEquivalent (SPathOf F _ _ e) (SPathOf G _ _ e))
@@ -174,17 +178,17 @@ Ltac stranslation_eqv := stranslation_eqv_with idtac.
 Section SmallTranslationsEquivalent_Relation.
   Variables C D E : SmallSchema.
 
-  Polymorphic Lemma SmallTranslationsEquivalent_refl (T : SmallTranslation C D) : SmallTranslationsEquivalent T T.
+  Lemma SmallTranslationsEquivalent_refl (T : SmallTranslation C D) : SmallTranslationsEquivalent T T.
     stranslation_eqv.
   Qed.
 
-  Polymorphic Lemma SmallTranslationsEquivalent_sym (T U : SmallTranslation C D) :
+  Lemma SmallTranslationsEquivalent_sym (T U : SmallTranslation C D) :
     SmallTranslationsEquivalent T U -> SmallTranslationsEquivalent U T.
     intro H; destruct H; destruct_hypotheses.
     stranslation_eqv; symmetry; intuition.
   Qed.
 
-  Polymorphic Lemma SmallTranslationsEquivalent_trans (T U V : SmallTranslation C D) :
+  Lemma SmallTranslationsEquivalent_trans (T U V : SmallTranslation C D) :
     SmallTranslationsEquivalent T U -> SmallTranslationsEquivalent U V -> SmallTranslationsEquivalent T V.
     intros H0 H1; destruct H0, H1; destruct_hypotheses.
     stranslation_eqv;
@@ -194,16 +198,16 @@ Section SmallTranslationsEquivalent_Relation.
     etransitivity; eauto.
   Qed.
 
-  Polymorphic Hint Resolve STEquivalenceOf.
+  Hint Resolve STEquivalenceOf.
 
-  Polymorphic Lemma PreComposeSmallTranslationsEquivalent (T T' : SmallTranslation C D) (U : SmallTranslation D E) :
+  Lemma PreComposeSmallTranslationsEquivalent (T T' : SmallTranslation C D) (U : SmallTranslation D E) :
     SmallTranslationsEquivalent T T' -> SmallTranslationsEquivalent (ComposeSmallTranslations U T) (ComposeSmallTranslations U T').
     intro H; destruct H; stranslation_eqv_with ltac:(destruct_hypotheses; eauto).
   Qed.
 
-  Polymorphic Hint Resolve concatenate_mor.
+  Hint Resolve concatenate_mor.
 
-  Polymorphic Lemma PostComposeSmallTranslationsEquivalent (T : SmallTranslation C D) (U U' : SmallTranslation D E) :
+  Lemma PostComposeSmallTranslationsEquivalent (T : SmallTranslation C D) (U U' : SmallTranslation D E) :
     SmallTranslationsEquivalent U U' -> SmallTranslationsEquivalent (ComposeSmallTranslations U T) (ComposeSmallTranslations U' T).
     intro H; destruct H; stranslation_eqv_with ltac:(destruct_hypotheses; eauto).
     destruct T; unfold STransferPath; stranslation_eqv.
@@ -227,16 +231,16 @@ Add Parametric Morphism C D E : (@ComposeSmallTranslations C D E)
     apply PreComposeSmallTranslationsEquivalent; eauto.
 Qed.
 
-Polymorphic Hint Resolve ComposeSmallTranslations_mor.
+Hint Resolve ComposeSmallTranslations_mor.
 
 (*
 Section Small2Large.
   Variables C D : SmallSchema.
   Variable T : SmallTranslation C D.
 
-  Polymorphic Hint Resolve STEquivalenceOf.
+  Hint Resolve STEquivalenceOf.
 
-  Polymorphic Hint Rewrite concatenate2concatenate spath_roundtrip spath_roundtrip'.
+  Hint Rewrite concatenate2concatenate spath_roundtrip spath_roundtrip'.
 
   Ltac equiv_by_equal :=
     match goal with
@@ -251,7 +255,7 @@ Section Small2Large.
     end.
 
   (* XXX TODO: Automate this better *)
-  Polymorphic Definition SmallTranslation2Translation : Translation C D.
+  Definition SmallTranslation2Translation : Translation C D.
     refine {| VertexOf := (fun c : @Vertex C => @SVertexOf _ _ T (c : SVertex C) : Vertex D);
       PathOf := @SPathOf _ _ T
     |}.

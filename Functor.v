@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section SpecializedFunctor.
@@ -22,89 +26,56 @@ Section SpecializedFunctor.
      (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
      (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
      **)
-  Polymorphic Record SpecializedFunctor :=
+  Record SpecializedFunctor :=
     {
-      ObjectOf' : objC -> objD;
-      MorphismOf' : forall s d, C.(Morphism') s d -> D.(Morphism') (ObjectOf' s) (ObjectOf' d);
-      FCompositionOf' : forall s d d' (m1 : C.(Morphism') s d) (m2: C.(Morphism') d d'),
-                          MorphismOf' _ _ (C.(Compose') _ _ _ m2 m1) = D.(Compose') _ _ _ (MorphismOf' _ _ m2) (MorphismOf' _ _ m1);
-      FIdentityOf' : forall o, MorphismOf' _ _ (C.(Identity') o) = D.(Identity') (ObjectOf' o)
+      ObjectOf :> objC -> objD;
+      MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
+      FCompositionOf : forall s d d' (m1 : C.(Morphism) s d) (m2: C.(Morphism) d d'),
+                          MorphismOf _ _ (Compose m2 m1) = Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1);
+      FIdentityOf : forall x, MorphismOf _ _ (Identity x) = Identity (ObjectOf x)
     }.
 End SpecializedFunctor.
 
+Section Functor.
+  Variable C : Category.
+  Variable D : Category.
+
+  Definition Functor := SpecializedFunctor C D.
+End Functor.
+
 Bind Scope functor_scope with SpecializedFunctor.
+Bind Scope functor_scope with Functor.
 
 Create HintDb functor discriminated.
 
-Section FunctorInterface.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-
-  Variable F : SpecializedFunctor C D.
-
-  Polymorphic Definition ObjectOf : C -> D := Eval cbv beta delta [ObjectOf'] in F.(ObjectOf'). (* [forall], so we can name it in [Arguments] *)
-  Polymorphic Definition MorphismOf : forall {s d : C} (m : C.(Morphism) s d), D.(Morphism) (ObjectOf s) (ObjectOf d)
-    := Eval cbv beta delta [MorphismOf'] in F.(MorphismOf').
-  Polymorphic Definition FCompositionOf : forall (s d d' : C) (m1 : C.(Morphism) s d) (m2 : C.(Morphism) d d'),
-    MorphismOf (Compose m2 m1) = Compose (MorphismOf m2) (MorphismOf m1)
-    := F.(FCompositionOf').
-  Polymorphic Definition FIdentityOf : forall (o : C), MorphismOf (Identity o) = Identity (ObjectOf o)
-    := F.(FIdentityOf').
-End FunctorInterface.
-
-Global Coercion ObjectOf : SpecializedFunctor >-> Funclass.
-
-Section Functor.
-  Variable C D : Category.
-
-  Polymorphic Definition Functor := SpecializedFunctor C D.
-End Functor.
-
-Bind Scope functor_scope with Functor.
-
 Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor.
-Polymorphic Definition GeneralizeFunctor objC C objD D (F : @SpecializedFunctor objC C objD D) : Functor C D := F.
+Definition GeneralizeFunctor objC C objD D (F : @SpecializedFunctor objC C objD D) : Functor C D := F.
 Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
 
 (* try to always unfold [GeneralizeFunctor]; it's in there
    only for coercions *)
 Arguments GeneralizeFunctor [objC C objD D] F /.
-Polymorphic Hint Extern 0 => unfold GeneralizeFunctor : category.
-Polymorphic Hint Extern 0 => unfold GeneralizeFunctor : functor.
+Hint Extern 0 => unfold GeneralizeFunctor : category functor.
 
 Arguments SpecializedFunctor {objC} C {objD} D.
 Arguments Functor C D.
-Arguments ObjectOf {objC C objD D} F c : simpl nomatch.
-Arguments MorphismOf {objC} [C] {objD} [D] F [s d] m : simpl nomatch.
+Arguments ObjectOf {objC%type C%category objD%type D%category} F%functor c%object : rename, simpl nomatch.
+Arguments MorphismOf {objC%type} [C%category] {objD%type} [D%category] F%functor [s%object d%object] m%morphism : rename, simpl nomatch.
 
-Arguments FCompositionOf [objC C objD D] F _ _ _ _ _.
-Arguments FIdentityOf [objC C objD D] F _.
+Arguments FCompositionOf [objC C objD D] F _ _ _ _ _ : rename.
+Arguments FIdentityOf [objC C objD D] F _ : rename.
 
-(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
-Arguments FCompositionOf' [_ _ _ _] _ _ _ _ _ _.
-Arguments FIdentityOf' [_ _ _ _] _ _.
-
-Polymorphic Hint Resolve FCompositionOf FIdentityOf FCompositionOf' FIdentityOf' : category.
-Polymorphic Hint Resolve FCompositionOf FIdentityOf FCompositionOf' FIdentityOf' : functor.
-Polymorphic Hint Rewrite FIdentityOf FIdentityOf' : category.
-Polymorphic Hint Rewrite FIdentityOf FIdentityOf' : functor.
-
-Ltac present_obj_obj from to :=
-  repeat match goal with
-           | [ _ : appcontext[from ?obj ?C ?obj'] |- _ ] => change (from obj C obj') with (to obj C obj') in *
-           | [ |- appcontext[from ?obj ?C ?obj'] ] => change (from obj C obj') with (to obj C obj') in *
-         end.
-
-Ltac present_spfunctor := present_spcategory;
-  present_obj_obj @ObjectOf' @ObjectOf; present_obj_obj @MorphismOf' @MorphismOf.
+Hint Resolve @FCompositionOf @FIdentityOf : category functor.
+Hint Rewrite @FIdentityOf : category.
+Hint Rewrite @FIdentityOf : functor.
 
 Ltac functor_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               ObjectOf' := _;
-                               MorphismOf' := _;
-                               FCompositionOf' := ?pf0;
-                               FIdentityOf' := ?pf1
+                               ObjectOf := _;
+                               MorphismOf := _;
+                               FCompositionOf := ?pf0;
+                               FIdentityOf := ?pf1
                              |}] ] =>
                hideProofs pf0 pf1
          end.
@@ -134,7 +105,51 @@ Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F 
 Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section Functors_Equal.
-  Polymorphic Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
+  Lemma Functor_contr_eq' objC C objD D (F G : @SpecializedFunctor objC C objD D)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : forall HO : ObjectOf F = ObjectOf G,
+      match HO in (_ = f) return forall s d, Morphism C s d -> Morphism D (f s) (f d) with
+        | eq_refl => MorphismOf F
+      end = MorphismOf G
+      -> F = G.
+    intros.
+    destruct F, G; simpl in *.
+    subst.
+    f_equal;
+      repeat (apply functional_extensionality_dep; intro);
+      trivial.
+  Qed.
+
+  Lemma Functor_contr_eq objC C objD D (F G : @SpecializedFunctor objC C objD D)
+        (D_object_proof_irrelevance
+         : forall (x : D) (pf : x = x),
+             pf = eq_refl)
+        (D_morphism_proof_irrelevance
+         : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
+             pf1 = pf2)
+  : forall HO : (forall x, ObjectOf F x = ObjectOf G x),
+      (forall s d (m : Morphism C s d),
+         match HO s in (_ = y) return (Morphism D y _) with
+           | eq_refl =>
+             match HO d in (_ = y) return (Morphism D _ y) with
+               | eq_refl => MorphismOf F m
+             end
+         end = MorphismOf G m)
+      -> F = G.
+    intros HO HM.
+    apply Functor_contr_eq' with (HO := (functional_extensionality_dep F G HO));
+      try assumption.
+    repeat (apply functional_extensionality_dep; intro).
+    rewrite <- HM; clear HM.
+    generalize_eq_match.
+    destruct F, G; simpl in *; subst.
+    subst_eq_refl_dec.
+    reflexivity.
+  Qed.
+
+  Lemma Functor_eq' objC C objD D : forall (F G : @SpecializedFunctor objC C objD D),
     ObjectOf F = ObjectOf G
     -> MorphismOf F == MorphismOf G
     -> F = G.
@@ -142,7 +157,7 @@ Section Functors_Equal.
       f_equal; apply proof_irrelevance.
   Qed.
 
-  Polymorphic Lemma Functor_eq objC C objD D :
+  Lemma Functor_eq objC C objD D :
     forall (F G : @SpecializedFunctor objC C objD D),
       (forall x, ObjectOf F x = ObjectOf G x)
       -> (forall s d m, MorphismOf F (s := s) (d := d) m == MorphismOf G (s := s) (d := d) m)
@@ -153,7 +168,7 @@ Section Functors_Equal.
     try apply JMeq_eq; trivial.
   Qed.
 
-  Polymorphic Lemma Functor_JMeq objC C objD D objC' C' objD' D' :
+  Lemma Functor_JMeq objC C objD D objC' C' objD' D' :
     forall (F : @SpecializedFunctor objC C objD D) (G : @SpecializedFunctor objC' C' objD' D'),
       objC = objC'
       -> objD = objD'
@@ -222,17 +237,47 @@ Section FunctorComposition.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
   Context `(E : @SpecializedCategory objE).
+  Variable G : SpecializedFunctor D E.
+  Variable F : SpecializedFunctor C D.
 
-  Polymorphic Hint Rewrite FCompositionOf : functor.
+  Definition ComposeFunctors' : SpecializedFunctor C E
+    := Build_SpecializedFunctor C E
+                                (fun c => G (F c))
+                                (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                                (fun _ _ _ m1 m2 =>
+                                   match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
+                                     | eq_refl =>
+                                       match
+                                         FCompositionOf F _ _ _ m1 m2 in (_ = y)
+                                         return
+                                         (MorphismOf G (MorphismOf F (Compose m2 m1)) =
+                                          MorphismOf G y)
+                                       with
+                                         | eq_refl => eq_refl
+                                       end
+                                   end)
+                                (fun x =>
+                                   match FIdentityOf G (F x) with
+                                     | eq_refl =>
+                                       match
+                                         FIdentityOf F x in (_ = y)
+                                         return
+                                         (MorphismOf G (MorphismOf F (Identity x)) =
+                                          MorphismOf G y)
+                                       with
+                                         | eq_refl => eq_refl
+                                       end
+                                   end).
 
-  Polymorphic Definition ComposeFunctors (G : SpecializedFunctor D E) (F : SpecializedFunctor C D) : SpecializedFunctor C E.
+  Hint Rewrite @FCompositionOf : functor.
+
+  Definition ComposeFunctors : SpecializedFunctor C E.
     refine (Build_SpecializedFunctor C E
                                      (fun c => G (F c))
                                      (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
                                      _
                                      _);
     abstract (
-        present_spcategory;
         intros; autorewrite with functor; reflexivity
       ).
   Defined.
@@ -241,36 +286,31 @@ End FunctorComposition.
 Section IdentityFunctor.
   Context `(C : @SpecializedCategory objC).
 
-  (* There is an identity functor.  It does the obvious thing. *)
-  Polymorphic Definition IdentityFunctor : SpecializedFunctor C C.
-    refine {| ObjectOf' := (fun x => x);
-      MorphismOf' := (fun _ _ x => x)
-    |};
-    abstract t.
-  Defined.
+  (** There is an identity functor.  It does the obvious thing. *)
+  Definition IdentityFunctor : SpecializedFunctor C C
+    := Build_SpecializedFunctor C C
+                                (fun x => x)
+                                (fun _ _ x => x)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End IdentityFunctor.
 
 Section IdentityFunctorLemmas.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Polymorphic Lemma LeftIdentityFunctor (F : SpecializedFunctor D C) : ComposeFunctors (IdentityFunctor _) F = F.
+  Lemma LeftIdentityFunctor (F : SpecializedFunctor D C) : ComposeFunctors (IdentityFunctor _) F = F.
     functor_eq.
   Qed.
 
-  Polymorphic Lemma RightIdentityFunctor (F : SpecializedFunctor C D) : ComposeFunctors F (IdentityFunctor _) = F.
+  Lemma RightIdentityFunctor (F : SpecializedFunctor C D) : ComposeFunctors F (IdentityFunctor _) = F.
     functor_eq.
   Qed.
 End IdentityFunctorLemmas.
 
-(* Polymorphic Hint Rewrite can't deal with maximally inserted implicit parameters *)
-Arguments LeftIdentityFunctor [_ _ _ _] _.
-Arguments RightIdentityFunctor [_ _ _ _] _.
-
-Polymorphic Hint Rewrite LeftIdentityFunctor RightIdentityFunctor : category.
-Polymorphic Hint Immediate LeftIdentityFunctor RightIdentityFunctor : category.
-Polymorphic Hint Rewrite LeftIdentityFunctor RightIdentityFunctor : functor.
-Polymorphic Hint Immediate LeftIdentityFunctor RightIdentityFunctor : functor.
+Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : category.
+Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
+Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category functor.
 
 Section FunctorCompositionLemmas.
   Context `(B : @SpecializedCategory objB).
@@ -278,11 +318,10 @@ Section FunctorCompositionLemmas.
   Context `(D : @SpecializedCategory objD).
   Context `(E : @SpecializedCategory objE).
 
-  Polymorphic Lemma ComposeFunctorsAssociativity (F : SpecializedFunctor B C) (G : SpecializedFunctor C D) (H : SpecializedFunctor D E) :
+  Lemma ComposeFunctorsAssociativity (F : SpecializedFunctor B C) (G : SpecializedFunctor C D) (H : SpecializedFunctor D E) :
     ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
     functor_eq.
   Qed.
 End FunctorCompositionLemmas.
 
-Polymorphic Hint Resolve ComposeFunctorsAssociativity : category.
-Polymorphic Hint Resolve ComposeFunctorsAssociativity : functor.
+Hint Resolve @ComposeFunctorsAssociativity : category functor.

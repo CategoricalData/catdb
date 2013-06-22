@@ -4,8 +4,12 @@ Require Import NatFacts Subcategory DefinitionSimplification.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ChainCat.
-  Polymorphic Definition OmegaCategory : @SpecializedCategory nat.
+  Definition OmegaCategory : @SpecializedCategory nat.
     refine (@Build_SpecializedCategory _
                                        le
                                        le_refl
@@ -19,7 +23,7 @@ Section ChainCat.
   Let ChainCategory' n : @SpecializedCategory { m | m <= n }.
     simpl_definition_by_tac_and_exact (FullSubcategory OmegaCategory (fun m => m <= n)) ltac:(unfold Subcategory in *).
   Defined.
-  Polymorphic Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.
+  Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.
 End ChainCat.
 
 Notation "[ n ]" := (ChainCategory n) : category_scope.

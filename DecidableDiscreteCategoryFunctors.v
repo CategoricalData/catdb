@@ -6,8 +6,12 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section eq_dec_prop.
-  Polymorphic Lemma eq_dec_prop T (eq_dec : forall x y : T, {x = y} + {x <> y}) : forall x y : T, x = y \/ x <> y.
+  Lemma eq_dec_prop T (eq_dec : forall x y : T, {x = y} + {x <> y}) : forall x y : T, x = y \/ x <> y.
     intros x y; case (eq_dec x y); intuition.
   Qed.
 End eq_dec_prop.
@@ -18,7 +22,7 @@ Section Obj.
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
           (fun C' => existT _ (Index2Object (projT1 C')) (projT2 C'))
-          (fun _ _ F => ObjectOf' F)
+          (fun _ _ F => ObjectOf F)
           _
           _
         )
@@ -30,7 +34,7 @@ Section Obj.
     Variable Index2Object : I -> Type.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) TypeCatDec.
+    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) TypeCatDec.
       build_ob_functor Index2Object.
     Defined.
   End type.
@@ -40,7 +44,7 @@ Section Obj.
     Variable Index2Object : I -> Set.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctorToSetDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) SetCatDec.
+    Definition ObjectFunctorToSetDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) SetCatDec.
       build_ob_functor Index2Object.
     Defined.
   End set.
@@ -50,7 +54,7 @@ Section Obj.
     Variable Index2Object : I -> Prop.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctorToPropDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) PropCatDec.
+    Definition ObjectFunctorToPropDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) PropCatDec.
       build_ob_functor Index2Object.
     Defined.
   End prop.
@@ -66,7 +70,7 @@ Section InducedFunctor.
   Variable f : O -> O'.
   Variable eq_dec : forall x y : O, {x = y} + {x <> y}.
 
-  Polymorphic Hint Unfold Object.
+  Hint Unfold Object.
 
   Local Ltac t' := intros; simpl in *; autounfold with core in *; repeat subst; trivial.
   Local Ltac t := t';
@@ -79,25 +83,25 @@ Section InducedFunctor.
              | [ H : False |- _ ] => destruct H
              | [ H : Empty_set |- _ ] => destruct H
              | [ H : unit |- _ ] => destruct H
-             | [ H : _ = _ |- _ ] => case H; try clear H
              | [ |- _ = _ ] => progress (repeat rewrite RightIdentity; repeat rewrite LeftIdentity; repeat rewrite Associativity)
              | [ H : ?a = ?a |- _ ] => pose proof (UIP_refl _ _ H); subst H
              | [ H : _ |- _ ] => unique_pose (H eq_refl)
              | [ H : Morphism _ _ _ |- _ ] => hnf in H
+             | [ H : _ = _ |- _ ] => case H; try clear H
            end.
 
-  Polymorphic Definition InducedDiscreteFunctorDec_MorphismOf s d (m : Morphism (DiscreteCategoryDec eq_dec) s d) :
+  Definition InducedDiscreteFunctorDec_MorphismOf s d (m : Morphism (DiscreteCategoryDec eq_dec) s d) :
     Morphism O' (f s) (f d).
     t.
   Defined.
 
-  Polymorphic Hint Unfold InducedDiscreteFunctorDec_MorphismOf.
-  Polymorphic Hint Unfold DiscreteCategoryDec_Compose.
-  Polymorphic Hint Unfold eq_rect_r eq_rect eq_sym.
+  Hint Unfold InducedDiscreteFunctorDec_MorphismOf.
+  Hint Unfold DiscreteCategoryDec_Compose.
+  Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Local Arguments Compose {obj} [C s d d'] / _ _ : simpl nomatch.
+  Local Arguments Compose {obj} [C s d d'] / _ _ : rename, simpl nomatch.
 
-  Polymorphic Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
+  Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -136,10 +140,10 @@ Local Ltac t_dec := repeat (intros; simpl in *; autounfold with core in *; simpl
 ).
 
 Section disc.
-  Polymorphic Hint Unfold DiscreteCategoryDec_Identity.
-  Polymorphic Hint Unfold eq_rect_r eq_rect eq_sym.
+  Hint Unfold DiscreteCategoryDec_Identity.
+  Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Polymorphic Definition DiscreteFunctorDec : SpecializedFunctor TypeCatDec LocallySmallCatDec.
+  Definition DiscreteFunctorDec : SpecializedFunctor TypeCatDec LocallySmallCatDec.
     refine (Build_SpecializedFunctor TypeCatDec LocallySmallCatDec
       (fun O => existT
         (fun C : LocallySmallCategory => forall x y : C, {x = y} + {x <> y})
@@ -223,7 +227,7 @@ Section disc.
     admit.
   Defined.
 
-  Polymorphic Definition DiscreteSetFunctorDec : SpecializedFunctor SetCatDec SmallCatDec.
+  Definition DiscreteSetFunctorDec : SpecializedFunctor SetCatDec SmallCatDec.
     refine (Build_SpecializedFunctor SetCatDec SmallCatDec
       (fun O => existT
         (fun C : SmallCategory => forall x y : C, {x = y} + {x <> y})
@@ -250,11 +254,11 @@ Section Adjoints.
              | _ => progress functor_eq
            end.
 
-  Polymorphic Lemma DiscreteObjectIdentityDec : ComposeFunctors ObjectFunctorDec DiscreteFunctorDec = IdentityFunctor _.
+  Lemma DiscreteObjectIdentityDec : ComposeFunctors ObjectFunctorDec DiscreteFunctorDec = IdentityFunctor _.
     functor_eq; simpl_eq; reflexivity.
   Qed.
 
-  Polymorphic Definition DiscreteObjectAdjunction : HomAdjunction DiscreteFunctorDec ObjectFunctorDec.
+  Definition DiscreteObjectAdjunction : HomAdjunction DiscreteFunctorDec ObjectFunctorDec.
     match goal with
       | [ |- HomAdjunction ?F ?G ] =>
         refine (Build_HomAdjunction F G

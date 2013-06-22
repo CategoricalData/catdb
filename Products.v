@@ -5,13 +5,17 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Products.
   Context `{C : @SpecializedCategory objC}.
   Variable I : Type.
   Variable f : I -> C.
 
-  Polymorphic Definition Product := Limit (InducedDiscreteFunctor C f).
-  Polymorphic Definition Coproduct := Colimit (InducedDiscreteFunctor C f).
+  Definition Product := Limit (InducedDiscreteFunctor C f).
+  Definition Coproduct := Colimit (InducedDiscreteFunctor C f).
 End Products.
 
 (* XXX: [Reserved Notation] doesn't work here? *)

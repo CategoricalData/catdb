@@ -3,6 +3,10 @@ Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section UniversalMorphism.
   (**
      Quoting Wikipedia:
@@ -10,16 +14,19 @@ Section UniversalMorphism.
      category [C], and let [X] be an object of [C].  Consider the
      following dual (opposite) notions:
      *)
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   Local Ltac intro_t :=
+    simpl in *;
     repeat intro;
+    simpl_eq;
     destruct_sig;
     destruct_head_hnf prod;
     destruct_head_hnf unit;
-    simpl_eq;
-    repeat rewrite @RightIdentity in *;
-    repeat rewrite @LeftIdentity in *;
+    destruct_head_hnf and;
+    autorewrite with morphism in *;
+    subst;
     intuition.
 
   Section InitialMorphism.
@@ -46,13 +53,13 @@ Section UniversalMorphism.
 
        ]]
        *)
-    Polymorphic Definition IsInitialMorphism (Aφ : (X ↓ U)) := IsInitialObject Aφ.
-    Polymorphic Definition InitialMorphism := InitialObject (X ↓ U).
+    Definition IsInitialMorphism (Aφ : (X ↓ U)) := IsInitialObject Aφ.
+    Definition InitialMorphism := InitialObject (X ↓ U).
 
     Section coercions.
-      Polymorphic Definition InitialMorphism_IsInitialMorphism : forall o : InitialMorphism, IsInitialMorphism o
+      Definition InitialMorphism_IsInitialMorphism : forall o : InitialMorphism, IsInitialMorphism o
         := InitialObject_IsInitialObject (C := (X ↓ U)).
-      Polymorphic Definition IsInitialMorphism_InitialMorphism : forall o, IsInitialMorphism o -> InitialMorphism
+      Definition IsInitialMorphism_InitialMorphism : forall o, IsInitialMorphism o -> InitialMorphism
         := IsInitialObject_InitialObject (C := (X ↓ U)).
 
       Global Coercion InitialMorphism_IsInitialMorphism : InitialMorphism >-> IsInitialMorphism.
@@ -60,7 +67,7 @@ Section UniversalMorphism.
     End coercions.
 
     Section IntroductionAbstractionBarrier.
-      Polymorphic Definition Build_InitialMorphism'
+      Definition Build_InitialMorphism'
                  (UniversalProperty : { A : D & { φ : Morphism C X (U A) &
                                               (*UniversalProperty : *)
                                               forall (A' : D) (φ' : Morphism C X (U A')),
@@ -97,22 +104,21 @@ Section UniversalMorphism.
       Local Arguments CommaCategory_Object / .
       Local Arguments CommaCategory_Morphism / .
 
-      Polymorphic Definition Build_InitialMorphism A φ UniversalProperty : InitialMorphism
+      Definition Build_InitialMorphism A φ UniversalProperty : InitialMorphism
         := Eval simpl in @Build_InitialMorphism' (existT _ A (existT _ φ UniversalProperty)).
     End IntroductionAbstractionBarrier.
 
     Section EliminationAbstractionBarrier.
       Variable M : InitialMorphism.
 
-      Polymorphic Definition InitialMorphism_Object : D := snd (projT1 (InitialObject_Object M)).
-      Polymorphic Definition InitialMorphism_Morphism : C.(Morphism) X (U (InitialMorphism_Object)) := projT2 (InitialObject_Object M).
-      Polymorphic Definition InitialProperty_Morphism (Y : D) (f : C.(Morphism) X (U Y)) : D.(Morphism) InitialMorphism_Object Y
+      Definition InitialMorphism_Object : D := snd (projT1 (InitialObject_Object M)).
+      Definition InitialMorphism_Morphism : C.(Morphism) X (U (InitialMorphism_Object)) := projT2 (InitialObject_Object M).
+      Definition InitialProperty_Morphism (Y : D) (f : C.(Morphism) X (U Y)) : D.(Morphism) InitialMorphism_Object Y
         := snd (proj1_sig (InitialObject_Morphism M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f))).
       (* TODO: Automate this better *)
-      Polymorphic Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
+      Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
-        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *;
-          simpl in *.
+        unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *.
         split;
         [ intro_proj2_sig_from_goal; autorewrite with morphism in *; assumption
         | abstract (
@@ -128,7 +134,8 @@ Section UniversalMorphism.
               exact (f_equal (@snd _ _)
                              (f_equal (@proj1_sig _ _)
                                       (InitialObject_Property M (existT _ (tt, _) f) (exist _ (unit_eq _ _, _) H))))
-            ) ].
+            )
+        ].
       Qed.
     End EliminationAbstractionBarrier.
   End InitialMorphism.
@@ -156,13 +163,13 @@ Section UniversalMorphism.
                       φ
        ]]
        *)
-    Polymorphic Definition IsTerminalMorphism (Aφ : (U ↓ X)) := IsTerminalObject Aφ.
-    Polymorphic Definition TerminalMorphism := TerminalObject (U ↓ X).
+    Definition IsTerminalMorphism (Aφ : (U ↓ X)) := IsTerminalObject Aφ.
+    Definition TerminalMorphism := TerminalObject (U ↓ X).
 
     Section coercions.
-      Polymorphic Definition TerminalMorphism_IsTerminalMorphism : forall o : TerminalMorphism, IsTerminalMorphism o
+      Definition TerminalMorphism_IsTerminalMorphism : forall o : TerminalMorphism, IsTerminalMorphism o
         := TerminalObject_IsTerminalObject (C := (U ↓ X)).
-      Polymorphic Definition IsTerminalMorphism_TerminalMorphism : forall o, IsTerminalMorphism o -> TerminalMorphism
+      Definition IsTerminalMorphism_TerminalMorphism : forall o, IsTerminalMorphism o -> TerminalMorphism
         := IsTerminalObject_TerminalObject (C := (U ↓ X)).
 
       Global Coercion TerminalMorphism_IsTerminalMorphism : TerminalMorphism >-> IsTerminalMorphism.
@@ -170,7 +177,7 @@ Section UniversalMorphism.
     End coercions.
 
     Section IntroductionAbstractionBarrier.
-      Polymorphic Definition Build_TerminalMorphism'
+      Definition Build_TerminalMorphism'
                  (UniversalProperty : { A : D & { φ : Morphism C (U A) X &
                                                                (*UniversalProperty : *)
                                                                forall (A' : D) (φ' : Morphism C (U A') X),
@@ -207,25 +214,26 @@ Section UniversalMorphism.
       Local Arguments CommaCategory_Object / .
       Local Arguments CommaCategory_Morphism / .
 
-      Polymorphic Definition Build_TerminalMorphism A φ UniversalProperty : TerminalMorphism
+      Definition Build_TerminalMorphism A φ UniversalProperty : TerminalMorphism
         := Eval simpl in @Build_TerminalMorphism' (existT _ A (existT _ φ UniversalProperty)).
     End IntroductionAbstractionBarrier.
 
     Section AbstractionBarrier.
       Variable M : TerminalMorphism.
 
-      Polymorphic Definition TerminalMorphism_Object : D := fst (projT1 (TerminalObject_Object M)).
-      Polymorphic Definition TerminalMorphism_Morphism : C.(Morphism) (U (TerminalMorphism_Object)) X := projT2 (TerminalObject_Object M).
-      Polymorphic Definition TerminalProperty_Morphism (Y : D) (f : C.(Morphism) (U Y) X) : D.(Morphism) Y TerminalMorphism_Object
+      Definition TerminalMorphism_Object : D := fst (projT1 (TerminalObject_Object M)).
+      Definition TerminalMorphism_Morphism : C.(Morphism) (U (TerminalMorphism_Object)) X := projT2 (TerminalObject_Object M).
+      Definition TerminalProperty_Morphism (Y : D) (f : C.(Morphism) (U Y) X) : D.(Morphism) Y TerminalMorphism_Object
         := fst (proj1_sig (TerminalObject_Morphism M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f))).
       (* TODO: Automate this better *)
-      Polymorphic Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
+      Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
           simpl in *.
         split;
         [ intro_proj2_sig_from_goal; symmetry in H (* WTF? *); autorewrite with morphism in *; assumption
-        | abstract (
+        | unfold InitialMorphism, TerminalMorphism in *; (* WTF type error *)
+          abstract (
               intros ? H;
               (* make sure the type of H is right *)
               match type of H with
@@ -237,7 +245,8 @@ Section UniversalMorphism.
               exact (f_equal (@fst _ _)
                              (f_equal (@proj1_sig _ _)
                                       (TerminalObject_Property M (existT _ (_, tt) f) (exist _ (_, unit_eq _ _) H))))
-        ) ].
+            )
+        ].
       Qed.
     End AbstractionBarrier.
   End TerminalMorphism.
@@ -254,17 +263,17 @@ Section UniversalMorphism.
        enough'', while the uniqueness of the morphism ensures that
        [(A, φ)] is ``not too general''.
        *)
-    Polymorphic Definition UniversalMorphism := ((InitialMorphism X U) + (TerminalMorphism U X))%type.
+    Definition UniversalMorphism := ((InitialMorphism X U) + (TerminalMorphism U X))%type.
 
     Section AbstractionBarrier.
       Variable M : UniversalMorphism.
 
-      Polymorphic Definition UniversalMorphism_Object : D :=
+      Definition UniversalMorphism_Object : D :=
         match M with
           | inl M' => InitialMorphism_Object M'
           | inr M' => TerminalMorphism_Object M'
         end.
-      Polymorphic Definition UniversalMorphism_Morphism :
+      Definition UniversalMorphism_Morphism :
         match M with
           | inl _ => Morphism C X (U (UniversalMorphism_Object))
           | inr _ => Morphism C (U (UniversalMorphism_Object)) X
@@ -272,22 +281,22 @@ Section UniversalMorphism.
         unfold UniversalMorphism_Object; destruct M; simpl;
           eapply InitialMorphism_Morphism || eapply TerminalMorphism_Morphism.
       Defined.
-      Polymorphic Definition UniversalProperty_Morphism
+      Definition UniversalProperty_Morphism
         (Y : D)
         (f : match M with
                | inl _ => Morphism C X (U Y)
                | inr _ => Morphism C (U Y) X
              end) :
         match M with
-          | inl _ => Morphism _ UniversalMorphism_Object Y
-          | inr _ => Morphism _ Y UniversalMorphism_Object
+          | inl _ => Morphism D UniversalMorphism_Object Y
+          | inr _ => Morphism D Y UniversalMorphism_Object
         end.
         unfold UniversalMorphism_Object; destruct M; simpl;
           eapply InitialProperty_Morphism || eapply TerminalProperty_Morphism;
             assumption.
       Defined.
 
-      Polymorphic Definition UniversalPropertyT (Y : D) : Type.
+      Definition UniversalPropertyT (Y : D) : Type.
         assert (m := UniversalMorphism_Morphism).
         assert (m' := UniversalProperty_Morphism Y).
         destruct M; simpl in *.
@@ -305,18 +314,18 @@ Section UniversalMorphism.
         ).
       Defined.
 
-      Polymorphic Definition UniversalProperty'
+      Definition UniversalProperty'
         (Y : D) : { T : Type & T }.
         destruct M as [ m | m ].
         exact (existT _ _ (InitialProperty m Y)).
         exact (existT _ _ (TerminalProperty m Y)).
       Defined.
 
-      Polymorphic Definition UniversalProperty'' (Y : D) : { A : Type & A }.
+      Definition UniversalProperty'' (Y : D) : { A : Type & A }.
         simpl_definition_by_tac_and_exact (UniversalProperty' Y) ltac:( unfold UniversalProperty in * ).
       Defined.
 
-      Polymorphic Definition UniversalProperty (Y : D) := Eval cbv beta iota zeta delta [UniversalProperty' UniversalProperty''] in projT2 (UniversalProperty'' Y).
+      Definition UniversalProperty (Y : D) := Eval cbv beta iota zeta delta [UniversalProperty' UniversalProperty''] in projT2 (UniversalProperty'' Y).
     End AbstractionBarrier.
   End UniversalMorphism.
 End UniversalMorphism.

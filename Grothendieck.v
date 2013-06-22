@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Grothendieck.
   (**
      Quoting Wikipedia:
@@ -24,7 +28,7 @@ Section Grothendieck.
   Variable F : SpecializedFunctor C TypeCat.
   Variable F' : SpecializedFunctor C SetCat.
 
-  Polymorphic Record GrothendieckPair := {
+  Record GrothendieckPair := {
     GrothendieckC' : objC;
     GrothendieckX' : F GrothendieckC'
   }.
@@ -32,15 +36,15 @@ Section Grothendieck.
   Section GrothendieckInterface.
     Variable G : GrothendieckPair.
 
-    Polymorphic Definition GrothendieckC : C := G.(GrothendieckC').
-    Polymorphic Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
+    Definition GrothendieckC : C := G.(GrothendieckC').
+    Definition GrothendieckX : F GrothendieckC := G.(GrothendieckX').
   End GrothendieckInterface.
 
-  Polymorphic Lemma GrothendieckPair_eta (x : GrothendieckPair) : Build_GrothendieckPair (GrothendieckC x) (GrothendieckX x) = x.
+  Lemma GrothendieckPair_eta (x : GrothendieckPair) : Build_GrothendieckPair (GrothendieckC x) (GrothendieckX x) = x.
     destruct x; reflexivity.
   Qed.
 
-  Polymorphic Record SetGrothendieckPair := {
+  Record SetGrothendieckPair := {
     SetGrothendieckC' : objC;
     SetGrothendieckX' : F' SetGrothendieckC'
   }.
@@ -48,15 +52,15 @@ Section Grothendieck.
   Section SetGrothendieckInterface.
     Variable G : SetGrothendieckPair.
 
-    Polymorphic Definition SetGrothendieckC : C := G.(SetGrothendieckC').
-    Polymorphic Definition SetGrothendieckX : F' SetGrothendieckC := G.(SetGrothendieckX').
+    Definition SetGrothendieckC : C := G.(SetGrothendieckC').
+    Definition SetGrothendieckX : F' SetGrothendieckC := G.(SetGrothendieckX').
   End SetGrothendieckInterface.
 
-  Polymorphic Lemma SetGrothendieckPair_eta (x : SetGrothendieckPair) : Build_SetGrothendieckPair (SetGrothendieckC x) (SetGrothendieckX x) = x.
+  Lemma SetGrothendieckPair_eta (x : SetGrothendieckPair) : Build_SetGrothendieckPair (SetGrothendieckC x) (SetGrothendieckX x) = x.
     destruct x; reflexivity.
   Qed.
 
-  Polymorphic Definition GrothendieckCompose cs xs cd xd cd' xd' :
+  Definition GrothendieckCompose cs xs cd xd cd' xd' :
     { f : C.(Morphism) cd cd' | F.(MorphismOf) f xd = xd' } -> { f : C.(Morphism) cs cd | F.(MorphismOf) f xs = xd } ->
     { f : C.(Morphism) cs cd' | F.(MorphismOf) f xs = xd' }.
     intros m2 m1.
@@ -71,7 +75,7 @@ Section Grothendieck.
 
   Arguments GrothendieckCompose [cs xs cd xd cd' xd'] / _ _.
 
-  Polymorphic Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
+  Definition GrothendieckIdentity c x : { f : C.(Morphism) c c | F.(MorphismOf) f x = x }.
     exists (Identity c).
     abstract (
       rewrite FIdentityOf;
@@ -80,9 +84,9 @@ Section Grothendieck.
     ).
   Defined.
 
-  Polymorphic Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
+  Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
 
-  Polymorphic Definition CategoryOfElements : @SpecializedCategory GrothendieckPair.
+  Definition CategoryOfElements : @SpecializedCategory GrothendieckPair.
     refine (@Build_SpecializedCategory _
                                        (fun s d =>
                                           { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) })
@@ -97,9 +101,9 @@ Section Grothendieck.
       ).
   Defined.
 
-  Polymorphic Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
-    refine {| ObjectOf' := (fun o : CategoryOfElements => GrothendieckC o);
-      MorphismOf' := (fun s d (m : CategoryOfElements.(Morphism') s d) => proj1_sig m)
+  Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
+    refine {| ObjectOf := (fun o : CategoryOfElements => GrothendieckC o);
+      MorphismOf := (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
     |}; abstract (eauto with category; intros; destruct_type CategoryOfElements; simpl; reflexivity).
   Defined.
 End Grothendieck.
@@ -109,7 +113,7 @@ Section SetGrothendieckCoercion.
   Variable F : SpecializedFunctor C SetCat.
   Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
 
-  Polymorphic Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'
+  Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'
     := {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.
 End SetGrothendieckCoercion.
 

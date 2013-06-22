@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Local Ltac faithful_t :=
@@ -42,7 +46,7 @@ Section sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Polymorphic Definition SpecializedCategory_sigT : @SpecializedCategory (sigT Pobj).
+  Definition SpecializedCategory_sigT : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -57,7 +61,7 @@ Section sigT_obj_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Polymorphic Definition projT1_functor : SpecializedFunctor SpecializedCategory_sigT A
+  Definition projT1_functor : SpecializedFunctor SpecializedCategory_sigT A
     := Build_SpecializedFunctor SpecializedCategory_sigT A
                                 (@projT1 _ _)
                                 (fun _ _ => @projT1 _ _)
@@ -71,7 +75,7 @@ Section sigT_obj.
   Context `(A : @SpecializedCategory objA).
   Variable Pobj : objA -> Type.
 
-  Polymorphic Definition SpecializedCategory_sigT_obj : @SpecializedCategory (sigT Pobj).
+  Definition SpecializedCategory_sigT_obj : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -86,37 +90,37 @@ Section sigT_obj.
     abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
 
-  Polymorphic Definition projT1_obj_functor : SpecializedFunctor SpecializedCategory_sigT_obj A
+  Definition projT1_obj_functor : SpecializedFunctor SpecializedCategory_sigT_obj A
     := Build_SpecializedFunctor SpecializedCategory_sigT_obj A
                                 (@projT1 _ _)
                                 (fun s d m => m)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Polymorphic Definition SpecializedCategory_sigT_obj_as_sigT : @SpecializedCategory (sigT Pobj).
+  Definition SpecializedCategory_sigT_obj_as_sigT : @SpecializedCategory (sigT Pobj).
     refine (@SpecializedCategory_sigT _ A Pobj (fun _ _ _ => unit) (fun _ => tt) (fun _ _ _ _ _ _ _ => tt) _ _ _);
     abstract (simpl; intros; trivial).
   Defined.
 
-  Polymorphic Definition sigT_functor_obj : SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj
+  Definition sigT_functor_obj : SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj
     := Build_SpecializedFunctor SpecializedCategory_sigT_obj_as_sigT SpecializedCategory_sigT_obj
                                 (fun x => x)
                                 (fun _ _ => @projT1 _ _)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Polymorphic Definition sigT_functor_obj_inv : SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT
+  Definition sigT_functor_obj_inv : SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT
     := Build_SpecializedFunctor SpecializedCategory_sigT_obj SpecializedCategory_sigT_obj_as_sigT
                                 (fun x => x)
                                 (fun _ _ m => existT _ m tt)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Polymorphic Lemma sigT_obj_eq : ComposeFunctors sigT_functor_obj sigT_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sigT_functor_obj_inv sigT_functor_obj = IdentityFunctor _.
+  Lemma sigT_obj_eq : ComposeFunctors sigT_functor_obj sigT_functor_obj_inv = IdentityFunctor _ /\ ComposeFunctors sigT_functor_obj_inv sigT_functor_obj = IdentityFunctor _.
     split; functor_eq; hnf in *; destruct_type @sigT; f_equal; trivial.
   Qed.
 
-  Polymorphic Lemma sigT_obj_compat : ComposeFunctors projT1_obj_functor sigT_functor_obj = projT1_functor.
+  Lemma sigT_obj_compat : ComposeFunctors projT1_obj_functor sigT_functor_obj = projT1_functor.
     functor_eq.
   Qed.
 End sigT_obj.
@@ -142,7 +146,7 @@ Section sigT_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Polymorphic Definition SpecializedCategory_sigT_mor : @SpecializedCategory objA.
+  Definition SpecializedCategory_sigT_mor : @SpecializedCategory objA.
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -157,7 +161,7 @@ Section sigT_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Polymorphic Definition projT1_mor_functor : SpecializedFunctor SpecializedCategory_sigT_mor A.
+  Definition projT1_mor_functor : SpecializedFunctor SpecializedCategory_sigT_mor A.
     refine (Build_SpecializedFunctor SpecializedCategory_sigT_mor A
       (fun x => x)
       (fun s d m => projT1 m)
@@ -167,12 +171,12 @@ Section sigT_mor.
     intros; reflexivity.
   Defined.
 
-  Polymorphic Definition SpecializedCategory_sigT_mor_as_sigT : @SpecializedCategory (sigT (fun _ : objA => unit)).
+  Definition SpecializedCategory_sigT_mor_as_sigT : @SpecializedCategory (sigT (fun _ : objA => unit)).
     apply (@SpecializedCategory_sigT _ A _ (fun s d => @Pmor (projT1 s) (projT1 d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2));
       abstract (intros; trivial).
   Defined.
 
-  Polymorphic Definition sigT_functor_mor : SpecializedFunctor SpecializedCategory_sigT_mor_as_sigT SpecializedCategory_sigT_mor.
+  Definition sigT_functor_mor : SpecializedFunctor SpecializedCategory_sigT_mor_as_sigT SpecializedCategory_sigT_mor.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -185,7 +189,7 @@ Section sigT_mor.
     simpl; intros; reflexivity.
   Defined.
 
-  Polymorphic Definition sigT_functor_mor_inv : SpecializedFunctor SpecializedCategory_sigT_mor SpecializedCategory_sigT_mor_as_sigT.
+  Definition sigT_functor_mor_inv : SpecializedFunctor SpecializedCategory_sigT_mor SpecializedCategory_sigT_mor_as_sigT.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -198,11 +202,11 @@ Section sigT_mor.
     abstract (simpl; intros; f_equal; trivial).
   Defined.
 
-  Polymorphic Lemma sigT_mor_eq : ComposeFunctors sigT_functor_mor sigT_functor_mor_inv = IdentityFunctor _ /\ ComposeFunctors sigT_functor_mor_inv sigT_functor_mor = IdentityFunctor _.
+  Lemma sigT_mor_eq : ComposeFunctors sigT_functor_mor sigT_functor_mor_inv = IdentityFunctor _ /\ ComposeFunctors sigT_functor_mor_inv sigT_functor_mor = IdentityFunctor _.
     split; functor_eq; simpl_eq; trivial.
   Qed.
 
-  Polymorphic Lemma sigT_mor_compat : ComposeFunctors projT1_mor_functor sigT_functor_mor = projT1_functor.
+  Lemma sigT_mor_compat : ComposeFunctors projT1_mor_functor sigT_functor_mor = projT1_functor.
     functor_eq.
   Qed.
 End sigT_mor.

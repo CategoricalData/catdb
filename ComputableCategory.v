@@ -3,6 +3,10 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ComputableCategory.
   Variable I : Type.
   Variable Index2Object : I -> Type.
@@ -10,7 +14,7 @@ Section ComputableCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Polymorphic Definition ComputableCategory : @SpecializedCategory I.
+  Definition ComputableCategory : @SpecializedCategory I.
     refine (@Build_SpecializedCategory _
                                        (fun C D : I => SpecializedFunctor C D)
                                        (fun o : I => IdentityFunctor o)

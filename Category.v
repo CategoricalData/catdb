@@ -5,41 +5,27 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
-Polymorphic Record Category := {
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
+Record > Category := {
   CObject : Type;
 
   UnderlyingCategory :> @SpecializedCategory CObject
 }.
 
-Polymorphic Definition GeneralizeCategory `(C : @SpecializedCategory obj) : Category.
-  refine {| CObject := C.(Object) |}; auto.
-Defined.
-
-Coercion GeneralizeCategory : SpecializedCategory >-> Category.
-
-Polymorphic Record SmallCategory := {
+Record > SmallCategory := {
   SObject : Set;
 
   SUnderlyingCategory :> @SmallSpecializedCategory SObject
 }.
 
-Polymorphic Definition GeneralizeSmallCategory `(C : @SmallSpecializedCategory obj) : SmallCategory.
-  refine {| SObject := obj |}; auto.
-Defined.
-
-Coercion GeneralizeSmallCategory : SmallSpecializedCategory >-> SmallCategory.
-
-Polymorphic Record LocallySmallCategory := {
+Record > LocallySmallCategory := {
   LSObject : Type;
 
   LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject
 }.
-
-Polymorphic Definition GeneralizeLocallySmallCategory `(C : @LocallySmallSpecializedCategory obj) : LocallySmallCategory.
-  refine {| LSObject := obj |}; auto.
-Defined.
-
-Coercion GeneralizeLocallySmallCategory : LocallySmallSpecializedCategory >-> LocallySmallCategory.
 
 Bind Scope category_scope with Category.
 Bind Scope category_scope with SmallCategory.

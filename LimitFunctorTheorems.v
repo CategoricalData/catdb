@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section InducedMaps.
   (** Quoting David:
      Given a commutative triangle consisting of
@@ -46,7 +50,7 @@ Section InducedMaps.
     Let limF1 := LimitObject F1_Limit.
     Let limF2 := LimitObject F2_Limit.
 
-    Polymorphic Definition InducedLimitMapNT' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
+    Definition InducedLimitMapNT' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
       unfold LimitObject, Limit in *;
         intro_universal_morphisms.
       subst limF1 limF2.
@@ -66,15 +70,15 @@ Section InducedMaps.
       simpl; reflexivity.
     Defined.
 
-    Polymorphic Definition InducedLimitMapNT'' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
+    Definition InducedLimitMapNT'' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
       simpl_definition_by_exact InducedLimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Polymorphic Definition InducedLimitMapNT : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1
+    Definition InducedLimitMapNT : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1
       := Eval cbv beta iota zeta delta [InducedLimitMapNT''] in InducedLimitMapNT''.
 
-    Polymorphic Definition InducedLimitMap : D.(Morphism) limF2 limF1
+    Definition InducedLimitMap : D.(Morphism) limF2 limF1
       := TerminalProperty_Morphism F1_Limit _ InducedLimitMapNT.
   End Limit.
 
@@ -87,7 +91,7 @@ Section InducedMaps.
     Let colimF1 := ColimitObject F1_Colimit.
     Let colimF2 := ColimitObject F2_Colimit.
 
-    Polymorphic Definition InducedColimitMapNT' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
+    Definition InducedColimitMapNT' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
       unfold ColimitObject, Colimit in *;
         intro_universal_morphisms.
       subst colimF1 colimF2.
@@ -107,15 +111,15 @@ Section InducedMaps.
       simpl; reflexivity.
     Defined.
 
-    Polymorphic Definition InducedColimitMapNT'' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
+    Definition InducedColimitMapNT'' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
       simpl_definition_by_exact InducedColimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Polymorphic Definition InducedColimitMapNT : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2)
+    Definition InducedColimitMapNT : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2)
       := Eval cbv beta iota zeta delta [InducedColimitMapNT''] in InducedColimitMapNT''.
 
-    Polymorphic Definition InducedColimitMap : Morphism D colimF1 colimF2
+    Definition InducedColimitMap : Morphism D colimF1 colimF2
       := InitialProperty_Morphism F1_Colimit _ InducedColimitMapNT.
   End Colimit.
 End InducedMaps.

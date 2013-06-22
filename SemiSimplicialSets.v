@@ -5,7 +5,11 @@ Generalizable Variables objC.
 
 Set Implicit Arguments.
 
-Local Notation "'Δ'" := SimplexCategory : category_scope.
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
+Local Notation Δ := SimplexCategory.
 
 Section SemiSimplicialSets.
   (* Quoting David Spivak:
@@ -17,21 +21,21 @@ Section SemiSimplicialSets.
      which we will use to make simplicial sets without having to worry
      about "degneracies". *)
 
-  Polymorphic Definition SemiSimplexCategory : SpecializedCategory nat.
+  Definition SemiSimplexCategory : SpecializedCategory nat.
     eapply (WideSubcategory Δ (@IsMonomorphism _ _));
     abstract eauto with morphism.
   Defined.
 
-  Local Notation "'Γ'" := SemiSimplexCategory : category_scope.
+  Local Notation Γ := SemiSimplexCategory.
 
-  Polymorphic Definition SemiSimplexCategoryInclusionFunctor : SpecializedFunctor Γ Δ
+  Definition SemiSimplexCategoryInclusionFunctor : SpecializedFunctor Γ Δ
     := WideSubcategoryInclusionFunctor _ _ _ _.
 
-  Polymorphic Definition SemiSimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Γ))%category.
+  Definition SemiSimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Γ))%category.
 
-  Polymorphic Definition SemiSimplicialSet := SemiSimplicialCategory SetCat.
-  Polymorphic Definition SemiSimplicialType := SemiSimplicialCategory TypeCat.
-  Polymorphic Definition SemiSimplicialProp := SemiSimplicialCategory PropCat.
+  Definition SemiSimplicialSet := SemiSimplicialCategory SetCat.
+  Definition SemiSimplicialType := SemiSimplicialCategory TypeCat.
+  Definition SemiSimplicialProp := SemiSimplicialCategory PropCat.
 End SemiSimplicialSets.
 
-Notation "'SemiSimplicialOf' obj" := (let C := CatOf obj in SemiSimplicialCategory C) (at level 0).
+Notation SemiSimplicialOf obj := (let C := CatOf obj in SemiSimplicialCategory C).

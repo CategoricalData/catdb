@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ProductNaturalTransformation.
   Context `{A : @SpecializedCategory objA}.
   Context `{B : @SpecializedCategory objB}.
@@ -15,7 +19,7 @@ Section ProductNaturalTransformation.
   Variable T : SpecializedNaturalTransformation F F'.
   Variable U : SpecializedNaturalTransformation G G'.
 
-  Polymorphic Definition ProductNaturalTransformation : SpecializedNaturalTransformation (F * G) (F' * G').
+  Definition ProductNaturalTransformation : SpecializedNaturalTransformation (F * G) (F' * G').
     refine (Build_SpecializedNaturalTransformation (F * G) (F' * G')
       (fun ac : A * C => (T (fst ac), U (snd ac)))
       _

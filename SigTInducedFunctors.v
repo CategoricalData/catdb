@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)
@@ -36,7 +40,7 @@ Section T2.
     P_MorphismOf (existT (Pmor0 o o) (Identity (projT1 o)) (Pidentity0 o)) =
     Pidentity1 (InducedT2Functor_sigT_ObjectOf o).
 
-  Polymorphic Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
+  Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -48,7 +52,7 @@ Section T2.
     end;
     subst_body;
     abstract (
-      present_spcategory; simpl in *; intros; unfold Morphism; simpl_eq; try reflexivity; JMeq_eq;
+      simpl in *; intros; unfold Morphism; simpl_eq; try reflexivity; JMeq_eq;
         apply @P_CompositionOf || apply @P_IdentityOf
     ).
   Defined.

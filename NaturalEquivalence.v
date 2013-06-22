@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Ltac intro_object_of :=
   repeat match goal with
            | [ |- appcontext[ObjectOf ?G ?x] ] => unique_pose_with_body (ObjectOf G x)
@@ -17,7 +21,7 @@ Section NaturalIsomorphism.
     Context `(D : @SpecializedCategory objD).
     Variables F G : SpecializedFunctor C D.
 
-    Polymorphic Record NaturalIsomorphism :=
+    Record NaturalIsomorphism :=
       {
         NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
         NaturalIsomorphism_Isomorphism : forall x : objC, IsomorphismOf (NaturalIsomorphism_Transformation x)
@@ -29,10 +33,9 @@ Section NaturalIsomorphism.
     Context `(D : @SpecializedCategory objD).
     Variables F G : SpecializedFunctor C D.
 
-    Polymorphic Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
+    Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
       exists (fun x => Inverse (NaturalIsomorphism_Isomorphism T x)).
       abstract (
-          present_spcategory;
           intros;
           repeat match goal with
                    | [ |- appcontext[?E] ] => match type of E with | IsomorphismOf _ => destruct E; simpl end
@@ -40,13 +43,12 @@ Section NaturalIsomorphism.
                  end;
           destruct T as [ [ ] ];
           simpl in *;
-            present_spcategory;
           pre_compose_to_identity; post_compose_to_identity;
           auto with functor
         ).
     Defined.
 
-    Polymorphic Definition InverseNaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalIsomorphism G F
+    Definition InverseNaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalIsomorphism G F
       := {|
           NaturalIsomorphism_Transformation := InverseNaturalIsomorphism_NT T;
           NaturalIsomorphism_Isomorphism := (fun x => InverseOf (NaturalIsomorphism_Isomorphism T x))
@@ -66,22 +68,22 @@ Section NaturalIsomorphism.
       repeat match goal with
                | _ => reflexivity
                | [ H : _ |- _ ] => rewrite H
-               | _ => progress (repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity)
+               | _ => progress (repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
                | _ => progress repeat rewrite <- FCompositionOf
-               | _ => progress repeat rewrite @FIdentityOf
+               | _ => progress repeat rewrite FIdentityOf
                | [ |- appcontext[?E] ] =>
                  match type of E with
                    | IsomorphismOf _ => destruct E; simpl
                  end
              end.
 
-    Polymorphic Definition NIComposeT (T' : NaturalIsomorphism F' F'') (T : NaturalIsomorphism F F') : NaturalIsomorphism F F''
+    Definition NIComposeT (T' : NaturalIsomorphism F' F'') (T : NaturalIsomorphism F F') : NaturalIsomorphism F F''
       := {|
           NaturalIsomorphism_Transformation := NTComposeT T' T;
           NaturalIsomorphism_Isomorphism := (fun x => ComposeIsomorphismOf (NaturalIsomorphism_Isomorphism T' x) (NaturalIsomorphism_Isomorphism T x))
         |}.
 
-    Polymorphic Definition NIComposeF (U : NaturalIsomorphism G G') (T : NaturalIsomorphism F F') : NaturalIsomorphism (ComposeFunctors G F) (ComposeFunctors G' F').
+    Definition NIComposeF (U : NaturalIsomorphism G G') (T : NaturalIsomorphism F F') : NaturalIsomorphism (ComposeFunctors G F) (ComposeFunctors G' F').
       exists (NTComposeF U T).
       intro x.
       exists (Compose (Inverse (NaturalIsomorphism_Isomorphism U (F x)))
@@ -98,14 +100,14 @@ Section NaturalIsomorphismOfCategories.
   Local Reserved Notation "'F'".
   Local Reserved Notation "'G'".
 
-  Polymorphic Record NaturalIsomorphismOfCategories := {
+  Record NaturalIsomorphismOfCategories := {
     NaturalIsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := NaturalIsomorphismOfCategories_F;
     NaturalIsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := NaturalIsomorphismOfCategories_G;
     NaturalIsomorphismOfCategories_Isomorphism_C :> NaturalIsomorphism (IdentityFunctor C) (ComposeFunctors G F);
     NaturalIsomorphismOfCategories_Isomorphism_D : NaturalIsomorphism (IdentityFunctor D) (ComposeFunctors F G)
   }.
 
-  Polymorphic Record IsomorphismOfCategories := {
+  Record IsomorphismOfCategories := {
     IsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := IsomorphismOfCategories_F;
     IsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := IsomorphismOfCategories_G;
     IsomorphismOfCategories_Isomorphism_C : ComposeFunctors G F = IdentityFunctor C;
@@ -114,13 +116,14 @@ Section NaturalIsomorphismOfCategories.
 End NaturalIsomorphismOfCategories.
 
 Section NaturalEquivalence.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F G : Functor C D.
 
-  Polymorphic Definition NaturalEquivalenceOf (T : NaturalTransformation F G) :=
+  Definition NaturalEquivalenceOf (T : NaturalTransformation F G) :=
     forall x : C.(Object), IsomorphismOf (T.(ComponentsOf) x).
 
-  Polymorphic Definition FunctorsNaturallyEquivalent : Prop :=
+  Definition FunctorsNaturallyEquivalent : Prop :=
     exists T : NaturalTransformation F G, exists NE : NaturalEquivalenceOf T, True.
 End NaturalEquivalence.
 
@@ -135,13 +138,14 @@ Section Coercions.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
   Variables F G : SpecializedFunctor C D.
-  Variables C' D' : Category.
+  Variable C' : Category.
+  Variable D' : Category.
   Variables F' G' : Functor C' D'.
 
-  Polymorphic Definition NaturalEquivalence_of_NaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalEquivalenceOf T
+  Definition NaturalEquivalence_of_NaturalIsomorphism (T : NaturalIsomorphism F G) : NaturalEquivalenceOf T
     := fun x => NaturalIsomorphism_Isomorphism T x.
 
-  Polymorphic Definition NaturalIsomorphism_of_NaturalEquivalence (T : NaturalTransformation F' G') (NE : NaturalEquivalenceOf T) : NaturalIsomorphism F' G'.
+  Definition NaturalIsomorphism_of_NaturalEquivalence (T : NaturalTransformation F' G') (NE : NaturalEquivalenceOf T) : NaturalIsomorphism F' G'.
     exists T.
     exact (fun x => NE x : IsomorphismOf _).
   Defined.
@@ -152,48 +156,51 @@ Coercion NaturalIsomorphism_of_NaturalEquivalence : NaturalEquivalenceOf >-> Nat
 (* gives "Ambiguous paths"... Is this bad? *)
 
 Section NaturalEquivalenceOfCategories.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
-  Polymorphic Definition NaturalEquivalenceOfCategories (F : Functor C D) (G : Functor D C) : Prop :=
+  Definition NaturalEquivalenceOfCategories (F : Functor C D) (G : Functor D C) : Prop :=
     (FunctorsNaturallyEquivalent (IdentityFunctor C) (ComposeFunctors G F)) /\
     (FunctorsNaturallyEquivalent (IdentityFunctor D) (ComposeFunctors F G)).
 
-  Polymorphic Definition CategoriesNaturallyEquivalent : Prop :=
+  Definition CategoriesNaturallyEquivalent : Prop :=
     exists F : Functor C D, exists G : Functor D C, NaturalEquivalenceOfCategories F G.
 End NaturalEquivalenceOfCategories.
 
 Arguments NaturalEquivalenceOfCategories [C D] F G.
 
 Section NaturalTransformationInverse.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F G : Functor C D.
   Variable T : NaturalTransformation F G.
 
-  Polymorphic Hint Unfold InverseOf.
-  Polymorphic Hint Resolve f_equal f_equal2 Commutes.
+  Hint Unfold InverseOf.
+  Hint Resolve f_equal f_equal2 @Commutes.
+  Hint Rewrite @LeftIdentity @RightIdentity.
 
-  Polymorphic Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
-    refine (fun X => {| ComponentsOf' := (fun c => proj1_sig (X c)) |});
+  Definition NaturalEquivalenceInverse : NaturalEquivalenceOf T -> NaturalTransformation G F.
+    refine (fun X => {| ComponentsOf := (fun c => proj1_sig (X c)) |});
       abstract (
         intros; destruct (X s); destruct (X d);
           simpl; unfold InverseOf in *; destruct_hypotheses;
-            present_spnt; present_spcategory;
             pre_compose_to_identity; post_compose_to_identity;
             auto
       ).
     (*morphisms 2*)
   Defined.
 
-  Polymorphic Lemma NaturalEquivalenceInverse_NaturalEquivalence (TE : NaturalEquivalenceOf T) : NaturalEquivalenceOf (NaturalEquivalenceInverse TE).
+  Lemma NaturalEquivalenceInverse_NaturalEquivalence (TE : NaturalEquivalenceOf T) : NaturalEquivalenceOf (NaturalEquivalenceInverse TE).
     intro; apply InverseOf.
   Qed.
 End NaturalTransformationInverse.
 
 Section IdentityNaturalTransformation.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
 
-  Polymorphic Theorem IdentityNaturalEquivalence : NaturalEquivalenceOf (IdentityNaturalTransformation F).
+  Theorem IdentityNaturalEquivalence : NaturalEquivalenceOf (IdentityNaturalTransformation F).
     hnf; intros; hnf; simpl; unfold InverseOf in *; eexists; t_with ltac:(eauto with morphism).
     Grab Existential Variables.
     eauto with morphism.
@@ -202,22 +209,23 @@ End IdentityNaturalTransformation.
 
 Arguments IdentityNaturalEquivalence [C D] F x.
 
-Polymorphic Hint Resolve IdentityNaturalEquivalence NaturalEquivalenceInverse_NaturalEquivalence : category.
-Polymorphic Hint Resolve IdentityNaturalEquivalence NaturalEquivalenceInverse_NaturalEquivalence : natural_transformation.
+Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquivalence : category.
+Hint Resolve @IdentityNaturalEquivalence @NaturalEquivalenceInverse_NaturalEquivalence : natural_transformation.
 
 Section FunctorNaturalEquivalenceRelation.
-  Variable C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
-  Polymorphic Lemma functors_naturally_equivalent_refl (F : Functor C D) : FunctorsNaturallyEquivalent F F.
+  Lemma functors_naturally_equivalent_refl (F : Functor C D) : FunctorsNaturallyEquivalent F F.
     exists (IdentityNaturalTransformation F); eauto with category.
   Qed.
 
-  Polymorphic Lemma functors_naturally_equivalent_sym (F G : Functor C D) :
+  Lemma functors_naturally_equivalent_sym (F G : Functor C D) :
     FunctorsNaturallyEquivalent F G -> FunctorsNaturallyEquivalent G F.
     destruct 1 as [ ? [ H ] ]; exists (NaturalEquivalenceInverse H); eauto with category.
   Qed.
 
-  Polymorphic Lemma functors_naturally_equivalent_trans (F G H : Functor C D) :
+  Lemma functors_naturally_equivalent_trans (F G H : Functor C D) :
     FunctorsNaturallyEquivalent F G -> FunctorsNaturallyEquivalent G H -> FunctorsNaturallyEquivalent F H.
     destruct 1 as [ T [ ] ]; destruct 1 as [ U [ ] ];
       exists (NTComposeT U T); eexists; hnf; simpl; eauto with category.
@@ -242,22 +250,25 @@ Add Parametric Morphism (C D E : Category) :
 Qed.
 
 Section FunctorNaturalEquivalenceLemmas.
-  Variable B C D E : Category.
+  Variable B : Category.
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
-  Polymorphic Lemma LeftIdentityFunctorNE (F : Functor D C) : FunctorsNaturallyEquivalent (ComposeFunctors (IdentityFunctor _) F) F.
+  Lemma LeftIdentityFunctorNE (F : Functor D C) : FunctorsNaturallyEquivalent (ComposeFunctors (IdentityFunctor _) F) F.
     match goal with
       | [ |- FunctorsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto with functor; try (rewrite H; reflexivity)
     end.
   Qed.
 
-  Polymorphic Lemma RightIdentityFunctorNE (F : Functor C D) : FunctorsNaturallyEquivalent (ComposeFunctors F (IdentityFunctor _)) F.
+  Lemma RightIdentityFunctorNE (F : Functor C D) : FunctorsNaturallyEquivalent (ComposeFunctors F (IdentityFunctor _)) F.
     match goal with
       | [ |- FunctorsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto with functor; try (rewrite H; reflexivity)
     end.
   Qed.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
+  Lemma PreComposeFunctorsNE (G : Functor D E) (F1 F2 : Functor C D) :
     FunctorsNaturallyEquivalent F1 F2 -> FunctorsNaturallyEquivalent (ComposeFunctors G F1) (ComposeFunctors G F2).
     intro;
     destruct_head FunctorsNaturallyEquivalent;
@@ -267,7 +278,7 @@ Section FunctorNaturalEquivalenceLemmas.
     simpl; eauto with category.
   Qed.
 
-  Polymorphic Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
+  Lemma PostComposeFunctorsNE (G1 G2 : Functor D E) (F : Functor C D) :
     FunctorsNaturallyEquivalent G1 G2 -> FunctorsNaturallyEquivalent (ComposeFunctors G1 F) (ComposeFunctors G2 F).
     intro;
     destruct_head FunctorsNaturallyEquivalent;
@@ -277,7 +288,7 @@ Section FunctorNaturalEquivalenceLemmas.
     simpl; eauto with category.
   Qed.
 
-  Polymorphic Lemma ComposeFunctorsAssociativityNE (F : Functor B C) (G : Functor C D) (H : Functor D E) :
+  Lemma ComposeFunctorsAssociativityNE (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     FunctorsNaturallyEquivalent (ComposeFunctors (ComposeFunctors H G) F) (ComposeFunctors H (ComposeFunctors G F)).
     match goal with
       | [ |- FunctorsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite H'; trivial || reflexivity ]
@@ -285,21 +296,21 @@ Section FunctorNaturalEquivalenceLemmas.
   Qed.
 End FunctorNaturalEquivalenceLemmas.
 
-Polymorphic Hint Resolve PreComposeFunctorsNE PostComposeFunctorsNE ComposeFunctorsAssociativityNE : category.
-Polymorphic Hint Rewrite LeftIdentityFunctorNE RightIdentityFunctorNE : category.
-Polymorphic Hint Resolve PreComposeFunctorsNE PostComposeFunctorsNE ComposeFunctorsAssociativityNE : natural_transformation.
-Polymorphic Hint Rewrite LeftIdentityFunctorNE RightIdentityFunctorNE : natural_transformation.
+Hint Resolve @PreComposeFunctorsNE @PostComposeFunctorsNE @ComposeFunctorsAssociativityNE : category.
+Hint Rewrite @LeftIdentityFunctorNE @RightIdentityFunctorNE : category.
+Hint Resolve @PreComposeFunctorsNE @PostComposeFunctorsNE @ComposeFunctorsAssociativityNE : natural_transformation.
+Hint Rewrite @LeftIdentityFunctorNE @RightIdentityFunctorNE : natural_transformation.
 
 Section CategoryNaturalEquivalenceRelation.
 
-  Polymorphic Lemma categories_naturally_equivalent_refl C : CategoriesNaturallyEquivalent C C.
+  Lemma categories_naturally_equivalent_refl C : CategoriesNaturallyEquivalent C C.
     repeat (exists (IdentityFunctor C)); split;
       match goal with
         | [ |- FunctorsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite <- H'; reflexivity || trivial ]
       end; functor_eq.
   Qed.
 
-  Polymorphic Lemma categories_naturally_equivalent_sym C D :
+  Lemma categories_naturally_equivalent_sym C D :
     CategoriesNaturallyEquivalent C D -> CategoriesNaturallyEquivalent D C.
     destruct 1 as [ F [ G [ ? ] ] ]; repeat (esplit; try eassumption).
   Qed.
@@ -311,9 +322,9 @@ Section CategoryNaturalEquivalenceRelation.
           try solve [ repeat (rewrite ComposeFunctorsAssociativity); reflexivity || trivial ]
     end.
 
-  Polymorphic Hint Extern 1 (FunctorsNaturallyEquivalent _ (ComposeFunctors ?a (ComposeFunctors (IdentityFunctor _) ?c))) => transitivity (ComposeFunctors a c) : category.
+  Hint Extern 1 (FunctorsNaturallyEquivalent _ (ComposeFunctors ?a (ComposeFunctors (IdentityFunctor _) ?c))) => transitivity (ComposeFunctors a c) : category.
 
-  Polymorphic Lemma categories_naturally_equivalent_trans C D E :
+  Lemma categories_naturally_equivalent_trans C D E :
     CategoriesNaturallyEquivalent C D -> CategoriesNaturallyEquivalent D E -> CategoriesNaturallyEquivalent C E.
     destruct 1 as [ F [ F' [ T T' ] ] ]; destruct 1 as [ G [ G' [ U U' ] ] ].
     exists (ComposeFunctors G F); exists (ComposeFunctors F' G').

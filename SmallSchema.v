@@ -4,7 +4,11 @@ Require Import Common FEqualDep.
 
 Set Implicit Arguments.
 
-Polymorphic Record SmallSchema := {
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
+Record SmallSchema := {
   SVertex :> Set;
   SEdge : SVertex -> SVertex -> Set;
 
@@ -17,20 +21,20 @@ Polymorphic Record SmallSchema := {
     SPathsEquivalent p1 p2 -> SPathsEquivalent (AddEdge p1 E) (AddEdge p2 E)
 }.
 
-Polymorphic Hint Resolve SPreCompose SPostCompose.
+Hint Resolve SPreCompose SPostCompose.
 
-Polymorphic Theorem SPreCompose' : forall S s d (E : S.(SEdge) s d) d' (p1 p2 : path' _ d d'),
+Theorem SPreCompose' : forall S s d (E : S.(SEdge) s d) d' (p1 p2 : path' _ d d'),
   SPathsEquivalent _ p1 p2 -> SPathsEquivalent _ (prepend p1 E) (prepend p2 E).
   intros; auto.
 Qed.
 
-Polymorphic Theorem SPostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(SEdge) d d'),
+Theorem SPostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(SEdge) d d'),
   SPathsEquivalent _ p1 p2
   -> SPathsEquivalent _ (AddEdge p1 E) (AddEdge p2 E).
   intros; auto.
 Qed.
 
-Polymorphic Hint Resolve SPreCompose' SPostCompose'.
+Hint Resolve SPreCompose' SPostCompose'.
 
 Add Parametric Relation S s d : _ (@SPathsEquivalent S s d)
   reflexivity proved by (equiv_refl _ _ (@SPathsEquivalent_Equivalence _ _ _))
@@ -38,19 +42,19 @@ Add Parametric Relation S s d : _ (@SPathsEquivalent S s d)
   transitivity proved by (equiv_trans _ _ (@SPathsEquivalent_Equivalence _ _ _))
     as spaths_eq.
 
-Polymorphic Hint Resolve spaths_eq_Reflexive spaths_eq_Symmetric.
+Hint Resolve spaths_eq_Reflexive spaths_eq_Symmetric.
 
-Polymorphic Definition spath S := path' S.(SEdge).
+Definition spath S := path' S.(SEdge).
 
 Section Small2Large.
   Variables S : SmallSchema.
 
-  Polymorphic Hint Resolve SPathsEquivalent SPreCompose SPostCompose prepend_mor.
-  Polymorphic Hint Extern 1 => reflexivity.
-  Polymorphic Hint Extern 1 => symmetry; assumption.
+  Hint Resolve SPathsEquivalent SPreCompose SPostCompose prepend_mor.
+  Hint Extern 1 => reflexivity.
+  Hint Extern 1 => symmetry; assumption.
 
   (* XXX TODO: Automate this better *)
-  Polymorphic Definition SmallSchema2Schema : Schema.
+  Definition SmallSchema2Schema : Schema.
     refine {| Vertex := @SVertex S;
       Edge := @SEdge S;
       PathsEquivalent := @SPathsEquivalent S;
@@ -65,11 +69,11 @@ End Small2Large.
 
 Coercion SmallSchema2Schema : SmallSchema >-> Schema.
 
-Polymorphic Lemma SPathsEquivalent_PathsEquivalent (S : SmallSchema) s d (p p' : spath S s d) : SPathsEquivalent S p p' -> PathsEquivalent S p p'.
+Lemma SPathsEquivalent_PathsEquivalent (S : SmallSchema) s d (p p' : spath S s d) : SPathsEquivalent S p p' -> PathsEquivalent S p p'.
   simpl; trivial.
 Qed.
 
-Polymorphic Lemma PathsEquivalent_SPathsEquivalent (S : SmallSchema) s d (p p' : spath S s d) : PathsEquivalent S p p' -> SPathsEquivalent S p p'.
+Lemma PathsEquivalent_SPathsEquivalent (S : SmallSchema) s d (p p' : spath S s d) : PathsEquivalent S p p' -> SPathsEquivalent S p p'.
   simpl; trivial.
 Qed.
 
@@ -101,15 +105,15 @@ Add Parametric Morphism S s' s d :
   t.
 Qed.
 
-Polymorphic Hint Resolve sconcatenate_mor SAddEdge_mor sconcatenate'_mor sprepend_mor.
+Hint Resolve sconcatenate_mor SAddEdge_mor sconcatenate'_mor sprepend_mor.
 
 Section GeneralizedSPathEquivalence.
   Variable S : SmallSchema.
 
-  Polymorphic Inductive GeneralizedSPathsEquivalent s d (p : spath S s d) : forall s' d' (p' : spath S s' d'), Prop :=
+  Inductive GeneralizedSPathsEquivalent s d (p : spath S s d) : forall s' d' (p' : spath S s' d'), Prop :=
     | GSPathsEquivalent (p' : spath S s d) : SPathsEquivalent _ p p' -> GeneralizedSPathsEquivalent p p'.
 
-  Polymorphic Lemma GeneralizedSPathsEquivalent_SPathsEquivalent s d (p p' : spath S s d) :
+  Lemma GeneralizedSPathsEquivalent_SPathsEquivalent s d (p p' : spath S s d) :
     GeneralizedSPathsEquivalent p p' -> SPathsEquivalent _ p p'.
     intro H; inversion H.
     repeat match goal with
@@ -119,7 +123,7 @@ Section GeneralizedSPathEquivalence.
     assumption.
   Qed.
 
-  Polymorphic Lemma GeneralizedSPathsEquivalent_eq s d (p : spath S s d) s' d' (p' : spath S s' d') :
+  Lemma GeneralizedSPathsEquivalent_eq s d (p : spath S s d) s' d' (p' : spath S s' d') :
     GeneralizedSPathsEquivalent p p' -> s = s' /\ d = d'.
     intro H; inversion H.
     repeat subst.
@@ -138,16 +142,16 @@ Ltac simpl_GeneralizedSPathsEquivalent := intros;
 Section GeneralizedSPathsEquivalenceRelation.
   Variable S : SmallSchema.
 
-  Polymorphic Lemma GeneralizedSPathsEquivalent_refl s d (p : spath S s d) : GeneralizedSPathsEquivalent p p.
+  Lemma GeneralizedSPathsEquivalent_refl s d (p : spath S s d) : GeneralizedSPathsEquivalent p p.
     simpl_GeneralizedSPathsEquivalent; reflexivity.
   Qed.
 
-  Polymorphic Lemma GeneralizedSPathsEquivalent_sym s d (p : spath S s d) s' d' (p' : spath S s' d') :
+  Lemma GeneralizedSPathsEquivalent_sym s d (p : spath S s d) s' d' (p' : spath S s' d') :
     GeneralizedSPathsEquivalent p p' -> GeneralizedSPathsEquivalent p' p.
     simpl_GeneralizedSPathsEquivalent; symmetry; assumption.
   Qed.
 
-  Polymorphic Lemma GeneralizedSPathsEquivalent_trans s d (p : spath S s d) s' d' (p' : spath S s' d') s'' d'' (p'' : spath S s'' d'') :
+  Lemma GeneralizedSPathsEquivalent_trans s d (p : spath S s d) s' d' (p' : spath S s' d') s'' d'' (p'' : spath S s'' d'') :
     GeneralizedSPathsEquivalent p p' -> GeneralizedSPathsEquivalent p' p'' -> GeneralizedSPathsEquivalent p p''.
     simpl_GeneralizedSPathsEquivalent; transitivity p'; eauto.
   Qed.
@@ -157,12 +161,12 @@ End GeneralizedSPathsEquivalenceRelation.
 Section Small2LargeId.
   Variables C D : SmallSchema.
 
-  Polymorphic Lemma ss2si_helper (A : Type) (B : A -> Type) (f g : forall x : A, B x) : f = g -> forall x : A, f x = g x.
+  Lemma ss2si_helper (A : Type) (B : A -> Type) (f g : forall x : A, B x) : f = g -> forall x : A, f x = g x.
     intros; subst; reflexivity.
   Qed.
 
   (* XXX TODO: Automate this better *)
-  Polymorphic Lemma SmallSchema2SchemaId :
+  Lemma SmallSchema2SchemaId :
     SmallSchema2Schema C = SmallSchema2Schema D -> C = D.
     intro H.
     injection H; intros.
@@ -186,5 +190,5 @@ Section Small2LargeId.
   Qed.
 End Small2LargeId.
 
-Polymorphic Hint Resolve SmallSchema2SchemaId.
+Hint Resolve SmallSchema2SchemaId.
 *)

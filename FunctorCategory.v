@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section FunctorCategory.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
@@ -12,7 +16,7 @@ Section FunctorCategory.
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
    *)
-  Polymorphic Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
+  Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
     refine (@Build_SpecializedCategory _
                                        (SpecializedNaturalTransformation (C := C) (D := D))
                                        (IdentityNaturalTransformation (C := C) (D := D))
@@ -24,5 +28,4 @@ Section FunctorCategory.
   Defined.
 End FunctorCategory.
 
-Notation "C ^ D" := (FunctorCategory D C) : functor_scope.
 Notation "C ^ D" := (FunctorCategory D C) : category_scope.

@@ -4,21 +4,25 @@ Require Import Common SmallTranslation EquivalenceClass.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ComputableSchema.
   Variable O : Type.
   Variable Object2Sch : O -> SmallSchema.
 
   Local Coercion Object2Sch : O >-> SmallSchema.
 
-  Polymorphic Hint Resolve LeftIdentitySmallTranslation RightIdentitySmallTranslation f_equal2 ComposeSmallTranslationsAssociativity.
+  Hint Resolve LeftIdentitySmallTranslation RightIdentitySmallTranslation f_equal2 ComposeSmallTranslationsAssociativity.
 
-  Polymorphic Hint Resolve PreComposeSmallTranslationsEquivalent PostComposeSmallTranslationsEquivalent.
+  Hint Resolve PreComposeSmallTranslationsEquivalent PostComposeSmallTranslationsEquivalent.
 
-  Polymorphic Hint Rewrite LeftIdentitySmallTranslation RightIdentitySmallTranslation.
-  Polymorphic Hint Rewrite ComposeSmallTranslationsAssociativity.
+  Hint Rewrite LeftIdentitySmallTranslation RightIdentitySmallTranslation.
+  Hint Rewrite ComposeSmallTranslationsAssociativity.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Definition ComputableSchemaCategory : @SpecializedCategory O (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
+  Definition ComputableSchemaCategory : @SpecializedCategory O (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
     refine (Build_SpecializedCategory (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d))
       (fun o => @classOf _ _ (@SmallTranslationsEquivalent_rel _ _)
         (IdentitySmallTranslation o))

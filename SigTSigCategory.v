@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section sigT_sig_obj_mor.
@@ -16,7 +20,7 @@ Section sigT_sig_obj_mor.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Polymorphic Definition SpecializedCategory_sigT_sig : @SpecializedCategory (sigT Pobj).
+  Definition SpecializedCategory_sigT_sig : @SpecializedCategory (sigT Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -45,7 +49,7 @@ Section sigT_sig_obj_mor.
       ).
   Defined.
 
-  Polymorphic Definition sigT_sig_functor_sigT : SpecializedFunctor SpecializedCategory_sigT_sig SpecializedCategory_sigT_sig_as_sigT.
+  Definition sigT_sig_functor_sigT : SpecializedFunctor SpecializedCategory_sigT_sig SpecializedCategory_sigT_sig_as_sigT.
     refine (Build_SpecializedFunctor SpecializedCategory_sigT_sig SpecializedCategory_sigT_sig_as_sigT
       (fun x => x)
       (fun s d m => m)
@@ -55,7 +59,7 @@ Section sigT_sig_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Polymorphic Definition sigT_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig_as_sigT SpecializedCategory_sigT_sig.
+  Definition sigT_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig_as_sigT SpecializedCategory_sigT_sig.
     refine (Build_SpecializedFunctor SpecializedCategory_sigT_sig_as_sigT SpecializedCategory_sigT_sig
       (fun x => x)
       (fun s d m => m)
@@ -65,12 +69,12 @@ Section sigT_sig_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Polymorphic Lemma sigT_sig_sigT_compat :
+  Lemma sigT_sig_sigT_compat :
     ComposeFunctors sigT_sig_functor_sigT sigT_functor_sigT_sig = IdentityFunctor _ /\
     ComposeFunctors sigT_functor_sigT_sig sigT_sig_functor_sigT = IdentityFunctor _.
     split; functor_eq; destruct_sig; reflexivity.
   Qed.
 
-  Polymorphic Definition proj1_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig A
+  Definition proj1_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig A
     := ComposeFunctors projT1_functor sigT_sig_functor_sigT.
 End sigT_sig_obj_mor.

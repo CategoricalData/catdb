@@ -6,12 +6,16 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section GraphObj.
   Context `(C : @SpecializedCategory objC).
 
-  Polymorphic Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
+  Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
 
-  Polymorphic Definition GraphIndex_Morphism (a b : GraphIndex) : Set :=
+  Definition GraphIndex_Morphism (a b : GraphIndex) : Set :=
     match (a, b) with
       | (GraphIndexSource, GraphIndexSource) => unit
       | (GraphIndexTarget, GraphIndexTarget) => unit
@@ -21,12 +25,12 @@ Section GraphObj.
 
   Global Arguments GraphIndex_Morphism a b /.
 
-  Polymorphic Definition GraphIndex_Compose s d d' (m1 : GraphIndex_Morphism d d') (m2 : GraphIndex_Morphism s d) :
+  Definition GraphIndex_Compose s d d' (m1 : GraphIndex_Morphism d d') (m2 : GraphIndex_Morphism s d) :
     GraphIndex_Morphism s d'.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Polymorphic Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
+  Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
     refine (@Build_SpecializedCategory _
                                        GraphIndex_Morphism
                                        (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end)
@@ -39,7 +43,7 @@ Section GraphObj.
       ).
   Defined.
 
-  Polymorphic Definition UnderlyingGraph_ObjectOf x :=
+  Definition UnderlyingGraph_ObjectOf x :=
     match x with
       | GraphIndexSource => { sd : objC * objC & C.(Morphism) (fst sd) (snd sd) }
       | GraphIndexTarget => objC
@@ -47,7 +51,7 @@ Section GraphObj.
 
   Global Arguments UnderlyingGraph_ObjectOf x /.
 
-  Polymorphic Definition UnderlyingGraph_MorphismOf s d (m : Morphism GraphIndexingCategory s d) :
+  Definition UnderlyingGraph_MorphismOf s d (m : Morphism GraphIndexingCategory s d) :
     UnderlyingGraph_ObjectOf s -> UnderlyingGraph_ObjectOf d :=
     match (s, d) as sd return
       Morphism GraphIndexingCategory (fst sd) (snd sd) ->
@@ -63,7 +67,7 @@ Section GraphObj.
       | (GraphIndexTarget, GraphIndexTarget) => fun _ => @id _
     end m.
 
-  Polymorphic Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
+  Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
@@ -77,8 +81,8 @@ Section GraphObj.
     abstract (
       unfold UnderlyingGraph_MorphismOf; simpl; intros;
         destruct_type GraphIndex;
-        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
-          trivial; try destruct_to_empty_set
+        autorewrite with morphism;
+        trivial; try destruct_to_empty_set
     ).
   Defined.
 End GraphObj.
@@ -98,7 +102,7 @@ Section GraphFunctor.
                | _ => progress destruct_sig; simpl in *
              end.
 
-  Polymorphic Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
+  Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
     Morphism (TypeCat ^ GraphIndexingCategory) (UnderlyingGraph C) (UnderlyingGraph D).
   Proof.
     exists (fun c => match c as c return (UnderlyingGraph C) c -> (UnderlyingGraph D) c with
@@ -108,7 +112,7 @@ Section GraphFunctor.
     abstract t.
   Defined.
 
-  Polymorphic Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
+  Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
   Proof.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
@@ -137,9 +141,9 @@ Section FreeCategory.
 
   Let vertices := F GraphIndexTarget.
 
-  Polymorphic Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
+  Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
 
-  Polymorphic Definition FreeCategory : SpecializedCategory vertices.
+  Definition FreeCategory : SpecializedCategory vertices.
   Proof.
     refine (@Build_SpecializedCategory
               vertices

@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 (*
@@ -13,12 +17,12 @@ Local Open Scope category_scope.
 
 Section covariant_contravariant.
   Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
-  Polymorphic Definition CovariantHomFunctor `(C : @SpecializedCategory objC) (A : OppositeCategory C) :=
+  Definition CovariantHomFunctor `(C : @SpecializedCategory objC) (A : OppositeCategory C) :=
     Eval simpl in ((HomFunctor C) [ A, - ])%functor.
-  Polymorphic Definition ContravariantHomFunctor `(C : @SpecializedCategory objC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+  Definition ContravariantHomFunctor `(C : @SpecializedCategory objC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
 
-  Polymorphic Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
-  Polymorphic Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
+  Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
+  Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
 End covariant_contravariant.
 
 but that would introduce an extra identity morphism which some tactics
@@ -32,7 +36,7 @@ Section HomFunctor.
   Section Covariant.
     Variable A : COp.
 
-    Polymorphic Definition CovariantHomFunctor : SpecializedFunctor C TypeCat.
+    Definition CovariantHomFunctor : SpecializedFunctor C TypeCat.
       refine (Build_SpecializedFunctor C TypeCat
         (fun X : C => C.(Morphism) A X : TypeCat)
         (fun X Y f => (fun g : C.(Morphism) A X => Compose f g))
@@ -46,7 +50,7 @@ Section HomFunctor.
   Section Contravariant.
     Variable B : C.
 
-    Polymorphic Definition ContravariantHomFunctor : SpecializedFunctor COp TypeCat.
+    Definition ContravariantHomFunctor : SpecializedFunctor COp TypeCat.
       refine (Build_SpecializedFunctor COp TypeCat
         (fun X : COp => COp.(Morphism) B X : TypeCat)
         (fun X Y (h : COp.(Morphism) X Y) => (fun g : COp.(Morphism) B X => Compose h g))
@@ -57,9 +61,9 @@ Section HomFunctor.
     Defined.
   End Contravariant.
 
-  Polymorphic Definition hom_functor_object_of (c'c : COp * C) := C.(Morphism) (fst c'c) (snd c'c) : TypeCat.
+  Definition hom_functor_object_of (c'c : COp * C) := C.(Morphism) (fst c'c) (snd c'c) : TypeCat.
 
-  Polymorphic Definition hom_functor_morphism_of (s's : (COp * C)%type) (d'd : (COp * C)%type) (hf : (COp * C).(Morphism) s's d'd) :
+  Definition hom_functor_morphism_of (s's : (COp * C)%type) (d'd : (COp * C)%type) (hf : (COp * C).(Morphism) s's d'd) :
     TypeCat.(Morphism) (hom_functor_object_of s's) (hom_functor_object_of d'd).
     unfold hom_functor_object_of in *.
     destruct s's as [ s' s ], d'd as [ d' d ].
@@ -68,7 +72,7 @@ Section HomFunctor.
     exact (Compose f (Compose g h)).
   Defined.
 
-  Polymorphic Definition HomFunctor : SpecializedFunctor (COp * C) TypeCat.
+  Definition HomFunctor : SpecializedFunctor (COp * C) TypeCat.
     refine (Build_SpecializedFunctor (COp * C) TypeCat
       (fun c'c : COp * C => C.(Morphism) (fst c'c) (snd c'c) : TypeCat)
       (fun X Y (hf : (COp * C).(Morphism) X Y) => hom_functor_morphism_of hf)
@@ -88,7 +92,7 @@ Section SplitHomFunctor.
   Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
-  Polymorphic Lemma SplitHom (X Y : COp * C) : forall gh,
+  Lemma SplitHom (X Y : COp * C) : forall gh,
     MorphismOf (HomFunctor C) (s := X) (d := Y) gh =
     (Compose
       (MorphismOf (ContravariantHomFunctor C (snd Y)) (s := fst X) (d := fst Y) (fst gh))
@@ -102,7 +106,7 @@ Section SplitHomFunctor.
     reflexivity.
   Qed.
 
-  Polymorphic Lemma SplitHom' (X Y : COp * C) : forall gh,
+  Lemma SplitHom' (X Y : COp * C) : forall gh,
     MorphismOf (HomFunctor C) (s := X) (d := Y) gh =
     (Compose
       (MorphismOf (CovariantHomFunctor C (fst Y)) (s := snd X) (d := snd Y) (snd gh))

@@ -6,26 +6,28 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Category.
   Context `{C : @SpecializedCategory obj}.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
   (* [Definitions] don't get sort-polymorphism :-(  *)
-  Polymorphic Definition IsInverseOf'1 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    C.(Compose') _ _ _ m' m = C.(Identity') s.
-  Polymorphic Definition IsInverseOf'2 (s d : obj) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
-    C.(Compose') _ _ _ m m' = C.(Identity') d.
+  Definition IsInverseOf1 (s d : C) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
+    Compose m' m = Identity s.
+  Definition IsInverseOf2 (s d : C) (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop :=
+    Compose m m' = Identity d.
 
-  Global Arguments IsInverseOf'1 / _ _ _ _.
-  Global Arguments IsInverseOf'2 / _ _ _ _.
+  Global Arguments IsInverseOf1 / _ _ _ _.
+  Global Arguments IsInverseOf2 / _ _ _ _.
 
-  Polymorphic Definition IsInverseOf' {s d : obj} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
-    @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
-  Polymorphic Definition IsInverseOf {s d} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
-    @IsInverseOf'1 s d m m' /\ @IsInverseOf'2 s d m m'.
+  Definition IsInverseOf {s d : C} (m : C.(Morphism) s d) (m' : C.(Morphism) d s) : Prop := Eval simpl in
+    @IsInverseOf1 s d m m' /\ @IsInverseOf2 s d m m'.
 
-  Polymorphic Lemma IsInverseOf_sym s d m m' : @IsInverseOf s d m m' -> @IsInverseOf d s m' m.
+  Lemma IsInverseOf_sym s d m m' : @IsInverseOf s d m m' -> @IsInverseOf d s m' m.
     firstorder.
   Qed.
 
@@ -46,27 +48,27 @@ Section Category.
   (* [Record]s are [Inductive] and get sort-polymorphism *)
   Section IsomorphismOf.
     (* A morphism is an isomorphism if it has an inverse *)
-    Polymorphic Record IsomorphismOf {s d : C} (m : C.(Morphism) s d) := {
+    Record IsomorphismOf {s d : C} (m : C.(Morphism) s d) := {
       IsomorphismOf_Morphism :> C.(Morphism) s d := m;
       Inverse : C.(Morphism) d s;
       LeftInverse : Compose Inverse m = Identity s;
       RightInverse : Compose m Inverse = Identity d
     }.
 
-    Polymorphic Hint Resolve RightInverse LeftInverse : category.
-    Polymorphic Hint Resolve RightInverse LeftInverse : morphism.
+    Hint Resolve RightInverse LeftInverse : category.
+    Hint Resolve RightInverse LeftInverse : morphism.
 
-    Polymorphic Definition IsomorphismOf_sig2 {s d : C} (m : C.(Morphism) s d) (i : @IsomorphismOf s d m) :
+    Definition IsomorphismOf_sig2 {s d : C} (m : C.(Morphism) s d) (i : @IsomorphismOf s d m) :
       { m' | Compose m' m = Identity s & Compose m m' = Identity d }.
       exists (Inverse i);
         [ apply LeftInverse | apply RightInverse ].
     Defined.
 
-    Polymorphic Definition IsomorphismOf_sig {s d : C} (m : C.(Morphism) s d) := { m' | Compose m' m = Identity s & Compose m m' = Identity d }.
+    Definition IsomorphismOf_sig {s d : C} (m : C.(Morphism) s d) := { m' | Compose m' m = Identity s & Compose m m' = Identity d }.
 
     Global Identity Coercion Isomorphism_sig : IsomorphismOf_sig >-> sig2.
 
-    Polymorphic Definition sig2_IsomorphismOf {s d : C} (m : C.(Morphism) s d) (i : @IsomorphismOf_sig s d m) :
+    Definition sig2_IsomorphismOf {s d : C} (m : C.(Morphism) s d) (i : @IsomorphismOf_sig s d m) :
       @IsomorphismOf s d m.
       exists (proj1_sig i);
         [ apply (proj2_sig i) | apply (proj3_sig i) ].
@@ -75,15 +77,15 @@ Section Category.
     Global Coercion IsomorphismOf_sig2 : IsomorphismOf >-> sig2.
     Global Coercion sig2_IsomorphismOf : IsomorphismOf_sig >-> IsomorphismOf.
 
-    Polymorphic Definition IsomorphismOf_Identity (c : C) : IsomorphismOf (Identity c).
+    Definition IsomorphismOf_Identity (c : C) : IsomorphismOf (Identity c).
       exists (Identity _); auto with morphism.
     Defined.
 
-    Polymorphic Definition InverseOf {s d : C} (m : C.(Morphism) s d) (i : IsomorphismOf m) : IsomorphismOf (Inverse i).
+    Definition InverseOf {s d : C} (m : C.(Morphism) s d) (i : IsomorphismOf m) : IsomorphismOf (Inverse i).
       exists (i : Morphism C _ _); auto with morphism.
     Defined.
 
-    Polymorphic Definition ComposeIsomorphismOf {s d d' : C} {m1 : C.(Morphism) d d'} {m2 : C.(Morphism) s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
+    Definition ComposeIsomorphismOf {s d d' : C} {m1 : C.(Morphism) d d'} {m2 : C.(Morphism) s d} (i1 : IsomorphismOf m1) (i2 : IsomorphismOf m2) :
       IsomorphismOf (Compose m1 m2).
       exists (Compose (Inverse i2) (Inverse i1));
       abstract (
@@ -96,7 +98,7 @@ Section Category.
   End IsomorphismOf.
 
   Section Isomorphism.
-    Polymorphic Record Isomorphism (s d : C) := {
+    Record Isomorphism (s d : C) := {
       Isomorphism_Morphism : C.(Morphism) s d;
       Isomorphism_Of :> IsomorphismOf Isomorphism_Morphism
     }.
@@ -105,18 +107,18 @@ Section Category.
   End Isomorphism.
 
   Section IsIsomorphism.
-    Polymorphic Definition IsIsomorphism {s d : C} (m : C.(Morphism) s d) : Prop :=
+    Definition IsIsomorphism {s d : C} (m : C.(Morphism) s d) : Prop :=
       exists m', IsInverseOf m m'.
 
-    Polymorphic Lemma IsmorphismOf_IsIsomorphism {s d : C} (m : C.(Morphism) s d) : IsomorphismOf m -> IsIsomorphism m.
+    Lemma IsomrphismOf_IsIsomorphism {s d : C} (m : C.(Morphism) s d) : IsomorphismOf m -> IsIsomorphism m.
       intro i; hnf.
       exists (Inverse i);
         destruct i; simpl;
-          split; present_spcategory;
-            assumption.
+        split;
+        assumption.
     Qed.
 
-    Polymorphic Lemma IsIsomorphism_IsmorphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
+    Lemma IsIsomorphism_IsomrphismOf {s d : C} (m : C.(Morphism) s d) : IsIsomorphism m -> exists _ : IsomorphismOf m, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
       eexists; eassumption.
@@ -124,16 +126,16 @@ Section Category.
   End IsIsomorphism.
 
   Section Isomorphic.
-    Polymorphic Definition Isomorphic (s d : C) : Prop :=
+    Definition Isomorphic (s d : C) : Prop :=
       exists (m : C.(Morphism) s d) (m' : C.(Morphism) d s), IsInverseOf m m'.
 
-    Polymorphic Lemma Ismorphism_Isomorphic s d : Isomorphism s d -> Isomorphic s d.
+    Lemma Isomrphism_Isomorphic s d : Isomorphism s d -> Isomorphic s d.
       intro i; destruct i as [ m i ].
       exists m.
-      apply IsmorphismOf_IsIsomorphism; assumption.
+      apply IsomrphismOf_IsIsomorphism; assumption.
     Qed.
 
-    Polymorphic Lemma Isomorphic_Isomorphism s d : Isomorphic s d -> exists _ : Isomorphism s d, True.
+    Lemma Isomorphic_Isomorphism s d : Isomorphic s d -> exists _ : Isomorphism s d, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
       repeat esplit; eassumption.
@@ -142,7 +144,7 @@ Section Category.
     Local Ltac t_iso' := intros;
       repeat match goal with
                | [ i : Isomorphic _ _ |- _ ] => destruct (Isomorphic_Isomorphism i) as [ ? [] ] ; clear i
-               | [ |- Isomorphic _ _ ] => apply Ismorphism_Isomorphic
+               | [ |- Isomorphic _ _ ] => apply Isomrphism_Isomorphic
              end.
 
     Local Ltac t_iso:= t_iso';
@@ -151,23 +153,22 @@ Section Category.
                | [ |- Isomorphism _ _ ] => eapply Build_Isomorphism
              end.
 
-    Polymorphic Hint Resolve IsomorphismOf_Identity InverseOf ComposeIsomorphismOf : category.
-    Polymorphic Hint Resolve IsomorphismOf_Identity InverseOf ComposeIsomorphismOf : morphism.
-    Local Polymorphic Hint Extern 1 => eassumption.
+    Hint Resolve @IsomorphismOf_Identity @InverseOf @ComposeIsomorphismOf : category morphism.
+    Local Hint Extern 1 => eassumption.
 
-    Polymorphic Lemma Isomorphic_refl c : Isomorphic c c.
+    Lemma Isomorphic_refl c : Isomorphic c c.
       t_iso.
       apply IsomorphismOf_Identity.
     Qed.
 
-    Polymorphic Lemma Isomorphic_sym s d : Isomorphic s d -> Isomorphic d s.
+    Lemma Isomorphic_sym s d : Isomorphic s d -> Isomorphic d s.
       t_iso.
       eauto with morphism.
       Grab Existential Variables.
       eauto with morphism.
     Qed.
 
-    Polymorphic Lemma Isomorphic_trans s d d' : Isomorphic s d -> Isomorphic d d' -> Isomorphic s d'.
+    Lemma Isomorphic_trans s d d' : Isomorphic s d -> Isomorphic d d' -> Isomorphic s d'.
       t_iso.
       apply @ComposeIsomorphismOf;
         eauto with morphism.
@@ -181,24 +182,21 @@ Section Category.
   End Isomorphic.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma iso_is_epi s d (m : _ s d) : IsIsomorphism m -> IsEpimorphism' (C := C) m.
+  Lemma iso_is_epi s d (m : _ s d) : IsIsomorphism m -> IsEpimorphism (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
-    present_spcategory.
     transitivity (Compose m1 (Compose m x)); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
     transitivity (Compose m2 (Compose m x)); [ repeat rewrite <- Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma iso_is_mono s d (m : _ s d) : IsIsomorphism m -> IsMonomorphism' (C := C) m.
+  Lemma iso_is_mono s d (m : _ s d) : IsIsomorphism m -> IsMonomorphism (C := C) m.
     destruct 1 as [ x [ i0 i1 ] ]; intros z m1 m2 e.
-    present_spcategory.
     transitivity (Compose (Compose x m) m1); [ rewrite_hyp; autorewrite with morphism | ]; trivial.
     transitivity (Compose (Compose x m) m2); [ repeat rewrite Associativity | ]; rewrite_hyp; autorewrite with morphism; trivial.
   Qed.
 End Category.
 
-Polymorphic Hint Resolve RightInverse LeftInverse IsomorphismOf_Identity ComposeIsomorphismOf : category.
-Polymorphic Hint Resolve RightInverse LeftInverse IsomorphismOf_Identity ComposeIsomorphismOf : morphism.
+Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorphismOf : category morphism.
 
 Ltac eapply_by_compose H :=
   match goal with
@@ -233,35 +231,35 @@ Ltac pre_compose_to_identity :=
 Section CategoryObjects1.
   Context `(C : @SpecializedCategory obj).
 
-  Polymorphic Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
+  Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
 
-  Polymorphic Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
+  Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
     forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | IsIsomorphism m & is_unique m }.
 
   Section terminal.
     (* A terminal object is an object with a unique morphism from every other object. *)
-    Polymorphic Definition IsTerminalObject' (o : C) : Prop :=
+    Definition IsTerminalObject' (o : C) : Prop :=
       forall o', exists! m : C.(Morphism) o' o, True.
 
-    Polymorphic Definition IsTerminalObject (o : C) :=
+    Definition IsTerminalObject (o : C) :=
       forall o', { m : C.(Morphism) o' o | is_unique m }.
 
-    Polymorphic Record TerminalObject :=
+    Record TerminalObject :=
       {
         TerminalObject_Object' : obj;
-        TerminalObject_Morphism : forall o, Morphism' C o TerminalObject_Object';
+        TerminalObject_Morphism : forall o, Morphism C o TerminalObject_Object';
         TerminalObject_Property : forall o, is_unique (TerminalObject_Morphism o)
       }.
 
-    Polymorphic Definition TerminalObject_Object : TerminalObject -> C := TerminalObject_Object'.
+    Definition TerminalObject_Object : TerminalObject -> C := TerminalObject_Object'.
 
     Global Coercion TerminalObject_Object : TerminalObject >-> Object.
 
-    Polymorphic Definition TerminalObject_IsTerminalObject (o : TerminalObject) : IsTerminalObject o
+    Definition TerminalObject_IsTerminalObject (o : TerminalObject) : IsTerminalObject o
       := fun o' => exist _ (TerminalObject_Morphism o o') (TerminalObject_Property o o').
 
-    Polymorphic Definition IsTerminalObject_TerminalObject o : IsTerminalObject o -> TerminalObject
+    Definition IsTerminalObject_TerminalObject o : IsTerminalObject o -> TerminalObject
       := fun H => @Build_TerminalObject o (fun o' => proj1_sig (H o')) (fun o' => proj2_sig (H o')).
 
     Global Coercion TerminalObject_IsTerminalObject : TerminalObject >-> IsTerminalObject.
@@ -270,27 +268,27 @@ Section CategoryObjects1.
 
   Section initial.
     (* An initial object is an object with a unique morphism from every other object. *)
-    Polymorphic Definition IsInitialObject' (o : C) : Prop :=
+    Definition IsInitialObject' (o : C) : Prop :=
       forall o', exists! m : C.(Morphism) o o', True.
 
-    Polymorphic Definition IsInitialObject (o : C) :=
+    Definition IsInitialObject (o : C) :=
       forall o', { m : C.(Morphism) o o' | is_unique m }.
 
-    Polymorphic Record InitialObject :=
+    Record InitialObject :=
       {
         InitialObject_Object' :> obj;
-        InitialObject_Morphism : forall o, Morphism' C InitialObject_Object' o;
+        InitialObject_Morphism : forall o, Morphism C InitialObject_Object' o;
         InitialObject_Property : forall o, is_unique (InitialObject_Morphism o)
       }.
 
-    Polymorphic Definition InitialObject_Object : InitialObject -> C := InitialObject_Object'.
+    Definition InitialObject_Object : InitialObject -> C := InitialObject_Object'.
 
     Global Coercion InitialObject_Object : InitialObject >-> Object.
 
-    Polymorphic Definition InitialObject_IsInitialObject (o : InitialObject) : IsInitialObject o
+    Definition InitialObject_IsInitialObject (o : InitialObject) : IsInitialObject o
       := fun o' => exist _ (InitialObject_Morphism o o') (InitialObject_Property o o').
 
-    Polymorphic Definition IsInitialObject_InitialObject o : IsInitialObject o -> InitialObject
+    Definition IsInitialObject_InitialObject o : IsInitialObject o -> InitialObject
       := fun H => @Build_InitialObject o (fun o' => proj1_sig (H o')) (fun o' => proj2_sig (H o')).
 
     Global Coercion InitialObject_IsInitialObject : InitialObject >-> IsInitialObject.
@@ -315,12 +313,12 @@ Section CategoryObjects2.
              end; eauto with category; try split; try solve [ etransitivity; eauto with category ].
 
   (* The terminal object is unique up to unique isomorphism. *)
-  Polymorphic Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (IsTerminalObject (C := C)).
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (IsTerminalObject (C := C)).
     unique.
   Qed.
 
   (* The initial object is unique up to unique isomorphism. *)
-  Polymorphic Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (IsInitialObject (C := C)).
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (IsInitialObject (C := C)).
     unique.
   Qed.
 End CategoryObjects2.

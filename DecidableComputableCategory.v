@@ -4,6 +4,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ComputableCategory.
   Variable I : Type.
   Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
@@ -12,5 +16,5 @@ Section ComputableCategory.
 
   Let eq_dec_on_cat `(C : @SpecializedCategory objC) := forall x y : objC, {x = y} + {x <> y}.
 
-  Polymorphic Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj _ (@ComputableCategory _ _ Index2Cat) (fun C => eq_dec_on_cat C).
+  Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj _ (@ComputableCategory _ _ Index2Cat) (fun C => eq_dec_on_cat C).
 End ComputableCategory.

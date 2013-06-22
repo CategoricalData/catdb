@@ -3,14 +3,18 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section PCategory.
   Variable V : Type.
   Variable E : V -> V -> Type.
 
-  Polymorphic Hint Immediate concatenate_associative.
-  Polymorphic Hint Rewrite concatenate_associative.
+  Hint Immediate concatenate_associative.
+  Hint Rewrite concatenate_associative.
 
-  Polymorphic Definition PathsCategory : @SpecializedCategory V.
+  Definition PathsCategory : @SpecializedCategory V.
     refine (@Build_SpecializedCategory _
                                        (@path V E)
                                        (@NoEdges _ _)

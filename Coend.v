@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Ltac t := simpl in *; subst_body;
   repeat (let H := fresh in intro H; hnf in H); subst;
     simpl in *;
@@ -42,11 +46,11 @@ Section Coend.
 
   Let MorC := @MorphismFunctor _ _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
 
-  Variable Fmor : ∐_{ c0c1f : MorC } (F (snd (projT1 c0c1f), fst (projT1 c0c1f))).
-  Variable Fob : ∐_{ c } (F (c, c)).
+  Variable Fmor : ∐_{ c0c1f : MorC } (F (snd (projT1 c0c1f), fst (projT1 c0c1f)) : D).
+  Variable Fob : ∐_{ c } (F (c, c) : D).
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the domain of the relevant morphism. *)
-  Polymorphic Definition Coend_Fdom : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
+  Definition Coend_Fdom : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
     apply (InducedColimitMap (G := InducedDiscreteFunctor _ (DomainNaturalTransformation _ (fun _ => C) tt))).
     hnf; simpl.
     match goal with
@@ -60,7 +64,7 @@ Section Coend.
   Defined.
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the codomain of the relevant morphism. *)
-  Polymorphic Definition Coend_Fcod : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
+  Definition Coend_Fcod : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
     apply (InducedColimitMap (G := InducedDiscreteFunctor _ (CodomainNaturalTransformation _ (fun _ => C) tt))).
     hnf; simpl.
     match goal with
@@ -73,7 +77,7 @@ Section Coend.
     abstract t.
   Defined.
 
-  Polymorphic Definition Coend := Coequalizer D _ _ Coend_Fdom Coend_Fcod.
+  Definition Coend := Coequalizer D _ _ Coend_Fdom Coend_Fcod.
 End Coend.
 
 (* TODO: Figure out why the notation for this is the same as the notation for the Grothendieck construction *)

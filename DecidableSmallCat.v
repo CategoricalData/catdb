@@ -4,9 +4,13 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section SmallCat.
   Let eq_dec_on_cat `(C : @SpecializedCategory objC) := forall x y : objC, {x = y} + {x <> y}.
 
-  Polymorphic Definition SmallCatDec := SpecializedCategory_sigT_obj SmallCat (fun C => eq_dec_on_cat C).
-  Polymorphic Definition LocallySmallCatDec := SpecializedCategory_sigT_obj LocallySmallCat (fun C => eq_dec_on_cat C).
+  Definition SmallCatDec := SpecializedCategory_sigT_obj SmallCat (fun C => eq_dec_on_cat C).
+  Definition LocallySmallCatDec := SpecializedCategory_sigT_obj LocallySmallCat (fun C => eq_dec_on_cat C).
 End SmallCat.

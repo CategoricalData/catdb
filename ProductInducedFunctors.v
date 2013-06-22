@@ -5,8 +5,11 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Ltac t :=
-  present_spfunctor;
   intros; simpl; repeat (rewrite <- FCompositionOf || rewrite <- FIdentityOf);
   apply f_equal; expand; autorewrite with morphism;
   reflexivity.
@@ -18,16 +21,16 @@ Section ProductInducedFunctors.
 
   Variable F : SpecializedFunctor (C * D) E.
 
-  Polymorphic Definition InducedProductFstFunctor (d : D) : SpecializedFunctor C E.
-    refine {| ObjectOf' := (fun c => F (c, d));
-      MorphismOf' := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
+  Definition InducedProductFstFunctor (d : D) : SpecializedFunctor C E.
+    refine {| ObjectOf := (fun c => F (c, d));
+      MorphismOf := (fun _ _ m => MorphismOf F (s := (_, d)) (d := (_, d)) (m, Identity d))
     |};
     abstract t.
   Defined.
 
-  Polymorphic Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
-    refine {| ObjectOf' := (fun d => F (c, d));
-      MorphismOf' := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
+  Definition InducedProductSndFunctor (c : C) : SpecializedFunctor D E.
+    refine {| ObjectOf := (fun d => F (c, d));
+      MorphismOf := (fun _ _ m => MorphismOf F (s := (c, _)) (d := (c, _)) (Identity c, m))
     |};
     abstract t.
   Defined.
@@ -43,7 +46,7 @@ Section ProductInducedNaturalTransformations.
 
   Variable F : SpecializedFunctor (C * D) E.
 
-  Polymorphic Definition InducedProductFstNaturalTransformation {s d} (m : Morphism C s d) : SpecializedNaturalTransformation (F ⟨ s, - ⟩) (F ⟨ d, - ⟩).
+  Definition InducedProductFstNaturalTransformation {s d} (m : Morphism C s d) : SpecializedNaturalTransformation (F ⟨ s, - ⟩) (F ⟨ d, - ⟩).
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
         refine (Build_SpecializedNaturalTransformation F0 G0
@@ -54,7 +57,7 @@ Section ProductInducedNaturalTransformations.
     abstract t.
   Defined.
 
-  Polymorphic Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F ⟨ -, s ⟩) (F ⟨ - , d ⟩).
+  Definition InducedProductSndNaturalTransformation {s d} (m : Morphism D s d) : SpecializedNaturalTransformation (F ⟨ -, s ⟩) (F ⟨ - , d ⟩).
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
         refine (Build_SpecializedNaturalTransformation F0 G0

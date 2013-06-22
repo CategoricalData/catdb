@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
@@ -32,7 +36,7 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Polymorphic Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
+    Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
       match goal with
         | [ |- SpecializedFunctor ?C0 ?D0 ] =>
           refine (Build_SpecializedFunctor C0 D0
@@ -57,7 +61,7 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Polymorphic Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
+    Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
       match goal with
         | [ |- SpecializedFunctor ?C0 ?D0 ] =>
           refine (Build_SpecializedFunctor C0 D0
@@ -77,12 +81,12 @@ Section YonedaLemma.
   Let COp := OppositeCategory C : SpecializedCategory _.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
-  Polymorphic Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
+  Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
 
-  Polymorphic Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
+  Definition YonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ C) : Morphism TypeCat (X c) (Morphism (TypeCat ^ C) (Yoneda C c) X).
     simpl; intro Xc.
     hnf.
     match goal with
@@ -101,7 +105,7 @@ Section YonedaLemma.
     ).
   Defined.
 
-  Polymorphic Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
+  Lemma YonedaLemma (c : C) (X : TypeCat ^ C) : IsIsomorphism (@YonedaLemmaMorphism c X).
     exists (@YonedaLemmaMorphismInverse c X).
     unfold YonedaLemmaMorphismInverse, YonedaLemmaMorphism.
     pose (FIdentityOf X).
@@ -116,12 +120,14 @@ Section CoYonedaLemma.
   Context `(C : @SpecializedCategory objC).
   Let COp := OppositeCategory C.
 
-  Polymorphic Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (Morphism _ (CoYoneda C c) X) (X c).
+  Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp)
+  : Morphism TypeCat (Morphism (TypeCat ^ COp) (CoYoneda C c) X) (X c).
     simpl; intro a.
     exact (a c (Identity _)).
   Defined.
 
-  Polymorphic Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp) : Morphism TypeCat (X c) (Morphism _ (CoYoneda C c) X).
+  Definition CoYonedaLemmaMorphismInverse (c : C) (X : TypeCat ^ COp)
+  : Morphism TypeCat (X c) (Morphism (TypeCat ^ COp) (CoYoneda C c) X).
     simpl; intro Xc.
     hnf.
     match goal with
@@ -140,13 +146,13 @@ Section CoYonedaLemma.
     ).
   Defined.
 
-  Polymorphic Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
+  Lemma CoYonedaLemma (c : C) (X : TypeCat ^ COp) : IsIsomorphism (@CoYonedaLemmaMorphism c X).
     exists (@CoYonedaLemmaMorphismInverse c X).
-    split; simpl; nt_eq; clear; present_spcategory;
+    split; simpl; nt_eq; clear;
     [ | pose (FIdentityOf X); fg_equal; trivial ];
     pose (FCompositionOf X);
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;
-    simpl; present_spcategory;
+    simpl;
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 End CoYonedaLemma.
@@ -154,7 +160,7 @@ End CoYonedaLemma.
 Section FullyFaithful.
   Context `(C : @SpecializedCategory objC).
 
-  Polymorphic Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
+  Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@YonedaLemma _ C c (CovariantHomFunctor C c')) as [ m i ].
@@ -163,14 +169,14 @@ Section FullyFaithful.
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 
-  Polymorphic Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
+  Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
     destruct (@CoYonedaLemma _ C c (ContravariantHomFunctor C c')) as [ m i ].
     exists (CoYonedaLemmaMorphism (X := ContravariantHomFunctor C c')).
     t_with t'; nt_eq; autorewrite with morphism; trivial.
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;
-      simpl; present_spcategory;
+      simpl;
       apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
   Qed.
 End FullyFaithful.

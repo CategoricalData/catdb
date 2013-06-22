@@ -6,20 +6,23 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section FunctorFromDiscrete.
   Variable O : Type.
   Context `(D : @SpecializedCategory objD).
   Variable objOf : O -> objD.
 
-  Let FunctorFromDiscrete_MorphismOf s d (m : Morphism' (DiscreteCategory O) s d) : Morphism' D (objOf s) (objOf d)
+  Let FunctorFromDiscrete_MorphismOf s d (m : Morphism (DiscreteCategory O) s d) : Morphism D (objOf s) (objOf d)
     := match m with
          | eq_refl => Identity _
        end.
 
-  Polymorphic Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
+  Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
   Proof.
-    refine {| ObjectOf' := objOf; MorphismOf' := FunctorFromDiscrete_MorphismOf |};
-      present_spcategory;
+    refine {| ObjectOf := objOf; MorphismOf := FunctorFromDiscrete_MorphismOf |};
       abstract (
         intros; hnf in *; subst; simpl;
           auto with category
@@ -33,7 +36,7 @@ Section Obj.
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
           (fun C' => Index2Object C')
-          (fun _ _ F => ObjectOf' F)
+          (fun _ _ F => ObjectOf F)
           _
           _
         )
@@ -45,7 +48,7 @@ Section Obj.
     Variable Index2Object : I -> Type.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
+    Definition ObjectFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
       build_ob_functor Index2Object.
     Defined.
   End type.
@@ -55,7 +58,7 @@ Section Obj.
     Variable Index2Object : I -> Set.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctorToSet : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) SetCat.
+    Definition ObjectFunctorToSet : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) SetCat.
       build_ob_functor Index2Object.
     Defined.
   End set.
@@ -65,7 +68,7 @@ Section Obj.
     Variable Index2Object : I -> Prop.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition ObjectFunctorToProp : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) PropCat.
+    Definition ObjectFunctorToProp : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) PropCat.
       build_ob_functor Index2Object.
     Defined.
   End prop.
@@ -80,11 +83,11 @@ Section Mor.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
-          (fun C' => { sd : Index2Object C' * Index2Object C' & (Index2Cat C').(Morphism') (fst sd) (snd sd) } )
+          (fun C' => { sd : Index2Object C' * Index2Object C' & (Index2Cat C').(Morphism) (fst sd) (snd sd) } )
           (fun _ _ F => (fun sdm =>
-            existT (fun sd => Morphism' _ (fst sd) (snd sd))
+            existT (fun sd => Morphism _ (fst sd) (snd sd))
             (F (fst (projT1 sdm)), F (snd (projT1 sdm)))
-            (MorphismOf' F (fst (projT1 sdm)) (snd (projT1 sdm)) (projT2 sdm))
+            (MorphismOf F (s := fst (projT1 sdm)) (d := snd (projT1 sdm)) (projT2 sdm))
           ))
           _
           _
@@ -100,7 +103,7 @@ Section Mor.
     Variable Index2Object : I -> Type.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition MorphismFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
+    Definition MorphismFunctor : SpecializedFunctor (@ComputableCategory _ _ Index2Cat) TypeCat.
       build_mor_functor Index2Object Index2Cat.
     Defined.
   End type.
@@ -124,11 +127,11 @@ Section dom_cod.
     Variable Index2Object : I -> Type.
     Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
 
-    Polymorphic Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
+    Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
       build_dom_cod @fst.
     Defined.
 
-    Polymorphic Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
+    Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ _ Index2Cat) ObjectFunctor.
       build_dom_cod @snd.
     Defined.
   End type.
@@ -139,7 +142,7 @@ Section InducedFunctor.
   Context `(O' : @SpecializedCategory obj).
   Variable f : O -> O'.
 
-  Polymorphic Definition InducedDiscreteFunctor : SpecializedFunctor (DiscreteCategory O) O'.
+  Definition InducedDiscreteFunctor : SpecializedFunctor (DiscreteCategory O) O'.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -164,7 +167,7 @@ Section disc.
       hnf in *; subst;
         auto.
 
-  Polymorphic Definition DiscreteFunctor : SpecializedFunctor TypeCat LocallySmallCat.
+  Definition DiscreteFunctor : SpecializedFunctor TypeCat LocallySmallCat.
     refine (Build_SpecializedFunctor TypeCat LocallySmallCat
       (fun O => DiscreteCategory O : LocallySmallSpecializedCategory _)
       (fun s d f => InducedDiscreteFunctor _ f)
@@ -174,7 +177,7 @@ Section disc.
     abstract t.
   Defined.
 
-  Polymorphic Definition DiscreteSetFunctor : SpecializedFunctor SetCat SmallCat.
+  Definition DiscreteSetFunctor : SpecializedFunctor SetCat SmallCat.
     refine (Build_SpecializedFunctor SetCat SmallCat
       (fun O => DiscreteCategory O : SmallSpecializedCategory _)
       (fun s d f => InducedDiscreteFunctor _ f)
@@ -186,11 +189,11 @@ Section disc.
 End disc.
 
 Section Adjoints.
-  Polymorphic Lemma DiscreteObjectIdentity : ComposeFunctors ObjectFunctor DiscreteFunctor = IdentityFunctor _.
+  Lemma DiscreteObjectIdentity : ComposeFunctors ObjectFunctor DiscreteFunctor = IdentityFunctor _.
     functor_eq.
   Qed.
 
-  Polymorphic Definition DiscreteObjectAdjunction : HomAdjunction DiscreteFunctor ObjectFunctor.
+  Definition DiscreteObjectAdjunction : HomAdjunction DiscreteFunctor ObjectFunctor.
     match goal with
       | [ |- HomAdjunction ?F ?G ] =>
         refine (Build_HomAdjunction F G

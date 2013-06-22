@@ -5,14 +5,18 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Equalizer.
   Context `(C : @SpecializedCategory objC).
   Variables A B : objC.
   Variables f g : C.(Morphism) A B.
 
-  Polymorphic Inductive EqualizerTwo := EqualizerA | EqualizerB.
+  Inductive EqualizerTwo := EqualizerA | EqualizerB.
 
-  Polymorphic Definition EqualizerIndex_Morphism (a b : EqualizerTwo) : Set :=
+  Definition EqualizerIndex_Morphism (a b : EqualizerTwo) : Set :=
     match (a, b) with
       | (EqualizerA, EqualizerA) => unit
       | (EqualizerB, EqualizerB) => unit
@@ -22,12 +26,12 @@ Section Equalizer.
 
   Global Arguments EqualizerIndex_Morphism a b /.
 
-  Polymorphic Definition EqualizerIndex_Compose s d d' (m1 : EqualizerIndex_Morphism d d') (m2 : EqualizerIndex_Morphism s d) :
+  Definition EqualizerIndex_Compose s d d' (m1 : EqualizerIndex_Morphism d d') (m2 : EqualizerIndex_Morphism s d) :
     EqualizerIndex_Morphism s d'.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Polymorphic Definition EqualizerIndex : @SpecializedCategory EqualizerTwo.
+  Definition EqualizerIndex : @SpecializedCategory EqualizerTwo.
     refine (@Build_SpecializedCategory _
                                        EqualizerIndex_Morphism
                                        (fun x => match x with EqualizerA => tt | EqualizerB => tt end)
@@ -40,7 +44,7 @@ Section Equalizer.
       ).
   Defined.
 
-  Polymorphic Definition EqualizerDiagram_ObjectOf x :=
+  Definition EqualizerDiagram_ObjectOf x :=
     match x with
       | EqualizerA => A
       | EqualizerB => B
@@ -48,7 +52,7 @@ Section Equalizer.
 
   Global Arguments EqualizerDiagram_ObjectOf x /.
 
-  Polymorphic Definition EqualizerDiagram_MorphismOf s d (m : Morphism EqualizerIndex s d) :
+  Definition EqualizerDiagram_MorphismOf s d (m : Morphism EqualizerIndex s d) :
     Morphism C (EqualizerDiagram_ObjectOf s) (EqualizerDiagram_ObjectOf d).
     destruct s, d; simpl in *; try apply Identity;
       try solve [ destruct m ];
@@ -58,7 +62,7 @@ Section Equalizer.
               end.
   Defined.
 
-  Polymorphic Definition EqualizerDiagram : SpecializedFunctor EqualizerIndex C.
+  Definition EqualizerDiagram : SpecializedFunctor EqualizerIndex C.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -71,11 +75,11 @@ Section Equalizer.
     abstract (
       unfold EqualizerDiagram_MorphismOf; simpl; intros;
         destruct_type EqualizerTwo;
-        repeat rewrite @LeftIdentity; repeat rewrite @RightIdentity;
+        repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
           trivial; try destruct_to_empty_set
     ).
   Defined.
 
-  Polymorphic Definition Equalizer := Limit EqualizerDiagram.
-  Polymorphic Definition Coequalizer := Colimit EqualizerDiagram.
+  Definition Equalizer := Limit EqualizerDiagram.
+  Definition Coequalizer := Colimit EqualizerDiagram.
 End Equalizer.

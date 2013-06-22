@@ -3,6 +3,10 @@ Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Ltac structures_eq_simpl_step_with tac := intros; simpl in *;

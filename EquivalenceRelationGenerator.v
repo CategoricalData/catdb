@@ -3,23 +3,27 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Gen.
   Variable A : Type.
   Variable equiv : relation A.
 
-  Polymorphic Inductive EquivalenceOf : A -> A -> Prop :=
+  Inductive EquivalenceOf : A -> A -> Prop :=
   | gen_underlying : forall a b, equiv a b -> EquivalenceOf a b
   | gen_refl : forall a, EquivalenceOf a a
   | gen_sym : forall a b, EquivalenceOf a b -> EquivalenceOf b a
   | gen_trans : forall a b c, EquivalenceOf a b -> EquivalenceOf b c -> EquivalenceOf a c.
 
-  Polymorphic Hint Constructors EquivalenceOf.
+  Hint Constructors EquivalenceOf.
 
-  Polymorphic Lemma EquivalenceOf_Equivalence : Equivalence EquivalenceOf.
+  Lemma EquivalenceOf_Equivalence : Equivalence EquivalenceOf.
     constructor; eauto.
   Defined.
 
-  Polymorphic Definition generateEquivalence : { equiv' : A -> A -> Prop | Equivalence equiv' & forall a b, equiv a b -> equiv' a b }.
+  Definition generateEquivalence : { equiv' : A -> A -> Prop | Equivalence equiv' & forall a b, equiv a b -> equiv' a b }.
     exists EquivalenceOf.
     exact EquivalenceOf_Equivalence.
     eauto.

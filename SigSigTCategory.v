@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
@@ -28,7 +32,7 @@ Section sig_sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Polymorphic Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
+  Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
     match goal with
       | [ |- @SpecializedCategory ?obj ] =>
         refine (@Build_SpecializedCategory obj
@@ -73,11 +77,11 @@ Section sig_sigT_obj_mor.
     trivial.
   Defined.
 
-  Polymorphic Definition sig_sigT_functor_sigT_MorphismOf (s d  : {x | Pobj x}) (m : sigT (Pmor s d)) : sigT (Pmor' s d).
+  Definition sig_sigT_functor_sigT_MorphismOf (s d  : {x | Pobj x}) (m : sigT (Pmor s d)) : sigT (Pmor' s d).
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Polymorphic Definition sig_sigT_functor_sigT : SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT.
+  Definition sig_sigT_functor_sigT : SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT.
     refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT
       (fun x => x)
       (@sig_sigT_functor_sigT_MorphismOf)
@@ -87,11 +91,11 @@ Section sig_sigT_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Polymorphic Definition sigT_functor_sig_sigT_MorphismOf (s d : sigT Pobj) (m : sigT (Pmor' s d)) : sigT (Pmor s d).
+  Definition sigT_functor_sig_sigT_MorphismOf (s d : sigT Pobj) (m : sigT (Pmor' s d)) : sigT (Pmor s d).
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Polymorphic Definition sigT_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT.
+  Definition sigT_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT.
     refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT
       (fun x => x)
       (@sigT_functor_sig_sigT_MorphismOf)
@@ -101,12 +105,12 @@ Section sig_sigT_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Polymorphic Lemma sig_sigT_sigT_compat :
+  Lemma sig_sigT_sigT_compat :
     ComposeFunctors sig_sigT_functor_sigT sigT_functor_sig_sigT = IdentityFunctor _ /\
     ComposeFunctors sigT_functor_sig_sigT sig_sigT_functor_sigT = IdentityFunctor _.
     split; functor_eq; destruct_sig; reflexivity.
   Qed.
 
-  Polymorphic Definition proj1_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT A
+  Definition proj1_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT A
     := ComposeFunctors projT1_functor sig_sigT_functor_sigT.
 End sig_sigT_obj_mor.

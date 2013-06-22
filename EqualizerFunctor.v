@@ -4,12 +4,16 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Equalizer.
   Context `(C : @SpecializedCategory objC).
 
   Variable HasLimits : forall F : SpecializedFunctor EqualizerIndex C, Limit F.
   Variable HasColimits : forall F : SpecializedFunctor EqualizerIndex C, Colimit F.
 
-  Polymorphic Definition EqualizerFunctor := LimitFunctor HasLimits.
-  Polymorphic Definition CoequalizerFunctor := ColimitFunctor HasColimits.
+  Definition EqualizerFunctor := LimitFunctor HasLimits.
+  Definition CoequalizerFunctor := ColimitFunctor HasColimits.
 End Equalizer.

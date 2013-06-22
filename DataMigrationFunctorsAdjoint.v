@@ -4,11 +4,15 @@ Require Import Common Notations FunctorCategory LimitFunctors AdjointUnit Specia
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 (*
 Section coslice_initial.
   (* TODO(jgross): This should go elsewhere *)
-  Polymorphic Definition CosliceSpecializedCategory_InitialObject objC C objD D (F : @SpecializedFunctor objC C objD D) x :
+  Definition CosliceSpecializedCategory_InitialObject objC C objD D (F : @SpecializedFunctor objC C objD D) x :
     { o : _ & @InitialObject _ (CosliceSpecializedCategory (F x) F) o }.
     unfold Object; simpl;
     match goal with
@@ -53,7 +57,7 @@ Section DataMigrationFunctorsAdjoint.
                            Limit (RightPushforwardAlong_pre_Functor C D S F g d).
     Let Π_F := RightPushforwardAlong HasLimits.
 
-    Polymorphic Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf (G : S ^ C) (c : C) :
+    Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf (G : S ^ C) (c : C) :
       Morphism S ((ComposeFunctors (RightPushforwardAlong_ObjectOf HasLimits G) F) c) (G c)
       := (TerminalMorphism_Morphism (HasLimits G (F c))
                                     (existT
@@ -96,18 +100,18 @@ Section DataMigrationFunctorsAdjoint.
 
     Eval cbv beta iota zeta delta [Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf] in Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf.
 
-    Polymorphic Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf (G : S ^ C) :
+    Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf (G : S ^ C) :
       Morphism (S ^ C) ((ComposeFunctors Δ_F Π_F) G) ((IdentityFunctor _) G).
       exists (Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf G).
       unfold Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation_ComponentsOf_ComponentsOf;
-        present_spfunctor; simpl;
+        simpl;
         intros.
       unfold RightPushforwardAlong_ObjectOf_MorphismOf, InducedLimitFunctor_MorphismOf, InducedLimitMap, InducedLimitMapNT, LimitObject; simpl.
       (* nt_hideProofs. *)
       unfold ComposeFunctorsAssociator1; simpl. (* ; nt_hideProofs. *)
       unfold NTComposeT, NTComposeF; simpl. (* ; nt_hideProofs. *)
       nt_hideProofs.
-      simpl in *; present_spcategory.
+      simpl in *.
       (* setoid_rewrite FIdentityOf. (* fails with "Error: build_signature: no constraint can apply on a dependent argument" *) *)
       match goal with
         | [ |- ?A = _ ] =>
@@ -161,7 +165,7 @@ Section DataMigrationFunctorsAdjoint.
         | [ |- context[{| ComponentsOf' := ?x |}] ] => let x' := fresh in set (x' := x)
       end.
       intro e0.
-      setoid_rewrite @LeftIdentity in e0.
+      setoid_rewrite LeftIdentity in e0.
       unfold RightPushforwardAlong_pre_Functor in *; simpl in *.
       pose (fun (g : (S ^ C)%functor) (d : D) =>
               (CosliceCategoryProjection d F)).
@@ -335,7 +339,7 @@ rewrite <- H3.
       setoid_rewrite FIdentityOf in H0.
       Require Import Setoid.
       present_spnt.
-      setoid_rewrite @FIdentityOf in H0.
+      setoid_rewrite FIdentityOf in H0.
       clear.
       revert e2.
       nt_hideProofs.
@@ -533,9 +537,9 @@ rewrite <- H3.
       intro_universal_properties.
       hnf in G; simpl in *.
       Check @ComponentsOf _ _ _ _ (ComposeFunctors (RightPushforwardAlong_ObjectOf HasLimits G) F) G.
-    Polymorphic Definition Pullback_RightPushforward_AdjunctionUnit : AdjunctionCounit Δ_F Π_F.
+    Definition Pullback_RightPushforward_AdjunctionUnit : AdjunctionCounit Δ_F Π_F.
       hnf.
-      Polymorphic Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation :
+      Definition Pullback_RightPushforward_AdjunctionCounit_NaturalTransformation :
         NaturalTransformation (ComposeFunctors Δ_F Π_F) (IdentityFunctor _).
         Check @ComponentsOf _ _ _ _ (ComposeFunctors Δ_F Π_F)
               (IdentityFunctor (S ^ C)%functor).
@@ -575,7 +579,7 @@ rewrite <- H3.
       Definition
     Print AdjunctionUnit.
 
-    Polymorphic Definition Pullback_RightPushforward_HomAdjunction_AComponentsOf :
+    Definition Pullback_RightPushforward_HomAdjunction_AComponentsOf :
       forall A A', Morphism (S ^ C) (Δ_F A) A' -> Morphism (S ^ D) A (Π_F A').
       intros; hnf in *.
       destruct X.
@@ -587,7 +591,7 @@ rewrite <- H3.
       Check @ComponentsOf _ _ _ _ A (Π_F A').
 
 
-    Polymorphic Definition Pullback_RightPushforward_HomAdjunction : HomAdjunction Δ_F Π_F.
+    Definition Pullback_RightPushforward_HomAdjunction : HomAdjunction Δ_F Π_F.
       Eval hnf in HomAdjunction Δ_F Π_F.
       Check @AComponentsOf' _ _
          _ _ Δ_F Π_F.
@@ -597,7 +601,7 @@ rewrite <- H3.
   End ΔΠ.
 
   Section Δ.
-    Polymorphic Definition PullbackAlong : Functor (S ^ D) (S ^ C).
+    Definition PullbackAlong : Functor (S ^ D) (S ^ C).
   End Δ.
 
   Section Π.
@@ -605,9 +609,9 @@ rewrite <- H3.
     (*Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).*)
 
     (** Quoting David Spivak in "Functorial Data Migration":
-       Polymorphic Definition 2.1.2. Let [F : C -> D] be a morphism of schemas and
+       Definition 2.1.2. Let [F : C -> D] be a morphism of schemas and
        [Δ_F : D–Set -> C–Set] be the associated data pull-back functor
-       (see Polymorphic Definition 1.3.1). There exists a right adjoint to [Δ_F]
+       (see Definition 1.3.1). There exists a right adjoint to [Δ_F]
        called the right push-forward functor associated to [F], denoted
        [Π_F : C–Set -> D–Set], and defined as follows.
        Given an object [ɣ : C -> Set] in [C–Set] define [Π_F ɣ] on an
@@ -631,7 +635,7 @@ rewrite <- H3.
        *)
 
     (* Define [ɣ ○ (π^F d)] *)
-    Polymorphic Definition RightPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (d ↓ F) S
+    Definition RightPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (d ↓ F) S
       := ComposeFunctors g (projT2 (CosliceCategoryProjectionFunctor C D F d)).
 
     Variable HasLimits : forall g d, Limit (RightPushforwardAlong_pre_Functor g d).
@@ -667,7 +671,7 @@ rewrite <- H3.
           )
       end;
       abstract (
-        simpl; present_spnt; intros ? ? m0;
+        simpl; intros ? ? m0;
           destruct m0 as [ [ m0 ] ]; simpl;
             rewrite LeftIdentity; rewrite RightIdentity;
               reflexivity
@@ -686,7 +690,7 @@ rewrite <- H3.
       end.
     Defined.
 
-    Polymorphic Definition RightPushforwardAlong_ObjectOf_MorphismOf_Pre (g : S ^ C) s d (m : Morphism D s d) :
+    Definition RightPushforwardAlong_ObjectOf_MorphismOf_Pre (g : S ^ C) s d (m : Morphism D s d) :
       Morphism (CAT ⇑ S)
       (existT _ (tt, s) (RightPushforwardAlong_pre_Functor g s) : @LaxCosliceSpecializedCategory_ObjectT _ _ Index2Cat _ _)
       (existT _ (tt, d) (RightPushforwardAlong_pre_Functor g d) : @LaxCosliceSpecializedCategory_ObjectT _ _ Index2Cat _ _)
@@ -716,10 +720,10 @@ rewrite <- H3.
       nt_hideProofs;
       unfold NTComposeF, NTComposeT; simpl;
       nt_hideProofs;
-      clear; simpl in *; present_spcategory.
+      clear; simpl in *.
 
 
-    Polymorphic Lemma RightPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
+    Lemma RightPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
       RightPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ (Compose m2 m1) =
       Compose (C := LaxCosliceSpecializedCategory _ _) (RightPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ m2) (RightPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ m1).
     Proof.
@@ -730,7 +734,7 @@ Time pre_anihilate.
       Time (anihilate). (* 85 s *)
     Qed. *)
 
-    Polymorphic Lemma RightPushforwardAlong_ObjectOf_FIdentityOf_Pre (g : S ^ C) x :
+    Lemma RightPushforwardAlong_ObjectOf_FIdentityOf_Pre (g : S ^ C) x :
       RightPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ (Identity x) =
       Identity (C := LaxCosliceSpecializedCategory _ _) _.
     Proof.
@@ -739,7 +743,7 @@ Time pre_anihilate.
       Time anihilate. (* 12 s *)
     Qed.
 
-    Polymorphic Definition RightPushforwardAlong_ObjectOf_MorphismOf (g : S ^ C) s d (m : Morphism D s d) :
+    Definition RightPushforwardAlong_ObjectOf_MorphismOf (g : S ^ C) s d (m : Morphism D s d) :
       Morphism S (RightPushforwardAlong_ObjectOf_ObjectOf g s) (RightPushforwardAlong_ObjectOf_ObjectOf g d).
       subst RightPushforwardAlong_ObjectOf_ObjectOf RightPushforwardAlong_ObjectOf_MorphismOf_Pre' RightPushforwardAlong_ObjectOf_MorphismOf_Pre''; simpl.
       apply (InducedLimitFunctor_MorphismOf (Index2Cat := Index2Cat) (D := S)
@@ -751,9 +755,9 @@ Time pre_anihilate.
       apply RightPushforwardAlong_ObjectOf_MorphismOf_Pre; assumption.
     Defined.
 
-    Polymorphic Hint Resolve RightPushforwardAlong_ObjectOf_FIdentityOf_Pre RightPushforwardAlong_ObjectOf_FCompositionOf_Pre.
+    Hint Resolve RightPushforwardAlong_ObjectOf_FIdentityOf_Pre RightPushforwardAlong_ObjectOf_FCompositionOf_Pre.
 
-    Polymorphic Definition RightPushforwardAlong_ObjectOf (g : S ^ C) : S ^ D.
+    Definition RightPushforwardAlong_ObjectOf (g : S ^ C) : S ^ D.
       pose proof (InducedLimitFunctor (Index2Cat := Index2Cat) (D := S)).
       hnf.
       unfold Object in X.
@@ -797,7 +801,7 @@ Time pre_anihilate.
             ).
     Defined.
 
-    Polymorphic Definition RightPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+    Definition RightPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
       NaturalTransformation
       (ComposeFunctors (RightPushforwardAlong_pre_Functor s c) (IdentityFunctor _))
       (RightPushforwardAlong_pre_Functor d c).
@@ -812,7 +816,7 @@ Time pre_anihilate.
           )
       end;
       abstract (
-        present_spnt; repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in *);
+        repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in *);
           match goal with
             | [ H : _ |- _ ] => rewrite RightIdentity in H
             | [ H : _ |- _ ] => rewrite LeftIdentity in H
@@ -822,7 +826,7 @@ Time pre_anihilate.
       ).
     Defined.
 
-    Polymorphic Definition RightPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+    Definition RightPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
       Morphism S ((RightPushforwardAlong_ObjectOf s) c) ((RightPushforwardAlong_ObjectOf d) c).
     Proof.
       simpl; subst_body; simpl.
@@ -830,7 +834,7 @@ Time pre_anihilate.
       exact (@RightPushforwardAlong_MorphismOf_ComponentsOf_Pre s d m c).
     Defined.
 
-    Polymorphic Definition RightPushforwardAlong_MorphismOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) :
+    Definition RightPushforwardAlong_MorphismOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) :
       SpecializedNaturalTransformation (RightPushforwardAlong_ObjectOf s) (RightPushforwardAlong_ObjectOf d).
     Proof.
       exists (@RightPushforwardAlong_MorphismOf_ComponentsOf s d m).
@@ -855,11 +859,11 @@ Time pre_anihilate.
       admit.
 
       (*
-      Polymorphic Definition Δ {objC C objD D} := @diagonal_functor_object_of objC C objD D.
-      Polymorphic Definition ΔMor {objC C objD D} o1 o2 := @diagonal_functor_morphism_of objC C objD D o1 o2.
-      Polymorphic Definition limo F x := TerminalMorphism_Object (HasLimits F x).
-      Polymorphic Definition φ := TerminalMorphism_Morphism.
-      Polymorphic Definition unique_m := @TerminalProperty_Morphism.
+      Definition Δ {objC C objD D} := @diagonal_functor_object_of objC C objD D.
+      Definition ΔMor {objC C objD D} o1 o2 := @diagonal_functor_morphism_of objC C objD D o1 o2.
+      Definition limo F x := TerminalMorphism_Object (HasLimits F x).
+      Definition φ := TerminalMorphism_Morphism.
+      Definition unique_m := @TerminalProperty_Morphism.
       Print unique_m.
       Arguments unique_m [C D U X] [M] Y f.
 
@@ -1048,10 +1052,10 @@ Time pre_anihilate.
          c0 : CommaSpecializedCategory_Object
                 (SliceSpecializedCategory_Functor D c) F,
        CMorphism S
-         (ObjectOf'
+         (ObjectOf
             (ComposeFunctors (RightPushforwardAlong_pre_Functor s c)
                (IdentityFunctor (c ↓ F))) c0)
-         (ObjectOf' (RightPushforwardAlong_pre_Functor d c) c0)).
+         (ObjectOf (RightPushforwardAlong_pre_Functor d c) c0)).
       present_spnt.
       intro c0; destruct c0 as [ [ [ [] c0 ] cm ] ]; simpl in *.
       match goal with
@@ -1089,10 +1093,10 @@ Time pre_anihilate.
       );
 
 
-     Polymorphic Definition RightPushforwardAlong : Functor (S ^ C) (S ^ D).
+     Definition RightPushforwardAlong : Functor (S ^ C) (S ^ D).
        Check @MorphismOf' _ _ (S ^ C) _ _ (S ^ D) _.
 
-       refine {| ObjectOf' := (fun
+       refine {| ObjectOf := (fun
 *)
 (*
  & Adjunction PushforwardAlong PullbackAlong }.
@@ -1121,7 +1125,7 @@ Time pre_anihilate.
 *)
     Defined.
 
-    Polymorphic Definition RightPushforwardAlong : SpecializedFunctor (S ^ C) (S ^ D).
+    Definition RightPushforwardAlong : SpecializedFunctor (S ^ C) (S ^ D).
       match goal with
           | [ |- SpecializedFunctor ?C ?D ] =>
             refine (Build_SpecializedFunctor
@@ -1156,9 +1160,9 @@ Time pre_anihilate.
     (*Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).*)
 
     (** Quoting David Spivak in "Functorial Data Migration":
-       Polymorphic Definition 2.1.3. Let [F : C -> D] be a morphism of schemas and
+       Definition 2.1.3. Let [F : C -> D] be a morphism of schemas and
        [Δ_F : D–Set -> C–Set] be the associated data pull-back functor
-       (see Polymorphic Definition 1.3.1). There exists a left adjoint to [Δ_F]
+       (see Definition 1.3.1). There exists a left adjoint to [Δ_F]
        called the left push-forward functor associated to [F], denoted
        [Σ_F : C–Set -> D–Set], and defined as follows.
        Given an object [ɣ : C -> Set] in [C–Set] define [Σ_F ɣ] on an
@@ -1183,7 +1187,7 @@ Time pre_anihilate.
        *)
 
     (* Define [ɣ ○ (π_F d)] *)
-    Polymorphic Definition LeftPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (F ↓ d) S
+    Definition LeftPushforwardAlong_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (F ↓ d) S
       := ComposeFunctors g (projT2 (SliceCategoryProjectionFunctor C D F d)).
 
     Variable HasColimits : forall g d, Colimit (LeftPushforwardAlong_pre_Functor g d).
@@ -1219,7 +1223,7 @@ Time pre_anihilate.
           )
       end;
       abstract (
-        simpl; present_spnt; intros ? ? m0;
+        simpl; intros ? ? m0;
           destruct m0 as [ [ m0 ] ]; simpl;
             rewrite LeftIdentity; rewrite RightIdentity;
               reflexivity
@@ -1238,7 +1242,7 @@ Time pre_anihilate.
       end.
     Defined.
 
-    Polymorphic Definition LeftPushforwardAlong_ObjectOf_MorphismOf_Pre (g : S ^ C) s d (m : Morphism D s d) :
+    Definition LeftPushforwardAlong_ObjectOf_MorphismOf_Pre (g : S ^ C) s d (m : Morphism D s d) :
       Morphism (CAT ⇓ S)
       (existT _ (s, tt) (LeftPushforwardAlong_pre_Functor g s) : @LaxSliceSpecializedCategory_ObjectT _ _ Index2Cat _ _)
       (existT _ (d, tt) (LeftPushforwardAlong_pre_Functor g d) : @LaxSliceSpecializedCategory_ObjectT _ _ Index2Cat _ _)
@@ -1268,10 +1272,10 @@ Time pre_anihilate.
       nt_hideProofs;
       unfold NTComposeF, NTComposeT; simpl;
       nt_hideProofs;
-      clear; simpl in *; present_spcategory.
+      clear; simpl in *.
 
 
-    Polymorphic Lemma LeftPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
+    Lemma LeftPushforwardAlong_ObjectOf_FCompositionOf_Pre (g : S ^ C) s d d' (m1 : Morphism D s d) (m2 : Morphism D d d') :
       LeftPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ (Compose m2 m1) =
       Compose (C := LaxSliceSpecializedCategory _ _ _) (LeftPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ m2) (LeftPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ m1).
     Proof.
@@ -1282,7 +1286,7 @@ Time pre_anihilate.
       Time (anihilate). (* 85 s *)
     Qed. *)
 
-    Polymorphic Lemma LeftPushforwardAlong_ObjectOf_FIdentityOf_Pre (g : S ^ C) x :
+    Lemma LeftPushforwardAlong_ObjectOf_FIdentityOf_Pre (g : S ^ C) x :
       LeftPushforwardAlong_ObjectOf_MorphismOf_Pre g _ _ (Identity x) =
       Identity (C := LaxSliceSpecializedCategory _ _ _) _.
     Proof.
@@ -1291,7 +1295,7 @@ Time pre_anihilate.
       Time anihilate. (* 12 s *)
     Qed.
 
-    Polymorphic Definition LeftPushforwardAlong_ObjectOf_MorphismOf (g : S ^ C) s d (m : Morphism D s d) :
+    Definition LeftPushforwardAlong_ObjectOf_MorphismOf (g : S ^ C) s d (m : Morphism D s d) :
       Morphism S (LeftPushforwardAlong_ObjectOf_ObjectOf g s) (LeftPushforwardAlong_ObjectOf_ObjectOf g d).
       subst LeftPushforwardAlong_ObjectOf_ObjectOf LeftPushforwardAlong_ObjectOf_MorphismOf_Pre' LeftPushforwardAlong_ObjectOf_MorphismOf_Pre''; simpl.
       apply (InducedColimitFunctor_MorphismOf (Index2Cat := Index2Cat) (D := S)
@@ -1303,9 +1307,9 @@ Time pre_anihilate.
       apply LeftPushforwardAlong_ObjectOf_MorphismOf_Pre; assumption.
     Defined.
 
-    Polymorphic Hint Resolve LeftPushforwardAlong_ObjectOf_FIdentityOf_Pre LeftPushforwardAlong_ObjectOf_FCompositionOf_Pre.
+    Hint Resolve LeftPushforwardAlong_ObjectOf_FIdentityOf_Pre LeftPushforwardAlong_ObjectOf_FCompositionOf_Pre.
 
-    Polymorphic Definition LeftPushforwardAlong_ObjectOf (g : S ^ C) : S ^ D.
+    Definition LeftPushforwardAlong_ObjectOf (g : S ^ C) : S ^ D.
       refine (Build_SpecializedFunctor
                 D
                 S
@@ -1351,7 +1355,7 @@ Time pre_anihilate.
           ).
     Defined.
 
-    Polymorphic Definition LeftPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+    Definition LeftPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
       NaturalTransformation
         (LeftPushforwardAlong_pre_Functor s c)
         (ComposeFunctors (LeftPushforwardAlong_pre_Functor d c) (IdentityFunctor _)).
@@ -1368,7 +1372,7 @@ Time pre_anihilate.
                  )
       end;
         abstract (
-            present_spnt; repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
+            repeat (let H := fresh in intro H; destruct H as [ [ [ ] ] ]; simpl in * );
             match goal with
               | [ H : _ |- _ ] => rewrite RightIdentity in H
               | [ H : _ |- _ ] => rewrite LeftIdentity in H
@@ -1378,7 +1382,7 @@ Time pre_anihilate.
           ).
     Defined.
 
-    Polymorphic Definition LeftPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+    Definition LeftPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
       Morphism S ((LeftPushforwardAlong_ObjectOf s) c) ((LeftPushforwardAlong_ObjectOf d) c).
     Proof.
       simpl; subst_body; simpl.
@@ -1386,7 +1390,7 @@ Time pre_anihilate.
       exact (@LeftPushforwardAlong_MorphismOf_ComponentsOf_Pre s d m c).
     Defined.
 
-    Polymorphic Definition LeftPushforwardAlong_MorphismOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) :
+    Definition LeftPushforwardAlong_MorphismOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) :
       SpecializedNaturalTransformation (LeftPushforwardAlong_ObjectOf s) (LeftPushforwardAlong_ObjectOf d).
     Proof.
       exists (@LeftPushforwardAlong_MorphismOf_ComponentsOf s d m).
@@ -1397,7 +1401,7 @@ Time pre_anihilate.
       admit.
     Defined.
 
-    Polymorphic Definition LeftPushforwardAlong : SpecializedFunctor (S ^ C) (S ^ D).
+    Definition LeftPushforwardAlong : SpecializedFunctor (S ^ C) (S ^ D).
       match goal with
         | [ |- SpecializedFunctor ?C ?D ] =>
           refine (Build_SpecializedFunctor

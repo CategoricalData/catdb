@@ -5,11 +5,15 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section ProductCategory.
   Context `(C : @SpecializedCategory objC).
   Context `(D : @SpecializedCategory objD).
 
-  Polymorphic Definition ProductCategory : @SpecializedCategory (objC * objD)%type.
+  Definition ProductCategory : @SpecializedCategory (objC * objD)%type.
     refine (@Build_SpecializedCategory _
                                        (fun s d => (C.(Morphism) (fst s) (fst d) * D.(Morphism) (snd s) (snd d))%type)
                                        (fun o => (Identity (fst o), Identity (snd o)))
@@ -27,23 +31,17 @@ Section ProductCategoryFunctors.
   Context `{C : @SpecializedCategory objC}.
   Context `{D : @SpecializedCategory objD}.
 
-  Polymorphic Definition fst_Functor : SpecializedFunctor (C * D) C.
-    refine (Build_SpecializedFunctor (C * D) C
-      (@fst _ _)
-      (fun _ _ => @fst _ _)
-      _
-      _
-    );
-    abstract eauto.
-  Defined.
+  Definition fst_Functor : SpecializedFunctor (C * D) C
+    := Build_SpecializedFunctor (C * D) C
+                                (@fst _ _)
+                                (fun _ _ => @fst _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Polymorphic Definition snd_Functor : SpecializedFunctor (C * D) D.
-    refine (Build_SpecializedFunctor (C * D) D
-      (@snd _ _)
-      (fun _ _ => @snd _ _)
-      _
-      _
-    );
-    abstract eauto.
-  Defined.
+  Definition snd_Functor : SpecializedFunctor (C * D) D
+    := Build_SpecializedFunctor (C * D) D
+                                (@snd _ _)
+                                (fun _ _ => @snd _ _)
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 End ProductCategoryFunctors.

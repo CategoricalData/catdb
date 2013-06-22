@@ -7,18 +7,22 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope type_scope.
 
 Section helpers.
-  Polymorphic Definition eq_dec (T : Type) := forall a b : T, {a = b} + {a <> b}.
+  Definition eq_dec (T : Type) := forall a b : T, {a = b} + {a <> b}.
 
-  Polymorphic Theorem JMeq_type_mismatch_absurd A (a : A) B (b : B) : A <> B -> @JMeq A a B b -> False.
+  Theorem JMeq_type_mismatch_absurd A (a : A) B (b : B) : A <> B -> @JMeq A a B b -> False.
     intros H0 H1;
     destruct H1;
     intuition.
   Qed.
 
-  Polymorphic Lemma type_neq_helper (A B : Type) (a : A) : (forall b : B, JMeq a b -> False) -> A <> B.
+  Lemma type_neq_helper (A B : Type) (a : A) : (forall b : B, JMeq a b -> False) -> A <> B.
     intros H0 H1.
     subst.
     specialize (H0 a); intuition.
@@ -32,11 +36,11 @@ Section helpers.
     Hypothesis Veq_dec : eq_dec V.
     Hypothesis Eeq_dec : forall s d, eq_dec (E s d).
 
-    Polymorphic Inductive paths_eq (s : V) : forall d (p : path E s d) d' (p' : path E s d'), Prop :=
+    Inductive paths_eq (s : V) : forall d (p : path E s d) d' (p' : path E s d'), Prop :=
       | noedges_eq : paths_eq NoEdges NoEdges
       | addedge_eq : forall s' (p p' : path E s s') d (e : E s' d), paths_eq p p' -> paths_eq (AddEdge p e) (AddEdge p' e).
 
-    Polymorphic Definition paths_eq_dec' s d (p : path E s d) d' (p' : path E s d') : {paths_eq p p'} + {paths_eq p p' -> False}.
+    Definition paths_eq_dec' s d (p : path E s d) d' (p' : path E s d') : {paths_eq p p'} + {paths_eq p p' -> False}.
       destruct (Veq_dec d d'); subst.
       - induction p.
         + induction p'.
@@ -45,12 +49,12 @@ Section helpers.
 solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
       Focus 2.
 
-    Polymorphic Definition mk_paths_eq s d (p p' : path E s d) : p = p' -> paths_eq p p'.
+    Definition mk_paths_eq s d (p p' : path E s d) : p = p' -> paths_eq p p'.
       intro H.
       subst.
 
 
-    Polymorphic Definition path_JMeq_dec : forall s d (p : path E s d) d' (p' : path E s d'),
+    Definition path_JMeq_dec : forall s d (p : path E s d) d' (p' : path E s d'),
                                  {JMeq p p'} + {not (JMeq p p')}.
       intros s d.
       induction p.
@@ -72,7 +76,7 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
       induction a.
 
 
-  Polymorphic Definition path_eq_dec V E (Veq : eq_dec V) (Eeq : forall s d : V, eq_dec (E s d)) (s d : V) : eq_dec (path E s d).
+  Definition path_eq_dec V E (Veq : eq_dec V) (Eeq : forall s d : V, eq_dec (E s d)) (s d : V) : eq_dec (path E s d).
     destruc
     hnf; induction a.
 
@@ -83,14 +87,14 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
     pose Eeq.
     hnf in e.
 
-  Polymorphic Lemma noedges_not_JMeq_other_dest V (E : V -> V -> Type) (x s : V) :
+  Lemma noedges_not_JMeq_other_dest V (E : V -> V -> Type) (x s : V) :
     x <> s -> forall d (p : path E s d), JMeq (@NoEdges V E x) p -> False.
     intros H0 d p H1.
     hnf in *.
 
 
 
-  Polymorphic Inductive unit' : Set := tt'.
+  Inductive unit' : Set := tt'.
 
   Goal unit <> unit'.
   intro.
@@ -110,7 +114,7 @@ solve [ (left; congruence) || (right; apply eq_JMeq; discriminate) ].
   destruct H0.
   Qed.
 
-  Polymorphic Lemma first_neq_implies_path_types_JMeq_absurd V E (s d s' d' : V) p0 p1 :
+  Lemma first_neq_implies_path_types_JMeq_absurd V E (s d s' d' : V) p0 p1 :
     s <> s' -> @JMeq (path E s d) p0 (path E s' d') p1 -> False.
     intros H0 H1; eapply (JMeq_type_mismatch_absurd _ H1).
     Grab Existential Variables.
@@ -218,9 +222,9 @@ Ltac fill_unique_paths_functor := fill_unique_paths_functor' ltac:(idtac; make_i
 
 Section FunctorialDataMigration.
   Section Example22.
-    Polymorphic Inductive C_Objects_Ex22 : Set := SSN_Ex22_C | FirstName_Ex22_C | LastName_Ex22_C | Salary_Ex22_C | T1_Ex22_C | T2_Ex22_C.
-    Polymorphic Inductive D_Objects_Ex22 : Set := SSN_Ex22_D | FirstName_Ex22_D | LastName_Ex22_D | Salary_Ex22_D | U_Ex22_D.
-    Polymorphic Inductive E_Objects_Ex22 : Set := SSN_Ex22_E | FirstName_Ex22_E | LastName_Ex22_E | V_Ex22_E.
+    Inductive C_Objects_Ex22 : Set := SSN_Ex22_C | FirstName_Ex22_C | LastName_Ex22_C | Salary_Ex22_C | T1_Ex22_C | T2_Ex22_C.
+    Inductive D_Objects_Ex22 : Set := SSN_Ex22_D | FirstName_Ex22_D | LastName_Ex22_D | Salary_Ex22_D | U_Ex22_D.
+    Inductive E_Objects_Ex22 : Set := SSN_Ex22_E | FirstName_Ex22_E | LastName_Ex22_E | V_Ex22_E.
 
     Example C_Edges_Ex22 (s d : C_Objects_Ex22) : Set :=
       match (s, d) with
@@ -286,15 +290,15 @@ Section FunctorialDataMigration.
       fill_unique_paths_functor.
     Defined.
 
-    Polymorphic Inductive SSN := SSN_intro : string -> SSN.
-    Polymorphic Inductive FirstName := FirstName_intro : string -> FirstName.
-    Polymorphic Inductive LastName := LastName_intro : string -> LastName.
-    Polymorphic Inductive Salary := Salary_intro : nat -> Salary.
+    Inductive SSN := SSN_intro : string -> SSN.
+    Inductive FirstName := FirstName_intro : string -> FirstName.
+    Inductive LastName := LastName_intro : string -> LastName.
+    Inductive Salary := Salary_intro : nat -> Salary.
 
     Section Example221.
-      Polymorphic Inductive Id_Ex221 := x11_Ex221 | x12_Ex221 | x13_Ex221.
+      Inductive Id_Ex221 := x11_Ex221 | x12_Ex221 | x13_Ex221.
 
-      Polymorphic Definition δ_Functor_Ex221_ObjectOf (x : D_Objects_Ex22) : Set :=
+      Definition δ_Functor_Ex221_ObjectOf (x : D_Objects_Ex22) : Set :=
         match x with
           | SSN_Ex22_D => SSN
           | FirstName_Ex22_D => FirstName
@@ -478,10 +482,10 @@ Section FunctorialDataMigration.
     End Example221.
 
     Section Example222.
-      Polymorphic Inductive T1_Id_Ex222 := x11_Ex222 | x12_Ex222 | x13_Ex222.
-      Polymorphic Inductive T2_Id_Ex222 := y1_Ex222 | y2_Ex222 | y3_Ex222 | y4_Ex222.
+      Inductive T1_Id_Ex222 := x11_Ex222 | x12_Ex222 | x13_Ex222.
+      Inductive T2_Id_Ex222 := y1_Ex222 | y2_Ex222 | y3_Ex222 | y4_Ex222.
 
-      Polymorphic Definition γ_Functor_Ex222_ObjectOf (x : C_Objects_Ex22) : Set :=
+      Definition γ_Functor_Ex222_ObjectOf (x : C_Objects_Ex22) : Set :=
         match x with
           | SSN_Ex22_C => SSN
           | FirstName_Ex22_C => FirstName
@@ -1062,8 +1066,8 @@ Section FunctorialDataMigration.
         assert (forall
         c : CommaSpecializedCategory_ObjectT
               {|
-              ObjectOf' := fun _ : unit => U_Ex22_D;
-              MorphismOf' := fun _ _ _ : unit => NoEdges;
+              ObjectOf := fun _ : unit => U_Ex22_D;
+              MorphismOf := fun _ _ _ : unit => NoEdges;
               FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                    D_Category_Ex22 U_Ex22_D;
               FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
@@ -1084,7 +1088,7 @@ Section FunctorialDataMigration.
 
         Require Import InitialTerminalCategory ChainCategory DiscreteCategoryFunctors.
 
-        Polymorphic Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
+        Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
           clear.
           eexists; intros; simpl; eauto.
           Grab Existential Variables.
@@ -1113,7 +1117,7 @@ Section FunctorialDataMigration.
 
         Require Import ProofIrrelevance.
 
-        Polymorphic Definition Functor_01_0 : SpecializedFunctor [0] [1].
+        Definition Functor_01_0 : SpecializedFunctor [0] [1].
           clear.
           eexists (fun _ => exist _ 0 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1122,7 +1126,7 @@ Section FunctorialDataMigration.
           intros; compute; constructor; trivial.
         Defined.
 
-        Polymorphic Definition Functor_01_1 : SpecializedFunctor [0] [1].
+        Definition Functor_01_1 : SpecializedFunctor [0] [1].
           clear.
           eexists (fun _ => exist _ 1 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1153,7 +1157,7 @@ Section FunctorialDataMigration.
         Example Π_F_01_F_ObjectOf_ObjectOf F x (x' : [1]%category) := Eval hnf in (@Π_F_01_F_ObjectOf F x x').
         Example Π_F_01_F_ObjectOf_MorhismOf F x s d (m : Morphism [1] s d) := Eval simpl in (MorphismOf (@Π_F_01_F_ObjectOf F x) m).
 
-        Example Π_F_01_F_ObjectOf'_ObjectOf F x x' : typeof (@Π_F_01_F_ObjectOf_ObjectOf F x x').
+        Example Π_F_01_F_ObjectOf_ObjectOf F x x' : typeof (@Π_F_01_F_ObjectOf_ObjectOf F x x').
         Proof.
           clear.
           pose (Π_F_01_F_ObjectOf_ObjectOf F x x') as f.
@@ -1185,12 +1189,12 @@ Section FunctorialDataMigration.
           exact f.
         Defined.
 
-        Example Π_F_01_F_ObjectOf'_ObjectOf' (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
-          typeof (Π_F_01_F_ObjectOf'_ObjectOf F x x').
+        Example Π_F_01_F_ObjectOf_ObjectOf (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
+          typeof (Π_F_01_F_ObjectOf_ObjectOf F x x').
         Proof.
           hnf in *; simpl in *.
-          assert (Hf : focus (Π_F_01_F_ObjectOf'_ObjectOf F x x')) by constructor.
-          unfold Π_F_01_F_ObjectOf'_ObjectOf in Hf; simpl in Hf.
+          assert (Hf : focus (Π_F_01_F_ObjectOf_ObjectOf F x x')) by constructor.
+          unfold Π_F_01_F_ObjectOf_ObjectOf in Hf; simpl in Hf.
           revert Hf; clear; intro.
           unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in Hf.
           simpl in Hf.
@@ -1234,11 +1238,11 @@ Section FunctorialDataMigration.
           end.
         Defined.
 
-        Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+        Arguments Π_F_01_F_ObjectOf_ObjectOf / .
 
         Require Import FunctionalExtensionality.
 
-        Polymorphic Definition f_to_functor_MorphismOf (f : [0]%category -> TypeCat) s d (m : Morphism [0] s d) : f s -> f d.
+        Definition f_to_functor_MorphismOf (f : [0]%category -> TypeCat) s d (m : Morphism [0] s d) : f s -> f d.
           revert m; clear; intro; clear m;
           destruct s as [ [ ] ];
           match goal with
@@ -1256,7 +1260,7 @@ Section FunctorialDataMigration.
           exact (@id _).
         Defined.
 
-        Polymorphic Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
+        Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
         Proof.
           revert f; clear; intro.
           exists f (f_to_functor_MorphismOf f); intros; simpl; destruct_sig; simpl in *;
@@ -1280,10 +1284,10 @@ Section FunctorialDataMigration.
     End Example222.
   End Example22.
 End FunctorialDataMigration.
-Arguments Π_F_01_F_ObjectOf'_ObjectOf' / .
+Arguments Π_F_01_F_ObjectOf_ObjectOf / .
 Arguments Functor_01_0 / .
 Arguments f_to_functor / .
-Polymorphic Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_1 (f_to_functor f)).
+Definition foo  f := Eval simpl in (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_1 (f_to_functor f)).
 Let typeof {T} (_ : T) := T.
 Eval compute in typeof foo.
 Require Import ExtrOcamlString.
@@ -1294,7 +1298,7 @@ Extraction Π_F__γ__U_Ex222''''''.
 Extraction path.
         Example F01_0 (f : [0]%category -> TypeCat) : Type.
         Proof.
-          pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0 (f_to_functor f)) as f'.
+          pose (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_0 (f_to_functor f)) as f'.
           hnf in *; revert f'; clear; intro.
           simpl in *.
 
@@ -1302,12 +1306,12 @@ Extraction path.
           simpl in *.
           revert f';
         Goal Type.
-        pose (@Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0) as f; hnf in f; unfold typeof in f; simpl in f; revert f; clear; intro.
+        pose (@Π_F_01_F_ObjectOf_ObjectOf Functor_01_0) as f; hnf in f; unfold typeof in f; simpl in f; revert f; clear; intro.
         unfold MorphismOf in f; simpl in f.
         apply f.
         assert (f' : [0]%category -> TypeCat) by admit.
 
-        Goal forall x y : @Π_F_01_F_ObjectOf'_ObjectOf' Functor_01_0, x = y.
+        Goal forall x y : @Π_F_01_F_ObjectOf_ObjectOf Functor_01_0, x = y.
 
           Set Printing All.
 
@@ -1323,7 +1327,7 @@ Extraction path.
           unfold MorphismOf in f; simpl in f.
           compute in f.
           simpl in *.
-        Print Π_F_01_F_ObjectOf'_ObjectOf'.
+        Print Π_F_01_F_ObjectOf_ObjectOf.
           match goal with
             | [ f := { S0 : ?ST |
                        forall (c c' : ?C)
@@ -1353,7 +1357,7 @@ Extraction path.
 
         Print Π_F_01_F_ObjectOf.
 
-        Example Π_F_C'_ObjectOf' objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
+        Example Π_F_C'_ObjectOf objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
         Proof.
           pose (@Π_F_C'_ObjectOf objC C g) as f; hnf in f |- *; revert f; clear; intro.
           hnf in *.
@@ -1402,8 +1406,8 @@ Extraction path.
 
             CommaSpecializedCategory_Object
               {|
-                ObjectOf' := fun _ : unit => U_Ex22_D;
-                MorphismOf' := fun _ _ _ : unit => NoEdges;
+                ObjectOf := fun _ : unit => U_Ex22_D;
+                MorphismOf := fun _ _ _ : unit => NoEdges;
                 FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                      D_Category_Ex22 U_Ex22_D;
                 FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
@@ -1469,8 +1473,8 @@ Extraction path.
 
                     Check (CommaSpecializedCategory_ObjectT _ _ : CommaSpecializedCategory_Object
                                                                     {|
-                                                                      ObjectOf' := fun _ : unit => U_Ex22_D;
-                                                                      MorphismOf' := fun _ _ _ : unit => NoEdges;
+                                                                      ObjectOf := fun _ : unit => U_Ex22_D;
+                                                                      MorphismOf := fun _ _ _ : unit => NoEdges;
                                                                       FCompositionOf' := SliceSpecializedCategory_Functor_subproof
                                                                                            D_Category_Ex22 U_Ex22_D;
                                                                       FIdentityOf' := SliceSpecializedCategory_Functor_subproof0

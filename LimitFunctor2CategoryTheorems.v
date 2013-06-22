@@ -4,6 +4,10 @@ Require Import Common Notations FunctorCategory NaturalTransformation Hom Duals 
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 (* This should be useful for proving that the data migration functors
@@ -27,11 +31,11 @@ Section LimReady.
 
   Variable HasLimits : forall C0 : CAT ⇑ S, Limit (projT2 C0).
 
-  Polymorphic Definition CatUpSet2Morphism A B (m1 m2 : Morphism (CAT ⇑ S) A B) : Type
+  Definition CatUpSet2Morphism A B (m1 m2 : Morphism (CAT ⇑ S) A B) : Type
     := { T : SpecializedNaturalTransformation (snd (projT1 m1)) (snd (projT1 m2)) |
          NTComposeT (projT2 m2) (NTComposeF (IdentityNaturalTransformation (projT2 A)) T) = projT2 m1 }.
 
-  Polymorphic Lemma LimReady A B m1 m2 (LimitF := @InducedLimitFunctor _ _ Index2Cat _ S HasLimits) :
+  Lemma LimReady A B m1 m2 (LimitF := @InducedLimitFunctor _ _ Index2Cat _ S HasLimits) :
     @CatUpSet2Morphism A B m1 m2 -> MorphismOf LimitF m1 = MorphismOf LimitF m2.
     intro X; destruct X.
     simpl in *.

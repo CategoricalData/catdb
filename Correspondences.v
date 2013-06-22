@@ -6,6 +6,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 (** Quoting Jacob Lurie in "Higher Topos Theory", section 2.3.1:
    Let [C] and [C'] be categories. A correspondence from [C] to [C']
    is a functor
@@ -87,7 +91,7 @@ Section CorrespondenceCategory.
                                ∅                 if X ∈ C', Y ∈ C
      ]]
      *)
-  Polymorphic Definition CorrespondenceCategory_Morphism (s d : (C + C')%type) : Type :=
+  Definition CorrespondenceCategory_Morphism (s d : (C + C')%type) : Type :=
     match (s, d) with
       | (inl X, inl Y) => Morphism C X Y
       | (inr X, inr Y) => Morphism C' X Y
@@ -95,13 +99,13 @@ Section CorrespondenceCategory.
       | (inr X, inl Y) => Empty_set
     end.
 
-  Polymorphic Definition CorrespondenceCategory_Identity x : CorrespondenceCategory_Morphism x x :=
+  Definition CorrespondenceCategory_Identity x : CorrespondenceCategory_Morphism x x :=
     match x as s return (CorrespondenceCategory_Morphism s s) with
       | inl X => Identity X
       | inr X => Identity X
     end.
 
-  Polymorphic Definition CorrespondenceCategory_Compose s d d' (m1 : CorrespondenceCategory_Morphism d d') (m2 : CorrespondenceCategory_Morphism s d) :
+  Definition CorrespondenceCategory_Compose s d d' (m1 : CorrespondenceCategory_Morphism d d') (m2 : CorrespondenceCategory_Morphism s d) :
     CorrespondenceCategory_Morphism s d'.
     destruct s as [ X | X ], d as [ Y | Y ], d' as [ Z | Z ];
       unfold CorrespondenceCategory_Morphism in *; simpl in *; trivial;
@@ -111,12 +115,12 @@ Section CorrespondenceCategory.
     exact (M.(MorphismOf) (s := (_, Y)) (d := (_, Z)) (Identity X, m1) m2).
   Defined.
 
-  Polymorphic Hint Resolve Associativity LeftIdentity RightIdentity.
+  Hint Resolve Associativity LeftIdentity RightIdentity.
 
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
   (* TODO(jgross): Rewrite fg_equal_in using typeclasses? for speed *)
-  Polymorphic Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type.
+  Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type.
     refine (@Build_SpecializedCategory _
                                        CorrespondenceCategory_Morphism
                                        CorrespondenceCategory_Identity
@@ -129,7 +133,6 @@ Section CorrespondenceCategory.
         unfold CorrespondenceCategory_Identity, CorrespondenceCategory_Compose, CorrespondenceCategory_Morphism in *;
           destruct_type @Empty_set; trivial; autorewrite with functor; auto with morphism;
         destruct M as [ MO MM MI MC ]; simpl in *; fg_equal_in MI; fg_equal_in MC;
-        present_spcategory;
         match goal with | [ H : _ |- _ ] => do 2 (try rewrite <- H); simpl; autorewrite with morphism; reflexivity end
       ).
   Defined.
@@ -156,14 +159,14 @@ Section Functor_to_1.
       | inl _ => exist _ 0 (le_S 0 0 (le_n 0))
       | inr _ => exist _ 1 (le_n 1)
     end. *)
-  Polymorphic Definition CorrespondenceCategoryFunctor_MorphismOf (s d : C + C') (m : CorrespondenceCategory_Morphism M s d) :
+  Definition CorrespondenceCategoryFunctor_MorphismOf (s d : C + C') (m : CorrespondenceCategory_Morphism M s d) :
     Morphism ([1]) (CorrespondenceCategoryFunctor_ObjectOf s) (CorrespondenceCategoryFunctor_ObjectOf d).
     subst_body; abstract (
       destruct s, d; hnf in *; simpl in *; intuition
     ).
   Defined.
 
-  Polymorphic Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') ([1]).
+  Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') ([1]).
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
         refine (Build_SpecializedFunctor C D
@@ -192,14 +195,14 @@ Section From_Functor_to_1.
   Variable F : SpecializedFunctor M ([1]).
 
   (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)
-  Polymorphic Definition CorrespondenceCategory0 := FullSubcategory M (fun x => F x = false). (* proj1_sig (F x) = 0).*)
-  Polymorphic Definition CorrespondenceCategory1 := FullSubcategory M (fun x => F x = true). (* proj1_sig (F x) = 1).*)
+  Definition CorrespondenceCategory0 := FullSubcategory M (fun x => F x = false). (* proj1_sig (F x) = 0).*)
+  Definition CorrespondenceCategory1 := FullSubcategory M (fun x => F x = true). (* proj1_sig (F x) = 1).*)
 
   Let C := CorrespondenceCategory0.
   Let C' := CorrespondenceCategory1.
   Let COp := OppositeCategory C.
 
-  Polymorphic Definition Correspondence : SpecializedFunctor (COp * C') TypeCat.
+  Definition Correspondence : SpecializedFunctor (COp * C') TypeCat.
     subst_body.
     match goal with
       | [ |- SpecializedFunctor ?C ?D ] =>
@@ -210,7 +213,7 @@ Section From_Functor_to_1.
           _
         )
     end;
-    simpl in *; present_spfunctor; subst_body;
+    simpl in *; subst_body;
       abstract (
         intros; destruct_hypotheses;
           apply functional_extensionality_dep; intro;

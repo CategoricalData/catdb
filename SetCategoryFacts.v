@@ -4,6 +4,10 @@ Require Import Common NaturalNumbersObject.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Notation IndexedTInitialOf obj coerce initial_obj :=
   ((fun o => exist _
                    (fun x : initial_obj%type => match x with end)
@@ -37,26 +41,26 @@ Notation CoercedUnitTerminalOf obj T := (IndexedUnitTerminalOf obj (fun x => x :
 Notation CoercedTrueTerminalOf obj T := (IndexedTrueTerminalOf obj (fun x => x : T)).
 
 Section InitialTerminal.
-  Polymorphic Definition TypeCatFalseInitial : IsInitialObject (C := TypeCat) False := Eval simpl in FalseInitialOf Type.
-  Polymorphic Definition SetCatFalseInitial : IsInitialObject (C := SetCat) False := Eval simpl in FalseInitialOf Set.
-  Polymorphic Definition PropCatFalseInitial : IsInitialObject (C := PropCat) False := Eval simpl in FalseInitialOf Prop.
+  Definition TypeCatFalseInitial : IsInitialObject (C := TypeCat) False := Eval simpl in FalseInitialOf Type.
+  Definition SetCatFalseInitial : IsInitialObject (C := SetCat) False := Eval simpl in FalseInitialOf Set.
+  Definition PropCatFalseInitial : IsInitialObject (C := PropCat) False := Eval simpl in FalseInitialOf Prop.
 
-  Polymorphic Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set := Eval simpl in EmptySetInitialOf Type.
-  Polymorphic Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set := Eval simpl in EmptySetInitialOf Set.
+  Definition TypeCatEmptyInitial : IsInitialObject (C := TypeCat) Empty_set := Eval simpl in EmptySetInitialOf Type.
+  Definition SetCatEmptyInitial : IsInitialObject (C := SetCat) Empty_set := Eval simpl in EmptySetInitialOf Set.
 
-  Polymorphic Definition TypeCatTrueTerminal : IsTerminalObject (C := TypeCat) True := Eval simpl in TrueTerminalOf Type.
-  Polymorphic Definition SetCatTrueTerminal : IsTerminalObject (C := SetCat) True := Eval simpl in TrueTerminalOf Set.
-  Polymorphic Definition PropCatTrueTerminal : IsTerminalObject (C := PropCat) True := Eval simpl in TrueTerminalOf Prop.
+  Definition TypeCatTrueTerminal : IsTerminalObject (C := TypeCat) True := Eval simpl in TrueTerminalOf Type.
+  Definition SetCatTrueTerminal : IsTerminalObject (C := SetCat) True := Eval simpl in TrueTerminalOf Set.
+  Definition PropCatTrueTerminal : IsTerminalObject (C := PropCat) True := Eval simpl in TrueTerminalOf Prop.
 
-  Polymorphic Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
-  Polymorphic Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
+  Definition TypeCatUnitTerminal : IsTerminalObject (C := TypeCat) unit := Eval simpl in UnitTerminalOf Type.
+  Definition SetCatUnitTerminal : IsTerminalObject (C := SetCat) unit := Eval simpl in UnitTerminalOf Set.
 
-  Polymorphic Definition TypeCatSingletonTerminal := Eval hnf in TypeCatUnitTerminal.
-  Polymorphic Definition SetCatSingletonTerminal := Eval hnf in SetCatUnitTerminal.
+  Definition TypeCatSingletonTerminal : IsTerminalObject (C := TypeCat) unit := Eval hnf in TypeCatUnitTerminal.
+  Definition SetCatSingletonTerminal : IsTerminalObject (C := SetCat) unit := Eval hnf in SetCatUnitTerminal.
 End InitialTerminal.
 
 Section EpiMono.
-  Polymorphic Definition compose {A B C : Type} (f : B -> C) (g : A -> B) := (fun x => f (g x)).
+  Definition compose {A B C : Type} (f : B -> C) (g : A -> B) := (fun x => f (g x)).
 
   Variables S : Type.
 
@@ -90,14 +94,14 @@ Section EpiMono.
                end
            end.
 
-  Polymorphic Lemma InjMono B (f : B -> S) :
+  Lemma InjMono B (f : B -> S) :
     (forall x y : B, f x = f y -> x = y)
     -> (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g').
   Proof.
     t.
   Qed.
 
-  Polymorphic Lemma MonoInj B (f : B -> S) :
+  Lemma MonoInj B (f : B -> S) :
     (forall A (g g' : A -> B), (compose f g) = (compose f g') -> g = g')
     -> (forall x y : B, f x = f y -> x = y).
   Proof.
@@ -106,14 +110,14 @@ Section EpiMono.
     t.
   Qed.
 
-  Polymorphic Lemma SurjEpi A (f : A -> S) :
+  Lemma SurjEpi A (f : A -> S) :
     (forall x : S, exists y : A, f y = x)
     -> (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g').
   Proof.
     t.
   Qed.
 
-  Polymorphic Lemma EpiSurj A (f : A -> S) (member_dec : forall x : S, {exists y, f y = x} + {~exists y, f y = x}) :
+  Lemma EpiSurj A (f : A -> S) (member_dec : forall x : S, {exists y, f y = x} + {~exists y, f y = x}) :
     (forall C (g g' : S -> C), (compose g f) = (compose g' f) -> g = g')
     -> (forall x : S, exists y : A, f y = x).
   Proof.
@@ -125,7 +129,7 @@ Section EpiMono.
 End EpiMono.
 
 Section nat.
-  Polymorphic Fixpoint NatBuilderFunction A (o : unit -> A) (s : A -> A) (n : nat) : A
+  Fixpoint NatBuilderFunction A (o : unit -> A) (s : A -> A) (n : nat) : A
     := match n with
          | 0 => o tt
          | S n' => s (NatBuilderFunction o s n')
@@ -143,28 +147,22 @@ Section nat.
     simpl in *;
     congruence.
 
-  Local Notation PartialBuild_NaturalNumbersPreObject T Cat pf :=
-    (@Build_NaturalNumbersPreObject T Cat
-                                    nat
-                                    (UnitTerminalOf T)
-                                    (fun _ => 0)
-                                    S
-                                    (fun A q f => exist _ (NatBuilderFunction q f) (pf A q f))).
+  Local Notation PartialBuild_NaturalNumbersPreObject T Cat :=
+    (fun pf => @Build_NaturalNumbersPreObject T Cat
+                                              nat
+                                              (UnitTerminalOf T)
+                                              (fun _ => 0)
+                                              S
+                                              (fun A q f => exist _ (NatBuilderFunction q f) (pf A q f))).
 
   Local Ltac build_nat T Cat :=
-    let pf := fresh in
-    let pfT := fresh in
-    evar (pfT : Prop);
-      cut pfT; subst pfT;
-      [ intro pf;
-        let t := constr:(PartialBuild_NaturalNumbersPreObject T Cat pf) in
-        let t' := (eval simpl in t) in
-        exact t'
-      | ];
-      instantiate; abstract t.
+    let t0 := constr:(PartialBuild_NaturalNumbersPreObject T Cat) in
+    let t0' := (eval simpl in t0) in
+    refine (t0' _);
+      abstract t.
 
   Let SetCatNaturalNumbersPreObject' : NaturalNumbersPreObject SetCat. build_nat Set SetCat. Defined.
-  Polymorphic Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
+  Definition SetCatNaturalNumbersPreObject := Eval hnf in SetCatNaturalNumbersPreObject'.
   Let TypeCatNaturalNumbersPreObject' : NaturalNumbersPreObject TypeCat. build_nat Type TypeCat. Defined.
-  Polymorphic Definition TypeCatNaturalNumbersPreObject := Eval hnf in TypeCatNaturalNumbersPreObject'.
+  Definition TypeCatNaturalNumbersPreObject := Eval hnf in TypeCatNaturalNumbersPreObject'.
 End nat.

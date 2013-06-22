@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section EnrichedCategory.
   (** Quoting Wikipedia:
      Let [(M, ⊗, I, α, λ, ρ)] be a monoidal category.
@@ -136,7 +140,7 @@ Section EnrichedCategory.
 
   Local Notation "x ~> y" := (M.(Morphism) x y).
 
-  Polymorphic Record EnrichedCategory (objC : Type) := {
+  Record EnrichedCategory (objC : Type) := {
     EnrichedObject :> _ := objC;
 
     EnrichedMorphism : objC -> objC -> objM where "'C' ( A , B )" := (@EnrichedMorphism A B);
@@ -214,8 +218,8 @@ End EnrichedCategory.
 Section nCategories.
   Check @EnrichedCategory.
   Require Import DiscreteCategory.
-  Polymorphic Definition TerminalMonoidalCategory : @MonoidalCategory unit (fun _ _ => unit).
-    Polymorphic Hint Extern 1 => repeat esplit; unfold Morphism, Object; intros; simpl; trivial.
+  Definition TerminalMonoidalCategory : @MonoidalCategory unit (fun _ _ => unit).
+    Hint Extern 1 => repeat esplit; unfold Morphism, Object; intros; simpl; trivial.
     refine {| MonoidalUnderlyingCategory := TerminalCategory |};
       eauto.
     Grab Existential Variables.
@@ -241,7 +245,7 @@ Section nCategories.
   Require Import ComputableCategory.
   Print ComputableCategory.
   Section m2Cat.
-    Polymorphic Definition m2Cat := @ComputableCategory unit _ _ (fun _ => TerminalCategory).
+    Definition m2Cat := @ComputableCategory unit _ _ (fun _ => TerminalCategory).
 
     Local Ltac ex_unit_fun := first [
       exists tt
@@ -304,7 +308,7 @@ Section nCategories.
       define_unit_nt.
     Defined.
 
-    Polymorphic Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => SpecializedFunctor TerminalCategory TerminalCategory).
+    Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => SpecializedFunctor TerminalCategory TerminalCategory).
       refine (@Build_MonoidalCategory _ _
         m2Cat
         TensorProduct tt Associator LeftUnitor RightUnitor
@@ -316,8 +320,8 @@ Section nCategories.
     Defined.
   End m2Cat.
 
-  Polymorphic Definition m1Cat : EnrichedCategory m2MonoidalCat.
+  Definition m1Cat : EnrichedCategory m2MonoidalCat.
 Print EnrichedCategory.
-  Polymorphic Definition m2Category : EnrichedCategory TerminalMonoidalCategory .
+  Definition m2Category : EnrichedCategory TerminalMonoidalCategory .
 End nCategories.
 *)

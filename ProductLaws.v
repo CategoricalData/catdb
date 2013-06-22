@@ -5,28 +5,31 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
 Section swap.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Definition SwapFunctor `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  : SpecializedFunctor (C * D) (D * C)
+    := Build_SpecializedFunctor (C * D) (D * C)
+                                (fun cd => (snd cd, fst cd))
+                                (fun _ _ m => (snd m, fst m))
+                                (fun _ _ _ _ _ => eq_refl)
+                                (fun _ => eq_refl).
 
-  Polymorphic Definition SwapFunctor : SpecializedFunctor (C * D) (D * C).
-    refine (Build_SpecializedFunctor (C * D) (D * C)
-                                     (fun cd => (snd cd, fst cd))
-                                     (fun _ _ m => (snd m, fst m))
-                                     _
-                                     _);
-    abstract (
-        intros; simpl; present_spcategory; simpl_eq; reflexivity
-      ).
-  Defined.
+  Lemma ProductLawSwap `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
+    functor_eq; intuition.
+  Qed.
 End swap.
 
 Section Law0.
   Context `(C : @SpecializedCategory objC).
 
-  Polymorphic Definition ProductLaw0Functor : SpecializedFunctor (C * 0) 0.
+  Definition ProductLaw0Functor : SpecializedFunctor (C * 0) 0.
     refine (Build_SpecializedFunctor (C * 0) 0
                                      (@snd _ _)
                                      (fun _ _ => @snd _ _)
@@ -39,7 +42,7 @@ Section Law0.
       ).
   Defined.
 
-  Polymorphic Definition ProductLaw0Functor_Inverse : SpecializedFunctor 0 (C * 0).
+  Definition ProductLaw0Functor_Inverse : SpecializedFunctor 0 (C * 0).
     repeat esplit;
     intros; destruct_head_hnf Empty_set.
     Grab Existential Variables.
@@ -47,7 +50,7 @@ Section Law0.
     intros; destruct_head_hnf Empty_set.
   Defined.
 
-  Polymorphic Lemma ProductLaw0 : ComposeFunctors ProductLaw0Functor ProductLaw0Functor_Inverse = IdentityFunctor _ /\
+  Lemma ProductLaw0 : ComposeFunctors ProductLaw0Functor ProductLaw0Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0Functor_Inverse ProductLaw0Functor = IdentityFunctor _.
   Proof.
     split; functor_eq;
@@ -62,14 +65,14 @@ Section Law0'.
   Let ProductLaw0'Functor' : SpecializedFunctor (0 * C) 0.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
   Defined.
-  Polymorphic Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
+  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
 
   Let ProductLaw0'Functor_Inverse' : SpecializedFunctor 0 (0 * C).
     functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C)).
   Defined.
-  Polymorphic Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
+  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
 
-  Polymorphic Lemma ProductLaw0' : ComposeFunctors ProductLaw0'Functor ProductLaw0'Functor_Inverse = IdentityFunctor _ /\
+  Lemma ProductLaw0' : ComposeFunctors ProductLaw0'Functor ProductLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0'Functor_Inverse ProductLaw0'Functor = IdentityFunctor _.
   Proof.
     split; functor_eq;
@@ -84,21 +87,21 @@ Section Law1.
   Let ProductLaw1Functor' : SpecializedFunctor (C * 1) C.
     functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
   Defined.
-  Polymorphic Definition ProductLaw1Functor : SpecializedFunctor (C * 1) C
+  Definition ProductLaw1Functor : SpecializedFunctor (C * 1) C
     := Eval hnf in ProductLaw1Functor'.
 
-  Polymorphic Definition ProductLaw1Functor_Inverse : SpecializedFunctor C (C * 1).
+  Definition ProductLaw1Functor_Inverse : SpecializedFunctor C (C * 1).
     refine (Build_SpecializedFunctor C (C * 1)
                                      (fun c => (c, tt))
                                      (fun s d m => (m, eq_refl))
                                      _
                                      _);
     abstract (
-        intros; simpl in *; present_spcategory; simpl_eq; reflexivity
+        intros; simpl in *; simpl_eq; reflexivity
       ).
   Defined.
 
-  Polymorphic Lemma ProductLaw1 : ComposeFunctors ProductLaw1Functor ProductLaw1Functor_Inverse = IdentityFunctor _ /\
+  Lemma ProductLaw1 : ComposeFunctors ProductLaw1Functor ProductLaw1Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1Functor_Inverse ProductLaw1Functor = IdentityFunctor _.
   Proof.
     split; functor_eq;
@@ -112,17 +115,17 @@ End Law1.
 Section Law1'.
   Context `(C : @SpecializedCategory objC).
 
-  Polymorphic Definition ProductLaw1'Functor' : SpecializedFunctor (1 * C) C.
+  Definition ProductLaw1'Functor' : SpecializedFunctor (1 * C) C.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _)).
   Defined.
-  Polymorphic Definition ProductLaw1'Functor : SpecializedFunctor (1 * C) C := Eval hnf in ProductLaw1'Functor'.
+  Definition ProductLaw1'Functor : SpecializedFunctor (1 * C) C := Eval hnf in ProductLaw1'Functor'.
 
   Let ProductLaw1'Functor_Inverse' : SpecializedFunctor C (1 * C).
     functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw1Functor_Inverse C)).
   Defined.
-  Polymorphic Definition ProductLaw1'Functor_Inverse : SpecializedFunctor C (1 * C) := Eval hnf in ProductLaw1'Functor_Inverse'.
+  Definition ProductLaw1'Functor_Inverse : SpecializedFunctor C (1 * C) := Eval hnf in ProductLaw1'Functor_Inverse'.
 
-  Polymorphic Lemma ProductLaw1' : ComposeFunctors ProductLaw1'Functor ProductLaw1'Functor_Inverse = IdentityFunctor _ /\
+  Lemma ProductLaw1' : ComposeFunctors ProductLaw1'Functor ProductLaw1'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1'Functor_Inverse ProductLaw1'Functor = IdentityFunctor _.
   Proof.
     split; functor_eq;

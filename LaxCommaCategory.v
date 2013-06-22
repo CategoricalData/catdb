@@ -6,13 +6,17 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Local Open Scope category_scope.
 
-Local Ltac fold_functor :=
+Local Ltac fold_functor := idtac. (*
   change (@SpecializedFunctor) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD) => @Functor C D) in *;
     change (@SpecializedNaturalTransformation) with (fun objC (C : @SpecializedCategory objC) objD (D : @SpecializedCategory objD)
       (F G : SpecializedFunctor C D)
-      => @NaturalTransformation C D F G) in *.
+      => @NaturalTransformation C D F G) in *. *)
 
 Section LaxSliceCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -34,52 +38,52 @@ Section LaxSliceCategory.
   Let LaxSliceCategory_Object'' : Type.
     simpl_definition_by_tac_and_exact LaxSliceCategory_Object' ltac:(simpl in *; fold_functor; simpl in *).
   Defined.
-  Polymorphic Definition LaxSliceCategory_Object := Eval hnf in LaxSliceCategory_Object''.
+  Definition LaxSliceCategory_Object := Eval hnf in LaxSliceCategory_Object''.
 
   Let LaxSliceCategory_Morphism' (XG X'G' : LaxSliceCategory_Object) := Eval hnf in @LaxSliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
   Let LaxSliceCategory_Morphism'' (XG X'G' : LaxSliceCategory_Object) : Type.
-    simpl_definition_by_tac_and_exact (LaxSliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (LaxSliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxSliceCategory_Morphism (XG X'G' : LaxSliceCategory_Object) := Eval hnf in LaxSliceCategory_Morphism'' XG X'G'.
+  Definition LaxSliceCategory_Morphism (XG X'G' : LaxSliceCategory_Object) := Eval hnf in LaxSliceCategory_Morphism'' XG X'G'.
 
   Let LaxSliceCategory_Compose' s d d' Fα F'α'
     := Eval hnf in @LaxSliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
   Let LaxSliceCategory_Compose'' s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
     LaxSliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxSliceCategory_Compose s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
+  Definition LaxSliceCategory_Compose s d d' (Fα : LaxSliceCategory_Morphism d d') (F'α' : LaxSliceCategory_Morphism s d) :
     LaxSliceCategory_Morphism s d'
     := Eval hnf in @LaxSliceCategory_Compose'' s d d' Fα F'α'.
 
   Let LaxSliceCategory_Identity' o := Eval hnf in @LaxSliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
   Let LaxSliceCategory_Identity'' (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o.
-    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxSliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxSliceCategory_Identity (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o
+  Definition LaxSliceCategory_Identity (o : LaxSliceCategory_Object) : LaxSliceCategory_Morphism o o
     := Eval hnf in @LaxSliceCategory_Identity'' o.
 
   Global Arguments LaxSliceCategory_Compose _ _ _ _ _ /.
   Global Arguments LaxSliceCategory_Identity _ /.
 
-  Polymorphic Lemma LaxSliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxSliceCategory_Morphism o1 o2) (m2 : LaxSliceCategory_Morphism o2 o3) (m3 : LaxSliceCategory_Morphism o3 o4) :
+  Lemma LaxSliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxSliceCategory_Morphism o1 o2) (m2 : LaxSliceCategory_Morphism o2 o3) (m3 : LaxSliceCategory_Morphism o3 o4) :
     LaxSliceCategory_Compose (LaxSliceCategory_Compose m3 m2) m1 = LaxSliceCategory_Compose m3 (LaxSliceCategory_Compose m2 m1).
     abstract apply (@LaxSliceSpecializedCategory_Associativity _ _ Index2Cat _ C o1 o2 o3 o4 m1 m2 m3).
   Qed.
 
-  Polymorphic Lemma LaxSliceCategory_LeftIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
+  Lemma LaxSliceCategory_LeftIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
     LaxSliceCategory_Compose (LaxSliceCategory_Identity b) f = f.
   Proof.
     abstract apply (@LaxSliceSpecializedCategory_LeftIdentity _ _ Index2Cat _ C a b f).
   Qed.
 
-  Polymorphic Lemma LaxSliceCategory_RightIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
+  Lemma LaxSliceCategory_RightIdentity (a b : LaxSliceCategory_Object) (f : LaxSliceCategory_Morphism a b) :
     LaxSliceCategory_Compose f (LaxSliceCategory_Identity a) = f.
   Proof.
     abstract apply (@LaxSliceSpecializedCategory_RightIdentity _ _ Index2Cat _ C a b f).
   Qed.
 
-  Polymorphic Definition LaxSliceCategory : Category.
+  Definition LaxSliceCategory : Category.
     refine (@Build_SpecializedCategory LaxSliceCategory_Object LaxSliceCategory_Morphism
       LaxSliceCategory_Identity
       LaxSliceCategory_Compose
@@ -90,7 +94,7 @@ Section LaxSliceCategory.
   Defined.
 End LaxSliceCategory.
 
-Polymorphic Hint Unfold LaxSliceCategory_Compose LaxSliceCategory_Identity : category.
+Hint Unfold LaxSliceCategory_Compose LaxSliceCategory_Identity : category.
 
 Section LaxCosliceCategory.
   (* [Definition]s are not sort-polymorphic. *)
@@ -108,52 +112,52 @@ Section LaxCosliceCategory.
   Let LaxCosliceCategory_Object'' : Type.
     simpl_definition_by_tac_and_exact LaxCosliceCategory_Object' ltac:(simpl in *; fold_functor; simpl in *).
   Defined.
-  Polymorphic Definition LaxCosliceCategory_Object := Eval hnf in LaxCosliceCategory_Object''.
+  Definition LaxCosliceCategory_Object := Eval hnf in LaxCosliceCategory_Object''.
 
   Let LaxCosliceCategory_Morphism' (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in @LaxCosliceSpecializedCategory_MorphismT _ _ Index2Cat _ C XG X'G'.
   Let LaxCosliceCategory_Morphism'' (XG X'G' : LaxCosliceCategory_Object) : Type.
-    simpl_definition_by_tac_and_exact (LaxCosliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (LaxCosliceCategory_Morphism' XG X'G') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in LaxCosliceCategory_Morphism'' XG X'G'.
+  Definition LaxCosliceCategory_Morphism (XG X'G' : LaxCosliceCategory_Object) := Eval hnf in LaxCosliceCategory_Morphism'' XG X'G'.
 
   Let LaxCosliceCategory_Compose' s d d' Fα F'α'
     := Eval hnf in @LaxCosliceSpecializedCategory_Compose _ _ Index2Cat _ C s d d' Fα F'α'.
   Let LaxCosliceCategory_Compose'' s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'.
-    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Compose' s d d' Fα F'α') ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxCosliceCategory_Compose s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
+  Definition LaxCosliceCategory_Compose s d d' (Fα : LaxCosliceCategory_Morphism d d') (F'α' : LaxCosliceCategory_Morphism s d) :
     LaxCosliceCategory_Morphism s d'
     := Eval hnf in @LaxCosliceCategory_Compose'' s d d' Fα F'α'.
 
   Let LaxCosliceCategory_Identity' o := Eval hnf in @LaxCosliceSpecializedCategory_Identity _ _ Index2Cat _ C o.
   Let LaxCosliceCategory_Identity'' (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o.
-    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *; present_spnt).
+    simpl_definition_by_tac_and_exact (@LaxCosliceCategory_Identity' o) ltac:(subst_body; cbv beta in *; fold_functor; cbv beta in *).
   Defined.
-  Polymorphic Definition LaxCosliceCategory_Identity (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o
+  Definition LaxCosliceCategory_Identity (o : LaxCosliceCategory_Object) : LaxCosliceCategory_Morphism o o
     := Eval hnf in @LaxCosliceCategory_Identity'' o.
 
   Global Arguments LaxCosliceCategory_Compose _ _ _ _ _ /.
   Global Arguments LaxCosliceCategory_Identity _ /.
 
-  Polymorphic Lemma LaxCosliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxCosliceCategory_Morphism o1 o2) (m2 : LaxCosliceCategory_Morphism o2 o3) (m3 : LaxCosliceCategory_Morphism o3 o4) :
+  Lemma LaxCosliceCategory_Associativity o1 o2 o3 o4 (m1 : LaxCosliceCategory_Morphism o1 o2) (m2 : LaxCosliceCategory_Morphism o2 o3) (m3 : LaxCosliceCategory_Morphism o3 o4) :
     LaxCosliceCategory_Compose (LaxCosliceCategory_Compose m3 m2) m1 = LaxCosliceCategory_Compose m3 (LaxCosliceCategory_Compose m2 m1).
     abstract apply (@LaxCosliceSpecializedCategory_Associativity _ _ Index2Cat _ C o1 o2 o3 o4 m1 m2 m3).
   Qed.
 
-  Polymorphic Lemma LaxCosliceCategory_LeftIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
+  Lemma LaxCosliceCategory_LeftIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
     LaxCosliceCategory_Compose (LaxCosliceCategory_Identity b) f = f.
   Proof.
     abstract apply (@LaxCosliceSpecializedCategory_LeftIdentity _ _ Index2Cat _ C a b f).
   Qed.
 
-  Polymorphic Lemma LaxCosliceCategory_RightIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
+  Lemma LaxCosliceCategory_RightIdentity (a b : LaxCosliceCategory_Object) (f : LaxCosliceCategory_Morphism a b) :
     LaxCosliceCategory_Compose f (LaxCosliceCategory_Identity a) = f.
   Proof.
     abstract apply (@LaxCosliceSpecializedCategory_RightIdentity _ _ Index2Cat _ C a b f).
   Qed.
 
-  Polymorphic Definition LaxCosliceCategory : Category.
+  Definition LaxCosliceCategory : Category.
     refine (@Build_SpecializedCategory LaxCosliceCategory_Object LaxCosliceCategory_Morphism
       LaxCosliceCategory_Identity
       LaxCosliceCategory_Compose
@@ -164,4 +168,4 @@ Section LaxCosliceCategory.
   Defined.
 End LaxCosliceCategory.
 
-Polymorphic Hint Unfold LaxCosliceCategory_Compose LaxCosliceCategory_Identity : category.
+Hint Unfold LaxCosliceCategory_Compose LaxCosliceCategory_Identity : category.

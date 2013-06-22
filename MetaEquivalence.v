@@ -5,25 +5,29 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section MetaEquivalence.
   Variable C D : Schema.
   Variable F G : Translation C D.
 
-  Polymorphic Definition MetaEquivalence (T : MetaTranslation F G) :=
+  Definition MetaEquivalence (T : MetaTranslation F G) :=
     forall x : C.(Vertex), SchemaIsomorphism (T.(SComponentsOf) x).
 
-  Polymorphic Definition TranslationsNaturallyEquivalent : Prop :=
+  Definition TranslationsNaturallyEquivalent : Prop :=
     exists T : MetaTranslation F G, exists TE : MetaEquivalence T, True.
 End MetaEquivalence.
 
 Section MetaEquivalenceOfSchemas.
   Variable C D : Schema.
 
-  Polymorphic Definition MetaEquivalenceOfSchemas (F : Translation C D) (G : Translation D C) : Prop :=
+  Definition MetaEquivalenceOfSchemas (F : Translation C D) (G : Translation D C) : Prop :=
     (TranslationsNaturallyEquivalent (IdentityTranslation C) (ComposeTranslations G F)) /\
     (TranslationsNaturallyEquivalent (IdentityTranslation D) (ComposeTranslations F G)).
 
-  Polymorphic Definition SchemasNaturallyEquivalent : Prop :=
+  Definition SchemasNaturallyEquivalent : Prop :=
     exists F : Translation C D, exists G : Translation D C, MetaEquivalenceOfSchemas F G.
 End MetaEquivalenceOfSchemas.
 
@@ -32,10 +36,10 @@ Section MetaEquivalenceInverse.
   Variable F G : Translation C D.
   Variable T : MetaTranslation F G.
 
-  Polymorphic Hint Unfold SInverseOf.
-  Polymorphic Hint Resolve f_equal f_equal2 SCommutes.
+  Hint Unfold SInverseOf.
+  Hint Resolve f_equal f_equal2 SCommutes.
 
-  Polymorphic Definition MetaEquivalenceInverse : MetaEquivalence T -> MetaTranslation G F.
+  Definition MetaEquivalenceInverse : MetaEquivalence T -> MetaTranslation G F.
     refine (fun X => {| SComponentsOf := (fun c => proj1_sig (X c)) |});
       abstract (intros; destruct (X s); destruct (X d); simpl; firstorder;
         eapply s_iso_is_epi; [ eauto | ]; eapply s_iso_is_mono; [ eauto | ];
@@ -48,9 +52,9 @@ Section MetaEquivalenceInverse.
                    end).
   Defined.
 
-  Polymorphic Hint Immediate SInverseOf_sym.
+  Hint Immediate SInverseOf_sym.
 
-  Polymorphic Lemma MetaEquivalenceInverse_MetaEquivalence (TE : MetaEquivalence T) : MetaEquivalence (MetaEquivalenceInverse TE).
+  Lemma MetaEquivalenceInverse_MetaEquivalence (TE : MetaEquivalence T) : MetaEquivalence (MetaEquivalenceInverse TE).
     unfold MetaEquivalence, SchemaIsomorphism in *; simpl in *;
       intro x; destruct (TE x); eauto.
   Qed.
@@ -60,13 +64,13 @@ Section IdentityMetaTranslation.
   Variable C D : Schema.
   Variable F : Translation C D.
 
-  Polymorphic Lemma SInverseOf_Identity : forall C (x : C.(Vertex)), SInverseOf (@NoEdges _ _ x) (@NoEdges _ _ x).
+  Lemma SInverseOf_Identity : forall C (x : C.(Vertex)), SInverseOf (@NoEdges _ _ x) (@NoEdges _ _ x).
     firstorder; unfold concatenate; reflexivity.
   Qed.
 
-  Polymorphic Hint Resolve SInverseOf_Identity.
+  Hint Resolve SInverseOf_Identity.
 
-  Polymorphic Theorem IdentityMetaEquivalence : MetaEquivalence (IdentityMetaTranslation F).
+  Theorem IdentityMetaEquivalence : MetaEquivalence (IdentityMetaTranslation F).
     hnf; intros; hnf; simpl; eauto.
   Qed.
 End IdentityMetaTranslation.
@@ -74,22 +78,22 @@ End IdentityMetaTranslation.
 Section TranslationMetaEquivalenceRelation.
   Variable C D : Schema.
 
-  Polymorphic Hint Resolve IdentityMetaEquivalence.
+  Hint Resolve IdentityMetaEquivalence.
 
-  Polymorphic Lemma translations_naturally_equivalent_refl (F : Translation C D) : TranslationsNaturallyEquivalent F F.
+  Lemma translations_naturally_equivalent_refl (F : Translation C D) : TranslationsNaturallyEquivalent F F.
     exists (IdentityMetaTranslation F); eauto.
   Qed.
 
-  Polymorphic Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
+  Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
 
-  Polymorphic Lemma translations_naturally_equivalent_sym (F G : Translation C D) :
+  Lemma translations_naturally_equivalent_sym (F G : Translation C D) :
     TranslationsNaturallyEquivalent F G -> TranslationsNaturallyEquivalent G F.
     destruct 1 as [ ? [ H ] ]; exists (MetaEquivalenceInverse H); eauto.
   Qed.
 
-  Polymorphic Hint Resolve SchemaIsomorphismComposition.
+  Hint Resolve SchemaIsomorphismComposition.
 
-  Polymorphic Lemma translations_naturally_equivalent_trans (F G H : Translation C D) :
+  Lemma translations_naturally_equivalent_trans (F G H : Translation C D) :
     TranslationsNaturallyEquivalent F G -> TranslationsNaturallyEquivalent G H -> TranslationsNaturallyEquivalent F H.
     destruct 1 as [ T [ ] ]; destruct 1 as [ U [ ] ];
       exists (MTComposeMT U T); eexists; hnf; simpl; eauto.
@@ -129,24 +133,24 @@ Qed.
 Section TranslationMetaEquivalenceLemmas.
   Variable B C D E : Schema.
 
-  Polymorphic Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
+  Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
 
-  Polymorphic Lemma LeftIdentityTranslationNE (F : Translation D C) : TranslationsNaturallyEquivalent (ComposeTranslations (IdentityTranslation _) F) F.
+  Lemma LeftIdentityTranslationNE (F : Translation D C) : TranslationsNaturallyEquivalent (ComposeTranslations (IdentityTranslation _) F) F.
     match goal with
       | [ |- TranslationsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto; try (rewrite H; reflexivity)
     end.
   Qed.
 
-  Polymorphic Lemma RightIdentityTranslationNE (F : Translation C D) : TranslationsNaturallyEquivalent (ComposeTranslations F (IdentityTranslation _)) F.
+  Lemma RightIdentityTranslationNE (F : Translation C D) : TranslationsNaturallyEquivalent (ComposeTranslations F (IdentityTranslation _)) F.
     match goal with
       | [ |- TranslationsNaturallyEquivalent ?a ?b ] => assert (H : a = b); eauto; try (rewrite H; reflexivity)
     end.
   Qed.
 
-  Polymorphic Hint Unfold TranslationsNaturallyEquivalent ComposeTranslations MetaEquivalence SchemaIsomorphism SInverseOf.
+  Hint Unfold TranslationsNaturallyEquivalent ComposeTranslations MetaEquivalence SchemaIsomorphism SInverseOf.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma PreComposeTranslationsNE (G : Translation D E) (F1 F2 : Translation C D) :
+  Lemma PreComposeTranslationsNE (G : Translation D E) (F1 F2 : Translation C D) :
     TranslationsNaturallyEquivalent F1 F2 -> TranslationsNaturallyEquivalent (ComposeTranslations G F1) (ComposeTranslations G F2).
     intro H.
     destruct H as [ T [ H t ] ]; clear t.
@@ -165,7 +169,7 @@ Section TranslationMetaEquivalenceLemmas.
                 etransitivity; eauto; try reflexivity.
   Qed.
 
-  Polymorphic Lemma PostComposeTranslationsNE (G1 G2 : Translation D E) (F : Translation C D) :
+  Lemma PostComposeTranslationsNE (G1 G2 : Translation D E) (F : Translation C D) :
     TranslationsNaturallyEquivalent G1 G2 -> TranslationsNaturallyEquivalent (ComposeTranslations G1 F) (ComposeTranslations G2 F).
     intro H.
     destruct H as [ T [ H t ] ]; clear t.
@@ -177,9 +181,9 @@ Section TranslationMetaEquivalenceLemmas.
     eexists; eauto.
   Qed.
 
-  Polymorphic Hint Resolve ComposeTranslationsAssociativity.
+  Hint Resolve ComposeTranslationsAssociativity.
 
-  Polymorphic Lemma ComposeTranslationsAssociativityNE (F : Translation B C) (G : Translation C D) (H : Translation D E) :
+  Lemma ComposeTranslationsAssociativityNE (F : Translation B C) (G : Translation C D) (H : Translation D E) :
     TranslationsNaturallyEquivalent (ComposeTranslations (ComposeTranslations H G) F) (ComposeTranslations H (ComposeTranslations G F)).
     match goal with
       | [ |- TranslationsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite H'; trivial || reflexivity ]
@@ -188,27 +192,27 @@ Section TranslationMetaEquivalenceLemmas.
 End TranslationMetaEquivalenceLemmas.
 
 Section SchemaMetaEquivalenceRelation.
-  Polymorphic Hint Unfold MetaEquivalenceOfSchemas.
+  Hint Unfold MetaEquivalenceOfSchemas.
 
-  Polymorphic Hint Resolve IdentityMetaEquivalence IdentityTranslation.
+  Hint Resolve IdentityMetaEquivalence IdentityTranslation.
 
-  Polymorphic Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
+  Hint Resolve LeftIdentityTranslation RightIdentityTranslation.
 
-  Polymorphic Lemma schemas_naturally_equivalent_refl C : SchemasNaturallyEquivalent C C.
+  Lemma schemas_naturally_equivalent_refl C : SchemasNaturallyEquivalent C C.
     repeat (exists (IdentityTranslation C)); split;
       match goal with
         | [ |- TranslationsNaturallyEquivalent ?a ?b ] => cut (a = b); try let H' := fresh in solve [ intro H'; rewrite <- H'; reflexivity || trivial ]
       end; eauto.
   Qed.
 
-  Polymorphic Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
+  Hint Resolve MetaEquivalenceInverse_MetaEquivalence.
 
-  Polymorphic Lemma schemas_naturally_equivalent_sym C D :
+  Lemma schemas_naturally_equivalent_sym C D :
     SchemasNaturallyEquivalent C D -> SchemasNaturallyEquivalent D C.
     destruct 1 as [ F [ G [ ? ] ] ]; eexists; eauto.
   Qed.
 
-  Polymorphic Hint Resolve SchemaIsomorphismComposition.
+  Hint Resolve SchemaIsomorphismComposition.
 
   Ltac solve_4_associativity :=
     match goal with
@@ -216,12 +220,12 @@ Section SchemaMetaEquivalenceRelation.
         transitivity (ComposeTranslations a (ComposeTranslations (ComposeTranslations b c) d));
           try solve [ repeat (rewrite ComposeTranslationsAssociativity); reflexivity || trivial ]
     end.
-  Polymorphic Hint Extern 1 (TranslationsNaturallyEquivalent _ (ComposeTranslations ?a (ComposeTranslations (IdentityTranslation _) ?c))) => transitivity (ComposeTranslations a c).
+  Hint Extern 1 (TranslationsNaturallyEquivalent _ (ComposeTranslations ?a (ComposeTranslations (IdentityTranslation _) ?c))) => transitivity (ComposeTranslations a c).
 
-  Polymorphic Hint Resolve PreComposeTranslationsNE PostComposeTranslationsNE.
-  Polymorphic Hint Rewrite LeftIdentityTranslationNE RightIdentityTranslationNE.
+  Hint Resolve PreComposeTranslationsNE PostComposeTranslationsNE.
+  Hint Rewrite LeftIdentityTranslationNE RightIdentityTranslationNE.
 
-  Polymorphic Lemma schemas_naturally_equivalent_trans C D E :
+  Lemma schemas_naturally_equivalent_trans C D E :
     SchemasNaturallyEquivalent C D -> SchemasNaturallyEquivalent D E -> SchemasNaturallyEquivalent C E.
     destruct 1 as [ F [ F' [ T T' ] ] ]; destruct 1 as [ G [ G' [ U U' ] ] ].
     exists (ComposeTranslations G F); exists (ComposeTranslations F' G').

@@ -6,27 +6,29 @@ Set Implicit Arguments.
 
 Set Asymmetric Patterns.
 
+Set Universe Polymorphism.
+
 Section path'.
   Variable V : Type.
   Variable E : V -> V -> Type.
 
-  Polymorphic Inductive path' (s : V) : V -> Type :=
+  Inductive path' (s : V) : V -> Type :=
   | NoEdges : path' s s
   | AddEdge : forall d d', path' s d -> E d d' -> path' s d'.
 
-  Polymorphic Fixpoint prepend s d (p : path' s d) : forall s', E s' s -> path' s' d :=
+  Fixpoint prepend s d (p : path' s d) : forall s', E s' s -> path' s' d :=
     match p with
       | NoEdges => fun _ E' => AddEdge (NoEdges _) E'
       | AddEdge _ _ p' E => fun _ E' => AddEdge (prepend p' E') E
     end.
 
-  Polymorphic Fixpoint concatenate s d d' (p : path' s d) (p' : path' d d') : path' s d' :=
+  Fixpoint concatenate s d d' (p : path' s d) (p' : path' d d') : path' s d' :=
     match p' with
       | NoEdges => p
       | AddEdge _ _ p' E => AddEdge (concatenate p p') E
     end.
 
-  Polymorphic Fixpoint concatenate' s d (p : path' s d) : forall d', path' d d' -> path' s d' :=
+  Fixpoint concatenate' s d (p : path' s d) : forall d', path' d d' -> path' s d' :=
     match p with
       | NoEdges => fun _ p' => p'
       | AddEdge _ _ p E => fun _ p' => concatenate' p (prepend p' E)
@@ -35,7 +37,7 @@ Section path'.
   Variable typeOf : V -> Type.
   Variable functionOf : forall s d, E s d -> typeOf s -> typeOf d.
 
-  Polymorphic Fixpoint compose s d (p : path' s d) : typeOf s -> typeOf d :=
+  Fixpoint compose s d (p : path' s d) : typeOf s -> typeOf d :=
     match p with
       | NoEdges => fun x => x
       | AddEdge _ _ p' E => fun x => functionOf E (compose p' x)
@@ -50,72 +52,72 @@ Section path'_Theorems.
   Variable V : Type.
   Variable E : V -> V -> Type.
 
-  Polymorphic Lemma concatenate_noedges_p : forall s d (p : path' E s d), concatenate NoEdges p = p.
+  Lemma concatenate_noedges_p : forall s d (p : path' E s d), concatenate NoEdges p = p.
     induction p; t.
   Qed.
 
-  Polymorphic Lemma concatenate_p_noedges : forall s d (p : path' E s d), concatenate p NoEdges = p.
+  Lemma concatenate_p_noedges : forall s d (p : path' E s d), concatenate p NoEdges = p.
     t.
   Qed.
 
-  Polymorphic Lemma concatenate'_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
+  Lemma concatenate'_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
     concatenate' p (AddEdge p' e) = AddEdge (concatenate' p p') e.
     induction p; t.
   Qed.
 
-  Polymorphic Hint Rewrite concatenate'_addedge.
+  Hint Rewrite concatenate'_addedge.
 
-  Polymorphic Lemma concatenate'_p_noedges : forall s d (p : path' E s d), concatenate' p NoEdges = p.
+  Lemma concatenate'_p_noedges : forall s d (p : path' E s d), concatenate' p NoEdges = p.
     induction p; t.
   Qed.
 
-  Polymorphic Lemma concatenate'_noedges_p : forall s d (p : path' E s d), concatenate' NoEdges p = p.
+  Lemma concatenate'_noedges_p : forall s d (p : path' E s d), concatenate' NoEdges p = p.
     t.
   Qed.
 
-  Polymorphic Hint Rewrite concatenate'_p_noedges.
+  Hint Rewrite concatenate'_p_noedges.
 
-  Polymorphic Lemma concatenate_addedge : forall s d d'0 d' (p : path' E s d) (e : E d d'0) (p' : path' E d'0 d'),
+  Lemma concatenate_addedge : forall s d d'0 d' (p : path' E s d) (e : E d d'0) (p' : path' E d'0 d'),
     concatenate (AddEdge p e) p' = concatenate' p (prepend p' e).
     induction p'; t.
   Qed.
 
-  Polymorphic Hint Resolve concatenate_noedges_p concatenate_addedge.
+  Hint Resolve concatenate_noedges_p concatenate_addedge.
 
-  Polymorphic Lemma concatenate_prepend_equivalent : forall s d d' (p : path' E s d) (p' : path' E d d'), concatenate p p' = concatenate' p p'.
+  Lemma concatenate_prepend_equivalent : forall s d d' (p : path' E s d) (p' : path' E d d'), concatenate p p' = concatenate' p p'.
     induction p; t.
   Qed.
 
-  Polymorphic Hint Rewrite concatenate_noedges_p concatenate_addedge.
-  Polymorphic Hint Rewrite <- concatenate_prepend_equivalent.
+  Hint Rewrite concatenate_noedges_p concatenate_addedge.
+  Hint Rewrite <- concatenate_prepend_equivalent.
 
-  Polymorphic Lemma concatenate_p_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
+  Lemma concatenate_p_addedge : forall s d d' d'' (p : path' E s d) (p' : path' E d d') (e : E d' d''),
     concatenate p (AddEdge p' e) = AddEdge (concatenate p p') e.
     induction p; t.
   Qed.
 
-  Polymorphic Lemma concatenate_prepend : forall s s' d d' (p1 : path' E s' d) (p2 : path' E d d') (e : E s s'),
+  Lemma concatenate_prepend : forall s s' d d' (p1 : path' E s' d) (p2 : path' E d d') (e : E s s'),
     (prepend (concatenate p1 p2) e) = (concatenate (prepend p1 e) p2).
     induction p1; t.
   Qed.
 
-  Polymorphic Hint Rewrite concatenate_prepend.
+  Hint Rewrite concatenate_prepend.
 
-  Polymorphic Lemma concatenate_associative o1 o2 o3 o4 : forall (p1 : path' E o1 o2) (p2 : path' E o2 o3) (p3 : path' E o3 o4),
+  Lemma concatenate_associative o1 o2 o3 o4 : forall (p1 : path' E o1 o2) (p2 : path' E o2 o3) (p3 : path' E o3 o4),
     (concatenate (concatenate p1 p2) p3) = (concatenate p1 (concatenate p2 p3)).
     induction p1; t.
   Qed.
 
-  Polymorphic Lemma compose_prepend s' s d (p : path' E s d) (e : E s' _) typeOf functionOf : forall x, compose typeOf functionOf (prepend p e) x = (compose typeOf functionOf p (functionOf _ _ e x)).
+  Lemma compose_prepend s' s d (p : path' E s d) (e : E s' _) typeOf functionOf : forall x, compose typeOf functionOf (prepend p e) x = (compose typeOf functionOf p (functionOf _ _ e x)).
     induction p; t_with t'.
   Qed.
 End path'_Theorems.
 
-Polymorphic Hint Rewrite compose_prepend.
-Polymorphic Hint Rewrite concatenate_p_noedges concatenate_noedges_p.
-Polymorphic Hint Resolve concatenate_p_noedges concatenate_noedges_p.
+Hint Rewrite compose_prepend.
+Hint Rewrite concatenate_p_noedges concatenate_noedges_p.
+Hint Resolve concatenate_p_noedges concatenate_noedges_p.
 
-Polymorphic Record Schema := {
+Record Schema := {
   Vertex :> Type;
   Edge : Vertex -> Vertex -> Type;
 
@@ -128,20 +130,20 @@ Polymorphic Record Schema := {
     PathsEquivalent p1 p2 -> PathsEquivalent (AddEdge p1 E) (AddEdge p2 E)
 }.
 
-Polymorphic Hint Resolve PreCompose PostCompose.
+Hint Resolve PreCompose PostCompose.
 
-Polymorphic Theorem PreCompose' : forall S s d (E : S.(Edge) s d) d' (p1 p2 : path' _ d d'),
+Theorem PreCompose' : forall S s d (E : S.(Edge) s d) d' (p1 p2 : path' _ d d'),
   PathsEquivalent _ p1 p2 -> PathsEquivalent _ (prepend p1 E) (prepend p2 E).
   intros; auto.
 Qed.
 
-Polymorphic Theorem PostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(Edge) d d'),
+Theorem PostCompose' : forall S s d (p1 p2 : path' _ s d) d' (E : S.(Edge) d d'),
   PathsEquivalent _ p1 p2
   -> PathsEquivalent _ (AddEdge p1 E) (AddEdge p2 E).
   intros; auto.
 Qed.
 
-Polymorphic Hint Resolve PreCompose' PostCompose'.
+Hint Resolve PreCompose' PostCompose'.
 
 Add Parametric Relation S s d : _ (@PathsEquivalent S s d)
   reflexivity proved by (equiv_refl _ _ (@PathsEquivalent_Equivalence _ _ _))
@@ -149,7 +151,7 @@ Add Parametric Relation S s d : _ (@PathsEquivalent S s d)
   transitivity proved by (equiv_trans _ _ (@PathsEquivalent_Equivalence _ _ _))
     as paths_eq.
 
-Polymorphic Hint Resolve paths_eq_Reflexive paths_eq_Symmetric.
+Hint Resolve paths_eq_Reflexive paths_eq_Symmetric.
 
 (* It's not true that [(p1 = p2 -> p3 = p4) -> (PathsEquivalent p1 p2 -> PathsEquivalent p3 p4)]
    Consider a case where p1 = NoEdges and p2 is a path containing an edge and its inverse,
@@ -159,31 +161,31 @@ Polymorphic Hint Resolve paths_eq_Reflexive paths_eq_Symmetric.
 Section path'_Equivalence_Theorems.
   Variable S : Schema.
 
-  Polymorphic Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent S p p'
+  Lemma addedge_equivalent : forall s d d' (p p' : path' _ s d), PathsEquivalent S p p'
     -> forall e : Edge _ d d', PathsEquivalent S (AddEdge p e) (AddEdge p' e).
     t.
   Qed.
 
-  Polymorphic Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S p p'
+  Lemma prepend_equivalent : forall s' s d (p p' : path' _ s d), PathsEquivalent S p p'
     -> forall e : Edge _ s' s, PathsEquivalent S (prepend p e) (prepend p' e).
     t.
   Qed.
 
-  Polymorphic Hint Rewrite concatenate_noedges_p concatenate_addedge.
-  Polymorphic Hint Rewrite <- concatenate_prepend_equivalent.
-  Polymorphic Hint Resolve prepend_equivalent addedge_equivalent.
+  Hint Rewrite concatenate_noedges_p concatenate_addedge.
+  Hint Rewrite <- concatenate_prepend_equivalent.
+  Hint Resolve prepend_equivalent addedge_equivalent.
 
-  Polymorphic Lemma pre_concatenate_equivalent : forall s' s d (p1 : path' _ s' s) (p p' : path' _ s d),
+  Lemma pre_concatenate_equivalent : forall s' s d (p1 : path' _ s' s) (p p' : path' _ s d),
     PathsEquivalent S p p' -> PathsEquivalent S (concatenate p1 p) (concatenate p1 p').
     induction p1; t.
   Qed.
 
-  Polymorphic Lemma post_concatenate_equivalent : forall s d d' (p p' : path' _ s d) (p2 : path' _ d d'),
+  Lemma post_concatenate_equivalent : forall s d d' (p p' : path' _ s d) (p2 : path' _ d d'),
     PathsEquivalent S p p' -> PathsEquivalent S (concatenate p p2) (concatenate p' p2).
     induction p2; t.
   Qed.
 
-  Polymorphic Hint Resolve pre_concatenate_equivalent post_concatenate_equivalent.
+  Hint Resolve pre_concatenate_equivalent post_concatenate_equivalent.
 
   Add Parametric Morphism s d d' p:
     (@concatenate _ S.(Edge) s d d' p)
@@ -197,13 +199,13 @@ Section path'_Equivalence_Theorems.
     t.
   Qed.
 
-  Polymorphic Lemma concatenate_equivalent : forall s d d' (p1 p1' : path' _ s d) (p2 p2' : path' _ d d'),
+  Lemma concatenate_equivalent : forall s d d' (p1 p1' : path' _ s d) (p2 p2' : path' _ d d'),
     PathsEquivalent S p1 p1' -> PathsEquivalent S p2 p2' -> PathsEquivalent S (concatenate p1 p2) (concatenate p1' p2').
     t; etransitivity; eauto.
   Qed.
 End path'_Equivalence_Theorems.
 
-Polymorphic Hint Resolve concatenate_equivalent.
+Hint Resolve concatenate_equivalent.
 
 Add Parametric Morphism S s d d' :
   (@concatenate _ S.(Edge) s d d')
@@ -229,7 +231,7 @@ Add Parametric Morphism S s' s d :
   t.
 Qed.
 
-Polymorphic Definition path S := path' S.(Edge).
+Definition path S := path' S.(Edge).
 
 Section Schema.
   Variable C : Schema.
@@ -246,82 +248,82 @@ Section Schema.
     monomorphism (i.e. an epimorphism in a category [C] is a
     monomorphism in the dual category [OppositeCategory C]).
     *)
-  Polymorphic Definition SEpimorphism x y (p : path C x y) : Prop :=
+  Definition SEpimorphism x y (p : path C x y) : Prop :=
     forall z (p1 p2 : path C y z), PathsEquivalent _ (concatenate p p1) (concatenate p p2) ->
       PathsEquivalent _ p1 p2.
-  Polymorphic Definition SMonomorphism x y (p : path C x y) : Prop :=
+  Definition SMonomorphism x y (p : path C x y) : Prop :=
     forall z (p1 p2 : path C z x), PathsEquivalent _ (concatenate p1 p) (concatenate p2 p) ->
       PathsEquivalent _ p1 p2.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
-  Polymorphic Definition SInverseOf s d (p : path C s d) (p' : path C d s) : Prop :=
+  Definition SInverseOf s d (p : path C s d) (p' : path C d s) : Prop :=
     PathsEquivalent _ (concatenate p p') NoEdges /\
     PathsEquivalent _ (concatenate p' p) NoEdges.
 
-  Polymorphic Lemma SInverseOf_sym s d m m' : @SInverseOf s d m m' -> @SInverseOf d s m' m.
+  Lemma SInverseOf_sym s d m m' : @SInverseOf s d m m' -> @SInverseOf d s m' m.
     firstorder.
   Qed.
 
   (* A morphism is an isomorphism if it has an inverse *)
-  Polymorphic Definition SchemaIsomorphism' s d (p : path C s d) : Prop :=
+  Definition SchemaIsomorphism' s d (p : path C s d) : Prop :=
     exists p', SInverseOf p p'.
 
-  Polymorphic Definition SchemaIsomorphism s d (p : path C s d) := { p' | SInverseOf p p' }.
+  Definition SchemaIsomorphism s d (p : path C s d) := { p' | SInverseOf p p' }.
 
-  Polymorphic Hint Unfold SInverseOf SchemaIsomorphism' SchemaIsomorphism.
+  Hint Unfold SInverseOf SchemaIsomorphism' SchemaIsomorphism.
 
-  Polymorphic Lemma SInverseOf1 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
+  Lemma SInverseOf1 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
     -> PathsEquivalent _ (concatenate p p') NoEdges.
     firstorder.
   Qed.
 
-  Polymorphic Lemma SInverseOf2 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
+  Lemma SInverseOf2 : forall (s d : C) (p : _ s d) p', SInverseOf p p'
     -> PathsEquivalent _ (concatenate p p') NoEdges.
     firstorder.
   Qed.
 
-  Polymorphic Lemma SchemaIsomorphism2Isomorphism' s d (p : path C s d) : SchemaIsomorphism p -> SchemaIsomorphism' p.
+  Lemma SchemaIsomorphism2Isomorphism' s d (p : path C s d) : SchemaIsomorphism p -> SchemaIsomorphism' p.
     firstorder.
   Qed.
 
-  Polymorphic Hint Rewrite <- SInverseOf1 SInverseOf2 using assumption.
+  Hint Rewrite <- SInverseOf1 SInverseOf2 using assumption.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma s_iso_is_epi s d (p : path C s d) : SchemaIsomorphism p -> SEpimorphism p.
+  Lemma s_iso_is_epi s d (p : path C s d) : SchemaIsomorphism p -> SEpimorphism p.
     destruct 1 as [ x [ i0 i1 ] ]; intros z p1 p2 e.
     transitivity (concatenate (concatenate x p) p1). t_con @PathsEquivalent.
     transitivity (concatenate (concatenate x p) p2); repeat rewrite concatenate_associative; t_con @PathsEquivalent;
       repeat rewrite <- concatenate_associative; t_con @PathsEquivalent.
   Qed.
 
-  Polymorphic Lemma SInverseOf1' : forall x y z (p : path C x y) (p' : path C y x) (p'' : path C z _),
+  Lemma SInverseOf1' : forall x y z (p : path C x y) (p' : path C y x) (p'' : path C z _),
     SInverseOf p p'
     -> PathsEquivalent _ (concatenate (concatenate p'' p) p') p''.
     unfold SInverseOf; intros; destruct_hypotheses; repeat rewrite concatenate_associative; t_con @PathsEquivalent.
   Qed.
 
-  Polymorphic Hint Rewrite SInverseOf1' using assumption.
+  Hint Rewrite SInverseOf1' using assumption.
 
   (* XXX TODO: Automate this better. *)
-  Polymorphic Lemma s_iso_is_mono s d (p : path C s d) : SchemaIsomorphism p -> SMonomorphism p.
+  Lemma s_iso_is_mono s d (p : path C s d) : SchemaIsomorphism p -> SMonomorphism p.
     destruct 1 as [ x [ i0 i1 ] ]; intros z p1 p2 e.
     transitivity (concatenate p1 (concatenate p x)). t_con @PathsEquivalent.
     transitivity (concatenate p2 (concatenate p x)); solve [ repeat rewrite <- concatenate_associative; t_con @PathsEquivalent ] || t_con @PathsEquivalent.
   Qed.
 
-  Polymorphic Theorem SchemaIdentityInverse (o : C) : SInverseOf (@NoEdges _ _ o) (@NoEdges _ _ o).
+  Theorem SchemaIdentityInverse (o : C) : SInverseOf (@NoEdges _ _ o) (@NoEdges _ _ o).
     hnf; t.
   Qed.
 
-  Polymorphic Hint Resolve SchemaIdentityInverse.
+  Hint Resolve SchemaIdentityInverse.
 
-  Polymorphic Theorem SchemaIdentityIsomorphism (o : C) : SchemaIsomorphism (@NoEdges _ _ o).
+  Theorem SchemaIdentityIsomorphism (o : C) : SchemaIsomorphism (@NoEdges _ _ o).
     eauto.
   Qed.
 End Schema.
 
-Polymorphic Hint Resolve SchemaIsomorphism2Isomorphism'.
+Hint Resolve SchemaIsomorphism2Isomorphism'.
 
 Ltac concatenate4associativity' a b c d := transitivity (concatenate a (concatenate (concatenate b c) d));
   try solve [ repeat rewrite concatenate_associative; reflexivity ].
@@ -335,7 +337,7 @@ Section SchemaIsomorphismEquivalenceRelation.
   Variable C : Schema.
   Variable s d d' : C.
 
-  Polymorphic Theorem SchemaIsomorphismComposition (p : path C s d) (p' : path C d d') :
+  Theorem SchemaIsomorphismComposition (p : path C s d) (p' : path C d d') :
     SchemaIsomorphism p -> SchemaIsomorphism p' -> SchemaIsomorphism (concatenate p p').
     repeat destruct 1; unfold SInverseOf in *; destruct_hypotheses.
       match goal with
@@ -346,15 +348,15 @@ Section SchemaIsomorphismEquivalenceRelation.
   Qed.
 End SchemaIsomorphismEquivalenceRelation.
 
-Polymorphic Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ x' x.
+Definition path_unique (A : Schema) s d (x : path A s d) := forall x' : path A s d, PathsEquivalent _ x' x.
 
 Section GeneralizedPathEquivalence.
   Variable S : Schema.
 
-  Polymorphic Inductive GeneralizedPathsEquivalent s d (p : path S s d) : forall s' d' (p' : path S s' d'), Prop :=
+  Inductive GeneralizedPathsEquivalent s d (p : path S s d) : forall s' d' (p' : path S s' d'), Prop :=
     | GPathsEquivalent (p' : path S s d) : PathsEquivalent _ p p' -> GeneralizedPathsEquivalent p p'.
 
-  Polymorphic Lemma GeneralizedPathsEquivalent_PathsEquivalent s d (p p' : path S s d) :
+  Lemma GeneralizedPathsEquivalent_PathsEquivalent s d (p p' : path S s d) :
     GeneralizedPathsEquivalent p p' -> PathsEquivalent _ p p'.
     intro H; inversion H.
     repeat match goal with
@@ -364,7 +366,7 @@ Section GeneralizedPathEquivalence.
     assumption.
   Qed.
 
-  Polymorphic Lemma GeneralizedPathsEquivalent_eq s d (p : path S s d) s' d' (p' : path S s' d') :
+  Lemma GeneralizedPathsEquivalent_eq s d (p : path S s d) s' d' (p' : path S s' d') :
     GeneralizedPathsEquivalent p p' -> s = s' /\ d = d'.
     intro H; inversion H.
     repeat subst.
@@ -383,16 +385,16 @@ Ltac simpl_GeneralizedPathsEquivalent := intros;
 Section GeneralizedPathsEquivalenceRelation.
   Variable S : Schema.
 
-  Polymorphic Lemma GeneralizedPathsEquivalent_refl s d (p : path S s d) : GeneralizedPathsEquivalent p p.
+  Lemma GeneralizedPathsEquivalent_refl s d (p : path S s d) : GeneralizedPathsEquivalent p p.
     simpl_GeneralizedPathsEquivalent; reflexivity.
   Qed.
 
-  Polymorphic Lemma GeneralizedPathsEquivalent_sym s d (p : path S s d) s' d' (p' : path S s' d') :
+  Lemma GeneralizedPathsEquivalent_sym s d (p : path S s d) s' d' (p' : path S s' d') :
     GeneralizedPathsEquivalent p p' -> GeneralizedPathsEquivalent p' p.
     simpl_GeneralizedPathsEquivalent; symmetry; assumption.
   Qed.
 
-  Polymorphic Lemma GeneralizedPathsEquivalent_trans s d (p : path S s d) s' d' (p' : path S s' d') s'' d'' (p'' : path S s'' d'') :
+  Lemma GeneralizedPathsEquivalent_trans s d (p : path S s d) s' d' (p' : path S s' d') s'' d'' (p'' : path S s'' d'') :
     GeneralizedPathsEquivalent p p' -> GeneralizedPathsEquivalent p' p'' -> GeneralizedPathsEquivalent p p''.
     simpl_GeneralizedPathsEquivalent; transitivity p'; eauto.
   Qed.
@@ -402,24 +404,24 @@ End GeneralizedPathsEquivalenceRelation.
 Section SchemaObjects1.
   Variable C : Schema.
 
-  Polymorphic Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
+  Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', SchemaIsomorphism' m /\ is_unique m.
 
-  Polymorphic Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
+  Definition UniqueUpToUniqueIsomorphism (P : C.(Object) -> Type) :=
     forall o, P o -> forall o', P o' -> { m : C.(Morphism) o o' | SchemaIsomorphism' m & is_unique m }.
 
   (* A terminal object is an object with a unique morphism from every other object. *)
-  Polymorphic Definition TerminalObject' (o : C) : Prop :=
+  Definition TerminalObject' (o : C) : Prop :=
     forall o', exists! m : C.(Morphism) o' o, True.
 
-  Polymorphic Definition TerminalObject (o : C) :=
+  Definition TerminalObject (o : C) :=
     forall o', { m : C.(Morphism) o' o | is_unique m }.
 
   (* An initial object is an object with a unique morphism from every other object. *)
-  Polymorphic Definition InitialObject' (o : C) : Prop :=
+  Definition InitialObject' (o : C) : Prop :=
     forall o', exists! m : C.(Morphism) o o', True.
 
-  Polymorphic Definition InitialObject (o : C) :=
+  Definition InitialObject (o : C) :=
     forall o', { m : C.(Morphism) o o' | is_unique m }.
 End SchemaObjects1.
 
@@ -433,7 +435,7 @@ Implicit Arguments TerminalObject [C].
 Section SchemaObjects2.
   Variable C : Schema.
 
-  Polymorphic Hint Unfold TerminalObject InitialObject InverseOf.
+  Hint Unfold TerminalObject InitialObject InverseOf.
 
   Ltac unique := intros o Ho o' Ho'; destruct (Ho o); destruct (Ho o'); destruct (Ho' o); destruct (Ho' o');
     unfold is_unique, unique, uniqueness in *;
@@ -443,12 +445,12 @@ Section SchemaObjects2.
              end; eauto; try split; try solve [ etransitivity; eauto ].
 
   (* The terminal object is unique up to unique isomorphism. *)
-  Polymorphic Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject C).
+  Theorem TerminalObjectUnique : UniqueUpToUniqueIsomorphism (@TerminalObject C).
     unique.
   Qed.
 
   (* The initial object is unique up to unique isomorphism. *)
-  Polymorphic Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (@InitialObject C).
+  Theorem InitialObjectUnique : UniqueUpToUniqueIsomorphism (@InitialObject C).
     unique.
   Qed.
 End SchemaObjects2.

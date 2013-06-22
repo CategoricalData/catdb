@@ -5,6 +5,10 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section preobject.
   (** Quoting nCatLab (http://ncatlab.org/nlab/show/natural+numbers+object):
 
@@ -91,10 +95,10 @@ Section preobject.
   Local Reserved Notation "'ℕ'".
   Local Reserved Notation "'S'".
 
-  Polymorphic Record NaturalNumbersPreObject :=
+  Record NaturalNumbersPreObject :=
     {
       NaturalNumbersPreObject_Object :> E where "'ℕ'" := NaturalNumbersPreObject_Object;
-      NaturalNumbersPreObject_TerminalObject : TerminalObject E where "1" := NaturalNumbersPreObject_TerminalObject;
+      NaturalNumbersPreObject_TerminalObject : TerminalObject E where "1" := (NaturalNumbersPreObject_TerminalObject : E);
       NaturalNumbersPreObject_Zero : Morphism E 1 ℕ where "0" := NaturalNumbersPreObject_Zero;
       NaturalNumbersPreObject_Successor : Morphism E ℕ ℕ where "'S'" := NaturalNumbersPreObject_Successor;
       NaturalNumbersPreObject_Property : forall A (q : Morphism E 1 A) (f : Morphism E A A),

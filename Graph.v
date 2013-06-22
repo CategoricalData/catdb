@@ -4,8 +4,12 @@ Set Implicit Arguments.
 
 Generalizable All Variables.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section Graph.
-  Polymorphic Record Graph (v : Type) := {
+  Record Graph (v : Type) := {
     Vertex :> _ := v;
     Edge' : v -> v -> Type
   }.
@@ -20,7 +24,7 @@ Arguments Vertex {v%type} G%graph : rename.
 Section GraphInterface.
   Context `(G : @Graph v).
 
-  Polymorphic Definition Edge : forall s d : G, _ := Eval cbv beta delta [Edge'] in G.(Edge').
+  Definition Edge : forall s d : G, _ := Eval cbv beta delta [Edge'] in G.(Edge').
 End GraphInterface.
 
 Bind Scope edge_scope with Edge.

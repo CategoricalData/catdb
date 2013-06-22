@@ -4,20 +4,24 @@ Require Import Common.
 
 Set Implicit Arguments.
 
+Set Asymmetric Patterns.
+
+Set Universe Polymorphism.
+
 Section MetaTranslation.
   Variable C D : Schema.
   Variable F G : Translation C D.
 
   (* See MetaTranslation for documentation *)
-  Polymorphic Record MetaTranslation := {
+  Record MetaTranslation := {
     SComponentsOf :> forall c : C, path D (F c) (G c);
     SCommutes : forall s d (e : C.(Edge) s d),
       PathsEquivalent _ (concatenate (F.(PathOf) _ _ e) (SComponentsOf d)) (concatenate (SComponentsOf s) (G.(PathOf) _ _ e))
   }.
 
-  Polymorphic Hint Rewrite SCommutes.
+  Hint Rewrite SCommutes.
 
-  Polymorphic Lemma SCommutes_TransferPath MT : forall s d (p : path C s d),
+  Lemma SCommutes_TransferPath MT : forall s d (p : path C s d),
     PathsEquivalent _ (concatenate (F.(TransferPath) p) (MT.(SComponentsOf) d)) (concatenate (MT.(SComponentsOf) s) (G.(TransferPath) p)).
     intros s d p; induction p; t.
     repeat rewrite concatenate_associative.
@@ -33,11 +37,11 @@ Section MetaTranslationComposition.
   Variable F F' F'' : Translation C D.
   Variable G G' : Translation D E.
 
-  Polymorphic Hint Resolve SCommutes f_equal f_equal2.
-  Polymorphic Hint Resolve post_concatenate_equivalent pre_concatenate_equivalent.
+  Hint Resolve SCommutes f_equal f_equal2.
+  Hint Resolve post_concatenate_equivalent pre_concatenate_equivalent.
 
   (* See NaturalTransformation for documentation *)
-  Polymorphic Definition MTComposeMT (T' : MetaTranslation F' F'') (T : MetaTranslation F F') :
+  Definition MTComposeMT (T' : MetaTranslation F' F'') (T : MetaTranslation F F') :
     MetaTranslation F F''.
     refine {| SComponentsOf := (fun c => concatenate (T c) (T' c)) |};
       (* XXX TODO: Find a way to get rid of [e] in the transitivity call *)
@@ -45,7 +49,7 @@ Section MetaTranslationComposition.
         solve_repeat_rewrite concatenate_associative eauto).
   Defined.
 
-  Polymorphic Hint Rewrite SCommutes.
+  Hint Rewrite SCommutes.
 
   Ltac strip_concatenate' :=
     match goal with
@@ -56,16 +60,16 @@ Section MetaTranslationComposition.
       repeat (rewrite concatenate_associative; try strip_concatenate'); repeat strip_concatenate';
         repeat (rewrite <- concatenate_associative; try strip_concatenate'); repeat strip_concatenate').
 
-  Polymorphic Hint Extern 1 => strip_concatenate.
+  Hint Extern 1 => strip_concatenate.
 
-  Polymorphic Hint Extern 1 =>
+  Hint Extern 1 =>
     match goal with
       | [ |- ?Rel (concatenate (TransferPath _ ?p) _) (concatenate _ (TransferPath _ ?p)) ] =>
         induction p; simpl; try rewrite concatenate_noedges_p; try reflexivity;
           repeat rewrite concatenate_associative; rewrite SCommutes; strip_concatenate; auto
     end.
 
-  Polymorphic Definition MTComposeT (U : MetaTranslation G G') (T : MetaTranslation F F'):
+  Definition MTComposeT (U : MetaTranslation G G') (T : MetaTranslation F F'):
     MetaTranslation (ComposeTranslations G F) (ComposeTranslations G' F').
     refine (Build_MetaTranslation (ComposeTranslations G F) (ComposeTranslations G' F')
       (fun c => concatenate (U.(SComponentsOf) (F c)) (G'.(TransferPath) (T.(SComponentsOf) c)))
@@ -86,7 +90,7 @@ Section IdentityMetaTranslation.
   Variable F : Translation C D.
 
   (* There is an identity natrual transformation. *)
-  Polymorphic Definition IdentityMetaTranslation : MetaTranslation F F.
+  Definition IdentityMetaTranslation : MetaTranslation F F.
     refine {| SComponentsOf := (fun c => NoEdges)
       |};
     abstract t.
