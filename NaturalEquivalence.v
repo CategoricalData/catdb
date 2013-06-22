@@ -17,20 +17,20 @@ Local Ltac intro_object_of :=
 
 Section NaturalIsomorphism.
   Section NaturalIsomorphism.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
     Variables F G : SpecializedFunctor C D.
 
     Record NaturalIsomorphism :=
       {
         NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
-        NaturalIsomorphism_Isomorphism : forall x : objC, IsomorphismOf (NaturalIsomorphism_Transformation x)
+        NaturalIsomorphism_Isomorphism : forall x : C, IsomorphismOf (NaturalIsomorphism_Transformation x)
       }.
   End NaturalIsomorphism.
 
   Section Inverse.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
     Variables F G : SpecializedFunctor C D.
 
     Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
@@ -56,9 +56,9 @@ Section NaturalIsomorphism.
   End Inverse.
 
   Section Composition.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
-    Context `(E : @SpecializedCategory objE).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
+    Context `(E : SpecializedCategory).
     Variables F F' F'' : SpecializedFunctor C D.
     Variables G G' : SpecializedFunctor D E.
 
@@ -94,8 +94,8 @@ Section NaturalIsomorphism.
 End NaturalIsomorphism.
 
 Section NaturalIsomorphismOfCategories.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Local Reserved Notation "'F'".
   Local Reserved Notation "'G'".
@@ -135,8 +135,8 @@ Arguments NaturalEquivalenceOf [C D F G] T.
 Arguments FunctorsNaturallyEquivalent [C D] F G.
 
 Section Coercions.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variables F G : SpecializedFunctor C D.
   Variable C' : Category.
   Variable D' : Category.

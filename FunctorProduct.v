@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorProduct.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(D' : @SpecializedCategory objD').
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(D' : SpecializedCategory).
 
   Definition FunctorProduct (F : Functor C D) (F' : Functor C D') : SpecializedFunctor C (D * D').
     match goal with
@@ -44,10 +44,10 @@ Section FunctorProduct.
 End FunctorProduct.
 
 Section FunctorProduct'.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(C' : @SpecializedCategory objC').
-  Context `(D' : @SpecializedCategory objD').
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(C' : SpecializedCategory).
+  Context `(D' : SpecializedCategory).
   Variable F : Functor C D.
   Variable F' : Functor C' D'.
 

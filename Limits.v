@@ -12,8 +12,8 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section DiagonalFunctor.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   (**
      Quoting Dwyer and Spalinski:
@@ -63,9 +63,9 @@ Section DiagonalFunctor.
 End DiagonalFunctor.
 
 Section DiagonalFunctorLemmas.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(D' : @SpecializedCategory objD').
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(D' : SpecializedCategory).
 
   Lemma Compose_DiagonalFunctor x (F : SpecializedFunctor D' D) :
     ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
@@ -83,8 +83,8 @@ End DiagonalFunctorLemmas.
 Hint Rewrite @Compose_DiagonalFunctor.
 
 Section Limit.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F : SpecializedFunctor D C.
 
   (**
@@ -160,8 +160,8 @@ Section Limit.
 End Limit.
 
 Section LimitMorphisms.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F : SpecializedFunctor D C.
 
   Definition MorphismBetweenLimits (L L' : Limit F) : C.(Morphism) (LimitObject L) (LimitObject L').

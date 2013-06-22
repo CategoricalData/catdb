@@ -12,7 +12,7 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section swap.
-  Definition SwapFunctor `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  Definition SwapFunctor `(C : SpecializedCategory) `(D : SpecializedCategory)
   : SpecializedFunctor (C * D) (D * C)
     := Build_SpecializedFunctor (C * D) (D * C)
                                 (fun cd => (snd cd, fst cd))
@@ -20,14 +20,14 @@ Section swap.
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Lemma ProductLawSwap `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD)
+  Lemma ProductLawSwap `(C : SpecializedCategory) `(D : SpecializedCategory)
   : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
     functor_eq; intuition.
   Qed.
 End swap.
 
 Section Law0.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ProductLaw0Functor : SpecializedFunctor (C * 0) 0.
     refine (Build_SpecializedFunctor (C * 0) 0
@@ -60,7 +60,7 @@ Section Law0.
 End Law0.
 
 Section Law0'.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Let ProductLaw0'Functor' : SpecializedFunctor (0 * C) 0.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
@@ -82,7 +82,7 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Let ProductLaw1Functor' : SpecializedFunctor (C * 1) C.
     functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
@@ -113,7 +113,7 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ProductLaw1'Functor' : SpecializedFunctor (1 * C) C.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _)).

@@ -10,19 +10,19 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section InitialTerminal.
-   Definition InitialCategory : SmallSpecializedCategory _ := 0.
-   Definition TerminalCategory : SmallSpecializedCategory _ := 1.
+   Definition InitialCategory : SmallSpecializedCategory := 0.
+   Definition TerminalCategory : SmallSpecializedCategory := 1.
 End InitialTerminal.
 
 Section Functors.
-  Context `(C : SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition FunctorTo1 : SpecializedFunctor C 1
     := Build_SpecializedFunctor C 1 (fun _ => tt) (fun _ _ _ => eq_refl) (fun _ _ _ _ _ => eq_refl) (fun _ => eq_refl).
   Definition FunctorToTerminal : SpecializedFunctor C TerminalCategory := FunctorTo1.
 
   Definition FunctorFrom1 (c : C) : SpecializedFunctor 1 C
-    := Build_SpecializedFunctor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _ _)) (fun _ => eq_refl).
+    := Build_SpecializedFunctor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _)) (fun _ => eq_refl).
   Definition FunctorFromTerminal (c : C) : SpecializedFunctor TerminalCategory C := FunctorFrom1 c.
 
   Definition FunctorFrom0 : SpecializedFunctor 0 C
@@ -31,7 +31,7 @@ Section Functors.
 End Functors.
 
 Section FunctorsUnique.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Lemma InitialCategoryFunctorUnique
   : forall F F' : SpecializedFunctor InitialCategory C,

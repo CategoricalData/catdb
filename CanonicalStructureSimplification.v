@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplifiedMorphism.
   Section single_category.
-    Context `{C : SpecializedCategory objC}.
+    Context `{C : SpecializedCategory}.
 
     (* structure for packaging a morphism and its reification *)
 
@@ -52,13 +52,13 @@ Section SimplifiedMorphism.
                  reflexivity.
 
   Section more_single_category.
-    Context `{C : SpecializedCategory objC}.
+    Context `{C : SpecializedCategory}.
 
     Lemma reifyIdentity x : Identity x = ReifiedMorphismDenote (ReifiedIdentityMorphism C x). reflexivity. Qed.
     Canonical Structure reify_identity_morphism x := ReifyMorphism (identity_tag _) _ (reifyIdentity x).
 
     Lemma reifyCompose s d d'
-          `(m1' : @SimplifiedMorphism objC C d d') `(m2' : @SimplifiedMorphism objC C s d)
+          `(m1' : @SimplifiedMorphism C d d') `(m2' : @SimplifiedMorphism C s d)
     : Compose (untag (morphism_of m1')) (untag (morphism_of m2'))
       = ReifiedMorphismDenote (ReifiedComposedMorphism (reified_morphism_of m1') (reified_morphism_of m2')).
       t.
@@ -67,11 +67,11 @@ Section SimplifiedMorphism.
   End more_single_category.
 
   Section functor.
-    Context `{C : SpecializedCategory objC}.
-    Context `{D : SpecializedCategory objD}.
+    Context `{C : SpecializedCategory}.
+    Context `{D : SpecializedCategory}.
     Variable F : SpecializedFunctor C D.
 
-    Lemma reifyFunctor `(m' : @SimplifiedMorphism objC C s d)
+    Lemma reifyFunctor `(m' : @SimplifiedMorphism C s d)
     : MorphismOf F (untag (morphism_of m')) = ReifiedMorphismDenote (ReifiedFunctorMorphism F (reified_morphism_of m')).
       t.
     Qed.
@@ -79,8 +79,8 @@ Section SimplifiedMorphism.
   End functor.
 
   Section natural_transformation.
-    Context `{C : SpecializedCategory objC}.
-    Context `{D : SpecializedCategory objD}.
+    Context `{C : SpecializedCategory}.
+    Context `{D : SpecializedCategory}.
     Variables F G : SpecializedFunctor C D.
     Variable T : SpecializedNaturalTransformation F G.
 
@@ -88,7 +88,7 @@ Section SimplifiedMorphism.
     Canonical Structure reify_nt_morphism x := ReifyMorphism (nt_tag _) _ (@reifyNT x).
   End natural_transformation.
   Section generic.
-    Context `{C : SpecializedCategory objC}.
+    Context `{C : SpecializedCategory}.
 
     Lemma reifyGeneric s d (m : Morphism C s d) : m = ReifiedMorphismDenote (ReifiedGenericMorphism C s d m). reflexivity. Qed.
     Canonical Structure reify_generic_morphism s d m := ReifyMorphism (generic_tag m) _ (@reifyGeneric s d m).
@@ -113,8 +113,8 @@ Ltac rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objC).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
     Variables F G : SpecializedFunctor C D.
     Variable T : SpecializedNaturalTransformation F G.
 
@@ -143,9 +143,9 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : SpecializedCategory objC0).
-    Context `(C1 : SpecializedCategory objC1).
-    Context `(D : SpecializedCategory objD).
+    Context `(C0 : SpecializedCategory).
+    Context `(C1 : SpecializedCategory).
+    Context `(D : SpecializedCategory).
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.

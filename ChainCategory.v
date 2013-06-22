@@ -9,8 +9,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ChainCat.
-  Definition OmegaCategory : @SpecializedCategory nat.
-    refine (@Build_SpecializedCategory _
+  Definition OmegaCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory nat
                                        le
                                        le_refl
                                        (fun _ _ _ H0 H1 => le_trans H1 H0)
@@ -20,7 +20,7 @@ Section ChainCat.
     abstract (intros; apply proof_irrelevance).
   Defined.
 
-  Let ChainCategory' n : @SpecializedCategory { m | m <= n }.
+  Let ChainCategory' (n : nat) : SpecializedCategory.
     simpl_definition_by_tac_and_exact (FullSubcategory OmegaCategory (fun m => m <= n)) ltac:(unfold Subcategory in *).
   Defined.
   Definition ChainCategory n := Eval cbv beta iota zeta delta [ChainCategory'] in ChainCategory' n.

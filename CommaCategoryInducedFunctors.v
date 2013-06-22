@@ -76,9 +76,9 @@ Local Ltac induced_anihilate :=
   repeat induced_step.
 
 Section CommaCategoryInducedFunctor.
-  Context `(A : @SpecializedCategory objA).
-  Context `(B : @SpecializedCategory objB).
-  Context `(C : @SpecializedCategory objC).
+  Context `(A : SpecializedCategory).
+  Context `(B : SpecializedCategory).
+  Context `(C : SpecializedCategory).
 
   Let CommaCategoryInducedFunctor_ObjectOf s d (m : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)
       (x : fst s ↓ snd s) : (fst d ↓ snd d)
@@ -121,10 +121,10 @@ Section CommaCategoryInducedFunctor.
 End CommaCategoryInducedFunctor.
 
 Section SliceCategoryInducedFunctor.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Section Slice_Coslice.
-    Context `(D : @SpecializedCategory objD).
+    Context `(D : SpecializedCategory).
 
     (* TODO(jgross): See if this can be recast as an exponential law functor about how Cat ^ 1 is isomorphic to Cat, or something *)
     Definition SliceCategoryInducedFunctor_NT s d (m : Morphism D s d) :

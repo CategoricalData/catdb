@@ -17,7 +17,7 @@ Section PreMonoidalCategory.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      *)
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   (**
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
          monoidal product,
@@ -299,7 +299,6 @@ Section PreMonoidalCategory.
 End PreMonoidalCategory.
 
 Section MonoidalCategory.
-  Variable objC : Type.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
@@ -357,18 +356,18 @@ Section MonoidalCategory.
   Local Reserved Notation "'λ'".
   Local Reserved Notation "'ρ'".
 
-  Let src (C : @SpecializedCategory objC) {s d} (_ : Morphism C s d) := s.
-  Let dst (C : @SpecializedCategory objC) s d (_ : Morphism C s d) := d.
+  Let src (C : SpecializedCategory) {s d} (_ : Morphism C s d) := s.
+  Let dst (C : SpecializedCategory) s d (_ : Morphism C s d) := d.
 
   Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in @AssociatorCoherenceCondition.
   Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in @UnitorCoherenceCondition.
 
   Record MonoidalCategory := {
-    MonoidalUnderlyingCategory :> @SpecializedCategory objC;
+    MonoidalUnderlyingCategory :> SpecializedCategory;
     TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
       where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism);
 
-    IdentityObject : objC where "'I'" := IdentityObject;
+    IdentityObject : MonoidalUnderlyingCategory where "'I'" := IdentityObject;
 
     Associator : NaturalIsomorphism (TriMonoidalProductL TensorProduct) (TriMonoidalProductR TensorProduct) where "'α'" := Associator;
     LeftUnitor : NaturalIsomorphism (LeftUnitorFunctor TensorProduct I)  (IdentityFunctor _) where "'λ'" := LeftUnitor;

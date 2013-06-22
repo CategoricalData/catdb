@@ -12,12 +12,12 @@ Local Open Scope category_scope.
 (*
 Section coslice_initial.
   (* TODO(jgross): This should go elsewhere *)
-  Definition CosliceSpecializedCategory_InitialObject objC C objD D (F : @SpecializedFunctor objC C objD D) x :
+  Definition CosliceSpecializedCategory_InitialObject C D (F : SpecializedFunctor C D) x :
     { o : _ & @InitialObject _ (CosliceSpecializedCategory (F x) F) o }.
     unfold Object; simpl;
     match goal with
       | [ |- { o : CommaSpecializedCategory_Object ?A ?B & _ } ] =>
-        (exists (existT _ (tt, _) (@Identity _ D _) : CommaSpecializedCategory_ObjectT A B))
+        (exists (existT _ (tt, _) (@Identity D _) : CommaSpecializedCategory_ObjectT A B))
     end;
     simpl.
     intro o'; hnf; simpl.
@@ -134,7 +134,7 @@ Section DataMigrationFunctorsAdjoint.
                   reflexivity
                 | ];
                 (* do transitivity with the evar'd components *)
-                let A'' := context A'[@Build_SpecializedNaturalTransformation objC C objD D F G CO' Com'] in
+                let A'' := context A'[@Build_SpecializedNaturalTransformation C D F G CO' Com'] in
                 transitivity A''; subst Com' CO'
           end
       end.
@@ -235,7 +235,7 @@ Section DataMigrationFunctorsAdjoint.
       expand.
       match goal with
         | [ |- @eq (@SpecializedNaturalTransformation ?objC ?C ?objD ?D ?F ?G) _ _ ] =>
-          apply (@NaturalTransformation_eq objC C objD D F G)
+          apply (@NaturalTransformation_eq C D F G)
       end.
       nt_eq.
       assumption.
@@ -249,7 +249,7 @@ rewrite <- H3.
       etransitivity.
       mat
       - do 3 match goal with
-               | [ |- @Build_SpecializedNaturalTransformation ?objC ?C ?objD ?D ?F ?G _ _ = _ ] => (apply (@NaturalTransformation_eq objC C objD D F G); simpl) || fail 1 "Cannot apply NaturalTransformation_eq"
+               | [ |- @Build_SpecializedNaturalTransformation ?objC ?C ?objD ?D ?F ?G _ _ = _ ] => (apply (@NaturalTransformation_eq C D F G); simpl) || fail 1 "Cannot apply NaturalTransformation_eq"
                | [ |- appcontext[Build_SpecializedNaturalTransformation] ] => apply f_equal2 || apply f_equal || fail 1 "Cannot apply f_equal"
                | _ => reflexivity
              end.
@@ -859,8 +859,8 @@ Time pre_anihilate.
       admit.
 
       (*
-      Definition Δ {objC C objD D} := @diagonal_functor_object_of objC C objD D.
-      Definition ΔMor {objC C objD D} o1 o2 := @diagonal_functor_morphism_of objC C objD D o1 o2.
+      Definition Δ {C D} := @diagonal_functor_object_of C D.
+      Definition ΔMor {C D} o1 o2 := @diagonal_functor_morphism_of C D o1 o2.
       Definition limo F x := TerminalMorphism_Object (HasLimits F x).
       Definition φ := TerminalMorphism_Morphism.
       Definition unique_m := @TerminalProperty_Morphism.
@@ -1147,7 +1147,7 @@ Time pre_anihilate.
       apply functional_extensionality_dep.
       intro.
       Time step.
-      pose (fun I Index2Object Index2Cat objD D C => @FIdentityOf _ _ _ _ (@InducedLimitFunctor I Index2Object Index2Cat objD D C)) as a.
+      pose (fun I Index2Object Index2Cat D C => @FIdentityOf _ _ _ _ (@InducedLimitFunctor I Index2Object Index2Cat D C)) as a.
       unfold InducedLimitFunctor, InducedLimitFunctor_MorphismOf in a; simpl in a.
       unfold RightPushforwardAlong_MorphismOf.
       admit.
@@ -1423,7 +1423,7 @@ Time pre_anihilate.
       apply functional_extensionality_dep.
       intro.
       Time step.
-      pose (fun I Index2Object Index2Cat objD D C => @FIdentityOf _ _ _ _ (@InducedColimitFunctor I Index2Object Index2Cat objD D C)) as a.
+      pose (fun I Index2Object Index2Cat D C => @FIdentityOf _ _ _ _ (@InducedColimitFunctor I Index2Object Index2Cat D C)) as a.
       unfold InducedColimitFunctor, InducedColimitFunctor_MorphismOf in a; simpl in a.
       unfold LeftPushforwardAlong_MorphismOf.
       admit.

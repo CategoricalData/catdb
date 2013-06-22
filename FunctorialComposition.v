@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorialComposition.
-  Context `(C : SpecializedCategory objC).
-  Context `(D : SpecializedCategory objD).
-  Context `(E : SpecializedCategory objE).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(E : SpecializedCategory).
 
   Definition FunctorialComposition : SpecializedFunctor ((E ^ D) * (D ^ C)) (E ^ C).
   Proof.

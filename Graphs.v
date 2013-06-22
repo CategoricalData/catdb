@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GraphObj.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
 
@@ -30,8 +30,8 @@ Section GraphObj.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition GraphIndexingCategory : @SpecializedCategory GraphIndex.
-    refine (@Build_SpecializedCategory _
+  Definition GraphIndexingCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory GraphIndex
                                        GraphIndex_Morphism
                                        (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end)
                                        GraphIndex_Compose
@@ -45,8 +45,8 @@ Section GraphObj.
 
   Definition UnderlyingGraph_ObjectOf x :=
     match x with
-      | GraphIndexSource => { sd : objC * objC & C.(Morphism) (fst sd) (snd sd) }
-      | GraphIndexTarget => objC
+      | GraphIndexSource => { sd : C * C & C.(Morphism) (fst sd) (snd sd) }
+      | GraphIndexTarget => Object C
     end.
 
   Global Arguments UnderlyingGraph_ObjectOf x /.
@@ -92,7 +92,7 @@ Section GraphFunctor.
     UnderlyingGraph C.
 
   Local Ltac t :=
-    intros; destruct_head GraphIndex;
+    intros; destruct_head_hnf GraphIndex;
       repeat match goal with
                | [ H : Empty_set |- _ ] => destruct H
                | _  => reflexivity
@@ -143,7 +143,7 @@ Section FreeCategory.
 
   Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
 
-  Definition FreeCategory : SpecializedCategory vertices.
+  Definition FreeCategory : SpecializedCategory.
   Proof.
     refine (@Build_SpecializedCategory
               vertices

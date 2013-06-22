@@ -15,9 +15,9 @@ Local Ltac t :=
   reflexivity.
 
 Section ProductInducedFunctors.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(E : @SpecializedCategory objE).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(E : SpecializedCategory).
 
   Variable F : SpecializedFunctor (C * D) E.
 
@@ -40,9 +40,9 @@ Notation "F ⟨ c , - ⟩" := (InducedProductSndFunctor F c) : functor_scope.
 Notation "F ⟨ - , d ⟩" := (InducedProductFstFunctor F d) : functor_scope.
 
 Section ProductInducedNaturalTransformations.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(E : @SpecializedCategory objE).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(E : SpecializedCategory).
 
   Variable F : SpecializedFunctor (C * D) E.
 

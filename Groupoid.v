@@ -11,9 +11,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GroupoidOf.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
-  Inductive GroupoidOf_Morphism (s d : objC) :=
+  Inductive GroupoidOf_Morphism (s d : C) :=
   | hasMorphism : C.(Morphism) s d -> GroupoidOf_Morphism s d
   | hasInverse : C.(Morphism) d s -> GroupoidOf_Morphism s d
   | byComposition : forall e, GroupoidOf_Morphism e d -> GroupoidOf_Morphism s e -> GroupoidOf_Morphism s d.
@@ -28,7 +28,7 @@ Section GroupoidOf.
   (** Quoting Wikipedia:
      A groupoid is a small category in which every morphism is an isomorphism, and hence invertible.
      *)
-  Definition GroupoidOf : @SpecializedCategory objC.
+  Definition GroupoidOf : SpecializedCategory.
     refine (@Build_SpecializedCategory _
                                        (fun s d => inhabited (GroupoidOf_Morphism s d))
                                        (fun o : C => inhabits (hasMorphism _ _ (Identity o)))
@@ -46,7 +46,7 @@ End GroupoidOf.
 Hint Constructors GroupoidOf_Morphism : category.
 
 Section Groupoid.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;

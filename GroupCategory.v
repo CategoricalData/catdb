@@ -24,7 +24,7 @@ Ltac destruct_units := destruct_singleton_constructor tt.
 Ltac destruct_Trues := destruct_singleton_constructor I.
 
 Section as_category.
-  Definition CategoryOfGroup (G : Group) : SpecializedCategory unit.
+  Definition CategoryOfGroup (G : Group) : SpecializedCategory.
     refine (@Build_SpecializedCategory unit
                                        (fun _ _ => G)
                                        (fun _ => @GroupIdentity G)
@@ -39,8 +39,8 @@ End as_category.
 Coercion CategoryOfGroup : Group >-> SpecializedCategory.
 
 Section category_of_groups.
-  Definition GroupCat : SpecializedCategory Group
-    := Eval unfold ComputableCategory in ComputableCategory _ CategoryOfGroup.
+  Definition GroupCat : SpecializedCategory
+    := Eval unfold ComputableCategory in ComputableCategory CategoryOfGroup.
 End category_of_groups.
 
 Section forgetful_functor.

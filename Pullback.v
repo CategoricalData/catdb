@@ -24,9 +24,9 @@ Section Pullback.
      ]]
    *)
 
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Section pullback.
-    Variables a b c : objC.
+    Variables a b c : C.
     Variable f : C.(Morphism) a c.
     Variable g : C.(Morphism) b c.
 
@@ -49,8 +49,8 @@ Section Pullback.
              destruct s, d, d'; simpl in *; trivial.
            Defined.
 
-    Definition PullbackIndex : @SpecializedCategory PullbackThree.
-      refine (@Build_SpecializedCategory _
+    Definition PullbackIndex : SpecializedCategory.
+      refine (@Build_SpecializedCategory PullbackThree
                                          PullbackIndex_Morphism
                                          (fun x => match x as p return (PullbackIndex_Morphism p p) with
                                                        PullbackA => tt | PullbackB => tt | PullbackC => tt
@@ -153,7 +153,7 @@ Section Pullback.
   End pullback_functorial.
 
   Section pushout.
-    Variables a b c : objC.
+    Variables a b c : C.
     Variable f : C.(Morphism) c a.
     Variable g : C.(Morphism) c b.
 
@@ -242,8 +242,8 @@ Section Pullback.
 End Pullback.
 
 Section PullbackObjects.
-  Context `{C : @SpecializedCategory objC}.
-  Variables a b c : objC.
+  Context `{C : SpecializedCategory}.
+  Variables a b c : C.
 
   (** Does an object [d] together with the functions [i] and [j]
     fit into a pullback diagram?
@@ -279,7 +279,7 @@ Section PullbackObjects.
                             (FunctorCategory.FunctorCategory PullbackIndex C)
                             (PullbackDiagram C a b c f g)).
     exists (PullbackObject, tt).
-    exists (fun x => match x as x return (Morphism C PullbackObject (PullbackDiagram_ObjectOf a b c x)) with
+    exists (fun x => match x as x return (Morphism C PullbackObject (PullbackDiagram_ObjectOf C a b c x)) with
                        | PullbackA => i
                        | PullbackB => j
                        | PullbackC => Compose f i
@@ -295,7 +295,7 @@ Section PullbackObjects.
              (i : Morphism C PullbackObject a)
              (j : Morphism C PullbackObject b)
              (PullbackCompatible : Compose f i = Compose g j)
-    := @IsPullback _ _ a b c f g (IsPullbackGivenMorphisms_Object f g PullbackObject i j PullbackCompatible).
+    := @IsPullback _ a b c f g (IsPullbackGivenMorphisms_Object f g PullbackObject i j PullbackCompatible).
 
   Definition IsPushoutGivenMorphisms_Object
              (f : Morphism C c a)
@@ -309,7 +309,7 @@ Section PullbackObjects.
                             (PushoutDiagram C a b c f g))
                          (DiagonalFunctor C PushoutIndex).
     exists (tt, PushoutObject).
-    exists (fun x => match x as x return (Morphism C (PushoutDiagram_ObjectOf a b c x) PushoutObject) with
+    exists (fun x => match x as x return (Morphism C (PushoutDiagram_ObjectOf C a b c x) PushoutObject) with
                        | PullbackA => i
                        | PullbackB => j
                        | PullbackC => Compose i f
@@ -325,5 +325,5 @@ Section PullbackObjects.
              (i : Morphism C a PushoutObject)
              (j : Morphism C b PushoutObject)
              (PushoutCompatible : Compose j g = Compose i f)
-    := @IsPushout _ _ a b c f g (IsPushoutGivenMorphisms_Object f g PushoutObject i j PushoutCompatible).
+    := @IsPushout _ a b c f g (IsPushoutGivenMorphisms_Object f g PushoutObject i j PushoutCompatible).
 End PullbackObjects.

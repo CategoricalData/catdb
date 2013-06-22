@@ -11,8 +11,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Adjunction.
-  Context `{C : @SpecializedCategory objC}.
-  Context `{D : @SpecializedCategory objD}.
+  Context `{C : SpecializedCategory}.
+  Context `{D : SpecializedCategory}.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
@@ -97,7 +97,7 @@ Section Adjunction.
     simpl in *.
     match goal with
       | [ H : Compose ?x (?T ?A ?A') = Identity _ |- Compose _ ?x = _ ]
-        => eapply (@iso_is_epi _ _ _ _ (T A A')); [
+        => eapply (@iso_is_epi _ _ _ (T A A')); [
           exists x; hnf; eauto
           |
             repeat rewrite Associativity; find_composition_to_identity (* slow, but I don't have a better way to do it *); rewrite RightIdentity
@@ -105,7 +105,7 @@ Section Adjunction.
     end.
     match goal with
       | [ H : Compose (?T ?A ?A') ?x = Identity _ |- _ = Compose ?x _ ]
-        => eapply (@iso_is_mono _ _ _ _ (T A A')); [
+        => eapply (@iso_is_mono _ _ _ (T A A')); [
           exists x; hnf; eauto
           |
             repeat rewrite <- Associativity; find_composition_to_identity; rewrite LeftIdentity
@@ -116,12 +116,12 @@ Section Adjunction.
   Defined.
 End Adjunction.
 
-Arguments AComponentsOf {objC C objD D} [F G] T A A' _ : simpl nomatch.
-Arguments AIsomorphism {objC C objD D} [F G] T A A' : simpl nomatch.
+Arguments AComponentsOf {C D} [F G] T A A' _ : simpl nomatch.
+Arguments AIsomorphism {C D} [F G] T A A' : simpl nomatch.
 
 Section AdjunctionEquivalences.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
@@ -134,7 +134,7 @@ Section AdjunctionEquivalences.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
-          (fun cd : objC * objD => A.(AComponentsOf) (fst cd) (snd cd))
+          (fun cd : C * D => A.(AComponentsOf) (fst cd) (snd cd))
           _
         )
     end.

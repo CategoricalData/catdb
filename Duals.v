@@ -15,25 +15,25 @@ Local Infix "==" := JMeq.
 Local Open Scope category_scope.
 
 Section OppositeCategory.
-  Definition OppositeCategory `(C : @SpecializedCategory objC) : @SpecializedCategory objC
-    := @Build_SpecializedCategory' objC
+  Definition OppositeCategory `(C : SpecializedCategory) : SpecializedCategory
+    := @Build_SpecializedCategory' C
                                 (fun s d => Morphism C d s)
                                 (Identity (C := C))
                                 (fun _ _ _ m1 m2 => Compose m2 m1)
-                                (fun _ _ _ _ _ _ _ => @Associativity_sym _ _ _ _ _ _ _ _ _)
-                                (fun _ _ _ _ _ _ _ => @Associativity _ _ _ _ _ _ _ _ _)
-                                (fun _ _ => @RightIdentity _ _ _ _)
-                                (fun _ _ => @LeftIdentity _ _ _ _).
+                                (fun _ _ _ _ _ _ _ => @Associativity_sym _ _ _ _ _ _ _ _)
+                                (fun _ _ _ _ _ _ _ => @Associativity _ _ _ _ _ _ _ _)
+                                (fun _ _ => @RightIdentity _ _ _)
+                                (fun _ _ => @LeftIdentity _ _ _).
 End OppositeCategory.
 
 (*Notation "C ᵒᵖ" := (OppositeCategory C) : category_scope.*)
 
 Section DualCategories.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
-    clear D objD.
+    clear D.
     unfold OppositeCategory; simpl.
     repeat change (fun a => ?f a) with f.
     destruct C; intros; simpl; reflexivity.
@@ -47,7 +47,7 @@ End DualCategories.
 Hint Rewrite @op_op_id @op_distribute_prod : category.
 
 Section DualObjects.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition terminal_opposite_initial (o : C) : IsTerminalObject o -> IsInitialObject (C := OppositeCategory C) o
     := fun H o' => H o'.
@@ -65,8 +65,8 @@ Section DualObjects.
 End DualObjects.
 
 Section OppositeFunctor.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F : SpecializedFunctor C D.
   Let COp := OppositeCategory C.
   Let DOp := OppositeCategory D.
@@ -84,8 +84,8 @@ End OppositeFunctor.
 (*Notation "C ᵒᵖ" := (OppositeFunctor C) : functor_scope.*)
 
 Section OppositeFunctor_Id.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F : SpecializedFunctor C D.
 
   Lemma op_op_functor_id : OppositeFunctor (OppositeFunctor F) == F.
@@ -97,8 +97,8 @@ End OppositeFunctor_Id.
 (*Hint Rewrite op_op_functor_id.*)
 
 Section OppositeNaturalTransformation.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variables F G : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F G.
   Let COp := OppositeCategory C.
@@ -117,8 +117,8 @@ End OppositeNaturalTransformation.
 (*Notation "C ᵒᵖ" := (OppositeNaturalTransformation C) : natural_transformation_scope.*)
 
 Section OppositeNaturalTransformation_Id.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variables F G : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F G.
 

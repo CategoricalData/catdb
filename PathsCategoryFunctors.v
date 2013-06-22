@@ -13,8 +13,8 @@ Set Universe Polymorphism.
 Section FunctorFromPaths.
   Variable V : Type.
   Variable E : V -> V -> Type.
-  Context `(D : @SpecializedCategory objD).
-  Variable objOf : V -> objD.
+  Context `(D : SpecializedCategory).
+  Variable objOf : V -> D.
   Variable morOf : forall s d, E s d -> Morphism D (objOf s) (objOf d).
 
   Fixpoint path_compose s d (m : Morphism (PathsCategory E) s d) : Morphism D (objOf s) (objOf d) :=
@@ -31,15 +31,15 @@ Section FunctorFromPaths.
 
   Definition FunctorFromPaths : SpecializedFunctor (PathsCategory E) D.
   Proof.
-    refine {|
-      ObjectOf := objOf;
-      MorphismOf := path_compose;
-      FCompositionOf := FunctorFromPaths_FCompositionOf
-    |};
+    refine (Build_SpecializedFunctor (PathsCategory E) D
+                                     objOf
+                                     path_compose
+                                     FunctorFromPaths_FCompositionOf
+                                     _);
     abstract intuition.
   Defined.
 End FunctorFromPaths.
 
 Section Underlying.
-  Definition UnderlyingGraph `(C : @SpecializedCategory objC) := @PathsCategory objC (Morphism C).
+  Definition UnderlyingGraph `(C : SpecializedCategory) := @PathsCategory _ (Morphism C).
 End Underlying.

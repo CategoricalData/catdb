@@ -13,11 +13,11 @@ Set Universe Polymorphism.
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)
-  Context `(dummy0 : @SpecializedCategory_sigT_sig objA A Pobj0 Pmor0 Pidentity0 Pcompose0).
-  Context `(dummy1 : @SpecializedCategory_sigT_sig objA A Pobj1 Pmor1 Pidentity1 Pcompose1).
+  Context `(dummy0 : @SpecializedCategory_sigT_sig A Pobj0 Pmor0 Pidentity0 Pcompose0).
+  Context `(dummy1 : @SpecializedCategory_sigT_sig A Pobj1 Pmor1 Pidentity1 Pcompose1).
 
-  Let sigT_sig_cat0 := @SpecializedCategory_sigT_sig objA A Pobj0 Pmor0 Pidentity0 Pcompose0.
-  Let sigT_sig_cat1 := @SpecializedCategory_sigT_sig objA A Pobj1 Pmor1 Pidentity1 Pcompose1.
+  Let sigT_sig_cat0 := @SpecializedCategory_sigT_sig A Pobj0 Pmor0 Pidentity0 Pcompose0.
+  Let sigT_sig_cat1 := @SpecializedCategory_sigT_sig A Pobj1 Pmor1 Pidentity1 Pcompose1.
 
   Variable P_ObjectOf : forall x, Pobj0 x -> Pobj1 x.
 
@@ -40,7 +40,7 @@ Section T2.
   Definition InducedT2Functor_sigT_sig : SpecializedFunctor sigT_sig_cat0 sigT_sig_cat1.
     eapply (ComposeFunctors (sigT_functor_sigT_sig _ _ _ _) (ComposeFunctors _ (sigT_sig_functor_sigT _ _ _ _))).
     Grab Existential Variables.
-    eapply (@InducedT2Functor_sigT _ A Pobj0 Pmor0 Pidentity0 Pcompose0 _ _ _ Pobj1 Pmor1 Pidentity1 Pcompose1 _ _ _
+    eapply (@InducedT2Functor_sigT A Pobj0 Pmor0 Pidentity0 Pcompose0 _ _ _ Pobj1 Pmor1 Pidentity1 Pcompose1 _ _ _
       P_ObjectOf (fun s d m => @P_MorphismOf s d (sig_of_sigT' m)));
     subst_body;
     abstract (simpl; intros; apply proof_irrelevance).

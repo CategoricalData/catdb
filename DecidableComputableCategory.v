@@ -10,11 +10,11 @@ Set Universe Polymorphism.
 
 Section ComputableCategory.
   Variable I : Type.
-  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
+  Variable Index2Cat : I -> SpecializedCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let eq_dec_on_cat `(C : @SpecializedCategory objC) := forall x y : objC, {x = y} + {x <> y}.
+  Let eq_dec_on_cat `(C : SpecializedCategory) := forall x y : C, {x = y} + {x <> y}.
 
-  Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj _ (@ComputableCategory _ _ Index2Cat) (fun C => eq_dec_on_cat C).
+  Definition ComputableCategoryDec := @SpecializedCategory_sigT_obj (ComputableCategory Index2Cat) (fun C => eq_dec_on_cat C).
 End ComputableCategory.

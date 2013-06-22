@@ -13,7 +13,7 @@ Section IndiscreteCategory.
   (** The indiscrete category has exactly one morphism between any two objects. *)
   Variable O : Type.
 
-  Definition IndiscreteCategory : @SpecializedCategory O
+  Definition IndiscreteCategory : SpecializedCategory
     := @Build_SpecializedCategory O
                                   (fun _ _ => unit)
                                   (fun _ => tt)
@@ -25,8 +25,8 @@ End IndiscreteCategory.
 
 Section FunctorToIndiscrete.
   Variable O : Type.
-  Context `(C : @SpecializedCategory objC).
-  Variable objOf : objC -> O.
+  Context `(C : SpecializedCategory).
+  Variable objOf : C -> O.
 
   Definition FunctorToIndiscrete : SpecializedFunctor C (IndiscreteCategory O)
     := Build_SpecializedFunctor C (IndiscreteCategory O)

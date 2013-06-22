@@ -10,11 +10,11 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ProductCategory.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
-  Definition ProductCategory : @SpecializedCategory (objC * objD)%type.
-    refine (@Build_SpecializedCategory _
+  Definition ProductCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory (C * D)%type
                                        (fun s d => (C.(Morphism) (fst s) (fst d) * D.(Morphism) (snd s) (snd d))%type)
                                        (fun o => (Identity (fst o), Identity (snd o)))
                                        (fun s d d' m2 m1 => (Compose (fst m2) (fst m1), Compose (snd m2) (snd m1)))
@@ -28,8 +28,8 @@ End ProductCategory.
 Infix "*" := ProductCategory : category_scope.
 
 Section ProductCategoryFunctors.
-  Context `{C : @SpecializedCategory objC}.
-  Context `{D : @SpecializedCategory objD}.
+  Context `{C : SpecializedCategory}.
+  Context `{D : SpecializedCategory}.
 
   Definition fst_Functor : SpecializedFunctor (C * D) C
     := Build_SpecializedFunctor (C * D) C

@@ -24,12 +24,12 @@ Section Grothendieck.
      [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
      [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
      *)
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Variable F : SpecializedFunctor C TypeCat.
   Variable F' : SpecializedFunctor C SetCat.
 
   Record GrothendieckPair := {
-    GrothendieckC' : objC;
+    GrothendieckC' : C;
     GrothendieckX' : F GrothendieckC'
   }.
 
@@ -45,7 +45,7 @@ Section Grothendieck.
   Qed.
 
   Record SetGrothendieckPair := {
-    SetGrothendieckC' : objC;
+    SetGrothendieckC' : C;
     SetGrothendieckX' : F' SetGrothendieckC'
   }.
 
@@ -86,8 +86,8 @@ Section Grothendieck.
 
   Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
 
-  Definition CategoryOfElements : @SpecializedCategory GrothendieckPair.
-    refine (@Build_SpecializedCategory _
+  Definition CategoryOfElements : SpecializedCategory.
+    refine (@Build_SpecializedCategory GrothendieckPair
                                        (fun s d =>
                                           { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) })
                                        (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
@@ -109,7 +109,7 @@ Section Grothendieck.
 End Grothendieck.
 
 Section SetGrothendieckCoercion.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Variable F : SpecializedFunctor C SetCat.
   Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
 

@@ -14,7 +14,7 @@ Section ComputableGraphCategory.
 
   Local Coercion Index2Graph : I >-> Graph.
 
-  Definition ComputableGraphCategory : @SpecializedCategory I.
+  Definition ComputableGraphCategory : SpecializedCategory.
     refine (@Build_SpecializedCategory _
                                        (fun C D : I => GraphTranslation C D)
                                        (fun o : I => IdentityGraphTranslation o)

@@ -11,9 +11,9 @@ Set Universe Polymorphism.
 
 Section SumCategoryFunctors.
   Section sum_functor.
-    Context `(C : @SpecializedCategory objC).
-    Context `(C' : @SpecializedCategory objC').
-    Context `(D : @SpecializedCategory objD).
+    Context `(C : SpecializedCategory).
+    Context `(C' : SpecializedCategory).
+    Context `(D : SpecializedCategory).
 
     Definition sum_Functor (F : SpecializedFunctor C D) (F' : SpecializedFunctor C' D)
     : SpecializedFunctor (C + C') D.
@@ -65,14 +65,14 @@ Section SumCategoryFunctors.
 
   Section swap_functor.
     Definition sum_swap_Functor
-               `(C : @SpecializedCategory objC)
-               `(D : @SpecializedCategory objD)
+               `(C : SpecializedCategory)
+               `(D : SpecializedCategory)
     : SpecializedFunctor (C + D) (D + C)
       := sum_Functor (inr_Functor _ _) (inl_Functor _ _).
 
     Lemma sum_swap_swap_id
-          `(C : @SpecializedCategory objC)
-          `(D : @SpecializedCategory objD)
+          `(C : SpecializedCategory)
+          `(D : SpecializedCategory)
     : ComposeFunctors (sum_swap_Functor C D) (sum_swap_Functor D C) = IdentityFunctor _.
       apply Functor_eq; repeat intros [?|?]; simpl; trivial.
     Qed.

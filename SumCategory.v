@@ -10,10 +10,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section SumCategory.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
-  Definition SumCategory_Morphism (s d : objC + objD) : Type
+  Definition SumCategory_Morphism (s d : C + D) : Type
     := match (s, d) with
          | (inl s, inl d) => C.(Morphism) s d
          | (inr s, inr d) => D.(Morphism) s d
@@ -38,7 +38,7 @@ Section SumCategory.
 
   Global Arguments SumCategory_Compose [_ _ _] _ _ /.
 
-  Definition SumCategory : @SpecializedCategory (objC + objD)%type.
+  Definition SumCategory : SpecializedCategory.
     refine (@Build_SpecializedCategory _
                                        SumCategory_Morphism
                                        SumCategory_Identity
@@ -59,8 +59,8 @@ End SumCategory.
 Infix "+" := SumCategory : category_scope.
 
 Section SumCategoryFunctors.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Definition inl_Functor : SpecializedFunctor C (C + D)
     := Build_SpecializedFunctor C (C + D)

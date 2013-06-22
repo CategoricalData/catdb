@@ -12,10 +12,10 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
-Record SpecializedCategory (obj : Type) :=
+Record SpecializedCategory :=
   Build_SpecializedCategory' {
-      Object :> _ := obj;
-      Morphism : obj -> obj -> Type;
+      Object :> Type;
+      Morphism : Object -> Object -> Type;
 
       Identity : forall x, Morphism x x;
       Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d';
@@ -39,10 +39,10 @@ Bind Scope category_scope with SpecializedCategory.
 Bind Scope object_scope with Object.
 Bind Scope morphism_scope with Morphism.
 
-Arguments Object {obj%type} C%category / : rename.
-Arguments Morphism {obj%type} !C%category s d : rename. (* , simpl nomatch. *)
-Arguments Identity {obj%type} [!C%category] x%object : rename.
-Arguments Compose {obj%type} [!C%category s%object d%object d'%object] m1%morphism m2%morphism : rename.
+Arguments Object C%category : rename.
+Arguments Morphism !C%category s d : rename. (* , simpl nomatch. *)
+Arguments Identity [!C%category] x%object : rename.
+Arguments Compose [!C%category s%object d%object d'%object] m1%morphism m2%morphism : rename.
 
 Section SpecializedCategoryInterface.
   Definition Build_SpecializedCategory (obj : Type)
@@ -53,7 +53,7 @@ Section SpecializedCategoryInterface.
                                  Compose' o1 o2 o4 (Compose' o2 o3 o4 m3 m2) m1 = Compose' o1 o3 o4 m3 (Compose' o1 o2 o3 m2 m1))
              (LeftIdentity' : forall (a b : obj) (f : Morphism a b), Compose' a b b (Identity' b) f = f)
              (RightIdentity' : forall (a b : obj) (f : Morphism a b), Compose' a a b f (Identity' a) = f)
-  : @SpecializedCategory obj
+  : SpecializedCategory
     := @Build_SpecializedCategory' obj
                                    Morphism
                                    Identity'
@@ -87,103 +87,130 @@ Hint Rewrite @LeftIdentity @RightIdentity : category.
 Hint Rewrite @LeftIdentity @RightIdentity : morphism.
 
 (* eh, I'm not terribly happy.  meh. *)
-Definition LocallySmallSpecializedCategory (obj : Type) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
-Definition SmallSpecializedCategory (obj : Set) (*mor : obj -> obj -> Set*) := SpecializedCategory obj.
+Definition LocallySmallSpecializedCategory (*obj : Type*) (*mor : obj -> obj -> Set*) := SpecializedCategory.
+Definition SmallSpecializedCategory (*obj : Set*) (*mor : obj -> obj -> Set*) := SpecializedCategory.
 Identity Coercion LocallySmallSpecializedCategory_SpecializedCategory_Id : LocallySmallSpecializedCategory >-> SpecializedCategory.
 Identity Coercion SmallSpecializedCategory_LocallySmallSpecializedCategory_Id : SmallSpecializedCategory >-> SpecializedCategory.
 
 Section Categories_Equal.
-  Lemma SpecializedCategory_contr_eq' `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC)
-        (C_morphism_proof_irrelevance
-         : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
-             pf1 = pf2)
-  : forall (HM : @Morphism _ C = @Morphism _ D),
-      match HM in (_ = y) return (forall x : objC, y x x) with
-        | eq_refl => Identity (C := C)
-      end = Identity (C := D)
-      -> match
-        HM in (_ = y) return (forall s d d' : objC, y d d' -> y s d -> y s d')
-      with
-        | eq_refl => Compose (C := C)
-      end = Compose (C := D)
-      -> C = D.
-    intros.
-    destruct C, D;
-      subst_body;
-      intros;
-      simpl in *.
-    subst.
-    repeat f_equal;
-      repeat (apply functional_extensionality_dep; intro);
-      trivial.
-  Qed.
+  Section contr_eq.
+    Variables C D : SpecializedCategory.
+    Section contr_eq'.
+      Hypothesis C_morphism_proof_irrelevance
+      : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
+          pf1 = pf2.
+      Hypothesis HO : Object C = Object D.
+      Hypothesis HM : match HO in (_ = y) return (y -> y -> Type) with
+                        | eq_refl => Morphism C
+                      end = Morphism D.
 
-  Lemma SpecializedCategory_contr_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC)
-        (C_morphism_proof_irrelevance
-         : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
-             pf1 = pf2)
-        (C_morphism_type_contr
-         : forall s d (pf1 pf2 : Morphism C s d = Morphism C s d),
-             pf1 = pf2)
-  : forall (HM : forall s d, @Morphism _ C s d = @Morphism _ D s d),
-      (forall x,
-         match HM x x in (_ = y) return y with
-           | eq_refl => Identity (C := C) x
-         end = Identity (C := D) x)
-      -> (forall s d d' (m : Morphism D d d') (m' : Morphism D s d),
-            match HM s d' in (_ = y) return y with
-              | eq_refl =>
-                match HM s d in (_ = y) return (y -> Morphism C s d') with
-                  | eq_refl =>
-                    match
-                      HM d d' in (_ = y) return (y -> Morphism C s d -> Morphism C s d')
-                    with
-                      | eq_refl => Compose (d':=d')
-                    end m
-                end m'
-            end = Compose m m')
-      -> C = D.
-    intros HM HI HC.
-    assert (HM' : @Morphism _ C = @Morphism _ D)
-      by (repeat (apply functional_extensionality_dep; intro); trivial).
-    apply (SpecializedCategory_contr_eq' _ _ C_morphism_proof_irrelevance HM');
-      revert HI HC C_morphism_proof_irrelevance C_morphism_type_contr;
-      destruct C, D; simpl in *; clear;
-      intros;
-      subst_body;
-      simpl in *;
-      repeat (subst || intro || apply functional_extensionality_dep);
-      rewrite_rev_hyp;
-      generalize_eq_match;
-      subst_eq_refl_dec;
-      trivial.
-  Qed.
+      Let HIdT : Prop.
+        refine (_ = Identity (C := D)).
+        case HM; clear HM.
+        case HO; clear HO.
+        exact (Identity (C := C)).
+      Defined.
+      Hypothesis HId : HIdT.
 
-  Lemma SpecializedCategory_eq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objC) :
-    @Morphism _ C = @Morphism _ D
-    -> @Identity _ C == @Identity _ D
-    -> @Compose _ C == @Compose _ D
+      Let HCoT : Prop.
+        refine (_ = Compose (C := D)).
+        clear HId HIdT.
+        case HM; clear HM.
+        case HO; clear HO.
+        exact (Compose (C := C)).
+      Defined.
+      Hypothesis HCo : HCoT.
+
+      Lemma SpecializedCategory_contr_eq' : C = D.
+      Proof.
+        hnf in *.
+        destruct C, D.
+        subst_body.
+        simpl in *.
+        repeat subst.
+        f_equal;
+          repeat (apply functional_extensionality_dep; intro);
+          trivial.
+      Qed.
+    End contr_eq'.
+
+    Section contr_eq.
+      Hypothesis C_morphism_proof_irrelevance
+      : forall s d (m1 m2 : Morphism C s d) (pf1 pf2 : m1 = m2),
+          pf1 = pf2.
+
+      (* presumably this can be proven from the above by univalence,
+         and turning equalities into equivalences *)
+      Hypothesis C_morphism_type_contr
+      : forall s d (pf1 pf2 : Morphism C s d = Morphism C s d),
+          pf1 = pf2.
+
+      Hypothesis HO : Object C = Object D.
+      Hypothesis HM : forall s d,
+                        match HO in (_ = y) return (y -> y -> Type) with
+                          | eq_refl => Morphism C
+                        end s d = Morphism D s d.
+
+      Let HIdT : forall x : D, Prop.
+        intro x.
+        refine (_ = Identity x).
+        case (HM x x); clear HM.
+        revert x; case HO; clear HO; intro x.
+        exact (Identity x).
+      Defined.
+      Hypothesis HId : forall x, HIdT x.
+
+      Let HCoT s d d' (m1 : Morphism D d d') (m2 : Morphism D s d) : Prop.
+        refine (_ = Compose m1 m2).
+        clear HId HIdT.
+        revert m1 m2.
+        case (HM s d'), (HM d d'), (HM s d); clear HM.
+        revert s d d'.
+        case HO; clear HO.
+        exact (Compose (C := C)).
+      Defined.
+      Hypothesis HCo : forall s d d' m1 m2, @HCoT s d d' m1 m2.
+
+      Lemma SpecializedCategory_contr_eq : C = D.
+      Proof.
+        let f := match type of HM with forall s d, ?f s d = ?f' s d => constr:(f) end in
+        let f' := match type of HM with forall s d, ?f s d = ?f' s d => constr:(f') end in
+        assert (HM' : f = f')
+          by (repeat (apply functional_extensionality_dep; intro); trivial).
+        apply (SpecializedCategory_contr_eq' C_morphism_proof_irrelevance HO HM');
+          repeat (apply functional_extensionality_dep; intro);
+          destruct C, D;
+          subst_body;
+          simpl in *;
+          repeat (subst || intro || apply functional_extensionality_dep);
+          etransitivity;
+          try match goal with
+                | [ H : _ |- _ ] => solve [ apply H ]
+              end;
+          [|];
+          instantiate;
+          generalize_eq_match;
+          subst_eq_refl_dec;
+          trivial.
+      Qed.
+    End contr_eq.
+  End contr_eq.
+
+  Lemma SpecializedCategory_eq `(C : SpecializedCategory) `(D : SpecializedCategory) :
+    @Object C = @Object D
+    -> @Morphism C == @Morphism D
+    -> @Identity C == @Identity D
+    -> @Compose C == @Compose D
     -> C = D.
     intros.
     destruct_head @SpecializedCategory;
     simpl in *; repeat subst;
     f_equal; apply proof_irrelevance.
   Qed.
-
-  Lemma SpecializedCategory_JMeq `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) :
-    objC = objD
-    -> @Morphism _ C == @Morphism _ D
-    -> @Identity _ C == @Identity _ D
-    -> @Compose _ C == @Compose _ D
-    -> C == D.
-    intros; destruct_head @SpecializedCategory;
-    simpl in *; repeat subst; JMeq_eq;
-    f_equal; apply proof_irrelevance.
-  Qed.
 End Categories_Equal.
 
 Ltac spcat_eq_step_with tac :=
-  structures_eq_step_with_tac ltac:(apply SpecializedCategory_eq || apply SpecializedCategory_JMeq) tac.
+  structures_eq_step_with_tac ltac:(apply SpecializedCategory_eq) tac.
 
 Ltac spcat_eq_with tac := repeat spcat_eq_step_with tac.
 
@@ -192,11 +219,11 @@ Ltac spcat_eq := spcategory_hideProofs; spcat_eq_with idtac.
 
 Ltac solve_for_identity :=
   match goal with
-    | [ |- @Compose _ ?C ?s ?s ?d ?a ?b = ?b ]
-      => cut (a = @Identity _ C s);
+    | [ |- @Compose ?C ?s ?s ?d ?a ?b = ?b ]
+      => cut (a = @Identity C s);
         [ try solve [ let H := fresh in intro H; rewrite H; apply LeftIdentity ] | ]
-    | [ |- @Compose _ ?C ?s ?d ?d ?a ?b = ?a ]
-      => cut (b = @Identity _ C d );
+    | [ |- @Compose ?C ?s ?d ?d ?a ?b = ?a ]
+      => cut (b = @Identity C d );
         [ try solve [ let H := fresh in intro H; rewrite H; apply RightIdentity ] | ]
   end.
 
@@ -204,7 +231,7 @@ Ltac solve_for_identity :=
 
 Definition NoEvar T (_ : T) := True.
 
-Lemma AssociativityNoEvar `(C : @SpecializedCategory obj) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
+Lemma AssociativityNoEvar `(C : SpecializedCategory) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
   (m2 : C.(Morphism) o2 o3) (m3 : C.(Morphism) o3 o4),
   NoEvar (m1, m2) \/ NoEvar (m2, m3) \/ NoEvar (m1, m3)
   -> Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1).
@@ -224,10 +251,10 @@ Ltac try_associativity tac := try_rewrite_by AssociativityNoEvar ltac:(idtac; no
 
 Ltac find_composition_to_identity :=
   match goal with
-    | [ H : @Compose _ _ _ _ _ ?a ?b = @Identity _ _ _ |- context[@Compose ?A ?B ?C ?D ?E ?c ?d] ]
+    | [ H : @Compose _ _ _ _ ?a ?b = @Identity _ _ |- context[@Compose ?B ?C ?D ?E ?c ?d] ]
       => let H' := fresh in
         assert (H' : b = d /\ a = c) by (split; reflexivity); clear H';
-          assert (H' : @Compose A B C D E c d = @Identity _ _ _) by (
+          assert (H' : @Compose B C D E c d = @Identity _ _) by (
             exact H ||
               (unfold Object; simpl in H |- *; exact H || (rewrite H; reflexivity))
           );
@@ -241,7 +268,7 @@ Ltac find_composition_to_identity :=
 (** * Back to the main content.... *)
 
 Section Category.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   (* Quoting Wikipedia,
     In category theory, an epimorphism (also called an epic
@@ -293,11 +320,11 @@ End Category.
 
 Hint Immediate @IdentityIsEpimorphism @IdentityIsMonomorphism @MonomorphismComposition @EpimorphismComposition : category morphism.
 
-Arguments IsEpimorphism {objC} [C x y] m.
-Arguments IsMonomorphism {objC} [C x y] m.
+Arguments IsEpimorphism [C x y] m.
+Arguments IsMonomorphism [C x y] m.
 
 Section AssociativityComposition.
-  Context `(C : @SpecializedCategory obj).
+  Context `(C : SpecializedCategory).
   Variables o0 o1 o2 o3 o4 : C.
 
   Lemma compose4associativity_helper

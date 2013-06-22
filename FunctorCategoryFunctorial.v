@@ -13,10 +13,10 @@ Local Open Scope category_scope.
 
 Section FunctorCategoryParts.
   Section MorphismOf.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
-    Context `(C' : @SpecializedCategory objC').
-    Context `(D' : @SpecializedCategory objD').
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
+    Context `(C' : SpecializedCategory).
+    Context `(D' : SpecializedCategory).
 
     Variable F : SpecializedFunctor C C'.
     Variable G : SpecializedFunctor D' D.
@@ -49,8 +49,8 @@ Section FunctorCategoryParts.
   End MorphismOf.
 
   Section FIdentityOf.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
 
     Lemma FunctorCategoryFunctor_FIdentityOf : FunctorCategoryFunctor_MorphismOf (IdentityFunctor C) (IdentityFunctor D) = IdentityFunctor _.
       repeat (intro || apply Functor_eq || nt_eq); simpl; subst; JMeq_eq; rsimplify_morphisms; reflexivity.
@@ -58,12 +58,12 @@ Section FunctorCategoryParts.
   End FIdentityOf.
 
   Section FCompositionOf.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
-    Context `(C' : @SpecializedCategory objC').
-    Context `(D' : @SpecializedCategory objD').
-    Context `(C'' : @SpecializedCategory objC'').
-    Context `(D'' : @SpecializedCategory objD'').
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
+    Context `(C' : SpecializedCategory).
+    Context `(D' : SpecializedCategory).
+    Context `(C'' : SpecializedCategory).
+    Context `(D'' : SpecializedCategory).
 
     Variable F' : SpecializedFunctor C' C''.
     Variable G : SpecializedFunctor D D'.
@@ -80,7 +80,7 @@ End FunctorCategoryParts.
 Section FunctorCategoryFunctor.
   Definition FunctorCategoryFunctor : SpecializedFunctor (LocallySmallCat * (OppositeCategory LocallySmallCat)) LocallySmallCat.
     refine (Build_SpecializedFunctor (LocallySmallCat * (OppositeCategory LocallySmallCat)) LocallySmallCat
-                                     (fun CD => (fst CD) ^ (snd CD) : LocallySmallSpecializedCategory _)
+                                     (fun CD => (fst CD) ^ (snd CD) : LocallySmallSpecializedCategory)
                                      (fun s d m => FunctorCategoryFunctor_MorphismOf (fst m) (snd m))
                                      _
                                      _);
@@ -95,10 +95,10 @@ End FunctorCategoryFunctor.
 Notation "F ^ G" := (FunctorCategoryFunctor_MorphismOf F G) : functor_scope.
 
 Section NaturalTransformation.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
-  Context `(C' : @SpecializedCategory objC').
-  Context `(D' : @SpecializedCategory objD').
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(C' : SpecializedCategory).
+  Context `(D' : SpecializedCategory).
 
   Variables F G : SpecializedFunctor C D.
   Variables F' G' : SpecializedFunctor C' D'.
@@ -134,8 +134,8 @@ Notation "T ^ U" := (LiftNaturalTransformationPointwise T U) : natural_transform
 
 Section NaturalTransformation_Properties.
   Section identity.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
 
     Local Ltac t := intros; simpl; nt_eq; rsimplify_morphisms; try reflexivity.
 
@@ -201,12 +201,12 @@ Section NaturalTransformation_Properties.
   End identity.
 
   Section compose.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objD).
-    Context `(E : @SpecializedCategory objE).
-    Context `(C' : @SpecializedCategory objC').
-    Context `(D' : @SpecializedCategory objD').
-    Context `(E' : @SpecializedCategory objE').
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
+    Context `(E : SpecializedCategory).
+    Context `(C' : SpecializedCategory).
+    Context `(D' : SpecializedCategory).
+    Context `(E' : SpecializedCategory).
 
     Variable G : SpecializedFunctor D E.
     Variable F : SpecializedFunctor C D.

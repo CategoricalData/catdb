@@ -37,21 +37,27 @@ Section Coend.
      ]]
      where the triangles denote induced colimit morphisms.
      *)
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Let COp := OppositeCategory C.
 
   Variable F : SpecializedFunctor (COp * C) D.
 
-  Let MorC := @MorphismFunctor _ _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
+  Let MorC := @MorphismFunctor _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
 
   Variable Fmor : ∐_{ c0c1f : MorC } (F (snd (projT1 c0c1f), fst (projT1 c0c1f)) : D).
   Variable Fob : ∐_{ c } (F (c, c) : D).
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the domain of the relevant morphism. *)
   Definition Coend_Fdom : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
-    apply (InducedColimitMap (G := InducedDiscreteFunctor _ (DomainNaturalTransformation _ (fun _ => C) tt))).
+    refine (InducedColimitMap (D := D)
+                              (F1 := InducedDiscreteFunctor D _)
+                              (F2 := InducedDiscreteFunctor D (fun c : COp => F (c, c)))
+                              (G := InducedDiscreteFunctor (DiscreteCategory COp) (DomainNaturalTransformation (fun _ : unit => C) tt))
+                              _
+                              Fmor
+                              Fob);
     hnf; simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
@@ -65,7 +71,7 @@ Section Coend.
 
   (* There is a morphism in D from [Fmor] to [Fob] which takes the codomain of the relevant morphism. *)
   Definition Coend_Fcod : Morphism D (ColimitObject Fmor) (ColimitObject Fob).
-    apply (InducedColimitMap (G := InducedDiscreteFunctor _ (CodomainNaturalTransformation _ (fun _ => C) tt))).
+    apply (InducedColimitMap (G := InducedDiscreteFunctor (DiscreteCategory COp) (CodomainNaturalTransformation (fun _ => C) tt))).
     hnf; simpl.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>

@@ -13,30 +13,28 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section sigT_sig_obj_mor.
-  Context `(A : @SpecializedCategory objA).
-  Variable Pobj : objA -> Type.
+  Context `(A : SpecializedCategory).
+  Variable Pobj : A -> Type.
   Variable Pmor : forall s d : sigT Pobj, A.(Morphism) (projT1 s) (projT1 d) -> Prop.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Definition SpecializedCategory_sigT_sig : @SpecializedCategory (sigT Pobj).
-    match goal with
-      | [ |- @SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          (fun s d => sig (@Pmor s d))
-          (fun x => existT _ (Identity (C := A) (projT1 x)) (Pidentity x))
-          (fun s d d' m1 m2 => existT _ (Compose (C := A) (proj1_sig m1) (proj1_sig m2)) (Pcompose (proj2_sig m1) (proj2_sig m2)))
-          _
-          _
-          _
-        )
-    end;
+  Definition SpecializedCategory_sigT_sig : SpecializedCategory.
+    refine (@Build_SpecializedCategory
+              (sigT Pobj)
+              (fun s d => sig (@Pmor s d))
+              (fun x => existT _ (Identity (C := A) (projT1 x)) (Pidentity x))
+              (fun s d d' m1 m2 => existT _ (Compose (C := A) (proj1_sig m1) (proj1_sig m2)) (Pcompose (proj2_sig m1) (proj2_sig m2)))
+              _
+              _
+              _
+           );
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Let SpecializedCategory_sigT_sig_as_sigT : @SpecializedCategory (sigT Pobj).
-    apply (@SpecializedCategory_sigT _ A _ _ Pidentity Pcompose);
+  Let SpecializedCategory_sigT_sig_as_sigT : SpecializedCategory.
+    apply (@SpecializedCategory_sigT A Pobj _ Pidentity Pcompose);
       abstract (
         simpl; intros;
           match goal with

@@ -27,7 +27,7 @@ Local Ltac limit_t :=
   trivial; t_with t'; intuition.
 
 Section SetLimits.
-  Context `(C : @SmallSpecializedCategory objC).
+  Context `(C : @SmallSpecializedCategory).
   Variable F : SpecializedFunctor C SetCat.
 
   (* Quoting David:
@@ -35,7 +35,7 @@ Section SetLimits.
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
   Definition SetLimit_Object : SetCat :=
-    { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
+    { S : forall c : C, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
   Definition SetLimit_Morphism : SpecializedNaturalTransformation
                                    ((DiagonalFunctor SetCat C) SetLimit_Object)
@@ -43,7 +43,7 @@ Section SetLimits.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
-          (fun c : objC => (fun S => (proj1_sig S) c))
+          (fun c : C => (fun S => (proj1_sig S) c))
           _
         )
     end.
@@ -67,7 +67,7 @@ Section SetLimits.
 End SetLimits.
 
 Section TypeLimits.
-  Context `(C : @SmallSpecializedCategory objC).
+  Context `(C : @SmallSpecializedCategory).
   Variable F : SpecializedFunctor C TypeCat.
 
   (* Quoting David:
@@ -75,7 +75,7 @@ Section TypeLimits.
      one for each c in C, such that under every arrow g: c-->c' in C, x_c is sent to x_{c'}.
      *)
   Definition TypeLimit_Object : TypeCat :=
-    { S : forall c : objC, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
+    { S : forall c : C, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
   Definition TypeLimit_Morphism : SpecializedNaturalTransformation
                                    ((DiagonalFunctor TypeCat C) TypeLimit_Object)
@@ -83,7 +83,7 @@ Section TypeLimits.
     match goal with
       | [ |- SpecializedNaturalTransformation ?F ?G ] =>
         refine (Build_SpecializedNaturalTransformation F G
-          (fun c : objC => (fun S => (proj1_sig S) c))
+          (fun c : C => (fun S => (proj1_sig S) c))
           _
         )
     end.

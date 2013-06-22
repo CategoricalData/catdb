@@ -16,9 +16,9 @@ Local Open Scope category_scope.
 
 Section CommaSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
-  Context `(A : @SpecializedCategory objA).
-  Context `(B : @SpecializedCategory objB).
-  Context `(C : @SpecializedCategory objC).
+  Context `(A : SpecializedCategory).
+  Context `(B : SpecializedCategory).
+  Context `(C : SpecializedCategory).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
 
@@ -54,7 +54,7 @@ Section CommaSpecializedCategory.
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
   (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : objA * objB & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
+  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : A * B & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
 
   Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
 
@@ -152,16 +152,14 @@ Section CommaSpecializedCategory.
     abstract comma_t.
   Qed.
 
-  Definition CommaSpecializedCategory : @SpecializedCategory CommaSpecializedCategory_Object.
-    match goal with
-      | [ |- @SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          CommaSpecializedCategory_Morphism
-          CommaSpecializedCategory_Identity
-          CommaSpecializedCategory_Compose
-          _ _ _
-        )
-    end;
+  Definition CommaSpecializedCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory
+              CommaSpecializedCategory_Object
+              CommaSpecializedCategory_Morphism
+              CommaSpecializedCategory_Identity
+              CommaSpecializedCategory_Compose
+              _ _ _
+           );
     abstract (
       intros;
         destruct_type' @CommaSpecializedCategory_Morphism;
@@ -178,8 +176,8 @@ Hint Unfold CommaSpecializedCategory_Compose CommaSpecializedCategory_Identity :
 Hint Constructors CommaSpecializedCategory_Morphism CommaSpecializedCategory_Object : category.
 
 Section SliceSpecializedCategory.
-  Context `(A : @SpecializedCategory objA).
-  Context `(C : @SpecializedCategory objC).
+  Context `(A : SpecializedCategory).
+  Context `(C : SpecializedCategory).
   Variable a : C.
   Variable S : SpecializedFunctor A C.
 
@@ -190,7 +188,7 @@ Section SliceSpecializedCategory.
 End SliceSpecializedCategory.
 
 Section SliceSpecializedCategoryOver.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Variable a : C.
 
   Definition SliceSpecializedCategoryOver := SliceSpecializedCategory a (IdentityFunctor C).
@@ -198,16 +196,16 @@ Section SliceSpecializedCategoryOver.
 End SliceSpecializedCategoryOver.
 
 Section ArrowSpecializedCategory.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ArrowSpecializedCategory := CommaSpecializedCategory (IdentityFunctor C) (IdentityFunctor C).
 End ArrowSpecializedCategory.
 
-Notation "C / a" := (@SliceSpecializedCategoryOver _ C a) : category_scope.
-Notation "a \ C" := (@CosliceSpecializedCategoryOver _ C a) (at level 70) : category_scope.
+Notation "C / a" := (@SliceSpecializedCategoryOver C a) : category_scope.
+Notation "a \ C" := (@CosliceSpecializedCategoryOver C a) (at level 70) : category_scope.
 
-Definition CC_SpecializedFunctor' `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) := SpecializedFunctor C D.
-Coercion CC_FunctorFromTerminal' `(C : @SpecializedCategory objC) (x : C) : CC_SpecializedFunctor' TerminalCategory C := FunctorFromTerminal C x.
+Definition CC_SpecializedFunctor' `(C : SpecializedCategory) `(D : SpecializedCategory) := SpecializedFunctor C D.
+Coercion CC_FunctorFromTerminal' `(C : SpecializedCategory) (x : C) : CC_SpecializedFunctor' TerminalCategory C := FunctorFromTerminal C x.
 Arguments CC_SpecializedFunctor' / .
 Arguments CC_FunctorFromTerminal' / .
 
@@ -219,5 +217,5 @@ Notation "S ↓ T" := (CommaSpecializedCategory S T) : category_scope.
 Notation "S ↓ T" := (CommaSpecializedCategory (S : CC_SpecializedFunctor' _ _)
                                               (T : CC_SpecializedFunctor' _ _)) : category_scope.
 (*Set Printing All.
-Check (fun `(C : @SpecializedCategory objC) `(D : @SpecializedCategory objD) `(E : @SpecializedCategory objE) (S : SpecializedFunctor C D) (T : SpecializedFunctor E D) => (S ↓ T)%category).
-Check (fun `(D : @SpecializedCategory objD) `(E : @SpecializedCategory objE) (S : SpecializedFunctor E D) (x : D) => (x ↓ S)%category).*)
+Check (fun `(C : SpecializedCategory) `(D : SpecializedCategory) `(E : SpecializedCategory) (S : SpecializedFunctor C D) (T : SpecializedFunctor E D) => (S ↓ T)%category).
+Check (fun `(D : SpecializedCategory) `(E : SpecializedCategory) (S : SpecializedFunctor E D) (x : D) => (x ↓ S)%category).*)

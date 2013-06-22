@@ -35,9 +35,9 @@ Local Ltac slice_t :=
          end.
 
 Section FCompositionOf.
-  Context `(A : @SpecializedCategory objA).
-  Context `(B : @SpecializedCategory objB).
-  Context `(C : @SpecializedCategory objC).
+  Context `(A : SpecializedCategory).
+  Context `(B : SpecializedCategory).
+  Context `(C : SpecializedCategory).
 
   Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
         (m1 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)
@@ -47,7 +47,7 @@ Section FCompositionOf.
     Time slice_t. (* 44 s *)
   Qed.
 
-  Lemma CommaCategoryInducedFunctor_FIdentityOf (x : (OppositeCategory (C ^ A)) * (C ^ B)) :
+  Lemma CommaCategoryInducedFunctor_FIdentityOf (x : Object ((OppositeCategory (C ^ A)) * (C ^ B))) :
     CommaCategoryInducedFunctor (Identity x)
     = IdentityFunctor _.
     Time slice_t. (* 11 s *)

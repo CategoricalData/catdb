@@ -9,7 +9,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Equalizer.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Variable HasLimits : forall F : SpecializedFunctor PullbackIndex C, Limit F.
   Variable HasColimits : forall F : SpecializedFunctor PushoutIndex C, Colimit F.

@@ -16,14 +16,13 @@ Section LaxSliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
 
   Variable I : Type.
-  Variable Index2Object : I -> Type.
-  Variable Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i).
+  Variable Index2Cat : I -> SpecializedCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Cat.
+  Let Cat := ComputableCategory Index2Cat.
 
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   (** Quoting David Spivak:
      David: ok
@@ -183,18 +182,16 @@ Section LaxSliceSpecializedCategory.
     abstract lax_slice_t.
   Qed.
 
-  Definition LaxSliceSpecializedCategory : @SpecializedCategory LaxSliceSpecializedCategory_Object.
-    match goal with
-      | [ |- @SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          LaxSliceSpecializedCategory_Morphism
-          LaxSliceSpecializedCategory_Identity
-          LaxSliceSpecializedCategory_Compose
-          _
-          _
-          _
-        )
-    end;
+  Definition LaxSliceSpecializedCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory
+              LaxSliceSpecializedCategory_Object
+              LaxSliceSpecializedCategory_Morphism
+              LaxSliceSpecializedCategory_Identity
+              LaxSliceSpecializedCategory_Compose
+              _
+              _
+              _
+           );
     abstract (
       repeat (
         let H := fresh in intro H; destruct H as [ ]; simpl in * |-
@@ -216,13 +213,13 @@ Section LaxCosliceSpecializedCategory.
   (* [Definition]s are not sort-polymorphic. *)
 
   Variable I : Type.
-  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
+  Variable Index2Cat : I -> SpecializedCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Let Cat := ComputableCategory Index2Object Index2Cat.
+  Let Cat := ComputableCategory Index2Cat.
 
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Record LaxCosliceSpecializedCategory_Object := { LaxCosliceSpecializedCategory_Object_Member :> { X : unit * I & SpecializedFunctor (snd X) C } }.
 
@@ -358,18 +355,16 @@ Section LaxCosliceSpecializedCategory.
     abstract lax_coslice_t.
   Qed.
 
-  Definition LaxCosliceSpecializedCategory : @SpecializedCategory LaxCosliceSpecializedCategory_Object.
-    match goal with
-      | [ |- @SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          LaxCosliceSpecializedCategory_Morphism
-          LaxCosliceSpecializedCategory_Identity
-          LaxCosliceSpecializedCategory_Compose
-          _
-          _
-          _
-        )
-    end;
+  Definition LaxCosliceSpecializedCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory
+              LaxCosliceSpecializedCategory_Object
+              LaxCosliceSpecializedCategory_Morphism
+              LaxCosliceSpecializedCategory_Identity
+              LaxCosliceSpecializedCategory_Compose
+              _
+              _
+              _
+           );
     abstract (
       repeat (
         let H := fresh in intro H; destruct H as [ ]; simpl in * |-

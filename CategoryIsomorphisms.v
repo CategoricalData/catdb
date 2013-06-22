@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Category.
-  Context `{C : @SpecializedCategory obj}.
+  Context `{C : SpecializedCategory}.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
@@ -200,12 +200,12 @@ Hint Resolve @RightInverse @LeftInverse @IsomorphismOf_Identity @ComposeIsomorph
 
 Ltac eapply_by_compose H :=
   match goal with
-    | [ |- @eq (@Morphism ?obj ?mor ?C) _ _ ] => eapply (H obj mor C)
-    | [ |- @Compose ?obj ?mor ?C _ _ _ _ _ = _ ] => eapply (H obj mor C)
-    | [ |- _ = @Compose ?obj ?mor ?C _ _ _ _ _ ] => eapply (H obj mor C)
+    | [ |- @eq (@Morphism ?C) _ _ ] => eapply (H C)
+    | [ |- @Compose ?C _ _ _ _ _ = _ ] => eapply (H C)
+    | [ |- _ = @Compose ?C _ _ _ _ _ ] => eapply (H C)
     | _ => eapply H
-    | [ C : @SpecializedCategory ?obj ?mor |- _ ] => eapply (H obj mor C)
-    | [ C : ?T |- _ ] => match eval hnf in T with | @SpecializedCategory ?obj ?mor => eapply (H obj mor C) end
+    | [ C : SpecializedCategory |- _ ] => eapply (H C)
+    | [ C : ?T |- _ ] => match eval hnf in T with | SpecializedCategory => eapply (H C) end
   end.
 
 Ltac solve_isomorphism := destruct_hypotheses;
@@ -229,7 +229,7 @@ Ltac pre_compose_to_identity :=
   [ solve_isomorphism | ].
 
 Section CategoryObjects1.
-  Context `(C : @SpecializedCategory obj).
+  Context `(C : SpecializedCategory).
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
@@ -247,7 +247,7 @@ Section CategoryObjects1.
 
     Record TerminalObject :=
       {
-        TerminalObject_Object' : obj;
+        TerminalObject_Object' : C;
         TerminalObject_Morphism : forall o, Morphism C o TerminalObject_Object';
         TerminalObject_Property : forall o, is_unique (TerminalObject_Morphism o)
       }.
@@ -276,7 +276,7 @@ Section CategoryObjects1.
 
     Record InitialObject :=
       {
-        InitialObject_Object' :> obj;
+        InitialObject_Object' :> C;
         InitialObject_Morphism : forall o, Morphism C InitialObject_Object' o;
         InitialObject_Property : forall o, is_unique (InitialObject_Morphism o)
       }.
@@ -296,14 +296,14 @@ Section CategoryObjects1.
   End initial.
 End CategoryObjects1.
 
-Arguments UniqueUpToUniqueIsomorphism {_ C} P.
-Arguments IsInitialObject' {_ C} o.
-Arguments IsInitialObject {_ C} o.
-Arguments IsTerminalObject' {_ C} o.
-Arguments IsTerminalObject {_ C} o.
+Arguments UniqueUpToUniqueIsomorphism {C} P.
+Arguments IsInitialObject' {C} o.
+Arguments IsInitialObject {C} o.
+Arguments IsTerminalObject' {C} o.
+Arguments IsTerminalObject {C} o.
 
 Section CategoryObjects2.
-  Context `(C : @SpecializedCategory obj).
+  Context `(C : SpecializedCategory).
 
   Ltac unique := hnf; intros; specialize_all_ways; destruct_sig;
     unfold is_unique, unique, uniqueness in *;

@@ -14,14 +14,14 @@ Section InducedFunctor.
      a category that we're coming from.  So prove them separately, so
      we can use them elsewhere, without assuming a full [HasLimits]. *)
   Variable I : Type.
-  Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
+  Variable Index2Cat : I -> SpecializedCategory.
 
   Local Coercion Index2Cat : I >-> SpecializedCategory.
 
-  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
-  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
+  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ Index2Cat D).
+  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ Index2Cat D).
 
-  Context `(D : @SpecializedCategory objD).
+  Context `(D : SpecializedCategory).
   Let DOp := OppositeCategory D.
 
   Section Limit.

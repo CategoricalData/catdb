@@ -19,12 +19,12 @@ Local Hint Resolve Functor_eq Functor_JMeq NaturalTransformation_eq
       NaturalTransformation_JMeq eq_JMeq.
 
 Section Law0.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1
     := FunctorTo1 _.
   Definition ExponentialLaw0Functor_Inverse : SpecializedFunctor 1 (C ^ 0)
-    := FunctorFrom1 _ (FunctorFrom0 _).
+    := FunctorFrom1 (C ^ 0) (FunctorFrom0 _).
 
   Lemma ExponentialLaw0
   : ComposeFunctors ExponentialLaw0Functor ExponentialLaw0Functor_Inverse
@@ -33,15 +33,15 @@ Section Law0.
        = IdentityFunctor _.
   Proof.
     split; auto.
-    apply Functor_eq; auto.
+    apply Functor_eq; auto;
     nt_eq; auto;
     destruct_head_hnf Empty_set.
   Qed.
 End Law0.
 
 Section Law0'.
-  Context `(C : @SpecializedCategory objC).
-  Variable c : objC.
+  Context `(C : SpecializedCategory).
+  Variable c : C.
 
   Definition ExponentialLaw0'Functor : SpecializedFunctor (0 ^ C) 0
     := Build_SpecializedFunctor (0 ^ C) 0
@@ -69,7 +69,7 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ExponentialLaw1Functor : SpecializedFunctor (C ^ 1) C
     := Build_SpecializedFunctor (C ^ 1) C
@@ -105,7 +105,7 @@ Section Law1.
   Proof.
     refine (Build_SpecializedFunctor
               C (C ^ 1)
-              (@FunctorFrom1 _ _)
+              (@FunctorFrom1 _)
               ExponentialLaw1Functor_Inverse_MorphismOf
               _
               _
@@ -131,7 +131,7 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition ExponentialLaw1'Functor : SpecializedFunctor (1 ^ C) 1
     := FunctorTo1 _.
@@ -158,15 +158,15 @@ Section Law1'.
     = IdentityFunctor _.
   Proof.
     split; auto.
-    apply Functor_eq; auto.
+    apply Functor_eq; auto;
     nt_eq; auto.
   Qed.
 End Law1'.
 
 Section Law2.
-  Context `(D : @SpecializedCategory objD).
-  Context `(C1 : @SpecializedCategory objC1).
-  Context `(C2 : @SpecializedCategory objC2).
+  Context `(D : SpecializedCategory).
+  Context `(C1 : SpecializedCategory).
+  Context `(C2 : SpecializedCategory).
 
   Definition ExponentialLaw2Functor
   : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2))
@@ -219,31 +219,30 @@ Section Law2.
 End Law2.
 
 Section Law3.
-  Context `(C1 : @SpecializedCategory objC1).
-  Context `(C2 : @SpecializedCategory objC2).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C1 : SpecializedCategory).
+  Context `(C2 : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Definition ExponentialLaw3Functor
   : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
-    match goal with
-      | [ |- SpecializedFunctor ?F ?G ] =>
-        refine (Build_SpecializedFunctor
-                  F G
-                  (fun H => (ComposeFunctors fst_Functor H,
-                             ComposeFunctors snd_Functor H))
-                  (fun s d m =>
-                     (MorphismOf (FunctorialComposition D (C1 * C2) C1)
-                                 (s := (_, _))
-                                 (d := (_, _))
-                                 (Identity fst_Functor, m),
-                      MorphismOf (FunctorialComposition D (C1 * C2) C2)
-                                 (s := (_, _))
-                                 (d := (_, _))
-                                 (Identity snd_Functor, m)))
-                  _
-                  _
-               )
-    end;
+    let F := match goal with | [ |- SpecializedFunctor ?F ?G ] => constr:(F) end in
+    let G := match goal with | [ |- SpecializedFunctor ?F ?G ] => constr:(G) end in
+    refine (Build_SpecializedFunctor
+              F G
+              (fun H => (ComposeFunctors fst_Functor H,
+                         ComposeFunctors snd_Functor H))
+              (fun s d m =>
+                 (MorphismOf (FunctorialComposition D (C1 * C2) C1)
+                             (s := (_, _))
+                             (d := (_, _))
+                             (Identity (C := _ ^ _) fst_Functor, m),
+                  MorphismOf (FunctorialComposition D (C1 * C2) C2)
+                             (s := (_, _))
+                             (d := (_, _))
+                             (Identity (C := _ ^ _) snd_Functor, m)))
+              _
+              _
+           );
     abstract (
         intros;
         simpl;
@@ -263,8 +262,8 @@ Section Law3.
     refine (Build_SpecializedFunctor
               (fst FG) (snd FG)
               (fun H => FunctorProduct
-                          (@fst_Functor _ (C1 ^ D) _ (C2 ^ D) H)
-                          (@snd_Functor _ (C1 ^ D) _ (C2 ^ D) H))
+                          (@fst_Functor (C1 ^ D) (C2 ^ D) H)
+                          (@snd_Functor (C1 ^ D) (C2 ^ D) H))
               (fun _ _ m => FunctorProductFunctorial (fst m) (snd m))
               _
               _);
@@ -300,9 +299,9 @@ Section Law3.
 End Law3.
 
 Section Law4.
-  Context `(C1 : @SpecializedCategory objC1).
-  Context `(C2 : @SpecializedCategory objC2).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C1 : SpecializedCategory).
+  Context `(C2 : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Section functor.
     Local Ltac do_exponential4 := intros; simpl;

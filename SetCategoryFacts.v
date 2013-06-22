@@ -148,7 +148,7 @@ Section nat.
     congruence.
 
   Local Notation PartialBuild_NaturalNumbersPreObject T Cat :=
-    (fun pf => @Build_NaturalNumbersPreObject T Cat
+    (fun pf => @Build_NaturalNumbersPreObject Cat
                                               nat
                                               (UnitTerminalOf T)
                                               (fun _ => 0)

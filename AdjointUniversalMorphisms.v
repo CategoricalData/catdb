@@ -10,8 +10,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section AdjunctionUniversal.
-  Context `{C : @SpecializedCategory objC}.
-  Context `{D : @SpecializedCategory objD}.
+  Context `{C : SpecializedCategory}.
+  Context `{D : SpecializedCategory}.
   Variable F : SpecializedFunctor C D.
   Variable G : SpecializedFunctor D C.
 
@@ -80,8 +80,8 @@ Section AdjunctionUniversal.
 End AdjunctionUniversal.
 
 Section AdjunctionFromUniversal.
-  Context `{C : @SpecializedCategory objC}.
-  Context `{D : @SpecializedCategory objD}.
+  Context `{C : SpecializedCategory}.
+  Context `{D : SpecializedCategory}.
 
   Local Ltac diagonal_transitivity_pre_then tac :=
     repeat rewrite AssociativityNoEvar by noEvar;

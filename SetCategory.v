@@ -23,15 +23,15 @@ Notation CoercedCatOf obj T := (IndexedCatOf obj (fun x => x : T)).
 
 (* There is a category [Set], where the objects are sets and the morphisms are set morphisms *)
 Section CSet.
-  Definition TypeCat : @SpecializedCategory Type := Eval cbv beta in CatOf Type.
-  Definition SetCat : @SpecializedCategory Set := Eval cbv beta in CatOf Set.
-  Definition PropCat : @SpecializedCategory Prop := Eval cbv beta in CatOf Prop.
+  Definition TypeCat : SpecializedCategory := Eval cbv beta in CatOf Type.
+  Definition SetCat : SpecializedCategory := Eval cbv beta in CatOf Set.
+  Definition PropCat : SpecializedCategory := Eval cbv beta in CatOf Prop.
 
   Definition IndexedTypeCat (Index : Type) (Index2Object : Index -> Type) := Eval cbv beta in IndexedCatOf Index Index2Object.
 End CSet.
 
 Section SetCoercionsDefinitions.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition SpecializedFunctorToProp := SpecializedFunctor C PropCat.
   Definition SpecializedFunctorToSet := SpecializedFunctor C SetCat.
@@ -50,7 +50,7 @@ Identity Coercion SpecializedFunctorFromSet_Id : SpecializedFunctorFromSet >-> S
 Identity Coercion SpecializedFunctorFromType_Id : SpecializedFunctorFromType >-> SpecializedFunctor.
 
 Section SetCoercions.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Local Notation BuildFunctor C D F :=
     (Build_SpecializedFunctor C D
@@ -94,10 +94,10 @@ Section PointedSet.
                                                                          (fun _ _ _ _ _ => eq_refl)
                                                                          (fun _ => eq_refl)).
 
-  Definition PointedTypeCat : @SpecializedCategory { A : Type & A } := Eval cbv beta zeta in PointedCatOf Type.
+  Definition PointedTypeCat : SpecializedCategory := Eval cbv beta zeta in PointedCatOf Type.
   Definition PointedTypeProjection : SpecializedFunctor PointedTypeCat TypeCat := PointedCatProjectionOf Type.
-  Definition PointedSetCat : @SpecializedCategory { A : Set & A } := Eval cbv beta zeta in PointedCatOf Set.
+  Definition PointedSetCat : SpecializedCategory := Eval cbv beta zeta in PointedCatOf Set.
   Definition PointedSetProjection : SpecializedFunctor PointedSetCat SetCat := PointedCatProjectionOf Set.
-  Definition PointedPropCat : @SpecializedCategory { A : Prop & A } := Eval cbv beta zeta in PointedCatOf Prop.
+  Definition PointedPropCat : SpecializedCategory := Eval cbv beta zeta in PointedCatOf Prop.
   Definition PointedPropProjection : SpecializedFunctor PointedPropCat PropCat := PointedCatProjectionOf Prop.
 End PointedSet.

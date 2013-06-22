@@ -14,7 +14,7 @@ Section GrothendieckNondependentFunctorial.
   Local Open Scope category_scope.
   Local Notation "Cat / C" := (SliceSpecializedCategoryOver Cat C).
 
-  Context `(C : @LocallySmallSpecializedCategory objC).
+  Context `(C : @LocallySmallSpecializedCategory).
 
   Let Cat := LocallySmallCat.
 
@@ -29,7 +29,7 @@ Section GrothendieckNondependentFunctorial.
         end.
         hnf; simpl.
         exists (((CategoryOfElements x
-                  : LocallySmallSpecializedCategory _)
+                  : LocallySmallSpecializedCategory)
                  : LocallySmallCategory),
                tt).
         exact (GrothendieckFunctor _).
@@ -103,7 +103,7 @@ Section GrothendieckNondependentFunctorial.
     Definition CategoryOfElementsFunctorial'
     : SpecializedFunctor (TypeCat ^ C) Cat.
       refine (Build_SpecializedFunctor (TypeCat ^ C) Cat
-                                       (fun x => CategoryOfElements x : LocallySmallSpecializedCategory _)
+                                       (fun x => CategoryOfElements x : LocallySmallSpecializedCategory)
                                        CategoryOfElementsFunctorial'_MorphismOf
                                        _
                                        _);

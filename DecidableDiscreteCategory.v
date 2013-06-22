@@ -41,8 +41,8 @@ Section DCategoryDec.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategoryDec : @SpecializedCategory O.
-    refine (@Build_SpecializedCategory _
+  Definition DiscreteCategoryDec : SpecializedCategory.
+    refine (@Build_SpecializedCategory O
                                        DiscreteCategoryDec_Morphism
                                        DiscreteCategoryDec_Identity
                                        DiscreteCategoryDec_Compose

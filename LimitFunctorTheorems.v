@@ -34,9 +34,9 @@ Section InducedMaps.
      injects one set into its union with another and [lim G] projects a
      product of two sets onto one factor.
      *)
-  Context `(C1 : @SpecializedCategory objC1).
-  Context `(C2 : @SpecializedCategory objC2).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C1 : SpecializedCategory).
+  Context `(C2 : SpecializedCategory).
+  Context `(D : SpecializedCategory).
   Variable F1 : SpecializedFunctor C1 D.
   Variable F2 : SpecializedFunctor C2 D.
   Variable G : SpecializedFunctor C1 C2.

@@ -29,11 +29,11 @@ Section Grothendieck.
      [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
      [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
      *)
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Variable F : SpecializedFunctor C Cat.
 
   Record CatGrothendieckPair := {
-    CatGrothendieckC' : objC;
+    CatGrothendieckC' : C;
     CatGrothendieckX' : F CatGrothendieckC'
   }.
 

@@ -72,8 +72,8 @@ Section CorrespondenceCategory.
      is a functor
      [[M: C^{op} × C' → Set.]]
      *)
-  Context `(C : @SpecializedCategory objC).
-  Context `(C' : @SpecializedCategory objC').
+  Context `(C : SpecializedCategory).
+  Context `(C' : SpecializedCategory).
 
   Let COp := OppositeCategory C.
 
@@ -120,8 +120,8 @@ Section CorrespondenceCategory.
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
   (* TODO(jgross): Rewrite fg_equal_in using typeclasses? for speed *)
-  Definition CorrespondenceCategory : @SpecializedCategory (C + C')%type.
-    refine (@Build_SpecializedCategory _
+  Definition CorrespondenceCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory (C + C')%type
                                        CorrespondenceCategory_Morphism
                                        CorrespondenceCategory_Identity
                                        CorrespondenceCategory_Compose
@@ -152,7 +152,7 @@ Section Functor_to_1.
      {0, 1}, regarded as a category in the obvious way), uniquely
      determined by the condition that [F⁻¹ {0} = C] and [F⁻¹ {1} = C'].
      *)
-  Context `(dummy : @CorrespondenceCategory objC C objC' C' M).
+  Context `(dummy : @CorrespondenceCategory C C' M).
 
   Let CorrespondenceCategoryFunctor_ObjectOf (x : C + C') : Object ([1]) := if x then false else true. (*
     match x with
@@ -191,7 +191,7 @@ Section From_Functor_to_1.
      [F : M → [1] ], we can define [C = F⁻¹ {0}], [C' = F⁻¹ {1}], and a
      correspondence [M : C → C'] by the formula
      [M (X, Y) = Hom_{M} (X, Y)]. *)
-  Context `(M : @SpecializedCategory objM).
+  Context `(M : SpecializedCategory).
   Variable F : SpecializedFunctor M ([1]).
 
   (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)

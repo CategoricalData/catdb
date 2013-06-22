@@ -10,10 +10,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section SimplicialSets.
-  Definition SimplexCategory := @ComputableCategory nat _ (fun n => [n])%category.
+  Definition SimplexCategory := ComputableCategory (fun n : nat => [n])%category.
   Local Notation Δ := SimplexCategory.
 
-  Definition SimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Δ))%category.
+  Definition SimplicialCategory `(C : SpecializedCategory) := (C ^ (OppositeCategory Δ))%category.
 
   Definition SimplicialSet := SimplicialCategory SetCat.
   Definition SimplicialType := SimplicialCategory TypeCat.

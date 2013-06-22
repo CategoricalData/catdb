@@ -65,9 +65,9 @@ Local Ltac t :=
          end.
 
 Section DataMigrationFunctors.
-  Context `(C : LocallySmallSpecializedCategory objC).
-  Context `(D : LocallySmallSpecializedCategory objD).
-  Context `(S : SpecializedCategory objS).
+  Context `(C : LocallySmallSpecializedCategory).
+  Context `(D : LocallySmallSpecializedCategory).
+  Context `(S : SpecializedCategory).
 
   Section Δ.
     Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)

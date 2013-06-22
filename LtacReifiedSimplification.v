@@ -18,70 +18,69 @@ Local Ltac do_simplification :=
     repeat rewrite ?FCompositionOf.
 
 Section ReifiedMorphism.
-  Inductive ReifiedMorphism : forall objC (C : SpecializedCategory objC), C -> C -> Type :=
-  | ReifiedIdentityMorphism : forall objC C x, @ReifiedMorphism objC C x x
-  | ReifiedComposedMorphism : forall objC C s d d', ReifiedMorphism C d d' -> ReifiedMorphism C s d -> @ReifiedMorphism objC C s d'
-  | ReifiedNaturalTransformationMorphism : forall objB (B : SpecializedCategory objB)
-                                                  objC (C : SpecializedCategory objC)
+  Inductive ReifiedMorphism : forall (C : SpecializedCategory), C -> C -> Type :=
+  | ReifiedIdentityMorphism : forall C x, @ReifiedMorphism C x x
+  | ReifiedComposedMorphism : forall C s d d', ReifiedMorphism C d d' -> ReifiedMorphism C s d -> @ReifiedMorphism C s d'
+  | ReifiedNaturalTransformationMorphism : forall (B : SpecializedCategory)
+                                                  (C : SpecializedCategory)
                                                   (F G : SpecializedFunctor B C)
                                                   (T : SpecializedNaturalTransformation F G)
                                                   x,
                                              ReifiedMorphism C (F x) (G x)
-  | ReifiedFunctorMorphism : forall objB (B : SpecializedCategory objB)
-                                    objC (C : SpecializedCategory objC)
+  | ReifiedFunctorMorphism : forall (B : SpecializedCategory)
+                                    (C : SpecializedCategory)
                                     (F : SpecializedFunctor B C)
                                     s d,
-                               @ReifiedMorphism objB B s d -> @ReifiedMorphism objC C (F s) (F d)
-  | ReifiedGenericMorphism : forall objC (C : SpecializedCategory objC) s d, Morphism C s d -> @ReifiedMorphism objC C s d.
+                               @ReifiedMorphism B s d -> @ReifiedMorphism C (F s) (F d)
+  | ReifiedGenericMorphism : forall (C : SpecializedCategory) s d, Morphism C s d -> @ReifiedMorphism C s d.
 
-  Fixpoint ReifiedMorphismDenote objC C s d (m : @ReifiedMorphism objC C s d) : Morphism C s d :=
-    match m in @ReifiedMorphism objC C s d return Morphism C s d with
-      | ReifiedIdentityMorphism _ _ x => Identity x
-      | ReifiedComposedMorphism _ _ _ _ _ m1 m2 => Compose (@ReifiedMorphismDenote _ _ _ _ m1)
-                                                           (@ReifiedMorphismDenote _ _ _ _ m2)
-      | ReifiedNaturalTransformationMorphism _ _ _ _ _ _ T x => T x
-      | ReifiedFunctorMorphism _ _ _ _ F _ _ m => MorphismOf F (@ReifiedMorphismDenote _ _ _ _ m)
-      | ReifiedGenericMorphism _ _ _ _ m => m
+  Fixpoint ReifiedMorphismDenote C s d (m : @ReifiedMorphism C s d) : Morphism C s d :=
+    match m in @ReifiedMorphism C s d return Morphism C s d with
+      | ReifiedIdentityMorphism _ x => Identity x
+      | ReifiedComposedMorphism _ _ _ _ m1 m2 => Compose (@ReifiedMorphismDenote _ _ _ m1)
+                                                           (@ReifiedMorphismDenote _ _ _ m2)
+      | ReifiedNaturalTransformationMorphism _ _ _ _ T x => T x
+      | ReifiedFunctorMorphism _ _ F _ _ m => MorphismOf F (@ReifiedMorphismDenote _ _ _ m)
+      | ReifiedGenericMorphism _ _ _ m => m
     end.
 End ReifiedMorphism.
 
 Ltac Ltac_reify_morphism m :=
-  let objC := match type of m with @Morphism ?objC _ ?s ?d => constr:(objC) end in
-  let C := match type of m with @Morphism ?objC ?C ?s ?d => constr:(C) end in
-  let s := match type of m with @Morphism ?objC _ ?s ?d => constr:(s) end in
-  let d := match type of m with @Morphism ?objC _ ?s ?d => constr:(d) end in
+  let C := match type of m with @Morphism ?C ?s ?d => constr:(C) end in
+  let s := match type of m with @Morphism ?C ?s ?d => constr:(s) end in
+  let d := match type of m with @Morphism ?C ?s ?d => constr:(d) end in
   match m with
-    | @Identity _ _ ?x => constr:(@ReifiedIdentityMorphism _ C x)
+    | @Identity _ ?x => constr:(@ReifiedIdentityMorphism C x)
     | Compose ?m1 ?m2 => let m1' := Ltac_reify_morphism m1 in
                          let m2' := Ltac_reify_morphism m2 in
-                         constr:(@ReifiedComposedMorphism _ _ _ _ _ m1' m2')
-    | ComponentsOf ?T ?x => constr:(@ReifiedNaturalTransformationMorphism _ _ _ _ _ _ T x)
+                         constr:(@ReifiedComposedMorphism _ _ _ _ m1' m2')
+    | ComponentsOf ?T ?x => constr:(@ReifiedNaturalTransformationMorphism _ _ _ _ T x)
     | MorphismOf ?F ?m => let m' := Ltac_reify_morphism m in
-                          constr:(@ReifiedFunctorMorphism _ _ _ _ F _ _ m')
+                          constr:(@ReifiedFunctorMorphism _ _ F _ _ m')
     | ReifiedMorphismDenote ?m' => constr:(m')
-    | _ => constr:(@ReifiedGenericMorphism objC C s d m)
+    | _ => constr:(@ReifiedGenericMorphism C s d m)
   end.
 
 Section SimplifiedMorphism.
-  Fixpoint ReifiedHasIdentities `(m : @ReifiedMorphism objC C s d) : bool
+  Fixpoint ReifiedHasIdentities `(m : @ReifiedMorphism C s d) : bool
     := match m with
-         | ReifiedIdentityMorphism _ _ _ => true
-         | ReifiedComposedMorphism _ _ _ _ _ m1 m2 => orb (@ReifiedHasIdentities _ _ _ _ m1) (@ReifiedHasIdentities _ _ _ _ m2)
-         | ReifiedNaturalTransformationMorphism _ _ _ _ _ _ _ _ => false
-         | ReifiedFunctorMorphism _ _ _ _ _ _ _ m0 => (@ReifiedHasIdentities _ _ _ _ m0)
-         | ReifiedGenericMorphism _ _ _ _ _ => false
+         | ReifiedIdentityMorphism _ _ => true
+         | ReifiedComposedMorphism _ _ _ _ m1 m2 => orb (@ReifiedHasIdentities _ _ _ m1) (@ReifiedHasIdentities _ _ _ m2)
+         | ReifiedNaturalTransformationMorphism _ _ _ _ _ _ => false
+         | ReifiedFunctorMorphism _ _ _ _ _ m0 => (@ReifiedHasIdentities _ _ _ m0)
+         | ReifiedGenericMorphism _ _ _ _ => false
        end.
 
-  Fixpoint ReifiedMorphismSimplifyWithProof objC C s d (m : @ReifiedMorphism objC C s d) {struct m}
+  Fixpoint ReifiedMorphismSimplifyWithProof C s d (m : @ReifiedMorphism C s d) {struct m}
   : { m' : ReifiedMorphism C s d | ReifiedMorphismDenote m = ReifiedMorphismDenote m' }.
   refine match m with
-           | ReifiedComposedMorphism _ _ s0 d0 d0' m1 m2 => _
-           | ReifiedFunctorMorphism _ _ _ _ F _ _ m' => _
-           | ReifiedIdentityMorphism _ _ x => exist _ _ eq_refl
-           | ReifiedNaturalTransformationMorphism _ _ _ _ _ _ T x => exist _ _ eq_refl
-           | ReifiedGenericMorphism _ _ _ _ m => exist _ _ eq_refl
+           | ReifiedComposedMorphism _ s0 d0 d0' m1 m2 => _
+           | ReifiedFunctorMorphism _ _ F _ _ m' => _
+           | ReifiedIdentityMorphism _ x => exist _ _ eq_refl
+           | ReifiedNaturalTransformationMorphism _ _ _ _ T x => exist _ _ eq_refl
+           | ReifiedGenericMorphism _ _ _ m => exist _ _ eq_refl
          end; clear m;
-  [ destruct (@ReifiedMorphismSimplifyWithProof _ _ _ _ m1) as [ m1' H1 ], (@ReifiedMorphismSimplifyWithProof _ _ _ _ m2) as [ m2' H2 ];
+  [ destruct (@ReifiedMorphismSimplifyWithProof _ _ _ m1) as [ m1' H1 ], (@ReifiedMorphismSimplifyWithProof _ _ _ m2) as [ m2' H2 ];
     clear ReifiedMorphismSimplifyWithProof;
     destruct m1';
     ((destruct m2')
@@ -97,42 +96,40 @@ Section SimplifiedMorphism.
          match type of m2' with
            | ReifiedMorphism _ _ (?f ?x) => generalize dependent (f x); intros; destruct m2'
          end))
-    | destruct (@ReifiedMorphismSimplifyWithProof _ _ _ _ m') as [ m'' ? ];
+    | destruct (@ReifiedMorphismSimplifyWithProof _ _ _ m') as [ m'' ? ];
       clear ReifiedMorphismSimplifyWithProof;
       destruct m''];
   simpl in *;
-  match goal with
-    | [ |- { m' : _ | ?m'' = ReifiedMorphismDenote m' } ]
-      => let T := type of m'' in
-         let t := fresh in
-         let H := fresh in
-         evar (t : T);
-           assert (H : t = m'');
-           [ repeat match goal with
-                      | [ H : ReifiedMorphismDenote _ = _ |- _ ] => rewrite H; clear H
-                    end;
-             do_simplification;
-             subst t;
-             reflexivity
-           | ];
-           instantiate;
-           let m := (eval unfold t in t) in
-           let m' := Ltac_reify_morphism m in
-           (exists m');
-             clear H t
-  end;
-  repeat match goal with
-           | [ H : _ = _ |- _ ] => revert H
-           | _ => clear
-         end;
-  intros;
-  abstract (
-      repeat match goal with
+  let m'' := match goal with | [ |- { m' : _ | ?m'' = ReifiedMorphismDenote m' } ] => constr:(m'') end in
+  let T := type of m'' in
+  let t := fresh in
+  let H := fresh in
+  evar (t : T);
+    assert (H : t = m'');
+    [ repeat match goal with
                | [ H : ReifiedMorphismDenote _ = _ |- _ ] => rewrite H; clear H
              end;
       do_simplification;
+      subst t;
       reflexivity
-    ).
+    | ];
+    instantiate;
+    let m := (eval unfold t in t) in
+    let m' := Ltac_reify_morphism m in
+    (exists m');
+      clear H t;
+      repeat match goal with
+               | [ H : _ = _ |- _ ] => revert H
+               | _ => clear
+             end;
+      intros;
+      abstract (
+          repeat match goal with
+                   | [ H : ReifiedMorphismDenote _ = _ |- _ ] => rewrite H; clear H
+                 end;
+          do_simplification;
+          reflexivity
+        ).
   Defined.
 
   Local Ltac solve_t :=
@@ -179,16 +176,16 @@ Section SimplifiedMorphism.
       destruct H';
       simpl in H.
 
-  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity `(C : @SpecializedCategory objC) s d
+  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity `(C : SpecializedCategory) s d
            (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (proj1_sig (ReifiedMorphismSimplifyWithProof m)) = false}
     + { exists H : s = d, proj1_sig (ReifiedMorphismSimplifyWithProof m) = match H with eq_refl => ReifiedIdentityMorphism C s end }.
   destruct m;
   try solve [ right; clear; abstract (exists eq_refl; subst; reflexivity)
             | left; clear; reflexivity ];
-  [ destruct (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ _ m1), (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ _ m2);
+  [ destruct (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ m1), (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ m2);
     [ left | left | left | right ]
-  | destruct (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ _ m);
+  | destruct (@ReifiedMorphismSimplifyWithProofNoIdentity _ _ _ m);
     [ left | right ] ];
   clear ReifiedMorphismSimplifyWithProofNoIdentity;
   try abstract (
@@ -211,14 +208,14 @@ Section SimplifiedMorphism.
   Section ReifiedMorphismSimplify.
     Local Arguments ReifiedMorphismSimplifyWithProof / .
 
-    Definition ReifiedMorphismSimplify objC C s d (m : @ReifiedMorphism objC C s d)
+    Definition ReifiedMorphismSimplify C s d (m : @ReifiedMorphism C s d)
     : ReifiedMorphism C s d
       := Eval simpl in proj1_sig (ReifiedMorphismSimplifyWithProof m).
 
     (*Local Arguments ReifiedMorphismSimplify / .*)
   End ReifiedMorphismSimplify.
 
-  Lemma ReifiedMorphismSimplifyOk objC C s d (m : @ReifiedMorphism objC C s d)
+  Lemma ReifiedMorphismSimplifyOk C s d (m : @ReifiedMorphism C s d)
   : ReifiedMorphismDenote m =
     ReifiedMorphismDenote (ReifiedMorphismSimplify m).
   Proof.
@@ -227,7 +224,7 @@ Section SimplifiedMorphism.
 
   Local Arguments ReifiedMorphismSimplifyWithProofNoIdentity / .
 
-  Definition ReifiedMorphismSimplifyNoIdentity `(C : @SpecializedCategory objC) s d
+  Definition ReifiedMorphismSimplifyNoIdentity `(C : SpecializedCategory) s d
              (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (ReifiedMorphismSimplify m) = false}
     + { exists H : s = d, ReifiedMorphismSimplify m = match H with eq_refl => ReifiedIdentityMorphism C s end }
@@ -252,8 +249,8 @@ Ltac Ltac_rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : @SpecializedCategory objC).
-    Context `(D : @SpecializedCategory objC).
+    Context `(C : SpecializedCategory).
+    Context `(D : SpecializedCategory).
     Variables F G : SpecializedFunctor C D.
     Variable T : SpecializedNaturalTransformation F G.
 
@@ -276,13 +273,13 @@ Section good_examples.
   End id.
 
   Lemma good_example_00004
-  : forall (objC : Type) (C : SpecializedCategory objC)
-           (objD : Type) (D : SpecializedCategory objD) (objC' : Type)
-           (C' : SpecializedCategory objC') (objD' : Type)
-           (D' : SpecializedCategory objD') (F : SpecializedFunctor C C')
+  : forall (C : SpecializedCategory)
+           (D : SpecializedCategory)
+           (C' : SpecializedCategory)
+           (D' : SpecializedCategory) (F : SpecializedFunctor C C')
            (G : SpecializedFunctor D' D) (s d d' : SpecializedFunctor D C)
            (m1 : SpecializedNaturalTransformation s d)
-           (m2 : SpecializedNaturalTransformation d d') (x : objD'),
+           (m2 : SpecializedNaturalTransformation d d') (x : D'),
       Compose (MorphismOf F (m2 (G x))) (MorphismOf F (m1 (G x))) =
       Compose
         (Compose
@@ -294,13 +291,13 @@ Section good_examples.
   Qed.
 
   Lemma good_example_00005
-  : forall (objC : Type) (C : SpecializedCategory objC)
-           (objD : Type) (D : SpecializedCategory objD) (objC' : Type)
-           (C' : SpecializedCategory objC') (objD' : Type)
-           (D' : SpecializedCategory objD') (F : SpecializedFunctor C C')
+  : forall (objC : Type) (C : SpecializedCategory)
+           (objD : Type) (D : SpecializedCategory) (objC' : Type)
+           (C' : SpecializedCategory) (objD' : Type)
+           (D' : SpecializedCategory) (F : SpecializedFunctor C C')
            (G : SpecializedFunctor D' D) (s d d' : SpecializedFunctor D C)
            (m1 : SpecializedNaturalTransformation s d)
-           (m2 : SpecializedNaturalTransformation d d') (x : objD'),
+           (m2 : SpecializedNaturalTransformation d d') (x : D'),
       Compose
         (MorphismOf F
                     (Compose (MorphismOf d' (Identity (G x)))
@@ -324,9 +321,9 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : SpecializedCategory objC0).
-    Context `(C1 : SpecializedCategory objC1).
-    Context `(D : SpecializedCategory objD).
+    Context `(C0 : SpecializedCategory).
+    Context `(C1 : SpecializedCategory).
+    Context `(D : SpecializedCategory).
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.

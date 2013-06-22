@@ -9,8 +9,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section SmallCat.
-  Definition SmallCat := ComputableCategory _ SUnderlyingCategory.
-  Definition LocallySmallCat := ComputableCategory _ LSUnderlyingCategory.
+  Definition SmallCat := ComputableCategory SUnderlyingCategory.
+  Definition LocallySmallCat := ComputableCategory LSUnderlyingCategory.
 End SmallCat.
 
 Local Ltac destruct_simple_types :=
@@ -26,8 +26,8 @@ Local Ltac destruct_simple_types :=
 Section Objects.
   Hint Unfold Morphism Object.
 
-  Local Arguments Object / {obj} C : rename.
-  Local Arguments Morphism / {obj} _ _ _ : rename.
+  Local Arguments Object / C : rename.
+  Local Arguments Morphism / _ _ _ : rename.
 
   Hint Extern 1 => destruct_simple_types.
   Hint Extern 3 => destruct_to_empty_set.

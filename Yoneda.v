@@ -22,7 +22,7 @@ Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
     end.
 
 Section Yoneda.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Let COp := OppositeCategory C.
 
   Section Yoneda.
@@ -77,8 +77,8 @@ Section Yoneda.
 End Yoneda.
 
 Section YonedaLemma.
-  Context `(C : @SpecializedCategory objC).
-  Let COp := OppositeCategory C : SpecializedCategory _.
+  Context `(C : SpecializedCategory).
+  Let COp := OppositeCategory C.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
   Definition YonedaLemmaMorphism (c : C) (X : TypeCat ^ C) : Morphism TypeCat (Morphism (TypeCat ^ C) (Yoneda C c) X) (X c).
@@ -117,7 +117,7 @@ Section YonedaLemma.
 End YonedaLemma.
 
 Section CoYonedaLemma.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Let COp := OppositeCategory C.
 
   Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp)
@@ -158,12 +158,12 @@ Section CoYonedaLemma.
 End CoYonedaLemma.
 
 Section FullyFaithful.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@YonedaLemma _ C c (CovariantHomFunctor C c')) as [ m i ].
+    destruct (YonedaLemma (C := C) c (CovariantHomFunctor C c')) as [ m i ].
     exists (YonedaLemmaMorphism (X := CovariantHomFunctor C c')).
     t_with t'; nt_eq; autorewrite with morphism; trivial.
     apply_commutes_by_transitivity_and_solve_with ltac:(rewrite_hyp; autorewrite with morphism; trivial).
@@ -172,7 +172,7 @@ Section FullyFaithful.
   Definition CoYonedaEmbedding : FunctorFullyFaithful (CoYoneda C).
     unfold FunctorFullyFaithful.
     intros c c'.
-    destruct (@CoYonedaLemma _ C c (ContravariantHomFunctor C c')) as [ m i ].
+    destruct (CoYonedaLemma (C := C) c (ContravariantHomFunctor C c')) as [ m i ].
     exists (CoYonedaLemmaMorphism (X := ContravariantHomFunctor C c')).
     t_with t'; nt_eq; autorewrite with morphism; trivial.
     unfold CoYonedaLemmaMorphism, CoYonedaLemmaMorphismInverse;

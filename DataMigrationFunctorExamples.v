@@ -256,9 +256,9 @@ Section FunctorialDataMigration.
         | _ => Empty_set
       end.
 
-    Example C_Category_Ex22 : LocallySmallSpecializedCategory _ := PathsCategory C_Edges_Ex22.
-    Example D_Category_Ex22 : LocallySmallSpecializedCategory _ := PathsCategory D_Edges_Ex22.
-    Example E_Category_Ex22 : LocallySmallSpecializedCategory _ := PathsCategory E_Edges_Ex22.
+    Example C_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory C_Edges_Ex22.
+    Example D_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory D_Edges_Ex22.
+    Example E_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory E_Edges_Ex22.
 
     Example F_Functor_Ex22_ObjectOf (x : C_Objects_Ex22) : D_Objects_Ex22 :=
       match x with
@@ -1088,7 +1088,7 @@ Section FunctorialDataMigration.
 
         Require Import InitialTerminalCategory ChainCategory DiscreteCategoryFunctors.
 
-        Definition F objC (C : SpecializedCategory objC) : SpecializedFunctor C TerminalCategory.
+        Definition F objC (C : SpecializedCategory) : SpecializedFunctor C TerminalCategory.
           clear.
           eexists; intros; simpl; eauto.
           Grab Existential Variables.
@@ -1096,9 +1096,9 @@ Section FunctorialDataMigration.
           intros; simpl; eauto.
         Defined.
 
-        Let Π_F_C objC (C : @LocallySmallSpecializedCategory objC) := Eval hnf in
+        Let Π_F_C objC (C : @LocallySmallSpecializedCategory) := Eval hnf in
                              (@RightPushforwardAlong C
-                                                     (TerminalCategory : LocallySmallSpecializedCategory _)
+                                                     (TerminalCategory : LocallySmallSpecializedCategory)
                                                      TypeCat
                                                      (@F objC C)
                                                      (fun (g : SpecializedFunctorToType _) d => @TypeLimit
@@ -1106,14 +1106,14 @@ Section FunctorialDataMigration.
                                                                                                   _
                                                                                                   (RightPushforwardAlong_pre_Functor
                                                                                                      C
-                                                                                                     (TerminalCategory : LocallySmallSpecializedCategory _)
+                                                                                                     (TerminalCategory : LocallySmallSpecializedCategory)
                                                                                                      TypeCat
                                                                                                      (@F objC C)
                                                                                                      (g : SpecializedFunctorToType _)
                                                                                                      d))).
 
-        Let Π_F_C'_ObjectOf objC C := Eval hnf in @ObjectOf _ _ _ _ (@Π_F_C objC C).
-        Let Π_F_C'_MorphismOf objC C := Eval simpl in @MorphismOf _ _ _ _ (@Π_F_C objC C).
+        Let Π_F_C'_ObjectOf C := Eval hnf in @ObjectOf _ _ _ _ (@Π_F_C objC C).
+        Let Π_F_C'_MorphismOf C := Eval simpl in @MorphismOf _ _ _ _ (@Π_F_C objC C).
 
         Require Import ProofIrrelevance.
 
@@ -1136,16 +1136,16 @@ Section FunctorialDataMigration.
         Defined.
 
         Let Π_F_01_F F := Eval hnf in
-                           (@RightPushforwardAlong ([0] : LocallySmallSpecializedCategory _)
-                                                   ([1] : LocallySmallSpecializedCategory _)
+                           (@RightPushforwardAlong ([0] : LocallySmallSpecializedCategory)
+                                                   ([1] : LocallySmallSpecializedCategory)
                                                    TypeCat
                                                    F
                                                    (fun (g : SpecializedFunctorToType _) d => @TypeLimit
                                                                                                 _
                                                                                                 _
                                                                                                 (RightPushforwardAlong_pre_Functor
-                                                                                                   ([0] : LocallySmallSpecializedCategory _)
-                                                                                                   ([1] : LocallySmallSpecializedCategory _)
+                                                                                                   ([0] : LocallySmallSpecializedCategory)
+                                                                                                   ([1] : LocallySmallSpecializedCategory)
                                                                                                    TypeCat
                                                                                                    F
                                                                                                    (g : SpecializedFunctorToType _)
@@ -1357,9 +1357,9 @@ Extraction path.
 
         Print Π_F_01_F_ObjectOf.
 
-        Example Π_F_C'_ObjectOf objC C g : typeof (@Π_F_C'_ObjectOf objC C g).
+        Example Π_F_C'_ObjectOf C g : typeof (@Π_F_C'_ObjectOf C g).
         Proof.
-          pose (@Π_F_C'_ObjectOf objC C g) as f; hnf in f |- *; revert f; clear; intro.
+          pose (@Π_F_C'_ObjectOf C g) as f; hnf in f |- *; revert f; clear; intro.
           hnf in *.
           unfold Object in *.
           simpl in *.
@@ -1367,7 +1367,7 @@ Extraction path.
             InducedLimitFunctors.InducedLimitFunctor_MorphismOf, LimitFunctorTheorems.InducedLimitMap, NTComposeT, NTComposeF in *;
             simpl in *.
         Print Π_F_C'_ObjectOf.
-        Example Π_F_C' objC C : typeof (@Π_F_C objC C).
+        Example Π_F_C' C : typeof (@Π_F_C objC C).
         pose (Π_F_C C) as Π_F_C''.
         hnf in Π_F_C'' |- *.
         revert Π_F_C''; clear; intro.

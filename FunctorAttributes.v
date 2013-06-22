@@ -13,10 +13,10 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section FullFaithful.
-  Context `(C : @SpecializedCategory objC).
-  Context `(C' : @LocallySmallSpecializedCategory objC').
-  Context `(D : @SpecializedCategory objD).
-  Context `(D' : @LocallySmallSpecializedCategory objD').
+  Context `(C : SpecializedCategory).
+  Context `(C' : @LocallySmallSpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(D' : @LocallySmallSpecializedCategory).
   Variable F : SpecializedFunctor C D.
   Variable F' : SpecializedFunctor C' D'.
   Let COp := OppositeCategory C.

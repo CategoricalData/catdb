@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplifiedMorphism.
   Section single_category.
-    Context `{C : SpecializedCategory objC}.
+    Context `{C : SpecializedCategory}.
 
     Class SimplifiedMorphism {s d} (m : Morphism C s d) :=
       SimplifyMorphism { reified_morphism : ReifiedMorphism C s d;
@@ -43,11 +43,11 @@ Section SimplifiedMorphism.
   End single_category.
 
   Section functor.
-    Context `{C : SpecializedCategory objC}.
-    Context `{D : SpecializedCategory objD}.
+    Context `{C : SpecializedCategory}.
+    Context `{D : SpecializedCategory}.
     Variable F : SpecializedFunctor C D.
 
-    Global Instance functor_morphism `(@SimplifiedMorphism objC C s d m)
+    Global Instance functor_morphism `(@SimplifiedMorphism C s d m)
     : SimplifiedMorphism (MorphismOf F m) | 50
       := SimplifyMorphism (m := MorphismOf F m)
                           (ReifiedFunctorMorphism F (reified_morphism (m := m)))
@@ -55,8 +55,8 @@ Section SimplifiedMorphism.
   End functor.
 
   Section natural_transformation.
-    Context `{C : SpecializedCategory objC}.
-    Context `{D : SpecializedCategory objD}.
+    Context `{C : SpecializedCategory}.
+    Context `{D : SpecializedCategory}.
     Variables F G : SpecializedFunctor C D.
     Variable T : SpecializedNaturalTransformation F G.
 

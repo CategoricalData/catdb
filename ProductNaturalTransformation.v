@@ -10,10 +10,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ProductNaturalTransformation.
-  Context `{A : @SpecializedCategory objA}.
-  Context `{B : @SpecializedCategory objB}.
-  Context `{C : @SpecializedCategory objC}.
-  Context `{D : @SpecializedCategory objD}.
+  Context `{A : SpecializedCategory}.
+  Context `{B : SpecializedCategory}.
+  Context `{C : SpecializedCategory}.
+  Context `{D : SpecializedCategory}.
   Variables F F' : SpecializedFunctor A B.
   Variables G G' : SpecializedFunctor C D.
   Variable T : SpecializedNaturalTransformation F F'.

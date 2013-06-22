@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section compose.
-  Context `(C : SpecializedCategory objC).
-  Context `(D : SpecializedCategory objD).
-  Context `(E : SpecializedCategory objE).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
+  Context `(E : SpecializedCategory).
 
   Variable F : SpecializedFunctor C D.
   Variable F' : SpecializedFunctor D E.

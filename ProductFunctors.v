@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Products.
-  Context `{C : @SpecializedCategory objC}.
+  Context `{C : SpecializedCategory}.
   Variable I : Type.
 
   Variable HasLimits : forall F : SpecializedFunctor (DiscreteCategory I) C, Limit F.

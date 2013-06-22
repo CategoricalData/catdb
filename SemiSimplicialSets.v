@@ -21,8 +21,8 @@ Section SemiSimplicialSets.
      which we will use to make simplicial sets without having to worry
      about "degneracies". *)
 
-  Definition SemiSimplexCategory : SpecializedCategory nat.
-    eapply (WideSubcategory Δ (@IsMonomorphism _ _));
+  Definition SemiSimplexCategory : SpecializedCategory.
+    eapply (WideSubcategory Δ (@IsMonomorphism _));
     abstract eauto with morphism.
   Defined.
 
@@ -31,7 +31,7 @@ Section SemiSimplicialSets.
   Definition SemiSimplexCategoryInclusionFunctor : SpecializedFunctor Γ Δ
     := WideSubcategoryInclusionFunctor _ _ _ _.
 
-  Definition SemiSimplicialCategory `(C : SpecializedCategory objC) := (C ^ (OppositeCategory Γ))%category.
+  Definition SemiSimplicialCategory `(C : SpecializedCategory) := (C ^ (OppositeCategory Γ))%category.
 
   Definition SemiSimplicialSet := SemiSimplicialCategory SetCat.
   Definition SemiSimplicialType := SemiSimplicialCategory TypeCat.

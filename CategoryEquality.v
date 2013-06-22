@@ -16,8 +16,8 @@ Section Categories_Equal.
   Lemma Category_eq : forall (A B : Category),
     Object A = Object B
     -> Morphism A == Morphism B
-    -> @Identity _ A == @Identity _ B
-    -> @Compose _ A == @Compose _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
     unfold Object, Morphism, Identity, Compose; intros;
     destruct_type @Category; destruct_type @SpecializedCategory; simpl in *;
@@ -26,24 +26,24 @@ Section Categories_Equal.
   Qed.
 
   Lemma SmallCategory_eq : forall (A B : SmallCategory),
-    SObject A = SObject B
+    Object A = Object B
     -> Morphism A == Morphism B
-    -> @Identity _ A == @Identity _ B
-    -> @Compose _ A == @Compose _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
-    unfold SObject, Morphism, Identity, Compose; intros;
+    unfold Object, Morphism, Identity, Compose; intros;
     destruct_type @SmallCategory; destruct_type @SmallSpecializedCategory; simpl in *;
     subst_body; repeat (subst; JMeq_eq).
     repeat f_equal; apply proof_irrelevance.
   Qed.
 
   Lemma LocallySmallCategory_eq : forall (A B : LocallySmallCategory),
-    LSObject A = LSObject B
+    Object A = Object B
     -> Morphism A == Morphism B
-    -> @Identity _ A == @Identity _ B
-    -> @Compose _ A == @Compose _ B
+    -> @Identity A == @Identity B
+    -> @Compose A == @Compose B
     -> A = B.
-    unfold LSObject, Morphism, Identity, Compose; intros;
+    unfold Object, Morphism, Identity, Compose; intros;
     destruct_type @LocallySmallCategory; destruct_type @LocallySmallSpecializedCategory; simpl in *;
     subst_body; repeat (subst; JMeq_eq).
     repeat f_equal; apply proof_irrelevance.
@@ -61,14 +61,14 @@ Ltac cat_eq_step := cat_eq_step_with idtac.
 Ltac cat_eq := cat_eq_with idtac.
 
 Section RoundtripCat.
-  Context `(C : @SpecializedCategory obj).
+  Context `(C : SpecializedCategory).
   Variable C' : Category.
 
-  Lemma SpecializedCategory_Category_SpecializedCategory_Id : ((C : Category) : SpecializedCategory _) = C.
+  Lemma SpecializedCategory_Category_SpecializedCategory_Id : ((C : Category) : SpecializedCategory) = C.
     spcat_eq.
   Qed.
 
-  Lemma Category_SpecializedCategory_Category_Id : ((C' : SpecializedCategory _) : Category) = C'.
+  Lemma Category_SpecializedCategory_Category_Id : ((C' : SpecializedCategory) : Category) = C'.
     cat_eq.
   Qed.
 End RoundtripCat.
@@ -76,14 +76,14 @@ End RoundtripCat.
 Hint Rewrite @SpecializedCategory_Category_SpecializedCategory_Id @Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripLSCat.
-  Context `(C : @LocallySmallSpecializedCategory obj).
+  Context `(C : @LocallySmallSpecializedCategory).
   Variable C' : LocallySmallCategory.
 
-  Lemma LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id : ((C : LocallySmallCategory) : LocallySmallSpecializedCategory _) = C.
+  Lemma LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id : ((C : LocallySmallCategory) : LocallySmallSpecializedCategory) = C.
     spcat_eq.
   Qed.
 
-  Lemma LocallySmall_Category_SpecializedCategory_Category_Id : ((C' : LocallySmallSpecializedCategory _) : LocallySmallCategory) = C'.
+  Lemma LocallySmall_Category_SpecializedCategory_Category_Id : ((C' : LocallySmallSpecializedCategory) : LocallySmallCategory) = C'.
     cat_eq.
   Qed.
 End RoundtripLSCat.
@@ -91,14 +91,15 @@ End RoundtripLSCat.
 Hint Rewrite @LocallySmall_SpecializedCategory_Category_SpecializedCategory_Id LocallySmall_Category_SpecializedCategory_Category_Id : category.
 
 Section RoundtripSCat.
-  Context `(C : @SmallSpecializedCategory obj).
+  Context `(C : @SmallSpecializedCategory).
   Variable C' : SmallCategory.
 
-  Lemma Small_SpecializedCategory_Category_SpecializedCategory_Id : ((C : SmallCategory) : SmallSpecializedCategory _) = C.
+  Lemma Small_SpecializedCategory_Category_SpecializedCategory_Id : ((C : SmallCategory) : SmallSpecializedCategory) = C.
     spcat_eq.
   Qed.
 
-  Lemma Small_Category_SpecializedCategory_Category_Id : ((C' : SmallSpecializedCategory _) : SmallCategory) = C'.
+
+  Lemma Small_Category_SpecializedCategory_Category_Id : ((C' : SmallSpecializedCategory) : SmallCategory) = C'.
     cat_eq.
   Qed.
 End RoundtripSCat.

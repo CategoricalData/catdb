@@ -12,9 +12,9 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section CommaCategory.
-  Context `(A : @SpecializedCategory objA).
-  Context `(B : @SpecializedCategory objB).
-  Context `(C : @SpecializedCategory objC).
+  Context `(A : SpecializedCategory).
+  Context `(B : SpecializedCategory).
+  Context `(C : SpecializedCategory).
   Variable S : SpecializedFunctor A C.
   Variable T : SpecializedFunctor B C.
 
@@ -27,7 +27,7 @@ Section CommaCategory.
 End CommaCategory.
 
 Section SliceCategory.
-  Context `(A : @SpecializedCategory objA).
+  Context `(A : SpecializedCategory).
 
   Local Arguments ComposeFunctors' / .
 
@@ -41,7 +41,7 @@ Section SliceCategory.
     := ComposeFunctors' snd_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
 
   Section Slice_Coslice.
-    Context `(C : @SpecializedCategory objC).
+    Context `(C : SpecializedCategory).
     Variable a : C.
     Variable S : SpecializedFunctor A C.
 

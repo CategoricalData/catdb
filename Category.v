@@ -10,21 +10,15 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Record > Category := {
-  CObject : Type;
-
-  UnderlyingCategory :> @SpecializedCategory CObject
+  UnderlyingCategory :> SpecializedCategory
 }.
 
 Record > SmallCategory := {
-  SObject : Set;
-
-  SUnderlyingCategory :> @SmallSpecializedCategory SObject
+  SUnderlyingCategory :> SmallSpecializedCategory
 }.
 
 Record > LocallySmallCategory := {
-  LSObject : Type;
-
-  LSUnderlyingCategory :> @LocallySmallSpecializedCategory LSObject
+  LSUnderlyingCategory :> LocallySmallSpecializedCategory
 }.
 
 Bind Scope category_scope with Category.

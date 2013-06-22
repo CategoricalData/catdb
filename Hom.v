@@ -17,12 +17,12 @@ Local Open Scope category_scope.
 
 Section covariant_contravariant.
   Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
-  Definition CovariantHomFunctor `(C : @SpecializedCategory objC) (A : OppositeCategory C) :=
+  Definition CovariantHomFunctor `(C : SpecializedCategory) (A : OppositeCategory C) :=
     Eval simpl in ((HomFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomFunctor `(C : @SpecializedCategory objC) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+  Definition ContravariantHomFunctor `(C : SpecializedCategory) (A : C) := ((HomFunctor C) [ -, A ])%functor.
 
-  Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory objC morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
+  Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
+  Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
 End covariant_contravariant.
 
 but that would introduce an extra identity morphism which some tactics
@@ -30,7 +30,7 @@ have a bit of trouble with.  *sigh*
 *)
 
 Section HomFunctor.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Let COp := OppositeCategory C.
 
   Section Covariant.
@@ -89,7 +89,7 @@ Section HomFunctor.
 End HomFunctor.
 
 Section SplitHomFunctor.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
   Let COp := OppositeCategory C.
 
   Lemma SplitHom (X Y : COp * C) : forall gh,

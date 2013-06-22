@@ -30,8 +30,8 @@ Section DCategory.
   Global Arguments DiscreteCategory_Compose [s d d'] m m' /.
   Global Arguments DiscreteCategory_Identity o /.
 
-  Definition DiscreteCategory : @SpecializedCategory O.
-    refine (@Build_SpecializedCategory _
+  Definition DiscreteCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory O
                                        DiscreteCategory_Morphism
                                        DiscreteCategory_Identity
                                        DiscreteCategory_Compose

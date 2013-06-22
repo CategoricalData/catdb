@@ -10,14 +10,14 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorCategory.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
    *)
-  Definition FunctorCategory : @SpecializedCategory (SpecializedFunctor C D).
-    refine (@Build_SpecializedCategory _
+  Definition FunctorCategory : SpecializedCategory.
+    refine (@Build_SpecializedCategory (SpecializedFunctor C D)
                                        (SpecializedNaturalTransformation (C := C) (D := D))
                                        (IdentityNaturalTransformation (C := C) (D := D))
                                        (NTComposeT (C := C) (D := D))

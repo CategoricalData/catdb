@@ -13,8 +13,8 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
-  Context `(A : @SpecializedCategory objA).
-  Variable Pobj : objA -> Prop.
+  Context `(A : SpecializedCategory).
+  Variable Pobj : A -> Prop.
   Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Type.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
@@ -32,18 +32,16 @@ Section sig_sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Definition SpecializedCategory_sig_sigT : @SpecializedCategory (sig Pobj).
-    match goal with
-      | [ |- @SpecializedCategory ?obj ] =>
-        refine (@Build_SpecializedCategory obj
-          (fun s d => sigT (@Pmor s d))
-          (fun x => existT _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
-          (fun s d d' m1 m2 => existT _ (Compose (C := A) (projT1 m1) (projT1 m2)) (Pcompose (projT2 m1) (projT2 m2)))
-          _
-          _
-          _
-        )
-    end;
+  Definition SpecializedCategory_sig_sigT : SpecializedCategory.
+    refine (@Build_SpecializedCategory
+              (sig Pobj)
+              (fun s d => sigT (@Pmor s d))
+              (fun x => existT _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
+              (fun s d d' m1 m2 => existT _ (Compose (C := A) (projT1 m1) (projT1 m2)) (Pcompose (projT2 m1) (projT2 m2)))
+              _
+              _
+              _
+           );
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
@@ -67,13 +65,13 @@ Section sig_sigT_obj_mor.
     f'
     := P_RightIdentity f'.
 
-  Let SpecializedCategory_sig_sigT_as_sigT : @SpecializedCategory (sigT Pobj).
-    eapply (@SpecializedCategory_sigT _ A
-      Pobj
-      Pmor'
-      Pidentity'
-      Pcompose'
-    );
+  Let SpecializedCategory_sig_sigT_as_sigT : SpecializedCategory.
+    eapply (@SpecializedCategory_sigT A
+                                      Pobj
+                                      Pmor'
+                                      Pidentity'
+                                      Pcompose'
+           );
     trivial.
   Defined.
 

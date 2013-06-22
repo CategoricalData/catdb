@@ -13,11 +13,11 @@ Set Universe Polymorphism.
 Local Open Scope type_scope.
 
 Section Coend.
-  Context `(C : @SpecializedCategory objC).
+  Context `(C : SpecializedCategory).
 
   Let COp := OppositeCategory C.
 
-  Definition CoendFunctor_Index_Object := { ds : objC * objC & Morphism C (snd ds) (fst ds) } + objC.
+  Definition CoendFunctor_Index_Object := { ds : C * C & Morphism C (snd ds) (fst ds) } + C.
 
   Global Arguments CoendFunctor_Index_Object /.
 
@@ -52,9 +52,9 @@ Section Coend.
     end.
   Defined.
 
-  Definition CoendFunctor_Index : SpecializedCategory CoendFunctor_Index_Object.
+  Definition CoendFunctor_Index : SpecializedCategory.
   Proof.
-    refine (@Build_SpecializedCategory _
+    refine (@Build_SpecializedCategory CoendFunctor_Index_Object
                                        CoendFunctor_Index_Morphism
                                        CoendFunctor_Index_Identity
                                        CoendFunctor_Index_Compose
@@ -133,8 +133,8 @@ Section Coend.
 End Coend.
 
 Section CoendFunctor.
-  Context `(C : @SpecializedCategory objC).
-  Context `(D : @SpecializedCategory objD).
+  Context `(C : SpecializedCategory).
+  Context `(D : SpecializedCategory).
 
   Let COp := OppositeCategory C.
 

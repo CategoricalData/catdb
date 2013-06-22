@@ -17,56 +17,32 @@ Section eq_dec_prop.
 End eq_dec_prop.
 
 Section Obj.
-  Local Ltac build_ob_functor Index2Object :=
-    match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
-          (fun C' => existT _ (Index2Object (projT1 C')) (projT2 C'))
-          (fun _ _ F => ObjectOf F)
-          _
-          _
-        )
-    end;
-    intros; simpl in *; reflexivity.
+  Local Ltac build_ob_functor Index2Cat :=
+    let C := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(C) end in
+    let D := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(D) end in
+    refine (Build_SpecializedFunctor C D
+                                     (fun C' => existT _ (Object (Index2Cat (projT1 C'))) (projT2 C'))
+                                     (fun _ _ F => ObjectOf F)
+                                     _
+                                     _
+           );
+      intros; simpl in *; reflexivity.
 
   Section type.
     Variable I : Type.
-    Variable Index2Object : I -> Type.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
+    Variable Index2Cat : I -> SpecializedCategory.
 
-    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) TypeCatDec.
-      build_ob_functor Index2Object.
+    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ Index2Cat) TypeCatDec.
+      build_ob_functor Index2Cat.
     Defined.
   End type.
-
-  Section set.
-    Variable I : Type.
-    Variable Index2Object : I -> Set.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
-
-    Definition ObjectFunctorToSetDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) SetCatDec.
-      build_ob_functor Index2Object.
-    Defined.
-  End set.
-
-  Section prop.
-    Variable I : Type.
-    Variable Index2Object : I -> Prop.
-    Context `(Index2Cat : forall i : I, @SpecializedCategory (@Index2Object i)).
-
-    Definition ObjectFunctorToPropDec : SpecializedFunctor (@ComputableCategoryDec _ _ Index2Cat) PropCatDec.
-      build_ob_functor Index2Object.
-    Defined.
-  End prop.
 End Obj.
 
-Arguments ObjectFunctorDec {I Index2Object Index2Cat}.
-Arguments ObjectFunctorToSetDec {I Index2Object Index2Cat}.
-Arguments ObjectFunctorToPropDec {I Index2Object Index2Cat}.
+Arguments ObjectFunctorDec {I Index2Cat}.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : @SpecializedCategory obj).
+  Context `(O' : SpecializedCategory).
   Variable f : O -> O'.
   Variable eq_dec : forall x y : O, {x = y} + {x <> y}.
 
@@ -99,7 +75,7 @@ Section InducedFunctor.
   Hint Unfold DiscreteCategoryDec_Compose.
   Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Local Arguments Compose {obj} [C s d d'] / _ _ : rename, simpl nomatch.
+  Local Arguments Compose [C s d d'] / _ _ : rename, simpl nomatch.
 
   Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
     match goal with
@@ -147,9 +123,9 @@ Section disc.
     refine (Build_SpecializedFunctor TypeCatDec LocallySmallCatDec
       (fun O => existT
         (fun C : LocallySmallCategory => forall x y : C, {x = y} + {x <> y})
-        (DiscreteCategoryDec (projT2 O) : LocallySmallSpecializedCategory _)
+        (DiscreteCategoryDec (projT2 O) : LocallySmallSpecializedCategory)
         (fun x y => projT2 O x y))
-      (fun s d f => InducedDiscreteFunctorDec _ f (projT2 s))
+      (fun s d f => InducedDiscreteFunctorDec (DiscreteCategoryDec (projT2 d)) f (projT2 s))
       _
       _
     );
@@ -231,9 +207,9 @@ Section disc.
     refine (Build_SpecializedFunctor SetCatDec SmallCatDec
       (fun O => existT
         (fun C : SmallCategory => forall x y : C, {x = y} + {x <> y})
-        (DiscreteCategoryDec (projT2 O) : SmallSpecializedCategory _)
+        (DiscreteCategoryDec (projT2 O) : SmallSpecializedCategory)
         (fun x y => projT2 O x y))
-      (fun s d f => InducedDiscreteFunctorDec _ f (projT2 s))
+      (fun s d f => InducedDiscreteFunctorDec (DiscreteCategoryDec (projT2 d)) f (projT2 s))
       _
       _
     );

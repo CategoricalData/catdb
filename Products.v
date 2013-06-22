@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Products.
-  Context `{C : @SpecializedCategory objC}.
+  Context `{C : SpecializedCategory}.
   Variable I : Type.
   Variable f : I -> C.
 
@@ -19,7 +19,7 @@ Section Products.
 End Products.
 
 (* XXX: [Reserved Notation] doesn't work here? *)
-Notation "∏_{ x } f" := (@Product _ _ _ (fun x => f)) (at level 0, x at level 99).
-Notation "∏_{ x : A } f" := (@Product _ _ A (fun x : A => f)) (at level 0, x at level 99).
-Notation "∐_{ x } f" := (@Coproduct _ _ _ (fun x => f)) (at level 0, x at level 99).
-Notation "∐_{ x : A } f" := (@Coproduct _ _ A (fun x : A => f)) (at level 0, x at level 99).
+Notation "∏_{ x } f" := (@Product _ _ (fun x => f)) (at level 0, x at level 99).
+Notation "∏_{ x : A } f" := (@Product _ A (fun x : A => f)) (at level 0, x at level 99).
+Notation "∐_{ x } f" := (@Coproduct _ _ (fun x => f)) (at level 0, x at level 99).
+Notation "∐_{ x : A } f" := (@Coproduct _ A (fun x : A => f)) (at level 0, x at level 99).
