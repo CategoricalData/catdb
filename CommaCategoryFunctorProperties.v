@@ -13,26 +13,16 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Local Ltac slice_t :=
-  repeat match goal with
-           | [ |- @eq (SpecializedFunctor _ _) _ _ ] => apply Functor_eq; intros
-           | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq
-           | [ |- (_ -> _) = (_ -> _) ] => apply f_type_equal
-           | _ => progress (intros; simpl in *; trivial; subst_body)
-           | _ => progress simpl_eq
-           | _ => progress (repeat rewrite Associativity; repeat rewrite LeftIdentity; repeat rewrite RightIdentity)
-           | _ => progress JMeq_eq
-           | _ => apply f_equal
-           | [ |- JMeq (?f ?x) (?f ?y) ] =>
-             apply (@f_equal1_JMeq _ _ x y f)
-           | [ |- JMeq (?f ?x) (?g ?y) ] =>
-             apply (@f_equal_JMeq _ _ _ _ x y f g)
-           | _ =>
-             progress (
-               destruct_type @CommaSpecializedCategory_Object;
-               destruct_type @CommaSpecializedCategory_Morphism;
-               destruct_sig
-             )
-         end.
+  apply Functor_eq; repeat intro;
+  simpl in * |- ;
+  destruct_head prod;
+  destruct_head CommaSpecializedCategory_Morphism;
+  destruct_head CommaSpecializedCategory_Object;
+  try apply CommaSpecializedCategory_Morphism_JMeq;
+  try apply CommaSpecializedCategory_Object_eq;
+  simpl;
+  autorewrite with morphism;
+  trivial.
 
 Section FCompositionOf.
   Context `(A : SpecializedCategory).
@@ -44,12 +34,13 @@ Section FCompositionOf.
         (m2 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) d d') :
     CommaCategoryInducedFunctor (Compose m2 m1)
     = ComposeFunctors (CommaCategoryInducedFunctor m2) (CommaCategoryInducedFunctor m1).
-    Time slice_t. (* 44 s *)
+  Proof.
+    abstract slice_t. (* 6.824 s *)
   Qed.
 
   Lemma CommaCategoryInducedFunctor_FIdentityOf (x : Object ((OppositeCategory (C ^ A)) * (C ^ B))) :
     CommaCategoryInducedFunctor (Identity x)
     = IdentityFunctor _.
-    Time slice_t. (* 11 s *)
+    abstract slice_t. (* 1.748 s *)
   Qed.
 End FCompositionOf.

@@ -92,6 +92,8 @@ Section GrothendieckNondependentFunctorial.
       repeat match goal with
                | _ => intro
                | _ => reflexivity
+               | _ => apply CommaSpecializedCategory_Morphism_eq
+               | _ => progress simpl
                | _ => progress simpl_eq
                | _ => progress destruct_head_hnf @GrothendieckPair
                | _ => progress apply f_equal

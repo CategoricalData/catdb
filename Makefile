@@ -55,7 +55,6 @@ MODULES    := Notations \
 	SetCategoryProductFunctor \
 	InitialTerminalCategory \
 	SmallCat \
-	CommaCategory \
 	SpecializedCommaCategory \
 	LaxCommaCategory \
 	SpecializedLaxCommaCategory \

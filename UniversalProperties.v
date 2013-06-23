@@ -1,4 +1,4 @@
-Require Export CommaCategory CategoryIsomorphisms.
+Require Export SpecializedCommaCategory CategoryIsomorphisms.
 Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
@@ -18,19 +18,25 @@ Section UniversalMorphism.
   Variable D : Category.
 
   Local Ltac intro_t :=
-    simpl in *;
     repeat intro;
-    simpl_eq;
-    destruct_sig;
+    destruct_head_hnf CommaSpecializedCategory_Morphism;
+    destruct_head_hnf CommaSpecializedCategory_Object;
     destruct_head_hnf prod;
+    try apply CommaSpecializedCategory_Morphism_eq;
+    try apply CommaSpecializedCategory_Morphism_JMeq;
+    try apply CommaSpecializedCategory_Object_eq;
+    simpl in *;
+    destruct_sig;
+    split_and;
+    simpl_eq;
     destruct_head_hnf unit;
     destruct_head_hnf and;
     autorewrite with morphism in *;
     subst;
-    intuition.
+    eauto.
 
   Section InitialMorphism.
-    Local Notation "A ↓ F" := (CosliceCategory A F).
+    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
     Variable X : C.
     Variable U : Functor D C.
     (**
@@ -84,25 +90,24 @@ Section UniversalMorphism.
         pose proof (projT2 φUniversalProperty) as UniversalProperty;
         set (φ := projT1 φUniversalProperty) in *;
         clearbody φ; clear φUniversalProperty; simpl in *.
-        refine (_ : IsInitialMorphism (existT _ (tt, A) φ)).
+        refine (_ : IsInitialMorphism (Build_CommaSpecializedCategory_Object (FunctorFromTerminal _ _) U tt A φ)).
         intro o'.
         specialize (UniversalProperty (snd (projT1 o')) (projT2 o')).
-        match goal with
-          | [ |- { _ : ?T | _ } ] => match eval hnf in T with
-                                       | sig ?P => cut (P (@unit_eq _ _, proj1_sig UniversalProperty));
-                                                  [ let H := fresh in
-                                                    intro H;
-                                                      exists (exist _ (@unit_eq _ _, proj1_sig UniversalProperty) H)
-                                                  | ]
-                                     end
-        end;
-          abstract intro_t.
+        let T := match goal with |- @sig ?T ?P => constr:(T) end in
+        let t := fresh in
+        assert (t : T);
+          [ (exists (@unit_eq _ _) (proj1_sig UniversalProperty))
+          | exists t ];
+          simpl in *;
+          abstract (
+              intro_t;
+              etransitivity;
+              apply_hyp;
+              intuition
+            ).
       Defined.
 
       Arguments Build_InitialMorphism' / .
-      Local Arguments Object / .
-      Local Arguments CommaCategory_Object / .
-      Local Arguments CommaCategory_Morphism / .
 
       Definition Build_InitialMorphism A φ UniversalProperty : InitialMorphism
         := Eval simpl in @Build_InitialMorphism' (existT _ A (existT _ φ UniversalProperty)).
@@ -114,34 +119,40 @@ Section UniversalMorphism.
       Definition InitialMorphism_Object : D := snd (projT1 (InitialObject_Object M)).
       Definition InitialMorphism_Morphism : C.(Morphism) X (U (InitialMorphism_Object)) := projT2 (InitialObject_Object M).
       Definition InitialProperty_Morphism (Y : D) (f : C.(Morphism) X (U Y)) : D.(Morphism) InitialMorphism_Object Y
-        := snd (proj1_sig (InitialObject_Morphism M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f))).
+        := Eval simpl in
+            snd (proj1_sig (InitialObject_Morphism M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f
+                                                      : CommaSpecializedCategory_ObjectT (FunctorFromTerminal _ _) _))).
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
         unfold InitialProperty_Morphism, InitialMorphism_Object, InitialMorphism_Morphism in *.
         split;
-        [ intro_proj2_sig_from_goal; autorewrite with morphism in *; assumption
-        | abstract (
-              intros ? H;
-              (* make sure the type of H is right *)
-              match type of H with
-                | Compose _ _ = f =>
-                  (symmetry in H;
-                   rewrite <- RightIdentity in H at 1;
-                   symmetry in H)
-              end;
+          [ abstract (
+                match goal with
+                  | [ |- appcontext[CCM_h ?x] ] => pose proof (CCM_φ x)
+                end;
+                autorewrite with morphism in *; assumption
+              )
+          | ].
+        let H := fresh in
+        assert (H := InitialObject_Property M);
+          intros;
+          let x := match goal with |- ?x = ?z => constr:(x) end in
+          let z := match goal with |- ?x = ?z => constr:(z) end in
+          eapply (eq_trans (x := x) (y := CCM_h {| CCM_h := _ |}) (z := z));
+            [ apply f_equal;
               symmetry;
-              exact (f_equal (@snd _ _)
-                             (f_equal (@proj1_sig _ _)
-                                      (InitialObject_Property M (existT _ (tt, _) f) (exist _ (unit_eq _ _, _) H))))
-            )
-        ].
+              solve [ apply H ]
+            | simpl; reflexivity ].
+        Grab Existential Variables.
+        intro_t.
+        abstract intro_t.
       Qed.
     End EliminationAbstractionBarrier.
   End InitialMorphism.
 
   Section TerminalMorphism.
-    Local Notation "F ↓ A" := (SliceCategory A F).
+    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
     Variable U : Functor D C.
     Variable X : C.
     (**
@@ -194,25 +205,25 @@ Section UniversalMorphism.
         pose proof (projT2 φUniversalProperty) as UniversalProperty;
         set (φ := projT1 φUniversalProperty) in *;
         clearbody φ; clear φUniversalProperty; simpl in *.
-        refine (_ : IsTerminalMorphism (existT _ (A, tt) φ)).
+        refine (_ : IsTerminalMorphism (existT _ (A, tt) φ
+                                        : CommaSpecializedCategory_ObjectT _ (FunctorFromTerminal _ _))).
         intro o'.
         specialize (UniversalProperty (fst (projT1 o')) (projT2 o')).
-        match goal with
-          | [ |- { _ : ?T | _ } ] => match eval hnf in T with
-                                       | sig ?P => cut (P (proj1_sig UniversalProperty, @unit_eq _ _));
-                                                  [ let H := fresh in
-                                                    intro H;
-                                                      exists (exist _ (proj1_sig UniversalProperty, @unit_eq _ _) H)
-                                                  | ]
-                                     end
-        end;
-          abstract intro_t.
+        let T := match goal with |- @sig ?T ?P => constr:(T) end in
+        let t := fresh in
+        assert (t : T);
+          [ (exists (proj1_sig UniversalProperty) (@unit_eq _ _))
+          | exists t ];
+          simpl in *;
+          abstract (
+              intro_t;
+              etransitivity;
+              apply_hyp;
+              intuition
+            ).
       Defined.
 
       Arguments Build_TerminalMorphism' / .
-      Local Arguments Object / .
-      Local Arguments CommaCategory_Object / .
-      Local Arguments CommaCategory_Morphism / .
 
       Definition Build_TerminalMorphism A φ UniversalProperty : TerminalMorphism
         := Eval simpl in @Build_TerminalMorphism' (existT _ A (existT _ φ UniversalProperty)).
@@ -224,29 +235,34 @@ Section UniversalMorphism.
       Definition TerminalMorphism_Object : D := fst (projT1 (TerminalObject_Object M)).
       Definition TerminalMorphism_Morphism : C.(Morphism) (U (TerminalMorphism_Object)) X := projT2 (TerminalObject_Object M).
       Definition TerminalProperty_Morphism (Y : D) (f : C.(Morphism) (U Y) X) : D.(Morphism) Y TerminalMorphism_Object
-        := fst (proj1_sig (TerminalObject_Morphism M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f))).
+        := fst (proj1_sig (TerminalObject_Morphism M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f
+                                                      : CommaSpecializedCategory_ObjectT _ (FunctorFromTerminal _ _)))).
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).
         unfold TerminalProperty_Morphism, TerminalMorphism_Object, TerminalMorphism_Morphism in *;
-          simpl in *.
+        simpl in *.
         split;
-        [ intro_proj2_sig_from_goal; symmetry in H (* WTF? *); autorewrite with morphism in *; assumption
-        | unfold InitialMorphism, TerminalMorphism in *; (* WTF type error *)
-          abstract (
-              intros ? H;
-              (* make sure the type of H is right *)
-              match type of H with
-                | Compose _ _ = f =>
-                  (symmetry in H;
-                   rewrite <- LeftIdentity in H at 1)
-              end;
+          [ abstract (
+                match goal with
+                  | [ |- appcontext[CCM_g ?x] ] => pose proof (CCM_φ x)
+                end;
+                autorewrite with morphism in *; simpl in *; intuition
+              )
+          | ].
+        let H := fresh in
+        assert (H := TerminalObject_Property M);
+          intros;
+          let x := match goal with |- ?x = ?z => constr:(x) end in
+          let z := match goal with |- ?x = ?z => constr:(z) end in
+          eapply (eq_trans (x := x) (y := CCM_g {| CCM_g := _ |}) (z := z));
+            [ apply f_equal;
               symmetry;
-              exact (f_equal (@fst _ _)
-                             (f_equal (@proj1_sig _ _)
-                                      (TerminalObject_Property M (existT _ (_, tt) f) (exist _ (_, unit_eq _ _) H))))
-            )
-        ].
+              solve [ apply H ]
+            | simpl; reflexivity ].
+        Grab Existential Variables.
+        intro_t.
+        abstract intro_t.
       Qed.
     End AbstractionBarrier.
   End TerminalMorphism.

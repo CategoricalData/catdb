@@ -53,55 +53,133 @@ Section CommaSpecializedCategory.
      Parts of the definition opaque via [abstract].  This speeds things
      up significantly.  We unfold the definitions at the very end with
      [Eval]. *)
-  (* stupid lack of sort-polymorphism in definitions... *)
-  Record CommaSpecializedCategory_Object := { CommaSpecializedCategory_Object_Member :> { αβ : A * B & C.(Morphism) (S (fst αβ)) (T (snd αβ)) } }.
+  Record CommaSpecializedCategory_Object :=
+    {
+      CCO_α : A;
+      CCO_β : B;
+      CCO_f : Morphism C (S CCO_α) (T CCO_β)
+    }.
 
-  Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
-
-  Definition CommaSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_CommaSpecializedCategory_Object.
+  Definition CommaSpecializedCategory_ObjectT := { αβ : A * B & C.(Morphism) (S (fst αβ)) (T (snd αβ)) }.
   Global Identity Coercion CommaSpecializedCategory_Object_Id : CommaSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_CommaSpecializedCategory_Object' (mem : CommaSpecializedCategory_ObjectT) := Build_CommaSpecializedCategory_Object mem.
-  Global Coercion Build_CommaSpecializedCategory_Object' : CommaSpecializedCategory_ObjectT >-> CommaSpecializedCategory_Object.
+  Global Coercion sigT_of_CCO (αβf : CommaSpecializedCategory_Object)
+  : CommaSpecializedCategory_ObjectT
+    := existT (fun αβ : A * B
+               => Morphism C (S (fst αβ)) (T (snd αβ)))
+              (CCO_α αβf, CCO_β αβf)
+              (CCO_f αβf).
+  Global Coercion CCO_of_sigT (αβf : CommaSpecializedCategory_ObjectT)
+  : CommaSpecializedCategory_Object
+    := Build_CommaSpecializedCategory_Object _
+                                             _
+                                             (projT2 αβf).
 
-  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_ObjectT) := { CommaSpecializedCategory_Morphism_Member :>
-    { gh : (A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
-      Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
-    }
-  }.
+  Global Arguments CCO_of_sigT _ / .
+  Global Arguments sigT_of_CCO _ / .
 
-  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT) :=
-    Eval hnf in SortPolymorphic_Helper (@Build_CommaSpecializedCategory_Morphism αβf α'β'f').
-  Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
-  Definition Build_CommaSpecializedCategory_Morphism' αβf α'β'f' (mem : @CommaSpecializedCategory_MorphismT αβf α'β'f') :=
-    @Build_CommaSpecializedCategory_Morphism _ _ mem.
-  Global Coercion Build_CommaSpecializedCategory_Morphism' : CommaSpecializedCategory_MorphismT >-> CommaSpecializedCategory_Morphism.
+  Lemma CommaSpecializedCategory_Object_eq' (x y : CommaSpecializedCategory_Object)
+  : forall (Hα : CCO_α x = CCO_α y)
+           (Hβ : CCO_β x = CCO_β y),
+      match Hα in _ = X, Hβ in _ = Y return Morphism C (S X) (T Y) with
+        | eq_refl, eq_refl => CCO_f x
+      end = CCO_f y
+      -> x = y.
+  Proof.
+    destruct x, y; simpl.
+    intros; subst; reflexivity.
+  Defined.
 
-  Lemma CommaSpecializedCategory_Morphism_eq αβf α'β'f' αβf2 α'β'f'2
-        (M : CommaSpecializedCategory_Morphism αβf α'β'f')
-        (N : CommaSpecializedCategory_Morphism αβf2 α'β'f'2) :
-    αβf = αβf2
-    -> α'β'f' = α'β'f'2
-    -> proj1_sig M == proj1_sig N
-    -> M == N.
-    clear; intros; subst.
-    destruct N as [ [ ] ], M as [ [ ] ]; simpl in *.
-    subst.
-    apply eq_JMeq.
-    f_equal; simpl_eq; reflexivity.
+  Lemma CommaSpecializedCategory_Object_eq (x y : CommaSpecializedCategory_Object)
+  : forall (Hα : CCO_α x = CCO_α y)
+           (Hβ : CCO_β x = CCO_β y),
+      CCO_f x == CCO_f y
+      -> x = y.
+  Proof.
+    destruct x, y; simpl.
+    intros; repeat subst; reflexivity.
   Qed.
 
-  Global Arguments CommaSpecializedCategory_Object_Member _ : simpl nomatch.
-  Global Arguments CommaSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
+  Record CommaSpecializedCategory_Morphism (αβf α'β'f' : CommaSpecializedCategory_Object) :=
+    {
+      CCM_g : Morphism A (CCO_α αβf) (CCO_α α'β'f');
+      CCM_h : Morphism B (CCO_β αβf) (CCO_β α'β'f');
+      CCM_φ : Compose (MorphismOf T CCM_h) (CCO_f αβf) = Compose (CCO_f α'β'f') (MorphismOf S CCM_g)
+    }.
+
+  Definition CommaSpecializedCategory_MorphismT (αβf α'β'f' : CommaSpecializedCategory_ObjectT)
+    := { gh : (A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f')))  |
+         Compose (T.(MorphismOf) (snd gh)) (projT2 αβf) = Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))
+       }.
+
+  Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
+  Global Coercion sig_of_CCM αβf α'β'f' (gh : CommaSpecializedCategory_Morphism αβf α'β'f')
+  : CommaSpecializedCategory_MorphismT αβf α'β'f'
+    := existT (fun gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f')
+               => Compose (MorphismOf T (snd gh)) (projT2 αβf)
+                  = Compose (projT2 α'β'f') (MorphismOf S (fst gh)))
+              (CCM_g gh, CCM_h gh)
+              (CCM_φ gh).
+  Global Coercion CCM_of_sig αβf α'β'f' (gh : CommaSpecializedCategory_MorphismT αβf α'β'f')
+  : CommaSpecializedCategory_Morphism αβf α'β'f'
+    := Build_CommaSpecializedCategory_Morphism
+         αβf
+         α'β'f'
+         _
+         _
+         (proj2_sig gh).
+
+  Global Arguments CCM_of_sig _ _ _ / .
+  Global Arguments sig_of_CCM _ _ _ / .
+
+  Lemma CommaSpecializedCategory_Morphism_contr_eq αβf α'β'f'
+        (gh g'h' : CommaSpecializedCategory_Morphism αβf α'β'f')
+        (C_morphism_proof_irrelevance : forall s d (m1 m2 : Morphism C s d)
+                                               (pf1 pf2 : m1 = m2),
+                                          pf1 = pf2)
+  : CCM_g gh = CCM_g g'h'
+    -> CCM_h gh = CCM_h g'h'
+    -> gh = g'h'.
+  Proof.
+    destruct gh, g'h'; simpl.
+    intros; subst.
+    f_equal.
+    apply_hyp.
+  Defined.
+
+  Lemma CommaSpecializedCategory_Morphism_eq αβf α'β'f'
+        (gh g'h' : CommaSpecializedCategory_Morphism αβf α'β'f')
+  : CCM_g gh = CCM_g g'h'
+    -> CCM_h gh = CCM_h g'h'
+    -> gh = g'h'.
+  Proof.
+    intros; apply CommaSpecializedCategory_Morphism_contr_eq;
+    try assumption.
+    intros; apply proof_irrelevance.
+  Qed.
+
+  Lemma CommaSpecializedCategory_Morphism_JMeq αβf0 α'β'f'0 αβf1 α'β'f'1
+        (gh : CommaSpecializedCategory_Morphism αβf0 αβf1)
+        (g'h' : CommaSpecializedCategory_Morphism α'β'f'0 α'β'f'1)
+  : αβf0 = α'β'f'0
+    -> αβf1 = α'β'f'1
+    -> CCM_g gh == CCM_g g'h'
+    -> CCM_h gh == CCM_h g'h'
+    -> gh == g'h'.
+  Proof.
+    destruct gh, g'h'; simpl.
+    intros; repeat subst.
+    JMeq_eq; f_equal.
+    apply proof_irrelevance.
+  Qed.
 
   Definition CommaSpecializedCategory_Compose s d d'
-    (gh : CommaSpecializedCategory_MorphismT d d') (g'h' : CommaSpecializedCategory_MorphismT s d) :
-    CommaSpecializedCategory_MorphismT s d'.
-    exists (Compose (C := A * B) (proj1_sig gh) (proj1_sig g'h')).
+             (gh : CommaSpecializedCategory_Morphism d d') (g'h' : CommaSpecializedCategory_Morphism s d)
+  : CommaSpecializedCategory_Morphism s d'.
+  Proof.
+    exists (Compose (CCM_g gh) (CCM_g g'h')) (Compose (CCM_h gh) (CCM_h g'h')).
     hnf in *; simpl in *.
     abstract (
-        destruct_all_hypotheses;
-        unfold Morphism in *;
-          destruct_hypotheses;
+        destruct_head CommaSpecializedCategory_Morphism;
         repeat rewrite FCompositionOf;
         repeat try_associativity ltac:(t_rev_with t')
       ).
@@ -109,8 +187,8 @@ Section CommaSpecializedCategory.
 
   Global Arguments CommaSpecializedCategory_Compose _ _ _ _ _ /.
 
-  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_MorphismT o o.
-    exists (Identity (C := A * B) (projT1 o)).
+  Definition CommaSpecializedCategory_Identity o : CommaSpecializedCategory_Morphism o o.
+    exists (Identity (CCO_α o)) (Identity (CCO_β o)).
     abstract (
         simpl; autorewrite with category; reflexivity
       ).
@@ -119,37 +197,38 @@ Section CommaSpecializedCategory.
   Global Arguments CommaSpecializedCategory_Identity _ /.
 
   Local Ltac comma_t :=
-    repeat (
-      let H:= fresh in intro H; destruct H as [ [ ] ]
-    );
-    destruct_hypotheses;
+    intros;
+    destruct_head CommaSpecializedCategory_Morphism;
     simpl in *;
     simpl_eq;
     autorewrite with category;
     f_equal;
     try reflexivity.
 
-  Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_MorphismT o1 o2) (m2 : CommaSpecializedCategory_MorphismT o2 o3) (m3 : CommaSpecializedCategory_MorphismT o3 o4),
+  Local Ltac comma_eq_t :=
+    intros;
+    apply CommaSpecializedCategory_Morphism_eq;
+    simpl;
+    autorewrite with category;
+    reflexivity.
+
+  Lemma CommaSpecializedCategory_Associativity : forall o1 o2 o3 o4 (m1 : CommaSpecializedCategory_Morphism o1 o2) (m2 : CommaSpecializedCategory_Morphism o2 o3) (m3 : CommaSpecializedCategory_Morphism o3 o4),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Compose m3 m2) m1 =
     CommaSpecializedCategory_Compose m3 (CommaSpecializedCategory_Compose m2 m1).
   Proof.
-    abstract (
-        simpl_eq;
-        repeat rewrite Associativity;
-        reflexivity
-      ).
+    abstract comma_eq_t.
   Qed.
 
-  Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+  Lemma CommaSpecializedCategory_LeftIdentity : forall a b (f : CommaSpecializedCategory_Morphism a b),
     CommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
   Proof.
-    abstract comma_t.
+    abstract comma_eq_t.
   Qed.
 
-  Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_MorphismT a b),
+  Lemma CommaSpecializedCategory_RightIdentity : forall a b (f : CommaSpecializedCategory_Morphism a b),
     CommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
   Proof.
-    abstract comma_t.
+    abstract comma_eq_t.
   Qed.
 
   Definition CommaSpecializedCategory : SpecializedCategory.
@@ -160,15 +239,7 @@ Section CommaSpecializedCategory.
               CommaSpecializedCategory_Compose
               _ _ _
            );
-    abstract (
-      intros;
-        destruct_type' @CommaSpecializedCategory_Morphism;
-        unfold CommaSpecializedCategory_Morphism_Member, Build_CommaSpecializedCategory_Morphism';
-          try apply f_equal;
-            apply CommaSpecializedCategory_Associativity ||
-              apply CommaSpecializedCategory_LeftIdentity ||
-                apply CommaSpecializedCategory_RightIdentity
-    ).
+    abstract comma_eq_t.
   Defined.
 End CommaSpecializedCategory.
 

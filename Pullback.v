@@ -24,13 +24,25 @@ Section Pullback.
      ]]
    *)
 
+  Inductive PullbackThree := PullbackA | PullbackB | PullbackC.
+
+  Local Ltac pullback_t :=
+    intros;
+    simpl in * |- ;
+    destruct_head prod;
+    destruct_head CommaSpecializedCategory_Morphism;
+    simpl in *;
+    nt_eq;
+    destruct_head PullbackThree;
+    destruct_head Empty_set;
+    autorewrite with morphism in *;
+    trivial.
+
   Context `(C : SpecializedCategory).
   Section pullback.
     Variables a b c : C.
     Variable f : C.(Morphism) a c.
     Variable g : C.(Morphism) b c.
-
-    Inductive PullbackThree := PullbackA | PullbackB | PullbackC.
 
     Definition PullbackIndex_Morphism (a b : PullbackThree) : Set :=
       match (a, b) with
@@ -42,12 +54,12 @@ Section Pullback.
         | _ => Empty_set
       end.
 
-    Global Arguments PullbackIndex_Morphism a b /.
+    Global Arguments PullbackIndex_Morphism a b / .
 
-           Definition PullbackIndex_Compose s d d' (m1 : PullbackIndex_Morphism d d') (m2 : PullbackIndex_Morphism s d) :
+    Definition PullbackIndex_Compose s d d' (m1 : PullbackIndex_Morphism d d') (m2 : PullbackIndex_Morphism s d) :
       PullbackIndex_Morphism s d'.
-             destruct s, d, d'; simpl in *; trivial.
-           Defined.
+      destruct s, d, d'; simpl in *; trivial.
+    Defined.
 
     Definition PullbackIndex : SpecializedCategory.
       refine (@Build_SpecializedCategory PullbackThree
@@ -59,9 +71,7 @@ Section Pullback.
                                          _
                                          _
                                          _);
-      abstract (
-          intros; destruct_type PullbackThree; simpl in *; destruct_type Empty_set; trivial
-        ).
+      abstract pullback_t.
     Defined.
 
     Definition PullbackDiagram_ObjectOf x :=
@@ -91,12 +101,7 @@ Section Pullback.
                                            _
                  )
       end;
-      abstract (
-          unfold PullbackDiagram_MorphismOf; simpl; intros;
-          destruct_type PullbackThree;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          trivial; try destruct_to_empty_set
-        ).
+      abstract pullback_t.
     Defined.
 
     Definition Pullback := Limit PullbackDiagram.
@@ -122,14 +127,7 @@ Section Pullback.
     Definition PullbackDiagramFunctor_MorphismOf s d (m : Morphism ((C / c) * (C / c)) s d)
     : Morphism (C ^ PullbackIndex) (PullbackDiagramFunctor_ObjectOf s) (PullbackDiagramFunctor_ObjectOf d).
       exists (PullbackDiagramFunctor_MorphismOf_ComponentsOf m).
-      abstract (
-          destruct m as [[[]] [[]]];
-          simpl in *;
-            intros [] [] [];
-          simpl in *;
-            autorewrite with morphism in *;
-            trivial
-        ).
+      abstract pullback_t. (* 5.559 s *)
     Defined.
 
     Definition PullbackDiagramFunctor : SpecializedFunctor ((C / c) * (C / c)) (C ^ PullbackIndex).
@@ -141,14 +139,7 @@ Section Pullback.
                                            _
                                            _)
       end;
-      abstract (
-          repeat intros [[[[? []] ?]] [[[? []] ?]]];
-          simpl in *;
-            nt_eq;
-          destruct_head PullbackThree;
-          autorewrite with morphism;
-          trivial
-        ).
+      abstract pullback_t. (* 10.719 s; 1.417 s *)
     Defined.
   End pullback_functorial.
 
@@ -181,12 +172,7 @@ Section Pullback.
                                            _
                  )
       end;
-      abstract (
-          unfold PushoutDiagram_MorphismOf; simpl; intros;
-          destruct_type PullbackThree;
-          repeat rewrite LeftIdentity; repeat rewrite RightIdentity;
-          trivial; try destruct_to_empty_set
-        ).
+      abstract pullback_t.
     Defined.
 
     Definition Pushout := Colimit PushoutDiagram.
@@ -210,14 +196,7 @@ Section Pullback.
     Definition PushoutDiagramFunctor_MorphismOf s d (m : Morphism ((c \ C) * (c \ C)) s d)
     : Morphism (C ^ PushoutIndex) (PushoutDiagramFunctor_ObjectOf s) (PushoutDiagramFunctor_ObjectOf d).
       exists (PushoutDiagramFunctor_MorphismOf_ComponentsOf m).
-      abstract (
-          destruct m as [[[]] [[]]];
-          simpl in *;
-            intros [] [] [];
-          simpl in *;
-            autorewrite with morphism in *;
-            trivial
-        ).
+      abstract pullback_t.
     Defined.
 
     Definition PushoutDiagramFunctor : SpecializedFunctor ((c \ C) * (c \ C)) (C ^ PushoutIndex).
@@ -229,14 +208,7 @@ Section Pullback.
                                            _
                                            _)
       end;
-      abstract (
-          repeat intros [[[[? []] ?]] [[[? []] ?]]];
-          simpl in *;
-            nt_eq;
-          destruct_head PullbackThree;
-          autorewrite with morphism;
-          trivial
-        ).
+      abstract pullback_t.
     Defined.
   End pushout_functorial.
 End Pullback.
@@ -274,11 +246,11 @@ Section PullbackObjects.
              (i : Morphism C PullbackObject a)
              (j : Morphism C PullbackObject b)
              (PullbackCompatible : Compose f i = Compose g j)
-  : CommaCategory_Object (DiagonalFunctor C PullbackIndex)
-                         (SliceCategory_Functor
-                            (FunctorCategory.FunctorCategory PullbackIndex C)
-                            (PullbackDiagram C a b c f g)).
-    exists (PullbackObject, tt).
+  : CommaSpecializedCategory_Object (DiagonalFunctor C PullbackIndex)
+                                    (FunctorFromTerminal
+                                       (FunctorCategory.FunctorCategory PullbackIndex C)
+                                       (PullbackDiagram C a b c f g)).
+    exists PullbackObject tt.
     exists (fun x => match x as x return (Morphism C PullbackObject (PullbackDiagram_ObjectOf C a b c x)) with
                        | PullbackA => i
                        | PullbackB => j
@@ -304,11 +276,11 @@ Section PullbackObjects.
              (i : Morphism C a PushoutObject)
              (j : Morphism C b PushoutObject)
              (PushoutCompatible : Compose j g = Compose i f)
-  : CommaCategory_Object (SliceCategory_Functor
-                            (FunctorCategory.FunctorCategory PushoutIndex C)
-                            (PushoutDiagram C a b c f g))
-                         (DiagonalFunctor C PushoutIndex).
-    exists (tt, PushoutObject).
+  : CommaSpecializedCategory_Object (FunctorFromTerminal
+                                       (FunctorCategory.FunctorCategory PushoutIndex C)
+                                       (PushoutDiagram C a b c f g))
+                                    (DiagonalFunctor C PushoutIndex).
+    exists tt PushoutObject.
     exists (fun x => match x as x return (Morphism C (PushoutDiagram_ObjectOf C a b c x) PushoutObject) with
                        | PullbackA => i
                        | PullbackB => j

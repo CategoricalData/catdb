@@ -12,66 +12,35 @@ Set Universe Polymorphism.
 
 Local Open Scope category_scope.
 
-Local Ltac rewrite_step :=
-  (progress repeat rewrite LeftIdentity in * )
-    || (progress repeat rewrite RightIdentity in * )
-    || (progress repeat rewrite @LeftIdentityFunctor in * )
-    || (progress repeat rewrite @RightIdentityFunctor in * )
-    || (progress (repeat rewrite Associativity; (reflexivity || apply f_equal)))
-    || (progress (repeat rewrite <- Associativity; apply f_equal2; trivial; [])).
-
 Local Ltac quick_step :=
   ((progress repeat subst)
      || (apply sig_eq; simpl)
+     || (apply CommaSpecializedCategory_Morphism_eq; simpl)
+     || (apply CommaSpecializedCategory_Morphism_JMeq; simpl)
+     || (apply CommaSpecializedCategory_Object_eq; simpl)
      || apply f_equal
      || (apply f_equal2; trivial; []));
   trivial.
 
 Local Ltac pre_anihilate :=
   subst_body;
-  repeat intro; simpl in *;
+  repeat intro;
   repeat quick_step;
   simpl in *;
   destruct_head_hnf @CommaSpecializedCategory_Morphism;
   destruct_head_hnf @CommaSpecializedCategory_Object;
-  destruct_sig;
+  destruct_head_hnf @prod;
   subst_body;
   simpl in *;
   trivial.
 
-Local Ltac slice_step :=
-  match goal with
-    | _ => apply Functor_eq; simpl; intros; pre_anihilate
-    | [ |- @JMeq (sig _) _ (sig _) _ ] => apply sig_JMeq; pre_anihilate
-    | [ |- JMeq (?f ?x) (?f ?y) ] =>
-      apply (@f_equal1_JMeq _ _ x y f); pre_anihilate
-    | [ |- JMeq (?f ?x) (?g ?y) ] =>
-      apply (@f_equal_JMeq _ _ _ _ x y f g); pre_anihilate
-  end.
-
-Local Ltac step :=
-  (quick_step
-     || rewrite_step
-     || (progress auto 1 with category)
-     || slice_step);
-  trivial.
-
-Local Ltac anihilate := pre_anihilate; repeat step.
-
-Local Ltac induced_step :=
-  reflexivity
-    || (try_associativity ltac:(rewrite <- Commutes))
-    || (try_associativity ltac:(apply f_equal))
-    || (match goal with
-          | [ H : _ = _ |- _ = _ ] => try_associativity ltac:(rewrite H)
-        end).
-
-Local Ltac induced_anihilate :=
-  simpl in *;
-  destruct_head @prod;
-  simpl in *;
+Local Ltac anihilate :=
   pre_anihilate;
-  repeat induced_step.
+  try apply Functor_eq;
+  simpl; intros;
+  repeat quick_step;
+  autorewrite with morphism;
+  trivial.
 
 Section CommaCategoryProjectionFunctor.
   Context `(A : LocallySmallSpecializedCategory).
@@ -80,40 +49,36 @@ Section CommaCategoryProjectionFunctor.
 
   Definition CommaCategoryProjectionFunctor_ObjectOf (ST : (OppositeCategory (C ^ A)) * (C ^ B)) :
     LocallySmallCat / (A * B : LocallySmallSpecializedCategory)
-    := let S := (fst ST) in
-       let T := (snd ST) in
-       existT _
-              ((S ↓ T : LocallySmallSpecializedCategory) : LocallySmallCategory, tt)
-              (CommaCategoryProjection S T) :
-         CommaSpecializedCategory_ObjectT (IdentityFunctor _)
-                                          (FunctorFromTerminal LocallySmallCat
-                                                               (A * B : LocallySmallSpecializedCategory)).
+    := Eval simpl in
+        let S := (fst ST) in
+        let T := (snd ST) in
+        existT _
+               ((S ↓ T : LocallySmallSpecializedCategory) : LocallySmallCategory, tt)
+               (CommaCategoryProjection S T) :
+          CommaSpecializedCategory_ObjectT (IdentityFunctor _)
+                                           (FunctorFromTerminal LocallySmallCat
+                                                                (A * B : LocallySmallSpecializedCategory)).
 
   Definition CommaCategoryProjectionFunctor_MorphismOf s d (m : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d) :
     Morphism (LocallySmallCat / (A * B : LocallySmallSpecializedCategory))
              (CommaCategoryProjectionFunctor_ObjectOf s)
              (CommaCategoryProjectionFunctor_ObjectOf d).
-    hnf in *; constructor; simpl in *.
-    exists (CommaCategoryInducedFunctor m, @unit_eq _ _).
-    abstract (
-        simpl;
-        functor_eq;
-        destruct_head_hnf @CommaSpecializedCategory_Morphism;
-        destruct_sig;
-        reflexivity
-      ).
+    simpl in *.
+    exists (CommaCategoryInducedFunctor m) (@unit_eq _ _).
+    simpl.
+    abstract (destruct_head prod; functor_eq).
   Defined.
 
   Lemma CommaCategoryProjectionFunctor_FIdentityOf x :
     CommaCategoryProjectionFunctor_MorphismOf (Identity x) = Identity _.
-    (* admit. *) Time (expand; anihilate). (* 20 s  :-( *)
+    abstract anihilate. (* 1.135 s *)
   Qed.
 
   Lemma CommaCategoryProjectionFunctor_FCompositionOf s d d' m m' :
     CommaCategoryProjectionFunctor_MorphismOf (Compose (s := s) (d := d) (d' := d') m m')
     = Compose (CommaCategoryProjectionFunctor_MorphismOf m)
               (CommaCategoryProjectionFunctor_MorphismOf m').
-    (* admit. *) Time (expand; anihilate). (* 57 s  :-( :-( *)
+    abstract anihilate. (* 5.318 s *)
   Qed.
 
   Definition CommaCategoryProjectionFunctor :
