@@ -1,5 +1,5 @@
 Require Import JMeq.
-Require Export SpecializedCategory Functor SigTCategory.
+Require Export Category Functor SigTCategory.
 Require Import Common Notations.
 
 Set Implicit Arguments.
@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
   Variable Pobj : A -> Prop.
   Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Type.
 
@@ -32,8 +32,8 @@ Section sig_sigT_obj_mor.
     @Pcompose a a b f _ f' (@Pidentity a) ==
     f'.
 
-  Definition SpecializedCategory_sig_sigT : SpecializedCategory.
-    refine (@Build_SpecializedCategory
+  Definition Category_sig_sigT : Category.
+    refine (@Build_Category
               (sig Pobj)
               (fun s d => sigT (@Pmor s d))
               (fun x => existT _ (Identity (C := A) (proj1_sig x)) (Pidentity x))
@@ -65,8 +65,8 @@ Section sig_sigT_obj_mor.
     f'
     := P_RightIdentity f'.
 
-  Let SpecializedCategory_sig_sigT_as_sigT : SpecializedCategory.
-    eapply (@SpecializedCategory_sigT A
+  Let Category_sig_sigT_as_sigT : Category.
+    eapply (@Category_sigT A
                                       Pobj
                                       Pmor'
                                       Pidentity'
@@ -79,8 +79,8 @@ Section sig_sigT_obj_mor.
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Definition sig_sigT_functor_sigT : SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT.
-    refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT SpecializedCategory_sig_sigT_as_sigT
+  Definition sig_sigT_functor_sigT : Functor Category_sig_sigT Category_sig_sigT_as_sigT.
+    refine (Build_Functor Category_sig_sigT Category_sig_sigT_as_sigT
       (fun x => x)
       (@sig_sigT_functor_sigT_MorphismOf)
       _
@@ -93,8 +93,8 @@ Section sig_sigT_obj_mor.
     subst_body; destruct s, d; simpl in *; eta_red; exact m.
   Defined.
 
-  Definition sigT_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT.
-    refine (Build_SpecializedFunctor SpecializedCategory_sig_sigT_as_sigT SpecializedCategory_sig_sigT
+  Definition sigT_functor_sig_sigT : Functor Category_sig_sigT_as_sigT Category_sig_sigT.
+    refine (Build_Functor Category_sig_sigT_as_sigT Category_sig_sigT
       (fun x => x)
       (@sigT_functor_sig_sigT_MorphismOf)
       _
@@ -109,6 +109,6 @@ Section sig_sigT_obj_mor.
     split; functor_eq; destruct_sig; reflexivity.
   Qed.
 
-  Definition proj1_functor_sig_sigT : SpecializedFunctor SpecializedCategory_sig_sigT A
+  Definition proj1_functor_sig_sigT : Functor Category_sig_sigT A
     := ComposeFunctors projT1_functor sig_sigT_functor_sigT.
 End sig_sigT_obj_mor.

@@ -62,7 +62,7 @@ Section subobject_classifier.
    See for instance (MacLane-Moerdijk, p. 22).
    *)
 
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Local Reserved Notation "'Ω'".
 

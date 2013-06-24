@@ -11,15 +11,15 @@ Set Universe Polymorphism.
 
 Section SumCategoryFunctors.
   Section sum_functor.
-    Context `(C : SpecializedCategory).
-    Context `(C' : SpecializedCategory).
-    Context `(D : SpecializedCategory).
+    Context `(C : Category).
+    Context `(C' : Category).
+    Context `(D : Category).
 
-    Definition sum_Functor (F : SpecializedFunctor C D) (F' : SpecializedFunctor C' D)
-    : SpecializedFunctor (C + C') D.
+    Definition sum_Functor (F : Functor C D) (F' : Functor C' D)
+    : Functor (C + C') D.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            (fun cc' => match cc' with
                                                          | inl c => F c
                                                          | inr c' => F' c'
@@ -43,13 +43,13 @@ Section SumCategoryFunctors.
         ).
     Defined.
 
-    Definition sum_Functor_Functorial (F G : SpecializedFunctor C D) (F' G' : SpecializedFunctor C' D)
-               (T : SpecializedNaturalTransformation F G)
-               (T' : SpecializedNaturalTransformation F' G')
-    : SpecializedNaturalTransformation (sum_Functor F F') (sum_Functor G G').
+    Definition sum_Functor_Functorial (F G : Functor C D) (F' G' : Functor C' D)
+               (T : NaturalTransformation F G)
+               (T' : NaturalTransformation F' G')
+    : NaturalTransformation (sum_Functor F F') (sum_Functor G G').
       match goal with
-        | [ |- SpecializedNaturalTransformation ?A ?B ] =>
-          refine (Build_SpecializedNaturalTransformation
+        | [ |- NaturalTransformation ?A ?B ] =>
+          refine (Build_NaturalTransformation
                     A B
                     (fun x => match x with
                                 | inl c => T c
@@ -65,14 +65,14 @@ Section SumCategoryFunctors.
 
   Section swap_functor.
     Definition sum_swap_Functor
-               `(C : SpecializedCategory)
-               `(D : SpecializedCategory)
-    : SpecializedFunctor (C + D) (D + C)
+               `(C : Category)
+               `(D : Category)
+    : Functor (C + D) (D + C)
       := sum_Functor (inr_Functor _ _) (inl_Functor _ _).
 
     Lemma sum_swap_swap_id
-          `(C : SpecializedCategory)
-          `(D : SpecializedCategory)
+          `(C : Category)
+          `(D : Category)
     : ComposeFunctors (sum_swap_Functor C D) (sum_swap_Functor D C) = IdentityFunctor _.
       apply Functor_eq; repeat intros [?|?]; simpl; trivial.
     Qed.

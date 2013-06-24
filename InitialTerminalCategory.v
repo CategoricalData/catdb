@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common Notations NatCategory.
 
 Set Implicit Arguments.
@@ -10,38 +10,38 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section InitialTerminal.
-   Definition InitialCategory : SmallSpecializedCategory := 0.
-   Definition TerminalCategory : SmallSpecializedCategory := 1.
+   Definition InitialCategory : Category := 0.
+   Definition TerminalCategory : Category := 1.
 End InitialTerminal.
 
 Section Functors.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition FunctorTo1 : SpecializedFunctor C 1
-    := Build_SpecializedFunctor C 1 (fun _ => tt) (fun _ _ _ => eq_refl) (fun _ _ _ _ _ => eq_refl) (fun _ => eq_refl).
-  Definition FunctorToTerminal : SpecializedFunctor C TerminalCategory := FunctorTo1.
+  Definition FunctorTo1 : Functor C 1
+    := Build_Functor C 1 (fun _ => tt) (fun _ _ _ => eq_refl) (fun _ _ _ _ _ => eq_refl) (fun _ => eq_refl).
+  Definition FunctorToTerminal : Functor C TerminalCategory := FunctorTo1.
 
-  Definition FunctorFrom1 (c : C) : SpecializedFunctor 1 C
-    := Build_SpecializedFunctor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _)) (fun _ => eq_refl).
-  Definition FunctorFromTerminal (c : C) : SpecializedFunctor TerminalCategory C := FunctorFrom1 c.
+  Definition FunctorFrom1 (c : C) : Functor 1 C
+    := Build_Functor 1 C (fun _ => c) (fun _ _ _ => Identity c) (fun _ _ _ _ _ => eq_sym (@RightIdentity _ _ _ _)) (fun _ => eq_refl).
+  Definition FunctorFromTerminal (c : C) : Functor TerminalCategory C := FunctorFrom1 c.
 
-  Definition FunctorFrom0 : SpecializedFunctor 0 C
-    := Build_SpecializedFunctor 0 C (fun x => match x with end) (fun x _ _ => match x with end) (fun x _ _ _ _ => match x with end) (fun x => match x with end).
-  Definition FunctorFromInitial : SpecializedFunctor InitialCategory C := FunctorFrom0.
+  Definition FunctorFrom0 : Functor 0 C
+    := Build_Functor 0 C (fun x => match x with end) (fun x _ _ => match x with end) (fun x _ _ _ _ => match x with end) (fun x => match x with end).
+  Definition FunctorFromInitial : Functor InitialCategory C := FunctorFrom0.
 End Functors.
 
 Section FunctorsUnique.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Lemma InitialCategoryFunctorUnique
-  : forall F F' : SpecializedFunctor InitialCategory C,
+  : forall F F' : Functor InitialCategory C,
       F = F'.
   Proof.
     functor_eq; destruct_head_hnf @Empty_set.
   Qed.
 
   Lemma InitialCategoryFunctor'Unique
-  : forall F F' : SpecializedFunctor C InitialCategory,
+  : forall F F' : Functor C InitialCategory,
       F = F'.
   Proof.
     intros F F'.
@@ -58,7 +58,7 @@ Section FunctorsUnique.
   Qed.
 
   Lemma TerminalCategoryFunctorUnique
-  : forall F F' : SpecializedFunctor C TerminalCategory,
+  : forall F F' : Functor C TerminalCategory,
       F = F'.
   Proof.
     functor_eq; auto.

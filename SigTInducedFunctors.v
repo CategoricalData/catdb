@@ -12,11 +12,11 @@ Set Universe Polymorphism.
 Section T2.
   (* use dummy variables so we don't have to specify the types of
      all these hypotheses *)
-  Context `(dummy0 : @SpecializedCategory_sigT A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0).
-  Context `(dummy1 : @SpecializedCategory_sigT A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1).
+  Context `(dummy0 : @Category_sigT A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0).
+  Context `(dummy1 : @Category_sigT A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1).
 
-  Let sigT_cat0 := @SpecializedCategory_sigT A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0.
-  Let sigT_cat1 := @SpecializedCategory_sigT A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1.
+  Let sigT_cat0 := @Category_sigT A Pobj0 Pmor0 Pidentity0 Pcompose0 P_Associativity0 P_LeftIdentity0 P_RightIdentity0.
+  Let sigT_cat1 := @Category_sigT A Pobj1 Pmor1 Pidentity1 Pcompose1 P_Associativity1 P_LeftIdentity1 P_RightIdentity1.
 
   Variable P_ObjectOf : forall x, Pobj0 x -> Pobj1 x.
 
@@ -40,10 +40,10 @@ Section T2.
     P_MorphismOf (existT (Pmor0 o o) (Identity (projT1 o)) (Pidentity0 o)) =
     Pidentity1 (InducedT2Functor_sigT_ObjectOf o).
 
-  Definition InducedT2Functor_sigT : SpecializedFunctor sigT_cat0 sigT_cat1.
+  Definition InducedT2Functor_sigT : Functor sigT_cat0 sigT_cat1.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           InducedT2Functor_sigT_ObjectOf
           InducedT2Functor_sigT_MorphismOf
           _

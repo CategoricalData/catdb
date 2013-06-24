@@ -16,31 +16,31 @@ Section FunctorIsomorphism.
   (* Copy definitions from CategoryIsomorphisms.v *)
 
   Section FunctorIsInverseOf.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
+    Context `{C : Category}.
+    Context `{D : Category}.
 
-    Definition FunctorIsInverseOf1 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
+    Definition FunctorIsInverseOf1 (F : Functor C D) (G : Functor D C) : Prop :=
       ComposeFunctors G F = IdentityFunctor C.
-    Definition FunctorIsInverseOf2 (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop :=
+    Definition FunctorIsInverseOf2 (F : Functor C D) (G : Functor D C) : Prop :=
       ComposeFunctors F G = IdentityFunctor D.
 
     Global Arguments FunctorIsInverseOf1 / _ _.
     Global Arguments FunctorIsInverseOf2 / _ _.
 
-    Definition FunctorIsInverseOf (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) : Prop := Eval simpl in
+    Definition FunctorIsInverseOf (F : Functor C D) (G : Functor D C) : Prop := Eval simpl in
       FunctorIsInverseOf1 F G /\ FunctorIsInverseOf2 F G.
   End FunctorIsInverseOf.
 
-  Lemma FunctorIsInverseOf_sym `{C : SpecializedCategory} `{D : SpecializedCategory}
-    (F : SpecializedFunctor C D) (G : SpecializedFunctor D C) :
+  Lemma FunctorIsInverseOf_sym `{C : Category} `{D : Category}
+    (F : Functor C D) (G : Functor D C) :
     FunctorIsInverseOf F G -> FunctorIsInverseOf G F.
     intros; hnf in *; split_and; split; trivial.
   Qed.
 
   Section FunctorIsomorphismOf.
-    Record FunctorIsomorphismOf `{C : SpecializedCategory} `{D : SpecializedCategory} (F : SpecializedFunctor C D) := {
+    Record FunctorIsomorphismOf `{C : Category} `{D : Category} (F : Functor C D) := {
       FunctorIsomorphismOf_Functor :> _ := F;
-      InverseFunctor : SpecializedFunctor D C;
+      InverseFunctor : Functor D C;
       LeftInverseFunctor : ComposeFunctors InverseFunctor F = IdentityFunctor C;
       RightInverseFunctor : ComposeFunctors F InverseFunctor = IdentityFunctor D
     }.
@@ -48,17 +48,17 @@ Section FunctorIsomorphism.
     Hint Resolve RightInverseFunctor LeftInverseFunctor : category.
     Hint Resolve RightInverseFunctor LeftInverseFunctor : functor.
 
-    Definition FunctorIsomorphismOf_Identity `(C : SpecializedCategory) : FunctorIsomorphismOf (IdentityFunctor C).
+    Definition FunctorIsomorphismOf_Identity `(C : Category) : FunctorIsomorphismOf (IdentityFunctor C).
       exists (IdentityFunctor _); eauto with functor.
     Defined.
 
-    Definition InverseOfFunctor `{C : SpecializedCategory} `{D : SpecializedCategory} (F : SpecializedFunctor C D)
+    Definition InverseOfFunctor `{C : Category} `{D : Category} (F : Functor C D)
       (i : FunctorIsomorphismOf F) : FunctorIsomorphismOf (InverseFunctor i).
       exists i; auto with functor.
     Defined.
 
-    Definition ComposeFunctorIsmorphismOf `{C : SpecializedCategory} `{D : SpecializedCategory} `{E : SpecializedCategory}
-      {F : SpecializedFunctor D E} {G : SpecializedFunctor C D} (i1 : FunctorIsomorphismOf F) (i2 : FunctorIsomorphismOf G) :
+    Definition ComposeFunctorIsmorphismOf `{C : Category} `{D : Category} `{E : Category}
+      {F : Functor D E} {G : Functor C D} (i1 : FunctorIsomorphismOf F) (i2 : FunctorIsomorphismOf G) :
       FunctorIsomorphismOf (ComposeFunctors F G).
       exists (ComposeFunctors (InverseFunctor i2) (InverseFunctor i1));
       abstract (
@@ -75,8 +75,8 @@ Section FunctorIsomorphism.
   End FunctorIsomorphismOf.
 
   Section IsomorphismOfCategories.
-    Record IsomorphismOfCategories `(C : SpecializedCategory) `(D : SpecializedCategory) := {
-      IsomorphismOfCategories_Functor : SpecializedFunctor C D;
+    Record IsomorphismOfCategories `(C : Category) `(D : Category) := {
+      IsomorphismOfCategories_Functor : Functor C D;
       IsomorphismOfCategories_Of :> FunctorIsomorphismOf IsomorphismOfCategories_Functor
     }.
 
@@ -84,10 +84,10 @@ Section FunctorIsomorphism.
   End IsomorphismOfCategories.
 
   Section FunctorIsIsomorphism.
-    Definition FunctorIsIsomorphism `{C : SpecializedCategory} `{D : SpecializedCategory} (F : SpecializedFunctor C D) : Prop :=
+    Definition FunctorIsIsomorphism `{C : Category} `{D : Category} (F : Functor C D) : Prop :=
       exists G, FunctorIsInverseOf F G.
 
-    Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : SpecializedCategory} `{D : SpecializedCategory} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsmorphismOf_FunctorIsIsomorphism `{C : Category} `{D : Category} (F : Functor C D) :
       FunctorIsomorphismOf F -> FunctorIsIsomorphism F.
       intro i; hnf.
       exists (InverseFunctor i);
@@ -96,7 +96,7 @@ Section FunctorIsomorphism.
         assumption.
     Qed.
 
-    Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : SpecializedCategory} `{D : SpecializedCategory} (F : SpecializedFunctor C D) :
+    Lemma FunctorIsIsomorphism_FunctorIsmorphismOf `{C : Category} `{D : Category} (F : Functor C D) :
       FunctorIsIsomorphism F -> exists _ : FunctorIsomorphismOf F, True.
       intro i; destruct_hypotheses.
       destruct_exists; trivial.
@@ -106,9 +106,9 @@ Section FunctorIsomorphism.
 
   Section CategoriesIsomorphic.
     Definition CategoriesIsomorphic (C D : Category) : Prop :=
-      exists (F : SpecializedFunctor C D) (G : SpecializedFunctor D C), FunctorIsInverseOf F G.
+      exists (F : Functor C D) (G : Functor D C), FunctorIsInverseOf F G.
 
-    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : SpecializedCategory) `(D : SpecializedCategory) :
+    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : Category) `(D : Category) :
       IsomorphismOfCategories C D -> CategoriesIsomorphic C D.
       intro i; destruct i as [ m i ].
       exists m.
@@ -163,9 +163,9 @@ Section FunctorIsomorphism.
 End FunctorIsomorphism.
 
 Section Functor_preserves_isomorphism.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor C D.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor C D.
 
   Hint Rewrite <- FCompositionOf : functor.
 

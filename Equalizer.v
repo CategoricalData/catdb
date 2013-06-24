@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Equalizer.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Variables A B : C.
   Variables f g : C.(Morphism) A B.
 
@@ -31,8 +31,8 @@ Section Equalizer.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition EqualizerIndex : SpecializedCategory.
-    refine (@Build_SpecializedCategory EqualizerTwo
+  Definition EqualizerIndex : Category.
+    refine (@Build_Category EqualizerTwo
                                        EqualizerIndex_Morphism
                                        (fun x => match x with EqualizerA => tt | EqualizerB => tt end)
                                        EqualizerIndex_Compose
@@ -62,10 +62,10 @@ Section Equalizer.
               end.
   Defined.
 
-  Definition EqualizerDiagram : SpecializedFunctor EqualizerIndex C.
+  Definition EqualizerDiagram : Functor EqualizerIndex C.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           EqualizerDiagram_ObjectOf
           EqualizerDiagram_MorphismOf
           _

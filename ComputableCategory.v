@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -9,13 +9,13 @@ Set Universe Polymorphism.
 
 Section ComputableCategory.
   Variable I : Type.
-  Variable Index2Cat : I -> SpecializedCategory.
+  Variable Index2Cat : I -> Category.
 
-  Local Coercion Index2Cat : I >-> SpecializedCategory.
+  Local Coercion Index2Cat : I >-> Category.
 
-  Definition ComputableCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory I
-                                       (fun C D : I => SpecializedFunctor C D)
+  Definition ComputableCategory : Category.
+    refine (@Build_Category I
+                                       (fun C D : I => Functor C D)
                                        (fun o : I => IdentityFunctor o)
                                        (fun C D E : I => ComposeFunctors (C := C) (D := D) (E := E))
                                        _

@@ -19,7 +19,7 @@ Local Ltac limit_t :=
 
   repeat (apply functional_extensionality_dep; intro; try simpl_eq);
 
-  destruct_head @SpecializedNaturalTransformation;
+  destruct_head @NaturalTransformation;
   fg_equal;
 
   destruct_sig;
@@ -27,8 +27,8 @@ Local Ltac limit_t :=
   trivial; t_with t'; intuition.
 
 Section SetLimits.
-  Context `(C : @SmallSpecializedCategory).
-  Variable F : SpecializedFunctor C SetCat.
+  Context `(C : @Category).
+  Variable F : Functor C SetCat.
 
   (* Quoting David:
      let F:C-->Set be a functor. An element of the limit is a collection of elements x_c,
@@ -37,12 +37,12 @@ Section SetLimits.
   Definition SetLimit_Object : SetCat :=
     { S : forall c : C, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
-  Definition SetLimit_Morphism : SpecializedNaturalTransformation
+  Definition SetLimit_Morphism : NaturalTransformation
                                    ((DiagonalFunctor SetCat C) SetLimit_Object)
                                    F.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun c : C => (fun S => (proj1_sig S) c))
           _
         )
@@ -51,7 +51,7 @@ Section SetLimits.
   Defined.
 
   Definition SetLimit_Property_Morphism A'
-             (φ' : SpecializedNaturalTransformation ((DiagonalFunctor SetCat C) A') F) :
+             (φ' : NaturalTransformation ((DiagonalFunctor SetCat C) A') F) :
     A' -> SetLimit_Object.
     intro x; hnf.
     exists (fun c => ComponentsOf φ' c x).
@@ -67,8 +67,8 @@ Section SetLimits.
 End SetLimits.
 
 Section TypeLimits.
-  Context `(C : @SmallSpecializedCategory).
-  Variable F : SpecializedFunctor C TypeCat.
+  Context `(C : @Category).
+  Variable F : Functor C TypeCat.
 
   (* Quoting David:
      let F:C-->Type be a functor. An element of the limit is a collection of elements x_c,
@@ -77,12 +77,12 @@ Section TypeLimits.
   Definition TypeLimit_Object : TypeCat :=
     { S : forall c : C, F c | forall c c' (g : C.(Morphism) c c'), F.(MorphismOf) g (S c) = (S c') }.
 
-  Definition TypeLimit_Morphism : SpecializedNaturalTransformation
+  Definition TypeLimit_Morphism : NaturalTransformation
                                    ((DiagonalFunctor TypeCat C) TypeLimit_Object)
                                    F.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun c : C => (fun S => (proj1_sig S) c))
           _
         )
@@ -91,7 +91,7 @@ Section TypeLimits.
   Defined.
 
   Definition TypeLimit_Property_Morphism A'
-             (φ' : SpecializedNaturalTransformation ((DiagonalFunctor TypeCat C) A') F) :
+             (φ' : NaturalTransformation ((DiagonalFunctor TypeCat C) A') F) :
     A' -> TypeLimit_Object.
     intro x; hnf.
     exists (fun c => ComponentsOf φ' c x).

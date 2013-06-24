@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common SetCategory.
 
 Set Implicit Arguments.
@@ -24,9 +24,9 @@ Section Grothendieck.
      [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
      [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
      *)
-  Context `(C : SpecializedCategory).
-  Variable F : SpecializedFunctor C TypeCat.
-  Variable F' : SpecializedFunctor C SetCat.
+  Context `(C : Category).
+  Variable F : Functor C TypeCat.
+  Variable F' : Functor C SetCat.
 
   Record GrothendieckPair := {
     GrothendieckC' : C;
@@ -86,8 +86,8 @@ Section Grothendieck.
 
   Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
 
-  Definition CategoryOfElements : SpecializedCategory.
-    refine (@Build_SpecializedCategory GrothendieckPair
+  Definition CategoryOfElements : Category.
+    refine (@Build_Category GrothendieckPair
                                        (fun s d =>
                                           { f : C.(Morphism) (GrothendieckC s) (GrothendieckC d) | F.(MorphismOf) f (GrothendieckX s) = (GrothendieckX d) })
                                        (fun o => GrothendieckIdentity (GrothendieckC o) (GrothendieckX o))
@@ -101,7 +101,7 @@ Section Grothendieck.
       ).
   Defined.
 
-  Definition GrothendieckFunctor : SpecializedFunctor CategoryOfElements C.
+  Definition GrothendieckFunctor : Functor CategoryOfElements C.
     refine {| ObjectOf := (fun o : CategoryOfElements => GrothendieckC o);
       MorphismOf := (fun s d (m : CategoryOfElements.(Morphism) s d) => proj1_sig m)
     |}; abstract (eauto with category; intros; destruct_type CategoryOfElements; simpl; reflexivity).
@@ -109,9 +109,9 @@ Section Grothendieck.
 End Grothendieck.
 
 Section SetGrothendieckCoercion.
-  Context `(C : SpecializedCategory).
-  Variable F : SpecializedFunctor C SetCat.
-  Let F' := (F : SpecializedFunctorToSet _) : SpecializedFunctorToType _.
+  Context `(C : Category).
+  Variable F : Functor C SetCat.
+  Let F' := (F : FunctorToSet _) : FunctorToType _.
 
   Definition SetGrothendieck2Grothendieck (G : SetGrothendieckPair F) : GrothendieckPair F'
     := {| GrothendieckC' := G.(SetGrothendieckC'); GrothendieckX' := G.(SetGrothendieckX') : F' _ |}.

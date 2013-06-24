@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export Functor SetCategory SmallCat FunctorCategory Paths.
+Require Export Functor SetCategory Cat FunctorCategory Paths.
 Require Import Common FEqualDep.
 
 Set Implicit Arguments.
@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GraphObj.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
 
@@ -30,8 +30,8 @@ Section GraphObj.
     destruct s, d, d'; simpl in *; trivial.
   Defined.
 
-  Definition GraphIndexingCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory GraphIndex
+  Definition GraphIndexingCategory : Category.
+    refine (@Build_Category GraphIndex
                                        GraphIndex_Morphism
                                        (fun x => match x with GraphIndexSource => tt | GraphIndexTarget => tt end)
                                        GraphIndex_Compose
@@ -67,11 +67,11 @@ Section GraphObj.
       | (GraphIndexTarget, GraphIndexTarget) => fun _ => @id _
     end m.
 
-  Definition UnderlyingGraph : SpecializedFunctor GraphIndexingCategory TypeCat.
+  Definition UnderlyingGraph : Functor GraphIndexingCategory TypeCat.
   Proof.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           UnderlyingGraph_ObjectOf
           UnderlyingGraph_MorphismOf
           _
@@ -88,7 +88,7 @@ Section GraphObj.
 End GraphObj.
 
 Section GraphFunctor.
-  Let UnderlyingGraphFunctor_ObjectOf (C : SmallCat) : SpecializedFunctor GraphIndexingCategory TypeCat :=
+  Let UnderlyingGraphFunctor_ObjectOf (C : Cat) : Functor GraphIndexingCategory TypeCat :=
     UnderlyingGraph C.
 
   Local Ltac t :=
@@ -102,7 +102,7 @@ Section GraphFunctor.
                | _ => progress destruct_sig; simpl in *
              end.
 
-  Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism SmallCat C D) :
+  Definition UnderlyingGraphFunctor_MorphismOf C D (F : Morphism Cat C D) :
     Morphism (TypeCat ^ GraphIndexingCategory) (UnderlyingGraph C) (UnderlyingGraph D).
   Proof.
     exists (fun c => match c as c return (UnderlyingGraph C) c -> (UnderlyingGraph D) c with
@@ -112,11 +112,11 @@ Section GraphFunctor.
     abstract t.
   Defined.
 
-  Definition UnderlyingGraphFunctor : SpecializedFunctor SmallCat (TypeCat ^ GraphIndexingCategory).
+  Definition UnderlyingGraphFunctor : Functor Cat (TypeCat ^ GraphIndexingCategory).
   Proof.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           UnderlyingGraphFunctor_ObjectOf
           UnderlyingGraphFunctor_MorphismOf
           _
@@ -137,15 +137,15 @@ Section GraphFunctor.
 End GraphFunctor.
 
 Section FreeCategory.
-  Variable F : SpecializedFunctor GraphIndexingCategory TypeCat.
+  Variable F : Functor GraphIndexingCategory TypeCat.
 
   Let vertices := F GraphIndexTarget.
 
   Hint Rewrite concatenate_p_noedges concatenate_noedges_p concatenate_associative.
 
-  Definition FreeCategory : SpecializedCategory.
+  Definition FreeCategory : Category.
   Proof.
-    refine (@Build_SpecializedCategory
+    refine (@Build_Category
               vertices
               _
               (@NoEdges _ _)

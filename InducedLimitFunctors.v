@@ -1,5 +1,5 @@
-Require Export LimitFunctorTheorems SpecializedLaxCommaCategory.
-Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation Duals CanonicalStructureSimplification.
+Require Export LimitFunctorTheorems LaxCommaCategory.
+Require Import Common DefinitionSimplification Category Functor NaturalTransformation Duals CanonicalStructureSimplification.
 
 Set Implicit Arguments.
 
@@ -14,14 +14,14 @@ Section InducedFunctor.
      a category that we're coming from.  So prove them separately, so
      we can use them elsewhere, without assuming a full [HasLimits]. *)
   Variable I : Type.
-  Variable Index2Cat : I -> SpecializedCategory.
+  Variable Index2Cat : I -> Category.
 
-  Local Coercion Index2Cat : I >-> SpecializedCategory.
+  Local Coercion Index2Cat : I >-> Category.
 
-  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ Index2Cat D).
-  Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ Index2Cat D).
+  Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ Index2Cat D).
+  Local Notation "'CAT' ⇓ D" := (@LaxSliceCategory _ Index2Cat D).
 
-  Context `(D : SpecializedCategory).
+  Context `(D : Category).
   Let DOp := OppositeCategory D.
 
   Section Limit.
@@ -83,10 +83,10 @@ Section InducedFunctor.
 
     Hint Resolve InducedLimitFunctor_FCompositionOf InducedLimitFunctor_FIdentityOf.
 
-    Definition InducedLimitFunctor : SpecializedFunctor (CAT ⇑ D) D.
+    Definition InducedLimitFunctor : Functor (CAT ⇑ D) D.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
             (fun x => LimitObject (HasLimits x))
             (fun s d => @InducedLimitFunctor_MorphismOf s d (HasLimits s) (HasLimits d))
             _
@@ -155,10 +155,10 @@ Section InducedFunctor.
 
     Hint Resolve InducedColimitFunctor_FCompositionOf InducedColimitFunctor_FIdentityOf.
 
-    Definition InducedColimitFunctor : SpecializedFunctor (CAT ⇓ D) D.
+    Definition InducedColimitFunctor : Functor (CAT ⇓ D) D.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
             (fun x => ColimitObject (HasColimits x))
             (fun s d => @InducedColimitFunctor_MorphismOf s d (HasColimits s) (HasColimits d))
             _

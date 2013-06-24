@@ -12,21 +12,21 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section LimitFunctors.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
-  Definition HasLimits' := forall F : SpecializedFunctor D C, exists _ : Limit F, True.
-  Definition HasLimits := forall F : SpecializedFunctor D C, Limit F.
+  Definition HasLimits' := forall F : Functor D C, exists _ : Limit F, True.
+  Definition HasLimits := forall F : Functor D C, Limit F.
 
-  Definition HasColimits' := forall F : SpecializedFunctor D C, exists _ : Colimit F, True.
-  Definition HasColimits := forall F : SpecializedFunctor D C, Colimit F.
+  Definition HasColimits' := forall F : Functor D C, exists _ : Colimit F, True.
+  Definition HasColimits := forall F : Functor D C, Colimit F.
 
   Hypothesis HL : HasLimits.
   Hypothesis HC : HasColimits.
 
-  Definition LimitFunctor : SpecializedFunctor (C ^ D) C
+  Definition LimitFunctor : Functor (C ^ D) C
     := Eval unfold AdjointFunctorOfTerminalMorphism in AdjointFunctorOfTerminalMorphism (D := C ^ D) HL.
-  Definition ColimitFunctor : SpecializedFunctor (C ^ D) C
+  Definition ColimitFunctor : Functor (C ^ D) C
     := Eval unfold AdjointFunctorOfInitialMorphism in AdjointFunctorOfInitialMorphism (C := C ^ D) HC.
 
   Definition LimitAdjunction : Adjunction (DiagonalFunctor C D) LimitFunctor

@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Graph GraphTranslation.
+Require Export Category Graph GraphTranslation.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -14,8 +14,8 @@ Section ComputableGraphCategory.
 
   Local Coercion Index2Graph : I >-> Graph.
 
-  Definition ComputableGraphCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory _
+  Definition ComputableGraphCategory : Category.
+    refine (@Build_Category _
                                        (fun C D : I => GraphTranslation C D)
                                        (fun o : I => IdentityGraphTranslation o)
                                        (fun C D E : I => ComposeGraphTranslations (C := C) (D := D) (E := E))

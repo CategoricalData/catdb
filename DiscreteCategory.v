@@ -1,4 +1,4 @@
-Require Export SpecializedCategory.
+Require Export Category.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -30,8 +30,8 @@ Section DCategory.
   Global Arguments DiscreteCategory_Compose [s d d'] m m' /.
   Global Arguments DiscreteCategory_Identity o /.
 
-  Definition DiscreteCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory O
+  Definition DiscreteCategory : Category.
+    refine (@Build_Category O
                                        DiscreteCategory_Morphism
                                        DiscreteCategory_Identity
                                        DiscreteCategory_Compose

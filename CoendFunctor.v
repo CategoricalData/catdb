@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Local Open Scope type_scope.
 
 Section Coend.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Let COp := OppositeCategory C.
 
@@ -52,9 +52,9 @@ Section Coend.
     end.
   Defined.
 
-  Definition CoendFunctor_Index : SpecializedCategory.
+  Definition CoendFunctor_Index : Category.
   Proof.
-    refine (@Build_SpecializedCategory CoendFunctor_Index_Object
+    refine (@Build_Category CoendFunctor_Index_Object
                                        CoendFunctor_Index_Morphism
                                        CoendFunctor_Index_Identity
                                        CoendFunctor_Index_Compose
@@ -105,9 +105,9 @@ Section Coend.
       | _ => injection H; intros; subst
     end.
 
-  Definition CoendFunctor_Diagram_pre : SpecializedFunctor CoendFunctor_Index (COp * C).
+  Definition CoendFunctor_Diagram_pre : Functor CoendFunctor_Index (COp * C).
   Proof.
-    refine (Build_SpecializedFunctor
+    refine (Build_Functor
       CoendFunctor_Index (COp * C)
       CoendFunctor_Diagram_ObjectOf_pre
       CoendFunctor_Diagram_MorphismOf_pre
@@ -133,12 +133,12 @@ Section Coend.
 End Coend.
 
 Section CoendFunctor.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Let COp := OppositeCategory C.
 
-  Hypothesis HasColimits : forall F : SpecializedFunctor (CoendFunctor_Index C) D, Colimit F.
+  Hypothesis HasColimits : forall F : Functor (CoendFunctor_Index C) D, Colimit F.
 
   Let CoendFunctor_post := ColimitFunctor HasColimits.
 

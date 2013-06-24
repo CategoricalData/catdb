@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Paths.
+Require Export Category Paths.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -14,8 +14,8 @@ Section PCategory.
   Hint Immediate concatenate_associative.
   Hint Rewrite concatenate_associative.
 
-  Definition PathsCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory V
+  Definition PathsCategory : Category.
+    refine (@Build_Category V
                                        (@path V E)
                                        (@NoEdges _ _)
                                        (fun _ _ _ p p' => concatenate p' p)

@@ -10,17 +10,17 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ProductNaturalTransformation.
-  Context `{A : SpecializedCategory}.
-  Context `{B : SpecializedCategory}.
-  Context `{C : SpecializedCategory}.
-  Context `{D : SpecializedCategory}.
-  Variables F F' : SpecializedFunctor A B.
-  Variables G G' : SpecializedFunctor C D.
-  Variable T : SpecializedNaturalTransformation F F'.
-  Variable U : SpecializedNaturalTransformation G G'.
+  Context `{A : Category}.
+  Context `{B : Category}.
+  Context `{C : Category}.
+  Context `{D : Category}.
+  Variables F F' : Functor A B.
+  Variables G G' : Functor C D.
+  Variable T : NaturalTransformation F F'.
+  Variable U : NaturalTransformation G G'.
 
-  Definition ProductNaturalTransformation : SpecializedNaturalTransformation (F * G) (F' * G').
-    refine (Build_SpecializedNaturalTransformation (F * G) (F' * G')
+  Definition ProductNaturalTransformation : NaturalTransformation (F * G) (F' * G').
+    refine (Build_NaturalTransformation (F * G) (F' * G')
       (fun ac : A * C => (T (fst ac), U (snd ac)))
       _
     );

@@ -21,17 +21,17 @@ Section SemiSimplicialSets.
      which we will use to make simplicial sets without having to worry
      about "degneracies". *)
 
-  Definition SemiSimplexCategory : SpecializedCategory.
+  Definition SemiSimplexCategory : Category.
     eapply (WideSubcategory Δ (@IsMonomorphism _));
     abstract eauto with morphism.
   Defined.
 
   Local Notation Γ := SemiSimplexCategory.
 
-  Definition SemiSimplexCategoryInclusionFunctor : SpecializedFunctor Γ Δ
+  Definition SemiSimplexCategoryInclusionFunctor : Functor Γ Δ
     := WideSubcategoryInclusionFunctor _ _ _ _.
 
-  Definition SemiSimplicialCategory `(C : SpecializedCategory) := (C ^ (OppositeCategory Γ))%category.
+  Definition SemiSimplicialCategory `(C : Category) := (C ^ (OppositeCategory Γ))%category.
 
   Definition SemiSimplicialSet := SemiSimplicialCategory SetCat.
   Definition SemiSimplicialType := SemiSimplicialCategory TypeCat.

@@ -10,15 +10,15 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorialComposition.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
 
-  Definition FunctorialComposition : SpecializedFunctor ((E ^ D) * (D ^ C)) (E ^ C).
+  Definition FunctorialComposition : Functor ((E ^ D) * (D ^ C)) (E ^ C).
   Proof.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           (fun fg => ComposeFunctors (fst fg) (snd fg))
           (fun _ _ tu => NTComposeF (fst tu) (snd tu))
           _

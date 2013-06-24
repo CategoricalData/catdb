@@ -10,14 +10,14 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorProduct.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(D' : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(D' : Category).
 
-  Definition FunctorProduct (F : Functor C D) (F' : Functor C D') : SpecializedFunctor C (D * D').
+  Definition FunctorProduct (F : Functor C D) (F' : Functor C D') : Functor C (D * D').
     match goal with
-      | [ |- SpecializedFunctor ?C0 ?D0 ] =>
-        refine (Build_SpecializedFunctor
+      | [ |- Functor ?C0 ?D0 ] =>
+        refine (Build_Functor
                   C0 D0
                   (fun c => (F c, F' c))
                   (fun s d m => (MorphismOf F m, MorphismOf F' m))
@@ -30,12 +30,12 @@ Section FunctorProduct.
   Definition FunctorProductFunctorial
              (F G : Functor C D)
              (F' G' : Functor C D')
-             (T : SpecializedNaturalTransformation F G)
-             (T' : SpecializedNaturalTransformation F' G')
-  : SpecializedNaturalTransformation (FunctorProduct F F') (FunctorProduct G G').
+             (T : NaturalTransformation F G)
+             (T' : NaturalTransformation F' G')
+  : NaturalTransformation (FunctorProduct F F') (FunctorProduct G G').
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
                                                        (fun x => (T x, T' x))
                                                        _)
     end.
@@ -44,14 +44,14 @@ Section FunctorProduct.
 End FunctorProduct.
 
 Section FunctorProduct'.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(C' : SpecializedCategory).
-  Context `(D' : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(C' : Category).
+  Context `(D' : Category).
   Variable F : Functor C D.
   Variable F' : Functor C' D'.
 
-  Definition FunctorProduct' : SpecializedFunctor  (C * C') (D * D')
+  Definition FunctorProduct' : Functor  (C * C') (D * D')
     := FunctorProduct (ComposeFunctors F fst_Functor) (ComposeFunctors F' snd_Functor).
 End FunctorProduct'.
 

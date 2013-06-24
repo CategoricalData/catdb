@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance.
-Require Export SpecializedCategory Functor ProductCategory FunctorProduct NaturalTransformation NaturalEquivalence.
+Require Export Category Functor ProductCategory FunctorProduct NaturalTransformation NaturalEquivalence.
 Require Import Common Notations StructureEquality DefinitionSimplification.
 
 Set Implicit Arguments.
@@ -17,12 +17,12 @@ Section PreMonoidalCategory.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      *)
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   (**
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
          monoidal product,
     *)
-  Variable TensorProduct : SpecializedFunctor (C * C) C.
+  Variable TensorProduct : Functor (C * C) C.
 
   Let src {s d} (_ : Morphism C s d) := s.
   Let dst {s d} (_ : Morphism C s d) := d.
@@ -132,8 +132,8 @@ Section PreMonoidalCategory.
     Morphism C (TriMonoidalProductR_ObjectOf s) (TriMonoidalProductR_ObjectOf d)
     := Eval cbv beta iota zeta delta [TriMonoidalProductR_MorphismOf''] in @TriMonoidalProductR_MorphismOf'' s d m.
 
-  Definition TriMonoidalProductL' : SpecializedFunctor (C * C * C) C.
-    refine (Build_SpecializedFunctor (C * C * C) C
+  Definition TriMonoidalProductL' : Functor (C * C * C) C.
+    refine (Build_Functor (C * C * C) C
       TriMonoidalProductL_ObjectOf
       TriMonoidalProductL_MorphismOf
       _
@@ -148,8 +148,8 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition TriMonoidalProductR' : SpecializedFunctor (C * C * C) C.
-    refine (Build_SpecializedFunctor (C * C * C) C
+  Definition TriMonoidalProductR' : Functor (C * C * C) C.
+    refine (Build_Functor (C * C * C) C
       TriMonoidalProductR_ObjectOf
       TriMonoidalProductR_MorphismOf
       _
@@ -164,11 +164,11 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition TriMonoidalProductL'' : SpecializedFunctor (C * C * C) C.
+  Definition TriMonoidalProductL'' : Functor (C * C * C) C.
     simpl_definition_by_tac_and_exact TriMonoidalProductL' ltac:(idtac; subst_body).
   Defined.
 
-  Definition TriMonoidalProductR'' : SpecializedFunctor (C * C * C) C.
+  Definition TriMonoidalProductR'' : Functor (C * C * C) C.
     simpl_definition_by_tac_and_exact TriMonoidalProductR' ltac:(idtac; subst_body).
   Defined.
 
@@ -195,7 +195,7 @@ Section PreMonoidalCategory.
            right unitor, with components
            [λ A : I ⊗ A ~= A] and [ρ A : A ⊗ I ~= A].
      *)
-  Definition LeftUnitorFunctor : SpecializedFunctor C C.
+  Definition LeftUnitorFunctor : Functor C C.
     clear TriMonoidalProductL_MorphismOf TriMonoidalProductR_MorphismOf
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
@@ -213,7 +213,7 @@ Section PreMonoidalCategory.
     ).
   Defined.
 
-  Definition RightUnitorFunctor : SpecializedFunctor C C.
+  Definition RightUnitorFunctor : Functor C C.
     clear TriMonoidalProductL_MorphismOf TriMonoidalProductR_MorphismOf
       TriMonoidalProductL_MorphismOf' TriMonoidalProductR_MorphismOf'
       TriMonoidalProductL_MorphismOf'' TriMonoidalProductR_MorphismOf''
@@ -356,15 +356,15 @@ Section MonoidalCategory.
   Local Reserved Notation "'λ'".
   Local Reserved Notation "'ρ'".
 
-  Let src (C : SpecializedCategory) {s d} (_ : Morphism C s d) := s.
-  Let dst (C : SpecializedCategory) s d (_ : Morphism C s d) := d.
+  Let src (C : Category) {s d} (_ : Morphism C s d) := s.
+  Let dst (C : Category) s d (_ : Morphism C s d) := d.
 
   Let AssociatorCoherenceCondition' := Eval unfold AssociatorCoherenceCondition in @AssociatorCoherenceCondition.
   Let UnitorCoherenceCondition' := Eval unfold UnitorCoherenceCondition in @UnitorCoherenceCondition.
 
   Record MonoidalCategory := {
-    MonoidalUnderlyingCategory :> SpecializedCategory;
-    TensorProduct : SpecializedFunctor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
+    MonoidalUnderlyingCategory :> Category;
+    TensorProduct : Functor (MonoidalUnderlyingCategory * MonoidalUnderlyingCategory) MonoidalUnderlyingCategory
       where "A ⊗ B" := (TensorProduct (A, B)) and "A ⊗m B" := (TensorProduct.(MorphismOf) (s := (@src _ _ _ A, @src _ _ _ B)) (d := (@dst _ _ _ A, @dst _ _ _ B)) (A, B)%morphism);
 
     IdentityObject : MonoidalUnderlyingCategory where "'I'" := IdentityObject;

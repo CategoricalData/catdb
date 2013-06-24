@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance Setoid.
-Require Export SpecializedCategory.
+Require Export Category.
 Require Import Common StructureEquality.
 
 Set Implicit Arguments.
@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Category.
-  Context `{C : SpecializedCategory}.
+  Context `{C : Category}.
 
   (* [m'] is the inverse of [m] if both compositions are
      equivalent to the relevant identity morphisms. *)
@@ -204,8 +204,8 @@ Ltac eapply_by_compose H :=
     | [ |- @Compose ?C _ _ _ _ _ = _ ] => eapply (H C)
     | [ |- _ = @Compose ?C _ _ _ _ _ ] => eapply (H C)
     | _ => eapply H
-    | [ C : SpecializedCategory |- _ ] => eapply (H C)
-    | [ C : ?T |- _ ] => match eval hnf in T with | SpecializedCategory => eapply (H C) end
+    | [ C : Category |- _ ] => eapply (H C)
+    | [ C : ?T |- _ ] => match eval hnf in T with | Category => eapply (H C) end
   end.
 
 Ltac solve_isomorphism := destruct_hypotheses;
@@ -229,7 +229,7 @@ Ltac pre_compose_to_identity :=
   [ solve_isomorphism | ].
 
 Section CategoryObjects1.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
@@ -303,7 +303,7 @@ Arguments IsTerminalObject' {C} o.
 Arguments IsTerminalObject {C} o.
 
 Section CategoryObjects2.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Ltac unique := hnf; intros; specialize_all_ways; destruct_sig;
     unfold is_unique, unique, uniqueness in *;

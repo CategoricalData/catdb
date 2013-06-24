@@ -37,12 +37,12 @@ Section Coend.
      ]]
      where the triangles denote induced colimit morphisms.
      *)
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Let COp := OppositeCategory C.
 
-  Variable F : SpecializedFunctor (COp * C) D.
+  Variable F : Functor (COp * C) D.
 
   Let MorC := @MorphismFunctor _ (fun _ : unit => C) tt. (* [((c0, c1) & f : morC c0 c1)], the set of morphisms of C *)
 
@@ -60,8 +60,8 @@ Section Coend.
                               Fob);
     hnf; simpl.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
-        refine (Build_SpecializedNaturalTransformation F0 G0
+      | [ |- NaturalTransformation ?F0 ?G0 ] =>
+        refine (Build_NaturalTransformation F0 G0
           (fun sdf => let s := fst (projT1 sdf) in MorphismOf F (s := (_, s)) (d := (_, s)) (projT2 sdf, Identity (C := C) s))
           _
         )
@@ -74,8 +74,8 @@ Section Coend.
     apply (InducedColimitMap (G := InducedDiscreteFunctor (DiscreteCategory COp) (CodomainNaturalTransformation (fun _ => C) tt))).
     hnf; simpl.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F0 ?G0 ] =>
-        refine (Build_SpecializedNaturalTransformation F0 G0
+      | [ |- NaturalTransformation ?F0 ?G0 ] =>
+        refine (Build_NaturalTransformation F0 G0
           (fun sdf => let d := snd (projT1 sdf) in MorphismOf F (s := (d, _)) (d := (d, _)) (Identity (C := C) d, projT2 sdf))
           _
         )

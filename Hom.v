@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export SpecializedCategory Functor Duals SetCategory ProductCategory.
+Require Export Category Functor Duals SetCategory ProductCategory.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -17,12 +17,12 @@ Local Open Scope category_scope.
 
 Section covariant_contravariant.
   Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
-  Definition CovariantHomFunctor `(C : SpecializedCategory) (A : OppositeCategory C) :=
+  Definition CovariantHomFunctor `(C : Category) (A : OppositeCategory C) :=
     Eval simpl in ((HomFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomFunctor `(C : SpecializedCategory) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+  Definition ContravariantHomFunctor `(C : Category) (A : C) := ((HomFunctor C) [ -, A ])%functor.
 
-  Definition CovariantHomSetFunctor `(C : @LocallySmallSpecializedCategory morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomSetFunctor `(C : @LocallySmallSpecializedCategory morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
+  Definition CovariantHomSetFunctor `(C : @Category morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
+  Definition ContravariantHomSetFunctor `(C : @Category morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
 End covariant_contravariant.
 
 but that would introduce an extra identity morphism which some tactics
@@ -30,14 +30,14 @@ have a bit of trouble with.  *sigh*
 *)
 
 Section HomFunctor.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Let COp := OppositeCategory C.
 
   Section Covariant.
     Variable A : COp.
 
-    Definition CovariantHomFunctor : SpecializedFunctor C TypeCat.
-      refine (Build_SpecializedFunctor C TypeCat
+    Definition CovariantHomFunctor : Functor C TypeCat.
+      refine (Build_Functor C TypeCat
         (fun X : C => C.(Morphism) A X : TypeCat)
         (fun X Y f => (fun g : C.(Morphism) A X => Compose f g))
         _
@@ -50,8 +50,8 @@ Section HomFunctor.
   Section Contravariant.
     Variable B : C.
 
-    Definition ContravariantHomFunctor : SpecializedFunctor COp TypeCat.
-      refine (Build_SpecializedFunctor COp TypeCat
+    Definition ContravariantHomFunctor : Functor COp TypeCat.
+      refine (Build_Functor COp TypeCat
         (fun X : COp => COp.(Morphism) B X : TypeCat)
         (fun X Y (h : COp.(Morphism) X Y) => (fun g : COp.(Morphism) B X => Compose h g))
         _
@@ -72,8 +72,8 @@ Section HomFunctor.
     exact (Compose f (Compose g h)).
   Defined.
 
-  Definition HomFunctor : SpecializedFunctor (COp * C) TypeCat.
-    refine (Build_SpecializedFunctor (COp * C) TypeCat
+  Definition HomFunctor : Functor (COp * C) TypeCat.
+    refine (Build_Functor (COp * C) TypeCat
       (fun c'c : COp * C => C.(Morphism) (fst c'c) (snd c'c) : TypeCat)
       (fun X Y (hf : (COp * C).(Morphism) X Y) => hom_functor_morphism_of hf)
       _
@@ -89,7 +89,7 @@ Section HomFunctor.
 End HomFunctor.
 
 Section SplitHomFunctor.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Let COp := OppositeCategory C.
 
   Lemma SplitHom (X Y : COp * C) : forall gh,

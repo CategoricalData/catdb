@@ -1,6 +1,6 @@
 Require Import JMeq.
 Require Export Grothendieck FunctorCategory SetCategory.
-Require Import Common Notations SmallCat SpecializedCommaCategory NatCategory FEqualDep.
+Require Import Common Notations Cat CommaCategory NatCategory FEqualDep.
 
 Set Implicit Arguments.
 
@@ -12,11 +12,11 @@ Set Universe Polymorphism.
 
 Section GrothendieckNondependentFunctorial.
   Local Open Scope category_scope.
-  Local Notation "Cat / C" := (SliceSpecializedCategoryOver Cat C).
+  Local Notation "Cat / C" := (SliceCategoryOver Cat C).
 
-  Context `(C : @LocallySmallSpecializedCategory).
+  Context `(C : @Category).
 
-  Let Cat := LocallySmallCat.
+  Let Cat := Cat.
 
   Section functorial.
     Section object_of.
@@ -25,20 +25,20 @@ Section GrothendieckNondependentFunctorial.
       : Cat / C.
         hnf.
         match goal with
-          | [ |- CommaSpecializedCategory_Object ?F ?G ] => refine (_ : CommaSpecializedCategory_ObjectT F G)
+          | [ |- CommaCategory_Object ?F ?G ] => refine (_ : CommaCategory_ObjectT F G)
         end.
         hnf; simpl.
         exists (((CategoryOfElements x
-                  : LocallySmallSpecializedCategory)
-                 : LocallySmallCategory),
+                  : Category)
+                 : Category),
                tt).
         exact (GrothendieckFunctor _).
       Defined.
     End object_of.
 
     Section morphism_of.
-      Variables F G : SpecializedFunctor C TypeCat.
-      Variable T : SpecializedNaturalTransformation F G.
+      Variables F G : Functor C TypeCat.
+      Variable T : NaturalTransformation F G.
 
       Definition CategoryOfElementsFunctorial'_MorphismOf_ObjectOf
       : CategoryOfElements F -> CategoryOfElements G
@@ -65,7 +65,7 @@ Section GrothendieckNondependentFunctorial.
 
       Definition CategoryOfElementsFunctorial'_MorphismOf
       : Functor (CategoryOfElements F) (CategoryOfElements G).
-        refine (Build_SpecializedFunctor (CategoryOfElements F) (CategoryOfElements G)
+        refine (Build_Functor (CategoryOfElements F) (CategoryOfElements G)
                                          CategoryOfElementsFunctorial'_MorphismOf_ObjectOf
                                          CategoryOfElementsFunctorial'_MorphismOf_MorphismOf
                                          _
@@ -79,8 +79,8 @@ Section GrothendieckNondependentFunctorial.
                  (CategoryOfElementsFunctorial_ObjectOf G).
         hnf.
         match goal with
-          | [ |- CommaSpecializedCategory_Morphism ?F ?G ]
-            => refine (_ : CommaSpecializedCategory_MorphismT F G)
+          | [ |- CommaCategory_Morphism ?F ?G ]
+            => refine (_ : CommaCategory_MorphismT F G)
         end.
         hnf; simpl.
         exists (CategoryOfElementsFunctorial'_MorphismOf, eq_refl).
@@ -92,7 +92,7 @@ Section GrothendieckNondependentFunctorial.
       repeat match goal with
                | _ => intro
                | _ => reflexivity
-               | _ => apply CommaSpecializedCategory_Morphism_eq
+               | _ => apply CommaCategory_Morphism_eq
                | _ => progress simpl
                | _ => progress simpl_eq
                | _ => progress destruct_head_hnf @GrothendieckPair
@@ -103,9 +103,9 @@ Section GrothendieckNondependentFunctorial.
              end.
 
     Definition CategoryOfElementsFunctorial'
-    : SpecializedFunctor (TypeCat ^ C) Cat.
-      refine (Build_SpecializedFunctor (TypeCat ^ C) Cat
-                                       (fun x => CategoryOfElements x : LocallySmallSpecializedCategory)
+    : Functor (TypeCat ^ C) Cat.
+      refine (Build_Functor (TypeCat ^ C) Cat
+                                       (fun x => CategoryOfElements x : Category)
                                        CategoryOfElementsFunctorial'_MorphismOf
                                        _
                                        _);
@@ -113,8 +113,8 @@ Section GrothendieckNondependentFunctorial.
     Defined.
 
     Definition CategoryOfElementsFunctorial
-    : SpecializedFunctor (TypeCat ^ C) (Cat / C).
-      refine (Build_SpecializedFunctor (TypeCat ^ C) (Cat / C)
+    : Functor (TypeCat ^ C) (Cat / C).
+      refine (Build_Functor (TypeCat ^ C) (Cat / C)
                                        CategoryOfElementsFunctorial_ObjectOf
                                        CategoryOfElementsFunctorial_MorphismOf
                                        _

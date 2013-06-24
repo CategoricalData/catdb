@@ -1,5 +1,5 @@
 Require Import JMeq FunctionalExtensionality.
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common Notations FunctorAttributes.
 
 Set Implicit Arguments.
@@ -23,14 +23,14 @@ Local Ltac faithful_t :=
           end).
 
 Section sig_obj_mor.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
   Variable Pobj : A -> Prop.
   Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Prop.
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Definition SpecializedCategory_sig : SpecializedCategory.
-    refine (@Build_SpecializedCategory
+  Definition Category_sig : Category.
+    refine (@Build_Category
               (sig Pobj)
               (fun s d => sig (@Pmor s d))
               (fun x => exist _ _ (Pidentity x))
@@ -42,8 +42,8 @@ Section sig_obj_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Definition proj1_sig_functor : SpecializedFunctor SpecializedCategory_sig A
-    := Build_SpecializedFunctor SpecializedCategory_sig A
+  Definition proj1_sig_functor : Functor Category_sig A
+    := Build_Functor Category_sig A
                                 (@proj1_sig _ _)
                                 (fun s d => @proj1_sig _ _)
                                 (fun _ _ _ _ _ => eq_refl)
@@ -57,11 +57,11 @@ End sig_obj_mor.
 Arguments proj1_sig_functor {A Pobj Pmor Pidentity Pcompose}.
 
 Section sig_obj.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
   Variable Pobj : A -> Prop.
 
-  Definition SpecializedCategory_sig_obj : SpecializedCategory.
-    refine (@Build_SpecializedCategory
+  Definition Category_sig_obj : Category.
+    refine (@Build_Category
               (sig Pobj)
               (fun s d => A.(Morphism) (proj1_sig s) (proj1_sig d))
               (fun x => Identity (C := A) (proj1_sig x))
@@ -73,25 +73,25 @@ Section sig_obj.
     abstract (intros; destruct_sig; simpl; auto with category).
   Defined.
 
-  Definition proj1_sig_obj_functor : SpecializedFunctor SpecializedCategory_sig_obj A
-    := Build_SpecializedFunctor SpecializedCategory_sig_obj A
+  Definition proj1_sig_obj_functor : Functor Category_sig_obj A
+    := Build_Functor Category_sig_obj A
                                 (@proj1_sig _ _)
                                 (fun s d m => m)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition SpecializedCategory_sig_obj_as_sig : SpecializedCategory
-    := @SpecializedCategory_sig A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I).
+  Definition Category_sig_obj_as_sig : Category
+    := @Category_sig A Pobj (fun _ _ _ => True) (fun _ => I) (fun _ _ _ _ _ _ _ => I).
 
-  Definition sig_functor_obj : SpecializedFunctor SpecializedCategory_sig_obj_as_sig SpecializedCategory_sig_obj
-    := Build_SpecializedFunctor SpecializedCategory_sig_obj_as_sig SpecializedCategory_sig_obj
+  Definition sig_functor_obj : Functor Category_sig_obj_as_sig Category_sig_obj
+    := Build_Functor Category_sig_obj_as_sig Category_sig_obj
                                 (fun x => x)
                                 (fun _ _ => @proj1_sig _ _)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition sig_functor_obj_inv : SpecializedFunctor SpecializedCategory_sig_obj SpecializedCategory_sig_obj_as_sig
-    := Build_SpecializedFunctor SpecializedCategory_sig_obj SpecializedCategory_sig_obj_as_sig
+  Definition sig_functor_obj_inv : Functor Category_sig_obj Category_sig_obj_as_sig
+    := Build_Functor Category_sig_obj Category_sig_obj_as_sig
                                 (fun x => x)
                                 (fun _ _ m => exist _ m I)
                                 (fun _ _ _ _ _ => eq_refl)
@@ -113,14 +113,14 @@ End sig_obj.
 Arguments proj1_sig_obj_functor {A Pobj}.
 
 Section sig_mor.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
   Variable Pmor : forall s d, A.(Morphism) s d -> Prop.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Definition SpecializedCategory_sig_mor : SpecializedCategory.
-    refine (@Build_SpecializedCategory
+  Definition Category_sig_mor : Category.
+    refine (@Build_Category
               A
               (fun s d => sig (@Pmor s d))
               (fun x => exist _ (Identity (C := A) x) (Pidentity x))
@@ -132,25 +132,25 @@ Section sig_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Definition proj1_sig_mor_functor : SpecializedFunctor SpecializedCategory_sig_mor A
-    := Build_SpecializedFunctor SpecializedCategory_sig_mor A
+  Definition proj1_sig_mor_functor : Functor Category_sig_mor A
+    := Build_Functor Category_sig_mor A
                                 (fun x => x)
                                 (fun s d => @proj1_sig _ _)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition SpecializedCategory_sig_mor_as_sig : SpecializedCategory
-    := @SpecializedCategory_sig A (fun _ => True) (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2).
+  Definition Category_sig_mor_as_sig : Category
+    := @Category_sig A (fun _ => True) (fun s d => @Pmor (proj1_sig s) (proj1_sig d)) (fun _ => Pidentity _) (fun _ _ _ _ _ m1 m2 => Pcompose m1 m2).
 
-  Definition sig_functor_mor : SpecializedFunctor SpecializedCategory_sig_mor_as_sig SpecializedCategory_sig_mor
-    := Build_SpecializedFunctor SpecializedCategory_sig_mor_as_sig SpecializedCategory_sig_mor
+  Definition sig_functor_mor : Functor Category_sig_mor_as_sig Category_sig_mor
+    := Build_Functor Category_sig_mor_as_sig Category_sig_mor
                                 (@proj1_sig _ _)
                                 (fun _ _ m => m)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition sig_functor_mor_inv : SpecializedFunctor SpecializedCategory_sig_mor SpecializedCategory_sig_mor_as_sig
-    := Build_SpecializedFunctor SpecializedCategory_sig_mor SpecializedCategory_sig_mor_as_sig
+  Definition sig_functor_mor_inv : Functor Category_sig_mor Category_sig_mor_as_sig
+    := Build_Functor Category_sig_mor Category_sig_mor_as_sig
                                 (fun x => exist _ x I)
                                 (fun _ _ m => m)
                                 (fun _ _ _ _ _ => eq_refl)

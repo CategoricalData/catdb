@@ -1,5 +1,5 @@
 Require Import Bool.
-Require Import SpecializedCategory Functor NaturalTransformation.
+Require Import Category Functor NaturalTransformation.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -18,21 +18,21 @@ Local Ltac do_simplification :=
     repeat rewrite ?FCompositionOf.
 
 Section ReifiedMorphism.
-  Inductive ReifiedMorphism : forall (C : SpecializedCategory), C -> C -> Type :=
+  Inductive ReifiedMorphism : forall (C : Category), C -> C -> Type :=
   | ReifiedIdentityMorphism : forall C x, @ReifiedMorphism C x x
   | ReifiedComposedMorphism : forall C s d d', ReifiedMorphism C d d' -> ReifiedMorphism C s d -> @ReifiedMorphism C s d'
-  | ReifiedNaturalTransformationMorphism : forall (B : SpecializedCategory)
-                                                  (C : SpecializedCategory)
-                                                  (F G : SpecializedFunctor B C)
-                                                  (T : SpecializedNaturalTransformation F G)
+  | ReifiedNaturalTransformationMorphism : forall (B : Category)
+                                                  (C : Category)
+                                                  (F G : Functor B C)
+                                                  (T : NaturalTransformation F G)
                                                   x,
                                              ReifiedMorphism C (F x) (G x)
-  | ReifiedFunctorMorphism : forall (B : SpecializedCategory)
-                                    (C : SpecializedCategory)
-                                    (F : SpecializedFunctor B C)
+  | ReifiedFunctorMorphism : forall (B : Category)
+                                    (C : Category)
+                                    (F : Functor B C)
                                     s d,
                                @ReifiedMorphism B s d -> @ReifiedMorphism C (F s) (F d)
-  | ReifiedGenericMorphism : forall (C : SpecializedCategory) s d, Morphism C s d -> @ReifiedMorphism C s d.
+  | ReifiedGenericMorphism : forall (C : Category) s d, Morphism C s d -> @ReifiedMorphism C s d.
 
   Fixpoint ReifiedMorphismDenote C s d (m : @ReifiedMorphism C s d) : Morphism C s d :=
     match m in @ReifiedMorphism C s d return Morphism C s d with
@@ -176,7 +176,7 @@ Section SimplifiedMorphism.
       destruct H';
       simpl in H.
 
-  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity `(C : SpecializedCategory) s d
+  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity `(C : Category) s d
            (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (proj1_sig (ReifiedMorphismSimplifyWithProof m)) = false}
     + { exists H : s = d, proj1_sig (ReifiedMorphismSimplifyWithProof m) = match H with eq_refl => ReifiedIdentityMorphism C s end }.
@@ -224,7 +224,7 @@ Section SimplifiedMorphism.
 
   Local Arguments ReifiedMorphismSimplifyWithProofNoIdentity / .
 
-  Definition ReifiedMorphismSimplifyNoIdentity `(C : SpecializedCategory) s d
+  Definition ReifiedMorphismSimplifyNoIdentity `(C : Category) s d
              (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (ReifiedMorphismSimplify m) = false}
     + { exists H : s = d, ReifiedMorphismSimplify m = match H with eq_refl => ReifiedIdentityMorphism C s end }
@@ -249,10 +249,10 @@ Ltac Ltac_rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : SpecializedCategory).
-    Context `(D : SpecializedCategory).
-    Variables F G : SpecializedFunctor C D.
-    Variable T : SpecializedNaturalTransformation F G.
+    Context `(C : Category).
+    Context `(D : Category).
+    Variables F G : Functor C D.
+    Variable T : NaturalTransformation F G.
 
     Lemma good_example_00001 (x : C) :Compose (Identity x) (Identity x) = Identity (C := C) x.
       Ltac_rsimplify_morphisms.
@@ -273,13 +273,13 @@ Section good_examples.
   End id.
 
   Lemma good_example_00004
-  : forall (C : SpecializedCategory)
-           (D : SpecializedCategory)
-           (C' : SpecializedCategory)
-           (D' : SpecializedCategory) (F : SpecializedFunctor C C')
-           (G : SpecializedFunctor D' D) (s d d' : SpecializedFunctor D C)
-           (m1 : SpecializedNaturalTransformation s d)
-           (m2 : SpecializedNaturalTransformation d d') (x : D'),
+  : forall (C : Category)
+           (D : Category)
+           (C' : Category)
+           (D' : Category) (F : Functor C C')
+           (G : Functor D' D) (s d d' : Functor D C)
+           (m1 : NaturalTransformation s d)
+           (m2 : NaturalTransformation d d') (x : D'),
       Compose (MorphismOf F (m2 (G x))) (MorphismOf F (m1 (G x))) =
       Compose
         (Compose
@@ -291,13 +291,13 @@ Section good_examples.
   Qed.
 
   Lemma good_example_00005
-  : forall (objC : Type) (C : SpecializedCategory)
-           (objD : Type) (D : SpecializedCategory) (objC' : Type)
-           (C' : SpecializedCategory) (objD' : Type)
-           (D' : SpecializedCategory) (F : SpecializedFunctor C C')
-           (G : SpecializedFunctor D' D) (s d d' : SpecializedFunctor D C)
-           (m1 : SpecializedNaturalTransformation s d)
-           (m2 : SpecializedNaturalTransformation d d') (x : D'),
+  : forall (objC : Type) (C : Category)
+           (objD : Type) (D : Category) (objC' : Type)
+           (C' : Category) (objD' : Type)
+           (D' : Category) (F : Functor C C')
+           (G : Functor D' D) (s d d' : Functor D C)
+           (m1 : NaturalTransformation s d)
+           (m2 : NaturalTransformation d d') (x : D'),
       Compose
         (MorphismOf F
                     (Compose (MorphismOf d' (Identity (G x)))
@@ -321,14 +321,14 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : SpecializedCategory).
-    Context `(C1 : SpecializedCategory).
-    Context `(D : SpecializedCategory).
+    Context `(C0 : Category).
+    Context `(C1 : Category).
+    Context `(D : Category).
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.
     Variable m2 : Morphism C0 d d'.
-    Variable F : SpecializedFunctor (C0 + C1) D.
+    Variable F : Functor (C0 + C1) D.
 
     Goal MorphismOf F (s := inl _) (d := inl _) (Compose m2 m1) = Compose (MorphismOf F (s := inl _) (d := inl _) m2) (MorphismOf F (s := inl _) (d := inl _) m1).
     Ltac_rsimplify_morphisms.

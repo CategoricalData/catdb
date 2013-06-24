@@ -16,16 +16,16 @@ Section ProductFunctor.
 
   Local Ltac build_functor :=
     hnf;
-    let C := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(C) end in
-    let D := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(D) end in
-    refine (@Build_SpecializedFunctor C D
+    let C := match goal with | [ |- Functor ?C ?D ] => constr:(C) end in
+    let D := match goal with | [ |- Functor ?C ?D ] => constr:(D) end in
+    refine (@Build_Functor C D
                                       (fun ab => (fst ab) * (snd ab))
                                       (fun _ _ fg => (fun xy => ((fst fg) (fst xy), (snd fg) (snd xy))))
                                       _
                                       _);
       simpl; abstract (intros; eauto).
 
-  Definition TypeProductFunctor : SpecializedFunctor (TypeCat * TypeCat) TypeCat. build_functor. Defined.
-  Definition SetProductFunctor  : SpecializedFunctor (SetCat * SetCat) SetCat. build_functor. Defined.
-  Definition PropProductFunctor : SpecializedFunctor (PropCat * PropCat) PropCat. build_functor. Defined.
+  Definition TypeProductFunctor : Functor (TypeCat * TypeCat) TypeCat. build_functor. Defined.
+  Definition SetProductFunctor  : Functor (SetCat * SetCat) SetCat. build_functor. Defined.
+  Definition PropProductFunctor : Functor (PropCat * PropCat) PropCat. build_functor. Defined.
 End ProductFunctor.

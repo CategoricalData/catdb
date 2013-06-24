@@ -15,9 +15,9 @@ Local Open Scope category_scope.
 Local Ltac quick_step :=
   ((progress repeat subst)
      || (apply sig_eq; simpl)
-     || (apply CommaSpecializedCategory_Morphism_eq; simpl)
-     || (apply CommaSpecializedCategory_Morphism_JMeq; simpl)
-     || (apply CommaSpecializedCategory_Object_eq; simpl)
+     || (apply CommaCategory_Morphism_eq; simpl)
+     || (apply CommaCategory_Morphism_JMeq; simpl)
+     || (apply CommaCategory_Object_eq; simpl)
      || apply f_equal
      || (apply f_equal2; trivial; []));
   trivial.
@@ -27,8 +27,8 @@ Local Ltac pre_anihilate :=
   repeat intro;
   repeat quick_step;
   simpl in *;
-  destruct_head_hnf @CommaSpecializedCategory_Morphism;
-  destruct_head_hnf @CommaSpecializedCategory_Object;
+  destruct_head_hnf @CommaCategory_Morphism;
+  destruct_head_hnf @CommaCategory_Object;
   destruct_head_hnf @prod;
   subst_body;
   simpl in *;
@@ -43,24 +43,24 @@ Local Ltac anihilate :=
   trivial.
 
 Section CommaCategoryProjectionFunctor.
-  Context `(A : LocallySmallSpecializedCategory).
-  Context `(B : LocallySmallSpecializedCategory).
-  Context `(C : SpecializedCategory).
+  Context `(A : Category).
+  Context `(B : Category).
+  Context `(C : Category).
 
   Definition CommaCategoryProjectionFunctor_ObjectOf (ST : (OppositeCategory (C ^ A)) * (C ^ B)) :
-    LocallySmallCat / (A * B : LocallySmallSpecializedCategory)
+    Cat / (A * B : Category)
     := Eval simpl in
         let S := (fst ST) in
         let T := (snd ST) in
         existT _
-               ((S ↓ T : LocallySmallSpecializedCategory) : LocallySmallCategory, tt)
+               ((S ↓ T : Category) : Category, tt)
                (CommaCategoryProjection S T) :
-          CommaSpecializedCategory_ObjectT (IdentityFunctor _)
-                                           (FunctorFromTerminal LocallySmallCat
-                                                                (A * B : LocallySmallSpecializedCategory)).
+          CommaCategory_ObjectT (IdentityFunctor _)
+                                           (FunctorFromTerminal Cat
+                                                                (A * B : Category)).
 
   Definition CommaCategoryProjectionFunctor_MorphismOf s d (m : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d) :
-    Morphism (LocallySmallCat / (A * B : LocallySmallSpecializedCategory))
+    Morphism (Cat / (A * B : Category))
              (CommaCategoryProjectionFunctor_ObjectOf s)
              (CommaCategoryProjectionFunctor_ObjectOf d).
     simpl in *.
@@ -82,10 +82,10 @@ Section CommaCategoryProjectionFunctor.
   Qed.
 
   Definition CommaCategoryProjectionFunctor :
-    SpecializedFunctor ((OppositeCategory (C ^ A)) * (C ^ B))
-                       (LocallySmallCat / (A * B : LocallySmallSpecializedCategory)).
-    refine (Build_SpecializedFunctor ((OppositeCategory (C ^ A)) * (C ^ B))
-                                     (LocallySmallCat / (A * B : LocallySmallSpecializedCategory))
+    Functor ((OppositeCategory (C ^ A)) * (C ^ B))
+                       (Cat / (A * B : Category)).
+    refine (Build_Functor ((OppositeCategory (C ^ A)) * (C ^ B))
+                                     (Cat / (A * B : Category))
                                      CommaCategoryProjectionFunctor_ObjectOf
                                      CommaCategoryProjectionFunctor_MorphismOf
                                      _
@@ -97,34 +97,34 @@ Section CommaCategoryProjectionFunctor.
 End CommaCategoryProjectionFunctor.
 
 Section SliceCategoryProjectionFunctor.
-  Context `(C : LocallySmallSpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Local Arguments ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf / .
   Local Arguments ComposeFunctors / .
-  Local Arguments LocallySmallCatOverInducedFunctor / .
+  Local Arguments CatOverInducedFunctor / .
   (*Local Arguments ProductLaw1Functor / . *)
   Local Arguments CommaCategoryProjectionFunctor / .
   Local Arguments SwapFunctor / .
   Local Arguments ExponentialLaw1Functor_Inverse / .
   Local Arguments IdentityFunctor / .
 (*
-  Let ArrowCategoryProjection' : SpecializedFunctor (ArrowSpecializedCategory A) A
+  Let ArrowCategoryProjection' : Functor (ArrowCategory A) A
     := ComposeFunctors fst_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
-  Let ArrowCategoryProjection'' : SpecializedFunctor (ArrowSpecializedCategory A) A. functor_simpl_abstract_trailing_props ArrowCategoryProjection'. Defined.
-  Definition ArrowCategoryProjection : SpecializedFunctor (ArrowSpecializedCategory A) A := Eval hnf in ArrowCategoryProjection''.
+  Let ArrowCategoryProjection'' : Functor (ArrowCategory A) A. functor_simpl_abstract_trailing_props ArrowCategoryProjection'. Defined.
+  Definition ArrowCategoryProjection : Functor (ArrowCategory A) A := Eval hnf in ArrowCategoryProjection''.
 *)
 
   Definition SliceCategoryProjectionFunctor_pre_pre'
-    := Eval hnf in (LocallySmallCatOverInducedFunctor (ProductLaw1Functor C : Morphism LocallySmallCat (C * 1 : LocallySmallSpecializedCategory) C)).
+    := Eval hnf in (CatOverInducedFunctor (ProductLaw1Functor C : Morphism Cat (C * 1 : Category) C)).
 
-  Definition SliceCategoryProjectionFunctor_pre_pre : SpecializedFunctor (LocallySmallCat / (C * 1 : LocallySmallSpecializedCategory)) (LocallySmallCat / C).
+  Definition SliceCategoryProjectionFunctor_pre_pre : Functor (Cat / (C * 1 : Category)) (Cat / C).
     functor_abstract_trailing_props SliceCategoryProjectionFunctor_pre_pre'.
   Defined.
 
   Arguments SliceCategoryProjectionFunctor_pre_pre / .
 
-(*  Arguments Build_CommaSpecializedCategory_Object' / .
+(*  Arguments Build_CommaCategory_Object' / .
 
   Eval simpl in SliceCategoryProjectionFunctor_pre_pre'.
 
@@ -140,43 +140,43 @@ Section SliceCategoryProjectionFunctor.
   Local Ltac refine_right_compose_functor_by_abstract F :=
     let H := fresh in pose_functor_by_abstract H F; refine (ComposeFunctors _ H); clear H.*)
 
-  Definition SliceCategoryProjectionFunctor_pre' : ((LocallySmallCat / C) ^ (D * (OppositeCategory (D ^ C)))).
+  Definition SliceCategoryProjectionFunctor_pre' : ((Cat / C) ^ (D * (OppositeCategory (D ^ C)))).
     refine (ComposeFunctors _ ((ExponentialLaw1Functor_Inverse D) * IdentityFunctor (OppositeCategory (D ^ C)))).
     refine (ComposeFunctors _ (SwapFunctor _ _)).
-    refine (ComposeFunctors _ (CommaCategoryProjectionFunctor (C : LocallySmallSpecializedCategory) (1 : LocallySmallSpecializedCategory) D)).
+    refine (ComposeFunctors _ (CommaCategoryProjectionFunctor (C : Category) (1 : Category) D)).
     (*
     refine_right_compose_functor_by_abstract ((ExponentialLaw1Functor_Inverse D) * IdentityFunctor (OppositeCategory (D ^ C)))%functor.
     refine_right_compose_functor_by_abstract (SwapFunctor (D ^ 1)%functor (OppositeCategory (D ^ C)%functor)).
-    refine_right_compose_functor_by_abstract (CommaCategoryProjectionFunctor (C : LocallySmallSpecializedCategory) (1 : LocallySmallSpecializedCategory) D).*)
+    refine_right_compose_functor_by_abstract (CommaCategoryProjectionFunctor (C : Category) (1 : Category) D).*)
     let F := (eval hnf in SliceCategoryProjectionFunctor_pre_pre) in
     exact F.
-(* (LocallySmallCatOverInducedFunctor (ProductLaw1Functor C : Morphism LocallySmallCat (C * 1 : LocallySmallSpecializedCategory) (C : LocallySmallSpecializedCategory))). *)
+(* (CatOverInducedFunctor (ProductLaw1Functor C : Morphism Cat (C * 1 : Category) (C : Category))). *)
   Defined.
 
-  Definition SliceCategoryProjectionFunctor_pre'' : ((LocallySmallCat / C) ^ (D * (OppositeCategory (D ^ C)))).
+  Definition SliceCategoryProjectionFunctor_pre'' : ((Cat / C) ^ (D * (OppositeCategory (D ^ C)))).
     functor_abstract_trailing_props SliceCategoryProjectionFunctor_pre'.
   Defined.
 
   Definition SliceCategoryProjectionFunctor_pre := Eval hnf in SliceCategoryProjectionFunctor_pre''.
 
-  Definition SliceCategoryProjectionFunctor' : (((LocallySmallCat / C) ^ D) ^ (OppositeCategory (D ^ C))).
+  Definition SliceCategoryProjectionFunctor' : (((Cat / C) ^ D) ^ (OppositeCategory (D ^ C))).
     refine ((ExponentialLaw4Functor_Inverse _ _ _) _).
     let F := (eval hnf in SliceCategoryProjectionFunctor_pre) in
     exact F.
   Defined.
 
-  Definition SliceCategoryProjectionFunctor'' : (((LocallySmallCat / C) ^ D) ^ (OppositeCategory (D ^ C))).
+  Definition SliceCategoryProjectionFunctor'' : (((Cat / C) ^ D) ^ (OppositeCategory (D ^ C))).
     functor_abstract_trailing_props SliceCategoryProjectionFunctor'.
   Defined.
 
-  Definition SliceCategoryProjectionFunctor : ((LocallySmallCat / C) ^ D) ^ (OppositeCategory (D ^ C))
+  Definition SliceCategoryProjectionFunctor : ((Cat / C) ^ D) ^ (OppositeCategory (D ^ C))
     := Eval cbv beta iota zeta delta [SliceCategoryProjectionFunctor''] in SliceCategoryProjectionFunctor''.
 
-  Definition CosliceCategoryProjectionFunctor : ((LocallySmallCat / C) ^ (OppositeCategory D)) ^ (D ^ C).
+  Definition CosliceCategoryProjectionFunctor : ((Cat / C) ^ (OppositeCategory D)) ^ (D ^ C).
     refine ((ExponentialLaw4Functor_Inverse _ _ _) _).
     refine (ComposeFunctors _ ((OppositeFunctor (ExponentialLaw1Functor_Inverse D)) * IdentityFunctor (D ^ C))).
-    refine (ComposeFunctors _ (CommaCategoryProjectionFunctor (1 : LocallySmallSpecializedCategory) (C : LocallySmallSpecializedCategory) D)).
-    refine (LocallySmallCatOverInducedFunctor _).
+    refine (ComposeFunctors _ (CommaCategoryProjectionFunctor (1 : Category) (C : Category) D)).
+    refine (CatOverInducedFunctor _).
     refine (ComposeFunctors _ (SwapFunctor _ _)).
     exact (ProductLaw1Functor _).
   Defined.

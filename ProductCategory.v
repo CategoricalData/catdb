@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -10,11 +10,11 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ProductCategory.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
-  Definition ProductCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory (C * D)%type
+  Definition ProductCategory : Category.
+    refine (@Build_Category (C * D)%type
                                        (fun s d => (C.(Morphism) (fst s) (fst d) * D.(Morphism) (snd s) (snd d))%type)
                                        (fun o => (Identity (fst o), Identity (snd o)))
                                        (fun s d d' m2 m1 => (Compose (fst m2) (fst m1), Compose (snd m2) (snd m1)))
@@ -28,18 +28,18 @@ End ProductCategory.
 Infix "*" := ProductCategory : category_scope.
 
 Section ProductCategoryFunctors.
-  Context `{C : SpecializedCategory}.
-  Context `{D : SpecializedCategory}.
+  Context `{C : Category}.
+  Context `{D : Category}.
 
-  Definition fst_Functor : SpecializedFunctor (C * D) C
-    := Build_SpecializedFunctor (C * D) C
+  Definition fst_Functor : Functor (C * D) C
+    := Build_Functor (C * D) C
                                 (@fst _ _)
                                 (fun _ _ => @fst _ _)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition snd_Functor : SpecializedFunctor (C * D) D
-    := Build_SpecializedFunctor (C * D) D
+  Definition snd_Functor : Functor (C * D) D
+    := Build_Functor (C * D) D
                                 (@snd _ _)
                                 (fun _ _ => @snd _ _)
                                 (fun _ _ _ _ _ => eq_refl)

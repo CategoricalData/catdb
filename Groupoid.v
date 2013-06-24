@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance.
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common CategoryIsomorphisms.
 
 Set Implicit Arguments.
@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GroupoidOf.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Inductive GroupoidOf_Morphism (s d : C) :=
   | hasMorphism : C.(Morphism) s d -> GroupoidOf_Morphism s d
@@ -28,8 +28,8 @@ Section GroupoidOf.
   (** Quoting Wikipedia:
      A groupoid is a small category in which every morphism is an isomorphism, and hence invertible.
      *)
-  Definition GroupoidOf : SpecializedCategory.
-    refine (@Build_SpecializedCategory _
+  Definition GroupoidOf : Category.
+    refine (@Build_Category _
                                        (fun s d => inhabited (GroupoidOf_Morphism s d))
                                        (fun o : C => inhabits (hasMorphism _ _ (Identity o)))
                                        (@GroupoidOf_Compose)
@@ -46,7 +46,7 @@ End GroupoidOf.
 Hint Constructors GroupoidOf_Morphism : category.
 
 Section Groupoid.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;
@@ -64,8 +64,8 @@ Section Groupoid.
         end.
   Qed.
 
-  Definition Groupoid_Functor : SpecializedFunctor C (GroupoidOf C).
-    refine (Build_SpecializedFunctor C (GroupoidOf C)
+  Definition Groupoid_Functor : Functor C (GroupoidOf C).
+    refine (Build_Functor C (GroupoidOf C)
       (fun c => c)
       (fun s d m => inhabits (hasMorphism C _ _ m))
       _

@@ -1,4 +1,4 @@
-Require Export SpecializedCommaCategory CategoryIsomorphisms.
+Require Export CommaCategory CategoryIsomorphisms.
 Require Import Common Notations DefinitionSimplification Eqdep.
 
 Set Implicit Arguments.
@@ -19,12 +19,12 @@ Section UniversalMorphism.
 
   Local Ltac intro_t :=
     repeat intro;
-    destruct_head_hnf CommaSpecializedCategory_Morphism;
-    destruct_head_hnf CommaSpecializedCategory_Object;
+    destruct_head_hnf CommaCategory_Morphism;
+    destruct_head_hnf CommaCategory_Object;
     destruct_head_hnf prod;
-    try apply CommaSpecializedCategory_Morphism_eq;
-    try apply CommaSpecializedCategory_Morphism_JMeq;
-    try apply CommaSpecializedCategory_Object_eq;
+    try apply CommaCategory_Morphism_eq;
+    try apply CommaCategory_Morphism_JMeq;
+    try apply CommaCategory_Object_eq;
     simpl in *;
     destruct_sig;
     split_and;
@@ -36,7 +36,7 @@ Section UniversalMorphism.
     eauto.
 
   Section InitialMorphism.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
+    Local Notation "A ↓ F" := (CosliceCategory A F).
     Variable X : C.
     Variable U : Functor D C.
     (**
@@ -90,7 +90,7 @@ Section UniversalMorphism.
         pose proof (projT2 φUniversalProperty) as UniversalProperty;
         set (φ := projT1 φUniversalProperty) in *;
         clearbody φ; clear φUniversalProperty; simpl in *.
-        refine (_ : IsInitialMorphism (Build_CommaSpecializedCategory_Object (FunctorFromTerminal _ _) U tt A φ)).
+        refine (_ : IsInitialMorphism (Build_CommaCategory_Object (FunctorFromTerminal _ _) U tt A φ)).
         intro o'.
         specialize (UniversalProperty (snd (projT1 o')) (projT2 o')).
         let T := match goal with |- @sig ?T ?P => constr:(T) end in
@@ -121,7 +121,7 @@ Section UniversalMorphism.
       Definition InitialProperty_Morphism (Y : D) (f : C.(Morphism) X (U Y)) : D.(Morphism) InitialMorphism_Object Y
         := Eval simpl in
             snd (proj1_sig (InitialObject_Morphism M (existT (fun ttY => C.(Morphism) X (U (snd ttY))) (tt, Y) f
-                                                      : CommaSpecializedCategory_ObjectT (FunctorFromTerminal _ _) _))).
+                                                      : CommaCategory_ObjectT (FunctorFromTerminal _ _) _))).
       (* TODO: Automate this better *)
       Lemma InitialProperty (Y : D) (f : C.(Morphism) X (U Y)) :
         unique (fun g => Compose (U.(MorphismOf) g) InitialMorphism_Morphism = f) (InitialProperty_Morphism Y f).
@@ -152,7 +152,7 @@ Section UniversalMorphism.
   End InitialMorphism.
 
   Section TerminalMorphism.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
+    Local Notation "F ↓ A" := (SliceCategory A F).
     Variable U : Functor D C.
     Variable X : C.
     (**
@@ -206,7 +206,7 @@ Section UniversalMorphism.
         set (φ := projT1 φUniversalProperty) in *;
         clearbody φ; clear φUniversalProperty; simpl in *.
         refine (_ : IsTerminalMorphism (existT _ (A, tt) φ
-                                        : CommaSpecializedCategory_ObjectT _ (FunctorFromTerminal _ _))).
+                                        : CommaCategory_ObjectT _ (FunctorFromTerminal _ _))).
         intro o'.
         specialize (UniversalProperty (fst (projT1 o')) (projT2 o')).
         let T := match goal with |- @sig ?T ?P => constr:(T) end in
@@ -236,7 +236,7 @@ Section UniversalMorphism.
       Definition TerminalMorphism_Morphism : C.(Morphism) (U (TerminalMorphism_Object)) X := projT2 (TerminalObject_Object M).
       Definition TerminalProperty_Morphism (Y : D) (f : C.(Morphism) (U Y) X) : D.(Morphism) Y TerminalMorphism_Object
         := fst (proj1_sig (TerminalObject_Morphism M (existT (fun Ytt => C.(Morphism) (U (fst Ytt)) X) (Y, tt) f
-                                                      : CommaSpecializedCategory_ObjectT _ (FunctorFromTerminal _ _)))).
+                                                      : CommaCategory_ObjectT _ (FunctorFromTerminal _ _)))).
       (* TODO: Automate this better *)
       Lemma TerminalProperty (Y : D) (f : C.(Morphism) (U Y) X) :
         unique (fun g => Compose TerminalMorphism_Morphism (U.(MorphismOf) g) = f) (TerminalProperty_Morphism Y f).

@@ -1,4 +1,4 @@
-Require Export SpecializedCommaCategory ProductCategory.
+Require Export CommaCategory ProductCategory.
 Require Import Common Notations.
 
 Set Implicit Arguments.
@@ -12,14 +12,14 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section CommaCategory.
-  Context `(A : SpecializedCategory).
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
-  Variable S : SpecializedFunctor A C.
-  Variable T : SpecializedFunctor B C.
+  Context `(A : Category).
+  Context `(B : Category).
+  Context `(C : Category).
+  Variable S : Functor A C.
+  Variable T : Functor B C.
 
-  Definition CommaCategoryProjection : SpecializedFunctor (S ↓ T) (A * B)
-    := Build_SpecializedFunctor (S ↓ T) (A * B)
+  Definition CommaCategoryProjection : Functor (S ↓ T) (A * B)
+    := Build_Functor (S ↓ T) (A * B)
                                 (@projT1 _ _)
                                 (fun _ _ m => proj1_sig m)
                                 (fun _ _ _ _ _ => eq_refl)
@@ -27,34 +27,34 @@ Section CommaCategory.
 End CommaCategory.
 
 Section SliceCategory.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
 
   Local Arguments ComposeFunctors' / .
 
-  Definition ArrowCategoryProjection : SpecializedFunctor (ArrowSpecializedCategory A) A
+  Definition ArrowCategoryProjection : Functor (ArrowCategory A) A
     := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
 
-  Definition SliceCategoryOverProjection (a : A) : SpecializedFunctor (A / a) A
+  Definition SliceCategoryOverProjection (a : A) : Functor (A / a) A
     := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection (IdentityFunctor A) _).
 
-  Definition CosliceCategoryOverProjection (a : A) : SpecializedFunctor (a \ A) A
+  Definition CosliceCategoryOverProjection (a : A) : Functor (a \ A) A
     := ComposeFunctors' snd_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
 
   Section Slice_Coslice.
-    Context `(C : SpecializedCategory).
+    Context `(C : Category).
     Variable a : C.
-    Variable S : SpecializedFunctor A C.
+    Variable S : Functor A C.
 
     Section Slice.
-      Definition SliceCategoryProjection : SpecializedFunctor (S ↓ a) A
+      Definition SliceCategoryProjection : Functor (S ↓ a) A
         := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection S (FunctorFromTerminal C a)).
     End Slice.
 
     Section Coslice.
-      Definition CosliceCategoryProjection : SpecializedFunctor (a ↓ S) A
+      Definition CosliceCategoryProjection : Functor (a ↓ S) A
         := Eval simpl in ComposeFunctors' snd_Functor (CommaCategoryProjection (FunctorFromTerminal C a) S).
       Check CosliceCategoryProjection.
-      Eval simpl in SpecializedFunctor (a ↓ S) A.
+      Eval simpl in Functor (a ↓ S) A.
     End Coslice.
   End Slice_Coslice.
 End SliceCategory.

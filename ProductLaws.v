@@ -12,25 +12,25 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section swap.
-  Definition SwapFunctor `(C : SpecializedCategory) `(D : SpecializedCategory)
-  : SpecializedFunctor (C * D) (D * C)
-    := Build_SpecializedFunctor (C * D) (D * C)
+  Definition SwapFunctor `(C : Category) `(D : Category)
+  : Functor (C * D) (D * C)
+    := Build_Functor (C * D) (D * C)
                                 (fun cd => (snd cd, fst cd))
                                 (fun _ _ m => (snd m, fst m))
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Lemma ProductLawSwap `(C : SpecializedCategory) `(D : SpecializedCategory)
+  Lemma ProductLawSwap `(C : Category) `(D : Category)
   : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
     functor_eq; intuition.
   Qed.
 End swap.
 
 Section Law0.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition ProductLaw0Functor : SpecializedFunctor (C * 0) 0.
-    refine (Build_SpecializedFunctor (C * 0) 0
+  Definition ProductLaw0Functor : Functor (C * 0) 0.
+    refine (Build_Functor (C * 0) 0
                                      (@snd _ _)
                                      (fun _ _ => @snd _ _)
                                      _
@@ -42,7 +42,7 @@ Section Law0.
       ).
   Defined.
 
-  Definition ProductLaw0Functor_Inverse : SpecializedFunctor 0 (C * 0).
+  Definition ProductLaw0Functor_Inverse : Functor 0 (C * 0).
     repeat esplit;
     intros; destruct_head_hnf Empty_set.
     Grab Existential Variables.
@@ -60,17 +60,17 @@ Section Law0.
 End Law0.
 
 Section Law0'.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Let ProductLaw0'Functor' : SpecializedFunctor (0 * C) 0.
+  Let ProductLaw0'Functor' : Functor (0 * C) 0.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
   Defined.
-  Definition ProductLaw0'Functor : SpecializedFunctor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
+  Definition ProductLaw0'Functor : Functor (0 * C) 0 := Eval hnf in ProductLaw0'Functor'.
 
-  Let ProductLaw0'Functor_Inverse' : SpecializedFunctor 0 (0 * C).
+  Let ProductLaw0'Functor_Inverse' : Functor 0 (0 * C).
     functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw0Functor_Inverse C)).
   Defined.
-  Definition ProductLaw0'Functor_Inverse : SpecializedFunctor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
+  Definition ProductLaw0'Functor_Inverse : Functor 0 (0 * C) := Eval hnf in ProductLaw0'Functor_Inverse'.
 
   Lemma ProductLaw0' : ComposeFunctors ProductLaw0'Functor ProductLaw0'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw0'Functor_Inverse ProductLaw0'Functor = IdentityFunctor _.
@@ -82,16 +82,16 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Let ProductLaw1Functor' : SpecializedFunctor (C * 1) C.
+  Let ProductLaw1Functor' : Functor (C * 1) C.
     functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
   Defined.
-  Definition ProductLaw1Functor : SpecializedFunctor (C * 1) C
+  Definition ProductLaw1Functor : Functor (C * 1) C
     := Eval hnf in ProductLaw1Functor'.
 
-  Definition ProductLaw1Functor_Inverse : SpecializedFunctor C (C * 1).
-    refine (Build_SpecializedFunctor C (C * 1)
+  Definition ProductLaw1Functor_Inverse : Functor C (C * 1).
+    refine (Build_Functor C (C * 1)
                                      (fun c => (c, tt))
                                      (fun s d m => (m, eq_refl))
                                      _
@@ -113,17 +113,17 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition ProductLaw1'Functor' : SpecializedFunctor (1 * C) C.
+  Definition ProductLaw1'Functor' : Functor (1 * C) C.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _)).
   Defined.
-  Definition ProductLaw1'Functor : SpecializedFunctor (1 * C) C := Eval hnf in ProductLaw1'Functor'.
+  Definition ProductLaw1'Functor : Functor (1 * C) C := Eval hnf in ProductLaw1'Functor'.
 
-  Let ProductLaw1'Functor_Inverse' : SpecializedFunctor C (1 * C).
+  Let ProductLaw1'Functor_Inverse' : Functor C (1 * C).
     functor_simpl_abstract_trailing_props (ComposeFunctors (SwapFunctor _ _) (ProductLaw1Functor_Inverse C)).
   Defined.
-  Definition ProductLaw1'Functor_Inverse : SpecializedFunctor C (1 * C) := Eval hnf in ProductLaw1'Functor_Inverse'.
+  Definition ProductLaw1'Functor_Inverse : Functor C (1 * C) := Eval hnf in ProductLaw1'Functor_Inverse'.
 
   Lemma ProductLaw1' : ComposeFunctors ProductLaw1'Functor ProductLaw1'Functor_Inverse = IdentityFunctor _ /\
     ComposeFunctors ProductLaw1'Functor_Inverse ProductLaw1'Functor = IdentityFunctor _.

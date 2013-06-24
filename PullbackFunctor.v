@@ -9,10 +9,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Equalizer.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Variable HasLimits : forall F : SpecializedFunctor PullbackIndex C, Limit F.
-  Variable HasColimits : forall F : SpecializedFunctor PushoutIndex C, Colimit F.
+  Variable HasLimits : forall F : Functor PullbackIndex C, Limit F.
+  Variable HasColimits : forall F : Functor PushoutIndex C, Colimit F.
 
   Definition PullbackFunctor := LimitFunctor HasLimits.
   Definition PushoutFunctor := ColimitFunctor HasColimits.

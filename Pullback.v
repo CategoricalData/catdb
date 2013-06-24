@@ -1,5 +1,5 @@
 Require Export Limits.
-Require Import Common Duals SpecializedCommaCategory FunctorCategory.
+Require Import Common Duals CommaCategory FunctorCategory.
 
 Set Implicit Arguments.
 
@@ -30,7 +30,7 @@ Section Pullback.
     intros;
     simpl in * |- ;
     destruct_head prod;
-    destruct_head CommaSpecializedCategory_Morphism;
+    destruct_head CommaCategory_Morphism;
     simpl in *;
     nt_eq;
     destruct_head PullbackThree;
@@ -38,7 +38,7 @@ Section Pullback.
     autorewrite with morphism in *;
     trivial.
 
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Section pullback.
     Variables a b c : C.
     Variable f : C.(Morphism) a c.
@@ -61,8 +61,8 @@ Section Pullback.
       destruct s, d, d'; simpl in *; trivial.
     Defined.
 
-    Definition PullbackIndex : SpecializedCategory.
-      refine (@Build_SpecializedCategory PullbackThree
+    Definition PullbackIndex : Category.
+      refine (@Build_Category PullbackThree
                                          PullbackIndex_Morphism
                                          (fun x => match x as p return (PullbackIndex_Morphism p p) with
                                                        PullbackA => tt | PullbackB => tt | PullbackC => tt
@@ -91,10 +91,10 @@ Section Pullback.
       try solve [ destruct m ].
     Defined.
 
-    Definition PullbackDiagram : SpecializedFunctor PullbackIndex C.
+    Definition PullbackDiagram : Functor PullbackIndex C.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            PullbackDiagram_ObjectOf
                                            PullbackDiagram_MorphismOf
                                            _
@@ -109,7 +109,7 @@ Section Pullback.
   End pullback.
 
   Section pullback_functorial.
-    Local Infix "/" := SliceSpecializedCategoryOver.
+    Local Infix "/" := SliceCategoryOver.
 
     Variable c : C.
 
@@ -130,10 +130,10 @@ Section Pullback.
       abstract pullback_t. (* 5.559 s *)
     Defined.
 
-    Definition PullbackDiagramFunctor : SpecializedFunctor ((C / c) * (C / c)) (C ^ PullbackIndex).
+    Definition PullbackDiagramFunctor : Functor ((C / c) * (C / c)) (C ^ PullbackIndex).
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            PullbackDiagramFunctor_ObjectOf
                                            PullbackDiagramFunctor_MorphismOf
                                            _
@@ -162,10 +162,10 @@ Section Pullback.
       try solve [ destruct m ].
     Defined.
 
-    Definition PushoutDiagram : SpecializedFunctor PushoutIndex C.
+    Definition PushoutDiagram : Functor PushoutIndex C.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            PushoutDiagram_ObjectOf
                                            PushoutDiagram_MorphismOf
                                            _
@@ -199,10 +199,10 @@ Section Pullback.
       abstract pullback_t.
     Defined.
 
-    Definition PushoutDiagramFunctor : SpecializedFunctor ((c \ C) * (c \ C)) (C ^ PushoutIndex).
+    Definition PushoutDiagramFunctor : Functor ((c \ C) * (c \ C)) (C ^ PushoutIndex).
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            PushoutDiagramFunctor_ObjectOf
                                            PushoutDiagramFunctor_MorphismOf
                                            _
@@ -214,7 +214,7 @@ Section Pullback.
 End Pullback.
 
 Section PullbackObjects.
-  Context `{C : SpecializedCategory}.
+  Context `{C : Category}.
   Variables a b c : C.
 
   (** Does an object [d] together with the functions [i] and [j]
@@ -246,7 +246,7 @@ Section PullbackObjects.
              (i : Morphism C PullbackObject a)
              (j : Morphism C PullbackObject b)
              (PullbackCompatible : Compose f i = Compose g j)
-  : CommaSpecializedCategory_Object (DiagonalFunctor C PullbackIndex)
+  : CommaCategory_Object (DiagonalFunctor C PullbackIndex)
                                     (FunctorFromTerminal
                                        (FunctorCategory.FunctorCategory PullbackIndex C)
                                        (PullbackDiagram C a b c f g)).
@@ -276,7 +276,7 @@ Section PullbackObjects.
              (i : Morphism C a PushoutObject)
              (j : Morphism C b PushoutObject)
              (PushoutCompatible : Compose j g = Compose i f)
-  : CommaSpecializedCategory_Object (FunctorFromTerminal
+  : CommaCategory_Object (FunctorFromTerminal
                                        (FunctorCategory.FunctorCategory PushoutIndex C)
                                        (PushoutDiagram C a b c f g))
                                     (DiagonalFunctor C PushoutIndex).

@@ -1,5 +1,5 @@
 Require Import JMeq.
-Require Export CommaCategoryProjection SmallCat Duals FunctorCategory.
+Require Export CommaCategoryProjection Cat Duals FunctorCategory.
 Require Import Common Notations DefinitionSimplification DiscreteCategory FEqualDep DefinitionSimplification ExponentialLaws FunctorProduct ProductLaws CanonicalStructureSimplification.
 
 Set Implicit Arguments.
@@ -23,7 +23,7 @@ Local Ltac rewrite_step :=
 Local Ltac quick_step :=
   ((progress repeat subst)
      || (apply sig_eq; simpl)
-     || (apply CommaSpecializedCategory_Morphism_eq; simpl)
+     || (apply CommaCategory_Morphism_eq; simpl)
      || (simpl; apply f_equal)
      || (simpl; apply f_equal2; trivial; []));
   trivial.
@@ -33,8 +33,8 @@ Local Ltac pre_anihilate :=
   repeat intro;
   repeat quick_step;
   simpl in *;
-  destruct_head @CommaSpecializedCategory_Morphism;
-  destruct_head @CommaSpecializedCategory_Object;
+  destruct_head @CommaCategory_Morphism;
+  destruct_head @CommaCategory_Object;
   destruct_head @prod;
   simpl in *;
   trivial.
@@ -71,9 +71,9 @@ Local Ltac induced_anihilate :=
   repeat induced_step.
 
 Section CommaCategoryInducedFunctor.
-  Context `(A : SpecializedCategory).
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
+  Context `(A : Category).
+  Context `(B : Category).
+  Context `(C : Category).
 
   Definition CommaCategoryInducedFunctor_ObjectOf s d (m : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)
       (x : fst s ↓ snd s) : (fst d ↓ snd d)
@@ -81,23 +81,23 @@ Section CommaCategoryInducedFunctor.
         existT _
                (projT1 x)
                (Compose ((snd m) (snd (projT1 x))) (Compose (projT2 x) ((fst m) (fst (projT1 x))))) :
-          CommaSpecializedCategory_ObjectT (fst d) (snd d).
+          CommaCategory_ObjectT (fst d) (snd d).
 
   Definition CommaCategoryInducedFunctor_MorphismOf s d m s0 d0 (m0 : Morphism (fst s ↓ snd s) s0 d0) :
     Morphism (fst d ↓ snd d)
              (@CommaCategoryInducedFunctor_ObjectOf s d m s0)
              (@CommaCategoryInducedFunctor_ObjectOf s d m d0).
     simpl.
-    let s := match goal with |- CommaSpecializedCategory_Morphism ?s ?d => constr:(s) end in
-    let d := match goal with |- CommaSpecializedCategory_Morphism ?s ?d => constr:(d) end in
-    refine (Build_CommaSpecializedCategory_Morphism s d (CCM_g m0) (CCM_h m0) _);
+    let s := match goal with |- CommaCategory_Morphism ?s ?d => constr:(s) end in
+    let d := match goal with |- CommaCategory_Morphism ?s ?d => constr:(d) end in
+    refine (Build_CommaCategory_Morphism s d (CCM_g m0) (CCM_h m0) _);
       simpl in *; clear.
     abstract induced_anihilate. (* 4.097 s *)
   Defined.
 
   Definition CommaCategoryInducedFunctor s d (m : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d) :
-    SpecializedFunctor (fst s ↓ snd s) (fst d ↓ snd d).
-    refine (Build_SpecializedFunctor (fst s ↓ snd s) (fst d ↓ snd d)
+    Functor (fst s ↓ snd s) (fst d ↓ snd d).
+    refine (Build_Functor (fst s ↓ snd s) (fst d ↓ snd d)
                                      (@CommaCategoryInducedFunctor_ObjectOf s d m)
                                      (@CommaCategoryInducedFunctor_MorphismOf s d m)
                                      _
@@ -108,37 +108,37 @@ Section CommaCategoryInducedFunctor.
 End CommaCategoryInducedFunctor.
 
 Section SliceCategoryInducedFunctor.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Section Slice_Coslice.
-    Context `(D : SpecializedCategory).
+    Context `(D : Category).
 
     (* TODO(jgross): See if this can be recast as an exponential law functor about how Cat ^ 1 is isomorphic to Cat, or something *)
     Definition SliceCategoryInducedFunctor_NT s d (m : Morphism D s d) :
-      SpecializedNaturalTransformation (FunctorFromTerminal D s)
+      NaturalTransformation (FunctorFromTerminal D s)
                                        (FunctorFromTerminal D d).
       exists (fun _ : unit => m).
       simpl; intros; clear;
       abstract (autorewrite with category; reflexivity).
     Defined.
 
-    Variable F : SpecializedFunctor C D.
+    Variable F : Functor C D.
     Variable a : D.
 
     Section Slice.
-      Local Notation "F ↓ A" := (SliceSpecializedCategory A F) : category_scope.
+      Local Notation "F ↓ A" := (SliceCategory A F) : category_scope.
 
       Local Arguments CommaCategoryInducedFunctor_MorphismOf / .
       Local Arguments CommaCategoryInducedFunctor_ObjectOf / .
 
-      Let SliceCategoryInducedFunctor' F' a' (m : Morphism D a a') (T : SpecializedNaturalTransformation F' F)
-      : SpecializedFunctor (F ↓ a) (F' ↓ a').
+      Let SliceCategoryInducedFunctor' F' a' (m : Morphism D a a') (T : NaturalTransformation F' F)
+      : Functor (F ↓ a) (F' ↓ a').
         functor_simpl_abstract_trailing_props (CommaCategoryInducedFunctor (s := (F, FunctorFromTerminal D a))
                                                                            (d := (F', FunctorFromTerminal D a'))
                                                                            (T, @SliceCategoryInducedFunctor_NT a a' m)).
       Defined.
-      Definition SliceCategoryInducedFunctor F' a' (m : Morphism D a a') (T : SpecializedNaturalTransformation F' F)
-      : SpecializedFunctor (F ↓ a) (F' ↓ a')
+      Definition SliceCategoryInducedFunctor F' a' (m : Morphism D a a') (T : NaturalTransformation F' F)
+      : Functor (F ↓ a) (F' ↓ a')
         := Eval hnf in @SliceCategoryInducedFunctor' F' a' m T.
 
       Definition SliceCategoryNTInducedFunctor F' T := @SliceCategoryInducedFunctor F' a (Identity _) T.
@@ -146,19 +146,19 @@ Section SliceCategoryInducedFunctor.
     End Slice.
 
     Section Coslice.
-      Local Notation "A ↓ F" := (CosliceSpecializedCategory A F) : category_scope.
+      Local Notation "A ↓ F" := (CosliceCategory A F) : category_scope.
 
       Local Arguments CommaCategoryInducedFunctor_MorphismOf / .
       Local Arguments CommaCategoryInducedFunctor_ObjectOf / .
 
-      Let CosliceCategoryInducedFunctor' F' a' (m : Morphism D a' a) (T : SpecializedNaturalTransformation F F')
-      : SpecializedFunctor (a ↓ F) (a' ↓ F').
+      Let CosliceCategoryInducedFunctor' F' a' (m : Morphism D a' a) (T : NaturalTransformation F F')
+      : Functor (a ↓ F) (a' ↓ F').
         functor_simpl_abstract_trailing_props (CommaCategoryInducedFunctor (s := (FunctorFromTerminal D a, F))
                                                                            (d := (FunctorFromTerminal D a', F'))
                                                                            (@SliceCategoryInducedFunctor_NT a' a m, T)).
       Defined.
-      Definition CosliceCategoryInducedFunctor F' a' (m : Morphism D a' a) (T : SpecializedNaturalTransformation F F')
-      : SpecializedFunctor (a ↓ F) (a' ↓ F')
+      Definition CosliceCategoryInducedFunctor F' a' (m : Morphism D a' a) (T : NaturalTransformation F F')
+      : Functor (a ↓ F) (a' ↓ F')
         := Eval hnf in @CosliceCategoryInducedFunctor' F' a' m T.
 
       Definition CosliceCategoryNTInducedFunctor F' T := @CosliceCategoryInducedFunctor F' a (Identity _) T.
@@ -166,52 +166,52 @@ Section SliceCategoryInducedFunctor.
     End Coslice.
   End Slice_Coslice.
 
-  Definition SliceCategoryOverInducedFunctor a a' (m : Morphism C a a') : SpecializedFunctor (C / a) (C / a')
+  Definition SliceCategoryOverInducedFunctor a a' (m : Morphism C a a') : Functor (C / a) (C / a')
     := Eval hnf in SliceCategoryMorphismInducedFunctor _ _ _ m.
-  Definition CosliceCategoryOverInducedFunctor a a' (m : Morphism C a' a) : SpecializedFunctor (a \ C) (a' \ C)
+  Definition CosliceCategoryOverInducedFunctor a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C)
     := Eval hnf in CosliceCategoryMorphismInducedFunctor _ _ _ m.
 End SliceCategoryInducedFunctor.
 
-Section LocallySmallCatOverInducedFunctor.
+Section CatOverInducedFunctor.
   (* Let's do this from scratch so we get better polymorphism *)
-  Let C := LocallySmallCat.
-  (*Local Opaque LocallySmallCat.*)
+  Let C := Cat.
+  (*Local Opaque Cat.*)
 
-  Let LocallySmallCatOverInducedFunctor_ObjectOf a a' (m : Morphism C a a') : C / a -> C / a'.
+  Let CatOverInducedFunctor_ObjectOf a a' (m : Morphism C a a') : C / a -> C / a'.
     refine (fun x => existT (fun αβ : _ * unit => Morphism C (fst αβ) a')
                             (projT1 x)
                             _ :
-                       CommaSpecializedCategory_ObjectT (IdentityFunctor C) (FunctorFromTerminal C a')).
+                       CommaCategory_ObjectT (IdentityFunctor C) (FunctorFromTerminal C a')).
     functor_simpl_abstract_trailing_props (Compose m (projT2 x)).
   Defined.
-  Let OverLocallySmallCatInducedFunctor_ObjectOf a a' (m : Morphism C a' a) : a \ C -> a' \ C.
+  Let OverCatInducedFunctor_ObjectOf a a' (m : Morphism C a' a) : a \ C -> a' \ C.
     refine (fun x => existT (fun αβ : unit * _ => Morphism C a' (snd αβ))
                             (projT1 x)
                             _ :
-                       CommaSpecializedCategory_ObjectT (FunctorFromTerminal C a') (IdentityFunctor C)).
+                       CommaCategory_ObjectT (FunctorFromTerminal C a') (IdentityFunctor C)).
     functor_simpl_abstract_trailing_props (Compose (projT2 x) m).
   Defined.
 
-  Let LocallySmallCatOverInducedFunctor_MorphismOf a a' (m : Morphism C a a') s d (m0 : Morphism (C / a) s d) :
-    Morphism (C / a') (@LocallySmallCatOverInducedFunctor_ObjectOf _ _ m s) (@LocallySmallCatOverInducedFunctor_ObjectOf _ _ m d).
-    refine (_ : CommaSpecializedCategory_MorphismT _ _).
+  Let CatOverInducedFunctor_MorphismOf a a' (m : Morphism C a a') s d (m0 : Morphism (C / a) s d) :
+    Morphism (C / a') (@CatOverInducedFunctor_ObjectOf _ _ m s) (@CatOverInducedFunctor_ObjectOf _ _ m d).
+    refine (_ : CommaCategory_MorphismT _ _).
     exists (projT1 m0).
       subst_body; simpl in *; clear.
     abstract anihilate.
   Defined.
-  Let OverLocallySmallCatInducedFunctor_MorphismOf a a' (m : Morphism C a' a) s d (m0 : Morphism (a \ C) s d) :
-    Morphism (a' \ C) (@OverLocallySmallCatInducedFunctor_ObjectOf _ _ m s) (@OverLocallySmallCatInducedFunctor_ObjectOf _ _ m d).
-    refine (_ : CommaSpecializedCategory_MorphismT _ _).
+  Let OverCatInducedFunctor_MorphismOf a a' (m : Morphism C a' a) s d (m0 : Morphism (a \ C) s d) :
+    Morphism (a' \ C) (@OverCatInducedFunctor_ObjectOf _ _ m s) (@OverCatInducedFunctor_ObjectOf _ _ m d).
+    refine (_ : CommaCategory_MorphismT _ _).
     exists (projT1 m0);
       subst_body; simpl in *; clear.
     abstract anihilate.
   Defined.
 
-  Local Opaque LocallySmallCat.
-  Let LocallySmallCatOverInducedFunctor'' a a' (m : Morphism C a a') : SpecializedFunctor (C / a) (C / a').
-    refine (Build_SpecializedFunctor (C / a) (C / a')
-                                     (@LocallySmallCatOverInducedFunctor_ObjectOf _ _ m)
-                                     (@LocallySmallCatOverInducedFunctor_MorphismOf _ _ m)
+  Local Opaque Cat.
+  Let CatOverInducedFunctor'' a a' (m : Morphism C a a') : Functor (C / a) (C / a').
+    refine (Build_Functor (C / a) (C / a')
+                                     (@CatOverInducedFunctor_ObjectOf _ _ m)
+                                     (@CatOverInducedFunctor_MorphismOf _ _ m)
                                      _
                                      _
            );
@@ -219,10 +219,10 @@ Section LocallySmallCatOverInducedFunctor.
     (* admit. *)
     abstract anihilate.
   Defined.
-  Let OverLocallySmallCatInducedFunctor'' a a' (m : Morphism C a' a) : SpecializedFunctor (a \ C) (a' \ C).
-    refine (Build_SpecializedFunctor (a \ C) (a' \ C)
-                                     (@OverLocallySmallCatInducedFunctor_ObjectOf _ _ m)
-                                     (@OverLocallySmallCatInducedFunctor_MorphismOf _ _ m)
+  Let OverCatInducedFunctor'' a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C).
+    refine (Build_Functor (a \ C) (a' \ C)
+                                     (@OverCatInducedFunctor_ObjectOf _ _ m)
+                                     (@OverCatInducedFunctor_MorphismOf _ _ m)
                                      _
                                      _
            );
@@ -230,16 +230,16 @@ Section LocallySmallCatOverInducedFunctor.
     (* admit. *) abstract anihilate.
   Defined.
 
-  Let LocallySmallCatOverInducedFunctor''' a a' (m : Morphism C a a') : SpecializedFunctor (C / a) (C / a').
-    simpl_definition_by_tac_and_exact (@LocallySmallCatOverInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
+  Let CatOverInducedFunctor''' a a' (m : Morphism C a a') : Functor (C / a) (C / a').
+    simpl_definition_by_tac_and_exact (@CatOverInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
   Defined.
-  Let OverLocallySmallCatInducedFunctor''' a a' (m : Morphism C a' a) : SpecializedFunctor (a \ C) (a' \ C).
-    simpl_definition_by_tac_and_exact (@OverLocallySmallCatInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
+  Let OverCatInducedFunctor''' a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C).
+    simpl_definition_by_tac_and_exact (@OverCatInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
   Defined.
 
-  Definition LocallySmallCatOverInducedFunctor a a' (m : Morphism C a a') : SpecializedFunctor (C / a) (C / a')
-    := Eval cbv beta iota zeta delta [LocallySmallCatOverInducedFunctor'''] in @LocallySmallCatOverInducedFunctor''' _ _ m.
-  Definition OverLocallySmallCatInducedFunctor a a' (m : Morphism C a' a) : SpecializedFunctor (a \ C) (a' \ C)
-    := Eval cbv beta iota zeta delta [OverLocallySmallCatInducedFunctor'''] in @OverLocallySmallCatInducedFunctor''' _ _ m.
-  Local Transparent LocallySmallCat.
-End LocallySmallCatOverInducedFunctor.
+  Definition CatOverInducedFunctor a a' (m : Morphism C a a') : Functor (C / a) (C / a')
+    := Eval cbv beta iota zeta delta [CatOverInducedFunctor'''] in @CatOverInducedFunctor''' _ _ m.
+  Definition OverCatInducedFunctor a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C)
+    := Eval cbv beta iota zeta delta [OverCatInducedFunctor'''] in @OverCatInducedFunctor''' _ _ m.
+  Local Transparent Cat.
+End CatOverInducedFunctor.

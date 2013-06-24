@@ -1,4 +1,4 @@
-Require Import SpecializedCategory Functor NaturalTransformation.
+Require Import Category Functor NaturalTransformation.
 Require Import Notations SumCategory ProductCategory.
 
 Set Implicit Arguments.
@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplifiedMorphism.
   Section single_category_definition.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     Class > MorphismSimplifiesTo {s d} (m_orig m_simpl : Morphism C s d) :=
       simplified_morphism_ok :> m_orig = m_simpl.
@@ -29,7 +29,7 @@ Section SimplifiedMorphism.
     trivial.
 
   Section single_category_instances.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     Global Instance LeftIdentitySimplify
            `(@MorphismSimplifiesTo C s d m1_orig m1_simpl)
@@ -71,8 +71,8 @@ Section SimplifiedMorphism.
   End single_category_instances.
 
   Section sum_prod_category_instances.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
+    Context `{C : Category}.
+    Context `{D : Category}.
 
     Global Instance SumCategorySimplify_inl
            `(@MorphismSimplifiesTo C s d m_orig m_simpl)
@@ -118,9 +118,9 @@ Section SimplifiedMorphism.
 
 
   Section functor_instances.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
-    Variable F : SpecializedFunctor C D.
+    Context `{C : Category}.
+    Context `{D : Category}.
+    Variable F : Functor C D.
 
     Global Instance FIdentityOfSimplify `(@MorphismSimplifiesTo C x x m_orig (Identity _))
     : MorphismSimplifiesTo (MorphismOf F m_orig) (Identity _) | 30.
@@ -190,19 +190,19 @@ Ltac rsimplify_morphisms :=
 (**                Goals which aren't yet solved by [rsimplify_morphisms]     **)
 (*******************************************************************************)
 Section bad1.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Variable s : SpecializedFunctor D E.
-  Variable s8 : SpecializedFunctor C D.
-  Variable s6 : SpecializedFunctor D E.
-  Variable s7 : SpecializedFunctor C D.
-  Variable s4 : SpecializedFunctor D E.
-  Variable s5 : SpecializedFunctor C D.
-  Variable s2 : SpecializedNaturalTransformation s s6.
-  Variable s3 : SpecializedNaturalTransformation s8 s7.
-  Variable s0 : SpecializedNaturalTransformation s6 s4.
-  Variable s1 : SpecializedNaturalTransformation s7 s5.
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Variable s : Functor D E.
+  Variable s8 : Functor C D.
+  Variable s6 : Functor D E.
+  Variable s7 : Functor C D.
+  Variable s4 : Functor D E.
+  Variable s5 : Functor C D.
+  Variable s2 : NaturalTransformation s s6.
+  Variable s3 : NaturalTransformation s8 s7.
+  Variable s0 : NaturalTransformation s6 s4.
+  Variable s1 : NaturalTransformation s7 s5.
   Variable x : C.
 
   Goal
@@ -221,9 +221,9 @@ End bad1.
 
 
 Section bad2.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor C D.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor C D.
   Variable o1 : C.
   Variable o2 : C.
   Variable o : C.

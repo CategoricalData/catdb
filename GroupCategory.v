@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Group.
+Require Export Category Group.
 Require Import Notations ComputableCategory SetCategory.
 
 Set Implicit Arguments.
@@ -24,8 +24,8 @@ Ltac destruct_units := destruct_singleton_constructor tt.
 Ltac destruct_Trues := destruct_singleton_constructor I.
 
 Section as_category.
-  Definition CategoryOfGroup (G : Group) : SpecializedCategory.
-    refine (@Build_SpecializedCategory unit
+  Definition CategoryOfGroup (G : Group) : Category.
+    refine (@Build_Category unit
                                        (fun _ _ => G)
                                        (fun _ => @GroupIdentity G)
                                        (fun _ _ _ => @GroupOperation G)
@@ -36,16 +36,16 @@ Section as_category.
   Defined.
 End as_category.
 
-Coercion CategoryOfGroup : Group >-> SpecializedCategory.
+Coercion CategoryOfGroup : Group >-> Category.
 
 Section category_of_groups.
-  Definition GroupCat : SpecializedCategory
+  Definition GroupCat : Category
     := Eval unfold ComputableCategory in ComputableCategory CategoryOfGroup.
 End category_of_groups.
 
 Section forgetful_functor.
-  Definition GroupForgetfulFunctor : SpecializedFunctor GroupCat TypeCat.
-    refine (Build_SpecializedFunctor GroupCat TypeCat
+  Definition GroupForgetfulFunctor : Functor GroupCat TypeCat.
+    refine (Build_Functor GroupCat TypeCat
                                      GroupObjects
                                      (fun s d m => MorphismOf m (s := tt) (d := tt))
                                      _

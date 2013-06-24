@@ -1,7 +1,7 @@
 Require Import JMeq.
 Require Export String.
 Require Export DataMigrationFunctors PathsCategory PathsCategoryFunctors.
-Require Import Notations Common Limits SetLimits SetColimits FEqualDep FunctorCategory DefinitionSimplification SetLimits SetColimits SpecializedCommaCategory CommaCategoryFunctors.
+Require Import Notations Common Limits SetLimits SetColimits FEqualDep FunctorCategory DefinitionSimplification SetLimits SetColimits CommaCategory CommaCategoryFunctors.
 
 Set Implicit Arguments.
 
@@ -256,9 +256,9 @@ Section FunctorialDataMigration.
         | _ => Empty_set
       end.
 
-    Example C_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory C_Edges_Ex22.
-    Example D_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory D_Edges_Ex22.
-    Example E_Category_Ex22 : LocallySmallSpecializedCategory := PathsCategory E_Edges_Ex22.
+    Example C_Category_Ex22 : Category := PathsCategory C_Edges_Ex22.
+    Example D_Category_Ex22 : Category := PathsCategory D_Edges_Ex22.
+    Example E_Category_Ex22 : Category := PathsCategory E_Edges_Ex22.
 
     Example F_Functor_Ex22_ObjectOf (x : C_Objects_Ex22) : D_Objects_Ex22 :=
       match x with
@@ -278,13 +278,13 @@ Section FunctorialDataMigration.
         | V_Ex22_E => U_Ex22_D
       end.
 
-    Example F_Functor_Ex22 : SpecializedFunctor C_Category_Ex22 D_Category_Ex22.
+    Example F_Functor_Ex22 : Functor C_Category_Ex22 D_Category_Ex22.
     Proof.
       apply (@FunctorFromPaths _ _ _ _ F_Functor_Ex22_ObjectOf).
       fill_unique_paths_functor.
     Defined.
 
-    Example G_Functor_Ex22 : SpecializedFunctor E_Category_Ex22 D_Category_Ex22.
+    Example G_Functor_Ex22 : Functor E_Category_Ex22 D_Category_Ex22.
     Proof.
       apply (@FunctorFromPaths _ _ _ _ G_Functor_Ex22_ObjectOf).
       fill_unique_paths_functor.
@@ -307,7 +307,7 @@ Section FunctorialDataMigration.
           | U_Ex22_D => Id_Ex221
         end.
 
-      Example  δ_Functor_Ex221 : SpecializedFunctor D_Category_Ex22 SetCat.
+      Example  δ_Functor_Ex221 : Functor D_Category_Ex22 SetCat.
       Proof.
         apply (@FunctorFromPaths _ _ _ _ δ_Functor_Ex221_ObjectOf).
         eliminate_useless_paths_functor_cases;
@@ -495,7 +495,7 @@ Section FunctorialDataMigration.
           | T2_Ex22_C => T2_Id_Ex222
         end.
 
-      Example γ_Functor_Ex222 : SpecializedFunctor C_Category_Ex22 SetCat.
+      Example γ_Functor_Ex222 : Functor C_Category_Ex22 SetCat.
       Proof.
         apply (@FunctorFromPaths _ _ _ _ γ_Functor_Ex222_ObjectOf).
         eliminate_useless_paths_functor_cases;
@@ -559,7 +559,7 @@ Section FunctorialDataMigration.
                                     D_Category_Ex22
                                     TypeCat
                                     F_Functor_Ex22
-                                    (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                    (fun (g : FunctorToType _) d => @TypeLimit
                                                                                  _
                                                                                  _
                                                                                  (RightPushforwardAlong_pre_Functor
@@ -567,14 +567,14 @@ Section FunctorialDataMigration.
                                                                                     D_Category_Ex22
                                                                                     TypeCat
                                                                                     F_Functor_Ex22
-                                                                                    (g : SpecializedFunctorToType _)
+                                                                                    (g : FunctorToType _)
                                                                                     d))).
 
       Let U_Ex22_D_ex := Eval hnf in (ObjectOf (@RightPushforwardAlong C_Category_Ex22
                                                                        D_Category_Ex22
                                                                        TypeCat
                                                                        F_Functor_Ex22
-                                                                       (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                                                       (fun (g : FunctorToType _) d => @TypeLimit
                                                                                                                     _
                                                                                                                     _
                                                                                                                     (RightPushforwardAlong_pre_Functor
@@ -582,16 +582,16 @@ Section FunctorialDataMigration.
                                                                                                                        D_Category_Ex22
                                                                                                                        TypeCat
                                                                                                                        F_Functor_Ex22
-                                                                                                                       (g : SpecializedFunctorToType _)
+                                                                                                                       (g : FunctorToType _)
                                                                                                                        d)))
-                                               ((γ_Functor_Ex222 : SpecializedFunctorToSet _) : SpecializedFunctorToType _)
+                                               ((γ_Functor_Ex222 : FunctorToSet _) : FunctorToType _)
                                                U_Ex22_D).
 
       Let Π_F__γ := (@RightPushforwardAlong C_Category_Ex22
                                             D_Category_Ex22
                                             TypeCat
                                             F_Functor_Ex22
-                                            (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                            (fun (g : FunctorToType _) d => @TypeLimit
                                                                                          _
                                                                                          _
                                                                                          (RightPushforwardAlong_pre_Functor
@@ -599,9 +599,9 @@ Section FunctorialDataMigration.
                                                                                             D_Category_Ex22
                                                                                             TypeCat
                                                                                             F_Functor_Ex22
-                                                                                            (g : SpecializedFunctorToType _)
+                                                                                            (g : FunctorToType _)
                                                                                             d)))
-                      ((γ_Functor_Ex222 : SpecializedFunctorToSet _) : SpecializedFunctorToType _).
+                      ((γ_Functor_Ex222 : FunctorToSet _) : FunctorToType _).
 
       Section Π_F__γ__T1_Ex222_cleanup.
         Example Π_F__γ__U_Ex222' :=
@@ -613,7 +613,7 @@ Section FunctorialDataMigration.
           Eval cbv beta iota zeta delta [Π_F__γ__U_Ex222'
                                            Object
                                            C_Edges_Ex22
-                                           SliceSpecializedCategory_Functor
+                                           SliceCategory_Functor
                                            RightPushforwardAlong_pre_Functor
                                            γ_Functor_Ex222] in Π_F__γ__U_Ex222'.
 
@@ -630,7 +630,7 @@ Section FunctorialDataMigration.
           assert (f : focus Π_F__γ__U_Ex222''') by constructor.
           unfold Π_F__γ__U_Ex222''' in f.
           simpl in f.
-          unfold CommaSpecializedCategory_ObjectT in *; simpl in *.
+          unfold CommaCategory_ObjectT in *; simpl in *.
           unfold γ_Functor_Ex222_ObjectOf in *.
           simpl in *.
           unfold F_Functor_Ex22_ObjectOf in *.
@@ -646,29 +646,29 @@ Section FunctorialDataMigration.
           subst_body; hnf.
           intro f.
           match type of f with
-            | focus ({ S0 : forall c : CommaSpecializedCategory_Object ?A ?B, @?C c |
+            | focus ({ S0 : forall c : CommaCategory_Object ?A ?B, @?C c |
                        @?D S0 }) =>
-              clear f; assert (f : focus ({ S0 : forall c : CommaSpecializedCategory_ObjectT A B,
-                                                   C (Build_CommaSpecializedCategory_Object A B c) |
-                                            D (fun c => S0 (CommaSpecializedCategory_Object_Member c)) }))
+              clear f; assert (f : focus ({ S0 : forall c : CommaCategory_ObjectT A B,
+                                                   C (Build_CommaCategory_Object A B c) |
+                                            D (fun c => S0 (CommaCategory_Object_Member c)) }))
                        by constructor;
-              unfold CommaSpecializedCategory_ObjectT in f; simpl in f
+              unfold CommaCategory_ObjectT in f; simpl in f
           end.
           match type of f with
             | focus ({ S0 : ?ST |
-                       forall (c c' : CommaSpecializedCategory_Object ?A ?B)
-                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
-                                                                     (CommaSpecializedCategory_Object_Member c')),
+                       forall (c c' : CommaCategory_Object ?A ?B)
+                              (g : CommaCategory_Morphism (CommaCategory_Object_Member c)
+                                                                     (CommaCategory_Object_Member c')),
                          @?D S0 c c' g }) =>
               clear f; assert (f : focus { S0 : ST |
-                                           forall (c c' : CommaSpecializedCategory_ObjectT A B)
-                                                  (g : CommaSpecializedCategory_MorphismT c c'),
+                                           forall (c c' : CommaCategory_ObjectT A B)
+                                                  (g : CommaCategory_MorphismT c c'),
                                              D S0
-                                               (Build_CommaSpecializedCategory_Object A B c)
-                                               (Build_CommaSpecializedCategory_Object A B c')
-                                               (Build_CommaSpecializedCategory_Morphism c c' g) })
+                                               (Build_CommaCategory_Object A B c)
+                                               (Build_CommaCategory_Object A B c')
+                                               (Build_CommaCategory_Morphism c c' g) })
                        by constructor;
-              unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in f;
+              unfold CommaCategory_ObjectT, CommaCategory_MorphismT in f;
               simpl in f
           end.
           match type of f with
@@ -839,24 +839,24 @@ Section FunctorialDataMigration.
         destruct x.
         simpl in *.
         match type of x with
-          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
-            assert (x' : forall c : CommaSpecializedCategory_ObjectT A B,
-                      f (Build_CommaSpecializedCategory_Object A B c))
+          | forall c : CommaCategory_Object ?A ?B, @?f c =>
+            assert (x' : forall c : CommaCategory_ObjectT A B,
+                      f (Build_CommaCategory_Object A B c))
         end.
         admit.
         match type of e with
-          | forall (c c' : CommaSpecializedCategory_Object ?A ?B) (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
-               (CommaSpecializedCategory_Object_Member c')),
+          | forall (c c' : CommaCategory_Object ?A ?B) (g : CommaCategory_Morphism (CommaCategory_Object_Member c)
+               (CommaCategory_Object_Member c')),
               @?f c c' g =>
-            clear e; assert (e : forall (c c' : CommaSpecializedCategory_ObjectT A B) (g : CommaSpecializedCategory_MorphismT c c'),
-                                    f (Build_CommaSpecializedCategory_Object A B c) (Build_CommaSpecializedCategory_Object A B c')
-                                      (Build_CommaSpecializedCategory_Morphism c c' g)) by admit
+            clear e; assert (e : forall (c c' : CommaCategory_ObjectT A B) (g : CommaCategory_MorphismT c c'),
+                                    f (Build_CommaCategory_Object A B c) (Build_CommaCategory_Object A B c')
+                                      (Build_CommaCategory_Morphism c c' g)) by admit
         end.
         match type of x with
-          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
+          | forall c : CommaCategory_Object ?A ?B, @?f c =>
             match type of e with
               | appcontext e'[x] =>
-                let e'' := context e'[fun c : CommaSpecializedCategory_Object A B => x' (CommaSpecializedCategory_Object_Member c)] in
+                let e'' := context e'[fun c : CommaCategory_Object A B => x' (CommaCategory_Object_Member c)] in
                 assert (e''' : e'') by admit
             end
         end.
@@ -864,10 +864,10 @@ Section FunctorialDataMigration.
         rename e''' into e'.
         simpl in *.
         match type of x with
-          | forall c : CommaSpecializedCategory_Object ?A ?B, @?f c =>
+          | forall c : CommaCategory_Object ?A ?B, @?f c =>
             repeat match type of e' with
                      | appcontext e''[x] =>
-                       let e''' := context e''[fun c : CommaSpecializedCategory_Object A B => x' (CommaSpecializedCategory_Object_Member c)] in
+                       let e''' := context e''[fun c : CommaCategory_Object A B => x' (CommaCategory_Object_Member c)] in
                        clear e'; assert (e' : e''') by admit
                    end
         end.
@@ -875,8 +875,8 @@ Section FunctorialDataMigration.
         rename x' into x, e' into e.
         simpl in *.
         compute in x.
-        unfold CommaSpecializedCategory_ObjectT in e; simpl in *.
-        unfold CommaSpecializedCategory_MorphismT in *; simpl in *.
+        unfold CommaCategory_ObjectT in e; simpl in *.
+        unfold CommaCategory_MorphismT in *; simpl in *.
         Print existT.
         Print exist.
         match type of e with
@@ -1064,13 +1064,13 @@ Section FunctorialDataMigration.
 
         compute in e.
         assert (forall
-        c : CommaSpecializedCategory_ObjectT
+        c : CommaCategory_ObjectT
               {|
               ObjectOf := fun _ : unit => U_Ex22_D;
               MorphismOf := fun _ _ _ : unit => NoEdges;
-              FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+              FCompositionOf' := SliceCategory_Functor_subproof
                                    D_Category_Ex22 U_Ex22_D;
-              FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+              FIdentityOf' := SliceCategory_Functor_subproof0
                                 D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22,
       match snd (projT1 ( c)) with
       | SSN_Ex22_C => SSN
@@ -1088,7 +1088,7 @@ Section FunctorialDataMigration.
 
         Require Import InitialTerminalCategory ChainCategory DiscreteCategoryFunctors.
 
-        Definition F objC (C : SpecializedCategory) : SpecializedFunctor C TerminalCategory.
+        Definition F objC (C : Category) : Functor C TerminalCategory.
           clear.
           eexists; intros; simpl; eauto.
           Grab Existential Variables.
@@ -1096,20 +1096,20 @@ Section FunctorialDataMigration.
           intros; simpl; eauto.
         Defined.
 
-        Let Π_F_C objC (C : @LocallySmallSpecializedCategory) := Eval hnf in
+        Let Π_F_C objC (C : @Category) := Eval hnf in
                              (@RightPushforwardAlong C
-                                                     (TerminalCategory : LocallySmallSpecializedCategory)
+                                                     (TerminalCategory : Category)
                                                      TypeCat
                                                      (@F objC C)
-                                                     (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                                     (fun (g : FunctorToType _) d => @TypeLimit
                                                                                                   _
                                                                                                   _
                                                                                                   (RightPushforwardAlong_pre_Functor
                                                                                                      C
-                                                                                                     (TerminalCategory : LocallySmallSpecializedCategory)
+                                                                                                     (TerminalCategory : Category)
                                                                                                      TypeCat
                                                                                                      (@F objC C)
-                                                                                                     (g : SpecializedFunctorToType _)
+                                                                                                     (g : FunctorToType _)
                                                                                                      d))).
 
         Let Π_F_C'_ObjectOf C := Eval hnf in @ObjectOf _ _ _ _ (@Π_F_C objC C).
@@ -1117,7 +1117,7 @@ Section FunctorialDataMigration.
 
         Require Import ProofIrrelevance.
 
-        Definition Functor_01_0 : SpecializedFunctor [0] [1].
+        Definition Functor_01_0 : Functor [0] [1].
           clear.
           eexists (fun _ => exist _ 0 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1126,7 +1126,7 @@ Section FunctorialDataMigration.
           intros; compute; constructor; trivial.
         Defined.
 
-        Definition Functor_01_1 : SpecializedFunctor [0] [1].
+        Definition Functor_01_1 : Functor [0] [1].
           clear.
           eexists (fun _ => exist _ 1 _) _;
             intros; compute; try apply proof_irrelevance.
@@ -1136,23 +1136,23 @@ Section FunctorialDataMigration.
         Defined.
 
         Let Π_F_01_F F := Eval hnf in
-                           (@RightPushforwardAlong ([0] : LocallySmallSpecializedCategory)
-                                                   ([1] : LocallySmallSpecializedCategory)
+                           (@RightPushforwardAlong ([0] : Category)
+                                                   ([1] : Category)
                                                    TypeCat
                                                    F
-                                                   (fun (g : SpecializedFunctorToType _) d => @TypeLimit
+                                                   (fun (g : FunctorToType _) d => @TypeLimit
                                                                                                 _
                                                                                                 _
                                                                                                 (RightPushforwardAlong_pre_Functor
-                                                                                                   ([0] : LocallySmallSpecializedCategory)
-                                                                                                   ([1] : LocallySmallSpecializedCategory)
+                                                                                                   ([0] : Category)
+                                                                                                   ([1] : Category)
                                                                                                    TypeCat
                                                                                                    F
-                                                                                                   (g : SpecializedFunctorToType _)
+                                                                                                   (g : FunctorToType _)
                                                                                                    d))).
 
-        Example Π_F_01_F_ObjectOf (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) := Eval hnf in (@ObjectOf _ _ _ _ (Π_F_01_F F) x).
-        Example Π_F_01_F_MorphismOf (F : SpecializedFunctor [0] [1]) (s d : SpecializedFunctor [0] TypeCat) m m' := Eval simpl in (@MorphismOf _ _ _ _ (Π_F_01_F F) s d m m').
+        Example Π_F_01_F_ObjectOf (F : Functor [0] [1]) (x : Functor [0] TypeCat) := Eval hnf in (@ObjectOf _ _ _ _ (Π_F_01_F F) x).
+        Example Π_F_01_F_MorphismOf (F : Functor [0] [1]) (s d : Functor [0] TypeCat) m m' := Eval simpl in (@MorphismOf _ _ _ _ (Π_F_01_F F) s d m m').
 
         Example Π_F_01_F_ObjectOf_ObjectOf F x (x' : [1]%category) := Eval hnf in (@Π_F_01_F_ObjectOf F x x').
         Example Π_F_01_F_ObjectOf_MorhismOf F x s d (m : Morphism [1] s d) := Eval simpl in (MorphismOf (@Π_F_01_F_ObjectOf F x) m).
@@ -1164,39 +1164,39 @@ Section FunctorialDataMigration.
           hnf in *;
             simpl in *; unfold Object in *; simpl in *.
           match goal with
-            | [ f := { S0 : forall c : CommaSpecializedCategory_Object ?A ?B, @?C c |
+            | [ f := { S0 : forall c : CommaCategory_Object ?A ?B, @?C c |
                        @?D S0 } |- _ ] =>
-              clear f; pose ({ S0 : forall c : CommaSpecializedCategory_ObjectT A B, C (Build_CommaSpecializedCategory_Object A B c) |
-                               D (fun c => S0 (CommaSpecializedCategory_Object_Member c)) }) as f; unfold CommaSpecializedCategory_ObjectT in *;
+              clear f; pose ({ S0 : forall c : CommaCategory_ObjectT A B, C (Build_CommaCategory_Object A B c) |
+                               D (fun c => S0 (CommaCategory_Object_Member c)) }) as f; unfold CommaCategory_ObjectT in *;
               simpl in *
           end.
           match goal with
             | [ f := { S0 : ?ST |
-                       forall (c c' : CommaSpecializedCategory_Object ?A ?B)
-                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
-                                                                     (CommaSpecializedCategory_Object_Member c')),
+                       forall (c c' : CommaCategory_Object ?A ?B)
+                              (g : CommaCategory_Morphism (CommaCategory_Object_Member c)
+                                                                     (CommaCategory_Object_Member c')),
                          @?D S0 c c' g } |- _ ] =>
               clear f; pose ({ S0 : ST |
-                               forall (c c' : CommaSpecializedCategory_ObjectT A B)
-                                      (g : CommaSpecializedCategory_MorphismT c c'),
+                               forall (c c' : CommaCategory_ObjectT A B)
+                                      (g : CommaCategory_MorphismT c c'),
                                  D S0
-                                   (Build_CommaSpecializedCategory_Object A B c)
-                                   (Build_CommaSpecializedCategory_Object A B c')
-                                   (Build_CommaSpecializedCategory_Morphism c c' g) }) as f;
-              unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in f;
+                                   (Build_CommaCategory_Object A B c)
+                                   (Build_CommaCategory_Object A B c')
+                                   (Build_CommaCategory_Morphism c c' g) }) as f;
+              unfold CommaCategory_ObjectT, CommaCategory_MorphismT in f;
               simpl in f
           end.
           exact f.
         Defined.
 
-        Example Π_F_01_F_ObjectOf_ObjectOf (F : SpecializedFunctor [0] [1]) (x : SpecializedFunctor [0] TypeCat) (x' : [1]%category) :
+        Example Π_F_01_F_ObjectOf_ObjectOf (F : Functor [0] [1]) (x : Functor [0] TypeCat) (x' : [1]%category) :
           typeof (Π_F_01_F_ObjectOf_ObjectOf F x x').
         Proof.
           hnf in *; simpl in *.
           assert (Hf : focus (Π_F_01_F_ObjectOf_ObjectOf F x x')) by constructor.
           unfold Π_F_01_F_ObjectOf_ObjectOf in Hf; simpl in Hf.
           revert Hf; clear; intro.
-          unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in Hf.
+          unfold CommaCategory_ObjectT, CommaCategory_MorphismT in Hf.
           simpl in Hf.
           match type of Hf with
             | focus ({ S0 : forall c : { ab : unit * ?A & @?B ab },
@@ -1260,7 +1260,7 @@ Section FunctorialDataMigration.
           exact (@id _).
         Defined.
 
-        Definition f_to_functor (f : [0]%category -> TypeCat) : SpecializedFunctor [0] TypeCat.
+        Definition f_to_functor (f : [0]%category -> TypeCat) : Functor [0] TypeCat.
         Proof.
           revert f; clear; intro.
           exists f (f_to_functor_MorphismOf f); intros; simpl; destruct_sig; simpl in *;
@@ -1331,26 +1331,26 @@ Extraction path.
           match goal with
             | [ f := { S0 : ?ST |
                        forall (c c' : ?C)
-                              (g : CommaSpecializedCategory_Morphism c c'),
+                              (g : CommaCategory_Morphism c c'),
                          @?D S0 c c' g } |- _ ] =>
               clear f; pose ({ S0 : ST |
                                forall (c c' : C)
-                                      (g : CommaSpecializedCategory_MorphismT (Build_CommaSpecializedCategory_Object c) (CommaSpecializedCategory_Object_Member c')),
-                                 D S0 c c' (Build_CommaSpecializedCategory_Morphism c c' g) }) (*as f;
-              unfold CommaSpecializedCategory_MorphismT in f; simpl in * *)
+                                      (g : CommaCategory_MorphismT (Build_CommaCategory_Object c) (CommaCategory_Object_Member c')),
+                                 D S0 c c' (Build_CommaCategory_Morphism c c' g) }) (*as f;
+              unfold CommaCategory_MorphismT in f; simpl in * *)
           end.
                                                                       c')),
 
 
                          @?D S0 c c' g
-                              (g : CommaSpecializedCategory_Morphism (CommaSpecializedCategory_Object_Member c)
-                                                                     (CommaSpecializedCategory_Object_Member c')),
+                              (g : CommaCategory_Morphism (CommaCategory_Object_Member c)
+                                                                     (CommaCategory_Object_Member c')),
 
-                        D (exist _ (Build_CommaSpecializedCategory_Object A B (proj1_sig S0)) (proj2_sig S0))
-                          (Build_CommaSpecializedCategory_Object A' B' c)
-                          (Build_CommaSpecializedCategory_Object A' B' c')
-                          (Build_CommaSpecializedCategory_Morphism (Build_CommaSpecializedCategory_Object A' B' c)
-                                                                   (Build_CommaSpecializedCategory_Object A' B' c')
+                        D (exist _ (Build_CommaCategory_Object A B (proj1_sig S0)) (proj2_sig S0))
+                          (Build_CommaCategory_Object A' B' c)
+                          (Build_CommaCategory_Object A' B' c')
+                          (Build_CommaCategory_Morphism (Build_CommaCategory_Object A' B' c)
+                                                                   (Build_CommaCategory_Object A' B' c')
                                                                    g) }) as f'
 
           compute in f.
@@ -1377,21 +1377,21 @@ Extraction path.
         clear Π_F_C'
         compute in Π_F_C''.
 
-        ((γ_Functor_Ex222 : SpecializedFunctorToSet _) : SpecializedFunctorToType _).
+        ((γ_Functor_Ex222 : FunctorToSet _) : FunctorToType _).
 
         Goal Π_F__γ__U_Ex222''''.
         hnf.
         subst_body.
         eexists.
         intros.
-        destruct_head @CommaSpecializedCategory_Object.
+        destruct_head @CommaCategory_Object.
         simpl in *.
         destruct_sig.
         simpl in *.
         destruct_head prod.
         simpl in *.
         destruct_head unit.
-        destruct_head @CommaSpecializedCategory_Morphism.
+        destruct_head @CommaCategory_Morphism.
         simpl in *.
         destruct_sig; destruct_head prod; destruct_head unit; simpl in *.
         destruct c0; simpl in *.
@@ -1404,13 +1404,13 @@ Extraction path.
             destruct_head C_Objects_Ex22;
               simpl in *.
 
-            CommaSpecializedCategory_Object
+            CommaCategory_Object
               {|
                 ObjectOf := fun _ : unit => U_Ex22_D;
                 MorphismOf := fun _ _ _ : unit => NoEdges;
-                FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+                FCompositionOf' := SliceCategory_Functor_subproof
                                      D_Category_Ex22 U_Ex22_D;
-                FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+                FIdentityOf' := SliceCategory_Functor_subproof0
                                   D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22.
 
             Example Π_F__γ__U_Ex222''''' : Type.
@@ -1420,12 +1420,12 @@ Extraction path.
               - intros a b; hnf in *.
                 destruct a as [ x e ].
                 simpl in *.
-                pose proof (fun c : CommaSpecializedCategory_ObjectT _ _ => x c) as x'; simpl in x'.
+                pose proof (fun c : CommaCategory_ObjectT _ _ => x c) as x'; simpl in x'.
                 move x' at top.
                 compute in x'.
-                pose proof (fun (c c' : CommaSpecializedCategory_ObjectT _ _) (g : CommaSpecializedCategory_MorphismT _ _) => e c c' g) as e'.
+                pose proof (fun (c c' : CommaCategory_ObjectT _ _) (g : CommaCategory_MorphismT _ _) => e c c' g) as e'.
                 move e' at top; simpl in e'.
-                unfold CommaSpecializedCategory_ObjectT, CommaSpecializedCategory_MorphismT in e'; simpl in e'.
+                unfold CommaCategory_ObjectT, CommaCategory_MorphismT in e'; simpl in e'.
                 unfold C_Edges_Ex22, D_Edges_Ex22 in *; simpl in *.
                 pattern x in e'.
                 Check e'.
@@ -1462,24 +1462,24 @@ Extraction path.
                     Eval hnf in Π_F__γ__U_Ex222''''.
 
 
-                    change (CommaSpecializedCategory_Object_Member ?x) with x in *.
+                    change (CommaCategory_Object_Member ?x) with x in *.
                     match goal with
                       | [ f := context G'[let (x) := ?y in x] |- _ ] => idtac
                     end.
                     change (let (x) := ?y in x) with y in *.
                     unfold C_Objects_Ex22 in *.
                     simpl in f.
-                    change (CommaSpecializedCategory_Object ?A ?B) with (CommaSpecializedCategory_ObjectT A B) in f.
+                    change (CommaCategory_Object ?A ?B) with (CommaCategory_ObjectT A B) in f.
 
-                    Check (CommaSpecializedCategory_ObjectT _ _ : CommaSpecializedCategory_Object
+                    Check (CommaCategory_ObjectT _ _ : CommaCategory_Object
                                                                     {|
                                                                       ObjectOf := fun _ : unit => U_Ex22_D;
                                                                       MorphismOf := fun _ _ _ : unit => NoEdges;
-                                                                      FCompositionOf' := SliceSpecializedCategory_Functor_subproof
+                                                                      FCompositionOf' := SliceCategory_Functor_subproof
                                                                                            D_Category_Ex22 U_Ex22_D;
-                                                                      FIdentityOf' := SliceSpecializedCategory_Functor_subproof0
+                                                                      FIdentityOf' := SliceCategory_Functor_subproof0
                                                                                         D_Category_Ex22 U_Ex22_D |} F_Functor_Ex22).
-                    unfold CommaSpecializedCategory_Object.
+                    unfold CommaCategory_Object.
                     unfold Object, C_Edges_Ex22 in f.
 
                     Print Π_F__γ__U_Ex222'.

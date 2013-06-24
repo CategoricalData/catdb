@@ -1,4 +1,4 @@
-Require Export SpecializedCategory.
+Require Export Category.
 Require Import CategoryIsomorphisms.
 
 Set Implicit Arguments.
@@ -90,7 +90,7 @@ Section preobject.
           [NaturalNumbersPreObject], to make the distinction slightly
           more obvious. *)
 
-  Context `(E : SpecializedCategory).
+  Context `(E : Category).
 
   Local Reserved Notation "'ℕ'".
   Local Reserved Notation "'S'".

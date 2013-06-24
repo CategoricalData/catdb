@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export SpecializedCategory Functor FunctorCategory Hom FunctorAttributes.
+Require Export Category Functor FunctorCategory Hom FunctorAttributes.
 Require Import Common ProductCategory SetCategory.
 
 Set Implicit Arguments.
@@ -22,12 +22,12 @@ Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
     end.
 
 Section Yoneda.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Let COp := OppositeCategory C.
 
   Section Yoneda.
-    Let Yoneda_NT s d (f : COp.(Morphism) s d) : SpecializedNaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d).
-      refine (Build_SpecializedNaturalTransformation
+    Let Yoneda_NT s d (f : COp.(Morphism) s d) : NaturalTransformation (CovariantHomFunctor C s) (CovariantHomFunctor C d).
+      refine (Build_NaturalTransformation
                 (CovariantHomFunctor C s)
                 (CovariantHomFunctor C d)
                 (fun c : C => (fun m : C.(Morphism) _ _ => Compose m f))
@@ -36,10 +36,10 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Definition Yoneda : SpecializedFunctor COp (TypeCat ^ C).
+    Definition Yoneda : Functor COp (TypeCat ^ C).
       match goal with
-        | [ |- SpecializedFunctor ?C0 ?D0 ] =>
-          refine (Build_SpecializedFunctor C0 D0
+        | [ |- Functor ?C0 ?D0 ] =>
+          refine (Build_Functor C0 D0
             (fun c : COp => CovariantHomFunctor C c : TypeCat ^ C)
             (fun s d (f : COp.(Morphism) s d) => Yoneda_NT s d f)
             _
@@ -51,8 +51,8 @@ Section Yoneda.
   End Yoneda.
 
   Section CoYoneda.
-    Let CoYoneda_NT s d (f : C.(Morphism) s d) : SpecializedNaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d).
-      refine (Build_SpecializedNaturalTransformation
+    Let CoYoneda_NT s d (f : C.(Morphism) s d) : NaturalTransformation (ContravariantHomFunctor C s) (ContravariantHomFunctor C d).
+      refine (Build_NaturalTransformation
                 (ContravariantHomFunctor C s)
                 (ContravariantHomFunctor C d)
                 (fun c : C => (fun m : COp.(Morphism) _ _ => Compose m f))
@@ -61,10 +61,10 @@ Section Yoneda.
       abstract (intros; simpl; apply functional_extensionality_dep; intros; auto with morphism).
     Defined.
 
-    Definition CoYoneda : SpecializedFunctor C (TypeCat ^ COp).
+    Definition CoYoneda : Functor C (TypeCat ^ COp).
       match goal with
-        | [ |- SpecializedFunctor ?C0 ?D0 ] =>
-          refine (Build_SpecializedFunctor C0 D0
+        | [ |- Functor ?C0 ?D0 ] =>
+          refine (Build_Functor C0 D0
             (fun c : C => ContravariantHomFunctor C c : TypeCat ^ COp)
             (fun s d (f : C.(Morphism) s d) => CoYoneda_NT s d f)
             _
@@ -77,7 +77,7 @@ Section Yoneda.
 End Yoneda.
 
 Section YonedaLemma.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Let COp := OppositeCategory C.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
@@ -90,8 +90,8 @@ Section YonedaLemma.
     simpl; intro Xc.
     hnf.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun c' : C => (fun f : Morphism _ c c' => X.(MorphismOf) f Xc))
           _
         )
@@ -117,7 +117,7 @@ Section YonedaLemma.
 End YonedaLemma.
 
 Section CoYonedaLemma.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Let COp := OppositeCategory C.
 
   Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp)
@@ -131,8 +131,8 @@ Section CoYonedaLemma.
     simpl; intro Xc.
     hnf.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun c' : COp => (fun f : COp.(Morphism) c c' => X.(MorphismOf) f Xc))
           _
         )
@@ -158,7 +158,7 @@ Section CoYonedaLemma.
 End CoYonedaLemma.
 
 Section FullyFaithful.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.

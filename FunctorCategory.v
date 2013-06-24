@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor NaturalTransformation.
+Require Export Category Functor NaturalTransformation.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -10,15 +10,15 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorCategory.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   (*
      There is a category Fun(C, D) of functors from [C] to [D].
    *)
-  Definition FunctorCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory (SpecializedFunctor C D)
-                                       (SpecializedNaturalTransformation (C := C) (D := D))
+  Definition FunctorCategory : Category.
+    refine (@Build_Category (Functor C D)
+                                       (NaturalTransformation (C := C) (D := D))
                                        (IdentityNaturalTransformation (C := C) (D := D))
                                        (NTComposeT (C := C) (D := D))
                                        _

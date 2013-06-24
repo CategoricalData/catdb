@@ -1,5 +1,5 @@
 Require Export LimitFunctors.
-Require Import Common DefinitionSimplification SpecializedCategory Functor NaturalTransformation.
+Require Import Common DefinitionSimplification Category Functor NaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -34,12 +34,12 @@ Section InducedMaps.
      injects one set into its union with another and [lim G] projects a
      product of two sets onto one factor.
      *)
-  Context `(C1 : SpecializedCategory).
-  Context `(C2 : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F1 : SpecializedFunctor C1 D.
-  Variable F2 : SpecializedFunctor C2 D.
-  Variable G : SpecializedFunctor C1 C2.
+  Context `(C1 : Category).
+  Context `(C2 : Category).
+  Context `(D : Category).
+  Variable F1 : Functor C1 D.
+  Variable F2 : Functor C2 D.
+  Variable G : Functor C1 C2.
 
   Section Limit.
     Variable T : NaturalTransformation (ComposeFunctors F2 G) F1.
@@ -50,7 +50,7 @@ Section InducedMaps.
     Let limF1 := LimitObject F1_Limit.
     Let limF2 := LimitObject F2_Limit.
 
-    Definition InducedLimitMapNT' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
+    Definition InducedLimitMapNT' : NaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
       unfold LimitObject, Limit in *;
         intro_universal_morphisms.
       subst limF1 limF2.
@@ -61,8 +61,8 @@ Section InducedMaps.
       unfold ComposeFunctors at 1.
       simpl.
       match goal with
-        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-          refine (Build_SpecializedNaturalTransformation F G
+        | [ |- NaturalTransformation ?F ?G ] =>
+          refine (Build_NaturalTransformation F G
             (fun x => Identity _)
             _
           )
@@ -70,12 +70,12 @@ Section InducedMaps.
       simpl; reflexivity.
     Defined.
 
-    Definition InducedLimitMapNT'' : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
+    Definition InducedLimitMapNT'' : NaturalTransformation ((DiagonalFunctor D C1) limF2) F1.
       simpl_definition_by_exact InducedLimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Definition InducedLimitMapNT : SpecializedNaturalTransformation ((DiagonalFunctor D C1) limF2) F1
+    Definition InducedLimitMapNT : NaturalTransformation ((DiagonalFunctor D C1) limF2) F1
       := Eval cbv beta iota zeta delta [InducedLimitMapNT''] in InducedLimitMapNT''.
 
     Definition InducedLimitMap : D.(Morphism) limF2 limF1
@@ -91,7 +91,7 @@ Section InducedMaps.
     Let colimF1 := ColimitObject F1_Colimit.
     Let colimF2 := ColimitObject F2_Colimit.
 
-    Definition InducedColimitMapNT' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
+    Definition InducedColimitMapNT' : NaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
       unfold ColimitObject, Colimit in *;
         intro_universal_morphisms.
       subst colimF1 colimF2.
@@ -102,8 +102,8 @@ Section InducedMaps.
       unfold ComposeFunctors at 1.
       simpl.
       match goal with
-        | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-          refine (Build_SpecializedNaturalTransformation F G
+        | [ |- NaturalTransformation ?F ?G ] =>
+          refine (Build_NaturalTransformation F G
             (fun x => Identity _)
             _
           )
@@ -111,12 +111,12 @@ Section InducedMaps.
       simpl; reflexivity.
     Defined.
 
-    Definition InducedColimitMapNT'' : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
+    Definition InducedColimitMapNT'' : NaturalTransformation F1 ((DiagonalFunctor D C1) colimF2).
       simpl_definition_by_exact InducedColimitMapNT'.
     Defined.
 
     (* Then we clean up a bit with reduction. *)
-    Definition InducedColimitMapNT : SpecializedNaturalTransformation F1 ((DiagonalFunctor D C1) colimF2)
+    Definition InducedColimitMapNT : NaturalTransformation F1 ((DiagonalFunctor D C1) colimF2)
       := Eval cbv beta iota zeta delta [InducedColimitMapNT''] in InducedColimitMapNT''.
 
     Definition InducedColimitMap : Morphism D colimF1 colimF2

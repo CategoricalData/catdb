@@ -30,14 +30,14 @@ Local Ltac step := clear; subst_body;
                       || (abstract apply CosliceCategoryInducedFunctor_FIdentityOf)
                       || (abstract apply SliceCategoryInducedFunctor_FCompositionOf)
                       || (abstract apply CosliceCategoryInducedFunctor_FCompositionOf)*)
-                      || apply CommaSpecializedCategory_Morphism_eq
+                      || apply CommaCategory_Morphism_eq
                       || apply f_equal
                       || (apply f_equal2; try reflexivity; [])
                       || apply sigT_eq (* simpl_eq *)
                       || (progress nt_eq)
                       || (progress functor_eq)
-                      || (progress (destruct_head_hnf @CommaSpecializedCategory_Object;
-                                    destruct_head_hnf @CommaSpecializedCategory_Morphism;
+                      || (progress (destruct_head_hnf @CommaCategory_Object;
+                                    destruct_head_hnf @CommaCategory_Morphism;
                                     destruct_sig)));
                    simpl; trivial.
 
@@ -52,27 +52,27 @@ Local Ltac t :=
            | _ => progress simpl_eq'
            | _ => progress (apply Functor_eq || apply Functor_JMeq)
            | _ => progress (apply NaturalTransformation_eq || apply NaturalTransformation_JMeq)
-           | _ => progress apply CommaSpecializedCategory_Morphism_eq
-           | _ => progress (destruct_head_hnf @CommaSpecializedCategory_Object; destruct_head_hnf @CommaSpecializedCategory_Morphism)
+           | _ => progress apply CommaCategory_Morphism_eq
+           | _ => progress (destruct_head_hnf @CommaCategory_Object; destruct_head_hnf @CommaCategory_Morphism)
            | _ => progress destruct_sig
            | _ => progress autorewrite with morphism
            | _ => progress repeat rewrite FIdentityOf
-           | [ |- @eq (LaxCosliceSpecializedCategory_Object _ _) _ _ ] => expand; apply f_equal
-           | [ |- @eq (LaxCosliceSpecializedCategory_Morphism _ _) _ _ ] => expand; apply f_equal
-           | [ |- @eq (LaxSliceSpecializedCategory_Object _ _) _ _ ] => expand; apply f_equal
-           | [ |- @eq (LaxSliceSpecializedCategory_Morphism _ _) _ _ ] => expand; apply f_equal
+           | [ |- @eq (LaxCosliceCategory_Object _ _) _ _ ] => expand; apply f_equal
+           | [ |- @eq (LaxCosliceCategory_Morphism _ _) _ _ ] => expand; apply f_equal
+           | [ |- @eq (LaxSliceCategory_Object _ _) _ _ ] => expand; apply f_equal
+           | [ |- @eq (LaxSliceCategory_Morphism _ _) _ _ ] => expand; apply f_equal
            | _ => progress (apply functional_extensionality_dep_JMeq; intros)
          end.
 
 Section DataMigrationFunctors.
-  Context `(C : LocallySmallSpecializedCategory).
-  Context `(D : LocallySmallSpecializedCategory).
-  Context `(S : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(S : Category).
 
   Section Δ.
     Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)
       := (ExponentialLaw4Functor_Inverse _ _ _) (FunctorialComposition _ _ _).
-    Definition PullbackAlong (F : SpecializedFunctor C D) : (S ^ C) ^ (S ^ D)
+    Definition PullbackAlong (F : Functor C D) : (S ^ C) ^ (S ^ D)
       := Eval hnf in PullbackAlongFunctor F.
     (*
 
@@ -90,7 +90,7 @@ Section DataMigrationFunctors.
       Implicit Arguments exist [A P].
       unfold IdentityFunctor, IdentityNaturalTransformation, NTComposeF, NTComposeT, ComposeFunctors in Hf.
       simpl in Hf.
-    Let PullbackAlong' (F : SpecializedFunctor C D) : { PA : (S ^ C) ^ (S ^ D) | PullbackAlongFunctor' F = PA }.
+    Let PullbackAlong' (F : Functor C D) : { PA : (S ^ C) ^ (S ^ D) | PullbackAlongFunctor' F = PA }.
       pre_abstract_trailing_props.
       functor_simpl_abstract_trailing_props_with_equality.
     Defined.
@@ -103,14 +103,14 @@ Section DataMigrationFunctors.
       nt_simpl_abstract_trailing_props_with_equality.
     Defined.
 
-    Definition PullbackAlong (F : SpecializedFunctor C D) : (S ^ C) ^ (S ^ D)
+    Definition PullbackAlong (F : Functor C D) : (S ^ C) ^ (S ^ D)
       := Eval hnf in proj1_sig (PullbackAlong' F).
 
     Let PullbackAlongFunctor'' : ((S ^ C) ^ (S ^ D)) ^ (D ^ C).
       hnf.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
                                            PullbackAlong
                                            (fun s d m => proj1_sig (@PullbackAlongFunctor'_MorphismOf' s d m))
                                            _
@@ -231,7 +231,7 @@ Section DataMigrationFunctors.
       unfold Morphism, FunctorCategory at 1.
       functor_simpl_abstract_trailing_props_with_equality.
     Defined.
-    Definition PullbackAlong (F : SpecializedFunctor C D) : SpecializedFunctor (S ^ D) (S ^ C)
+    Definition PullbackAlong (F : Functor C D) : Functor (S ^ D) (S ^ C)
       := Eval hnf in PullbackAlong' F.
     Print PullbackAlong.
       := ComposeFunctors (FunctorialComposition C D S)
@@ -246,8 +246,8 @@ Section DataMigrationFunctors.
   Eval simpl in PullbackAlongFunctor.
 
   Section Π.
-    Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
-    (*Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).*)
+    Local Notation "A ↓ F" := (CosliceCategory A F).
+    (*Local Notation "C / c" := (@SliceCategoryOver _ _ C c).*)
 
     (** Quoting David Spivak in "Functorial Data Migration":
        Definition 2.1.2. Let [F : C -> D] be a morphism of schemas and
@@ -276,17 +276,17 @@ Section DataMigrationFunctors.
      *)
 
     Section pre_functorial.
-      Variable F : SpecializedFunctor C D.
+      Variable F : Functor C D.
 
       (* Define [ɣ ○ (π^F d)] *)
-      Definition RightPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (d ↓ F) S.
+      Definition RightPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : Functor (d ↓ F) S.
         refine (ComposeFunctors (ComposeFunctors g (projT2 (CosliceCategoryProjectionFunctor C D F d))) _).
-        unfold CosliceSpecializedCategory, SliceSpecializedCategory_Functor, Object; simpl.
+        unfold CosliceCategory, SliceCategory_Functor, Object; simpl.
         refine (CommaCategoryInducedFunctor (s := (_, F)) (d := (_, F)) (_, IdentityNaturalTransformation F)).
         simpl.
         match goal with
-          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-            refine (Build_SpecializedNaturalTransformation F G
+          | [ |- NaturalTransformation ?F ?G ] =>
+            refine (Build_NaturalTransformation F G
                                                            (fun _ => Identity _)
                                                            _)
         end;
@@ -294,17 +294,17 @@ Section DataMigrationFunctors.
       Defined.
 
       (*Variable HasLimits : forall g d, Limit (RightPushforwardAlong_pre_Functor g d).*)
-      (* Variable HasLimits : forall d (F' : SpecializedFunctor (d ↓ F) S), Limit F'.*)
+      (* Variable HasLimits : forall d (F' : Functor (d ↓ F) S), Limit F'.*)
 
       Let Index2Cat d := d ↓ F.
 
-      Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ _ Index2Cat _ D).
 
       (*Let HasLimits' (C0 : CAT ⇑ S) : Limit (projT2 C0)
         := HasLimits (projT2 C0). *)
 
       Let RightPushforwardAlong_pre_curried_ObjectOf_pre (g : S ^ C) (d : D) : CAT ⇑ S
-        := existT _ (tt, _) (RightPushforwardAlong_pre_pre_Functor g d) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+        := existT _ (tt, _) (RightPushforwardAlong_pre_pre_Functor g d) : LaxCosliceCategory_ObjectT Index2Cat S.
 
       Let RightPushforwardAlong_pre_curried_ObjectOf (gd : (S ^ C) * D) : CAT ⇑ S
         := RightPushforwardAlong_pre_curried_ObjectOf_pre (fst gd) (snd gd).
@@ -318,8 +318,8 @@ Section DataMigrationFunctors.
         simpl;
         unfold Object, Morphism, GeneralizeFunctor.
         match goal with
-          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-            let F' := eval hnf in F in let G' := eval hnf in G in change (SpecializedNaturalTransformation F' G')
+          | [ |- NaturalTransformation ?F ?G ] =>
+            let F' := eval hnf in F in let G' := eval hnf in G in change (NaturalTransformation F' G')
         end.
         exists (fun c : d' ↓ F => m (snd (projT1 c)) : Morphism S _ _).
         simpl;
@@ -332,7 +332,7 @@ Section DataMigrationFunctors.
         Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf gd) (RightPushforwardAlong_pre_curried_ObjectOf g'd')
         := @RightPushforwardAlong_pre_curried_MorphismOf_pre (fst gd) (snd gd) (fst g'd') (snd g'd') (fst m) (snd m).
 
-      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : SpecializedFunctor C S * LSObject D)
+      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : Functor C S * LSObject D)
             (m1 : Morphism ((S ^ C)%functor * D) s d)
             (m2 : Morphism ((S ^ C)%functor * D) d d') :
         RightPushforwardAlong_pre_curried_MorphismOf (Compose m2 m1) =
@@ -346,7 +346,7 @@ Section DataMigrationFunctors.
         Time anihilate.
       Qed.
 
-      Lemma RightPushforwardAlong_pre_curried_FIdentityOf (o : SpecializedFunctor C S * LSObject D) :
+      Lemma RightPushforwardAlong_pre_curried_FIdentityOf (o : Functor C S * LSObject D) :
         RightPushforwardAlong_pre_curried_MorphismOf (Identity o) =
         Identity (RightPushforwardAlong_pre_curried_ObjectOf o).
       Proof.
@@ -357,10 +357,10 @@ Section DataMigrationFunctors.
         Time anihilate.
       Qed.
 
-      Definition RightPushforwardAlong_pre_curried : SpecializedFunctor ((S ^ C) * D) (CAT ⇑ S).
+      Definition RightPushforwardAlong_pre_curried : Functor ((S ^ C) * D) (CAT ⇑ S).
         match goal with
-          | [ |- SpecializedFunctor ?F ?G ] =>
-            exact (Build_SpecializedFunctor F G
+          | [ |- Functor ?F ?G ] =>
+            exact (Build_Functor F G
                                             RightPushforwardAlong_pre_curried_ObjectOf
                                             RightPushforwardAlong_pre_curried_MorphismOf
                                             RightPushforwardAlong_pre_curried_FCompositionOf
@@ -373,13 +373,13 @@ Section DataMigrationFunctors.
     Section functorial.
       Let Index2Cat (dF : D * (D ^ C)) := (fst dF) ↓ (snd dF).
 
-      Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ _ Index2Cat _ D).
 
       Let RightPushforwardAlongFunctor_pre_curried_ObjectOf (dgF : D * ((S ^ C) * (OppositeCategory (D ^ C)))) : CAT ⇑ S
         := let d := fst dgF in
            let g := fst (snd dgF) in
            let F := snd (snd dgF) in
-           existT _ (tt, (d, F)) (projT2 (RightPushforwardAlong_pre_curried F (g, d))) : LaxCosliceSpecializedCategory_ObjectT Index2Cat S.
+           existT _ (tt, (d, F)) (projT2 (RightPushforwardAlong_pre_curried F (g, d))) : LaxCosliceCategory_ObjectT Index2Cat S.
 
       Definition RightPushforwardAlongFunctor_pre_curried_MorphismOf dgF d'g'F' (m : Morphism (D * ((S ^ C) * (OppositeCategory (D ^ C)))) dgF d'g'F') :
         Morphism (CAT ⇑ S)
@@ -396,13 +396,13 @@ Section DataMigrationFunctors.
         let mg := constr:(fst (snd m)) in
         let mF := constr:(snd (snd m)) in
         exists (tt, CosliceCategoryInducedFunctor d' d md mF);
-          exists (fun c : CommaSpecializedCategory_Object (SliceSpecializedCategory_Functor D d') F'
+          exists (fun c : CommaCategory_Object (SliceCategory_Functor D d') F'
                   => mg (snd (projT1 c)));
           simpl; subst_body;
           abstract (
               intros;
-              destruct_head @CommaSpecializedCategory_Object;
-              destruct_head @CommaSpecializedCategory_Morphism;
+              destruct_head @CommaCategory_Object;
+              destruct_head @CommaCategory_Morphism;
               destruct_sig;
               destruct_head_hnf @prod;
               simpl in *;
@@ -410,10 +410,10 @@ Section DataMigrationFunctors.
             ).
       Defined.
 
-      Definition RightPushforwardAlongFunctor_pre_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) (CAT ⇑ S).
+      Definition RightPushforwardAlongFunctor_pre_curried : Functor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) (CAT ⇑ S).
         match goal with
-          | [ |- SpecializedFunctor ?C ?D ] =>
-            refine (Build_SpecializedFunctor C D
+          | [ |- Functor ?C ?D ] =>
+            refine (Build_Functor C D
                                              RightPushforwardAlongFunctor_pre_curried_ObjectOf
                                              RightPushforwardAlongFunctor_pre_curried_MorphismOf
                                              _
@@ -425,16 +425,16 @@ Section DataMigrationFunctors.
     End functorial.
 
     Section applied.
-      Variable HasLimits : forall (F : SpecializedFunctor C D) d (F' : SpecializedFunctor (d ↓ F) S), Limit F'.
+      Variable HasLimits : forall (F : Functor C D) d (F' : Functor (d ↓ F) S), Limit F'.
 
       Let Index2Cat (dF : D * (D ^ C)) := (fst dF) ↓ (snd dF).
 
-      Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ _ Index2Cat _ D).
 
       Let HasLimits' (C0 : CAT ⇑ S) : Limit (projT2 C0)
         := HasLimits (projT2 C0).
 
-      Definition RightPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
+      Definition RightPushforwardAlongFunctor_curried : Functor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedLimitFunctor HasLimits') RightPushforwardAlongFunctor_pre_curried.
 
       Definition RightPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C))
@@ -454,7 +454,7 @@ Section DataMigrationFunctors.
         Check ExponentialLaw4Functor_Inverse_ObjectOf _. *)
 
       (*
-      Definition RightPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+      Definition RightPushforwardAlong_MorphismOf_ComponentsOf_Pre (s d : S ^ C) (m : NaturalTransformation s d) (c : D) :
         NaturalTransformation
           (ComposeFunctors (RightPushforwardAlong_pre_Functor s c) (IdentityFunctor _))
           (RightPushforwardAlong_pre_Functor d c).
@@ -462,8 +462,8 @@ Section DataMigrationFunctors.
         eapply (NTComposeT (ComposeFunctorsAssociator1 _ _ _) _).
         Grab Existential Variables.
         match goal with
-          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-            refine (Build_SpecializedNaturalTransformation F G
+          | [ |- NaturalTransformation ?F ?G ] =>
+            refine (Build_NaturalTransformation F G
                                                            (fun x => m (snd (projT1 x)))
                                                            _
                    )
@@ -479,7 +479,7 @@ Section DataMigrationFunctors.
             ).
       Defined.
 
-      Definition RightPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) (c : D) :
+      Definition RightPushforwardAlong_MorphismOf_ComponentsOf (s d : S ^ C) (m : NaturalTransformation s d) (c : D) :
         Morphism S ((RightPushforwardAlong_ObjectOf s) c) ((RightPushforwardAlong_ObjectOf d) c).
       Proof.
         simpl; subst_body; simpl.
@@ -487,8 +487,8 @@ Section DataMigrationFunctors.
         exact (@RightPushforwardAlong_MorphismOf_ComponentsOf_Pre s d m c).
       Defined.
 
-      Definition RightPushforwardAlong_MorphismOf (s d : S ^ C) (m : SpecializedNaturalTransformation s d) :
-        SpecializedNaturalTransformation (RightPushforwardAlong_ObjectOf s) (RightPushforwardAlong_ObjectOf d).
+      Definition RightPushforwardAlong_MorphismOf (s d : S ^ C) (m : NaturalTransformation s d) :
+        NaturalTransformation (RightPushforwardAlong_ObjectOf s) (RightPushforwardAlong_ObjectOf d).
       Proof.
         exists (@RightPushforwardAlong_MorphismOf_ComponentsOf s d m).
         rename d into t.
@@ -504,8 +504,8 @@ Section DataMigrationFunctors.
   End Π.
 
   Section Σ.
-    Local Notation "F ↓ A" := (SliceSpecializedCategory A F).
-    (*Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).*)
+    Local Notation "F ↓ A" := (SliceCategory A F).
+    (*Local Notation "C / c" := (@SliceCategoryOver _ _ C c).*)
 
     (** Quoting David Spivak in "Functorial Data Migration":
        Definition 2.1.3. Let [F : C -> D] be a morphism of schemas and
@@ -535,21 +535,21 @@ Section DataMigrationFunctors.
      *)
 
     Section pre_functorial.
-      Variable F : SpecializedFunctor C D.
+      Variable F : Functor C D.
 
       Let Index2Cat d := F ↓ d.
 
-      Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇓ D" := (@LaxSliceCategory _ _ Index2Cat _ D).
 
       (* Define [ɣ ○ (π_F d)] *)
-      Definition LeftPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : SpecializedFunctor (F ↓ d) S.
+      Definition LeftPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : Functor (F ↓ d) S.
         refine (ComposeFunctors (ComposeFunctors g (projT2 (SliceCategoryProjectionFunctor C D F d))) _).
-        unfold SliceSpecializedCategory, SliceSpecializedCategory_Functor, Object; simpl.
+        unfold SliceCategory, SliceCategory_Functor, Object; simpl.
         refine (CommaCategoryInducedFunctor (s := (F, _)) (d := (F, _)) (IdentityNaturalTransformation F, _)).
         simpl.
         match goal with
-          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-            refine (Build_SpecializedNaturalTransformation F G
+          | [ |- NaturalTransformation ?F ?G ] =>
+            refine (Build_NaturalTransformation F G
                                                            (fun _ => Identity _)
                                                            _)
         end;
@@ -557,7 +557,7 @@ Section DataMigrationFunctors.
       Defined.
 
       Let LeftPushforwardAlong_pre_curried_ObjectOf_pre (g : S ^ C) (d : D) : CAT ⇓ S
-        := existT _ (_, tt) (LeftPushforwardAlong_pre_pre_Functor g d) : LaxSliceSpecializedCategory_ObjectT _ Index2Cat S.
+        := existT _ (_, tt) (LeftPushforwardAlong_pre_pre_Functor g d) : LaxSliceCategory_ObjectT _ Index2Cat S.
 
       Let LeftPushforwardAlong_pre_curried_ObjectOf (gd : (S ^ C) * D) : CAT ⇓ S
         := LeftPushforwardAlong_pre_curried_ObjectOf_pre (fst gd) (snd gd).
@@ -571,8 +571,8 @@ Section DataMigrationFunctors.
         simpl;
         unfold Object, Morphism, GeneralizeFunctor.
         match goal with
-          | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-            let F' := eval hnf in F in let G' := eval hnf in G in change (SpecializedNaturalTransformation F' G')
+          | [ |- NaturalTransformation ?F ?G ] =>
+            let F' := eval hnf in F in let G' := eval hnf in G in change (NaturalTransformation F' G')
         end.
         exists (fun c : F ↓ d => m (fst (projT1 c)) : Morphism S _ _).
         simpl;
@@ -585,7 +585,7 @@ Section DataMigrationFunctors.
         Morphism (CAT ⇓ S) (LeftPushforwardAlong_pre_curried_ObjectOf gd) (LeftPushforwardAlong_pre_curried_ObjectOf g'd')
         := @LeftPushforwardAlong_pre_curried_MorphismOf_pre (fst gd) (snd gd) (fst g'd') (snd g'd') (fst m) (snd m).
 
-      Lemma LeftPushforwardAlong_pre_curried_FCompositionOf (s d d' : SpecializedFunctor C S * LSObject D)
+      Lemma LeftPushforwardAlong_pre_curried_FCompositionOf (s d d' : Functor C S * LSObject D)
             (m1 : Morphism ((S ^ C)%functor * D) s d)
             (m2 : Morphism ((S ^ C)%functor * D) d d') :
         LeftPushforwardAlong_pre_curried_MorphismOf (Compose m2 m1) =
@@ -599,7 +599,7 @@ Section DataMigrationFunctors.
         Time anihilate.
       Qed.
 
-      Lemma LeftPushforwardAlong_pre_curried_FIdentityOf (o : SpecializedFunctor C S * LSObject D) :
+      Lemma LeftPushforwardAlong_pre_curried_FIdentityOf (o : Functor C S * LSObject D) :
         LeftPushforwardAlong_pre_curried_MorphismOf (Identity o) =
         Identity (LeftPushforwardAlong_pre_curried_ObjectOf o).
       Proof.
@@ -610,10 +610,10 @@ Section DataMigrationFunctors.
         Time anihilate.
       Qed.
 
-      Definition LeftPushforwardAlong_pre_curried : SpecializedFunctor ((S ^ C) * D) (CAT ⇓ S).
+      Definition LeftPushforwardAlong_pre_curried : Functor ((S ^ C) * D) (CAT ⇓ S).
         match goal with
-          | [ |- SpecializedFunctor ?F ?G ] =>
-            exact (Build_SpecializedFunctor F G
+          | [ |- Functor ?F ?G ] =>
+            exact (Build_Functor F G
                                             LeftPushforwardAlong_pre_curried_ObjectOf
                                             LeftPushforwardAlong_pre_curried_MorphismOf
                                             LeftPushforwardAlong_pre_curried_FCompositionOf
@@ -626,13 +626,13 @@ Section DataMigrationFunctors.
     Section functorial.
       Let Index2Cat (dF : D * (D ^ C)) := (snd dF) ↓ (fst dF).
 
-      Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇓ D" := (@LaxSliceCategory _ _ Index2Cat _ D).
 
       Let LeftPushforwardAlongFunctor_pre_curried_ObjectOf (dgF : D * ((S ^ C) * (OppositeCategory (D ^ C)))) : CAT ⇓ S
         := let d := fst dgF in
            let g := fst (snd dgF) in
            let F := snd (snd dgF) in
-           existT _ ((d, F), tt) (projT2 (LeftPushforwardAlong_pre_curried F (g, d))) : LaxSliceSpecializedCategory_ObjectT _ Index2Cat S.
+           existT _ ((d, F), tt) (projT2 (LeftPushforwardAlong_pre_curried F (g, d))) : LaxSliceCategory_ObjectT _ Index2Cat S.
 
       Definition LeftPushforwardAlongFunctor_pre_curried_MorphismOf dgF d'g'F' (m : Morphism (D * ((S ^ C) * (OppositeCategory (D ^ C)))) dgF d'g'F') :
         Morphism (CAT ⇓ S)
@@ -649,13 +649,13 @@ Section DataMigrationFunctors.
         let mg := constr:(fst (snd m)) in
         let mF := constr:(snd (snd m)) in
         exists (SliceCategoryInducedFunctor d d' md mF, tt);
-          exists (fun c : CommaSpecializedCategory_Object F (SliceSpecializedCategory_Functor D d)
+          exists (fun c : CommaCategory_Object F (SliceCategory_Functor D d)
                   => mg (fst (projT1 c)));
           simpl; subst_body;
           abstract (
               intros;
-              destruct_head @CommaSpecializedCategory_Object;
-              destruct_head @CommaSpecializedCategory_Morphism;
+              destruct_head @CommaCategory_Object;
+              destruct_head @CommaCategory_Morphism;
               destruct_sig;
               destruct_head_hnf @prod;
               simpl in *;
@@ -663,10 +663,10 @@ Section DataMigrationFunctors.
             ).
       Defined.
 
-      Definition LeftPushforwardAlongFunctor_pre_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) (CAT ⇓ S).
+      Definition LeftPushforwardAlongFunctor_pre_curried : Functor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) (CAT ⇓ S).
         match goal with
-          | [ |- SpecializedFunctor ?C ?D ] =>
-            refine (Build_SpecializedFunctor C D
+          | [ |- Functor ?C ?D ] =>
+            refine (Build_Functor C D
                                              LeftPushforwardAlongFunctor_pre_curried_ObjectOf
                                              LeftPushforwardAlongFunctor_pre_curried_MorphismOf
                                              _
@@ -678,16 +678,16 @@ Section DataMigrationFunctors.
     End functorial.
 
     Section applied.
-      Variable HasColimits : forall (F : SpecializedFunctor C D) d (F' : SpecializedFunctor (F ↓ d) S), Colimit F'.
+      Variable HasColimits : forall (F : Functor C D) d (F' : Functor (F ↓ d) S), Colimit F'.
 
       Let Index2Cat (dF : D * (D ^ C)) := (snd dF) ↓ (fst dF).
 
-      Local Notation "'CAT' ⇓ D" := (@LaxSliceSpecializedCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇓ D" := (@LaxSliceCategory _ _ Index2Cat _ D).
 
       Let HasColimits' (C0 : CAT ⇓ S) : Colimit (projT2 C0)
         := HasColimits (projT2 C0).
 
-      Definition LeftPushforwardAlongFunctor_curried : SpecializedFunctor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
+      Definition LeftPushforwardAlongFunctor_curried : Functor (D * ((S ^ C) * (OppositeCategory (D ^ C)))) S
         := ComposeFunctors (InducedColimitFunctor HasColimits') LeftPushforwardAlongFunctor_pre_curried.
 
       Definition LeftPushforwardAlongFunctor : ((S ^ D) ^ (S ^ C)) ^ (OppositeCategory (D ^ C))

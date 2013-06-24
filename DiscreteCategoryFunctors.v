@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export DiscreteCategory Functor SetCategory ComputableCategory SmallCat NaturalTransformation.
+Require Export DiscreteCategory Functor SetCategory ComputableCategory Cat NaturalTransformation.
 Require Import Common Adjoint.
 
 Set Implicit Arguments.
@@ -12,7 +12,7 @@ Set Universe Polymorphism.
 
 Section FunctorFromDiscrete.
   Variable O : Type.
-  Context `(D : SpecializedCategory).
+  Context `(D : Category).
   Variable objOf : O -> D.
 
   Let FunctorFromDiscrete_MorphismOf s d (m : Morphism (DiscreteCategory O) s d) : Morphism D (objOf s) (objOf d)
@@ -20,9 +20,9 @@ Section FunctorFromDiscrete.
          | eq_refl => Identity _
        end.
 
-  Definition FunctorFromDiscrete : SpecializedFunctor (DiscreteCategory O) D.
+  Definition FunctorFromDiscrete : Functor (DiscreteCategory O) D.
   Proof.
-    refine (@Build_SpecializedFunctor (DiscreteCategory O)
+    refine (@Build_Functor (DiscreteCategory O)
                                       D
                                       objOf
                                       FunctorFromDiscrete_MorphismOf
@@ -38,8 +38,8 @@ End FunctorFromDiscrete.
 Section Obj.
   Local Ltac build_ob_functor Index2Cat :=
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (@Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (@Build_Functor C D
                                           (fun C' => Object (Index2Cat C'))
                                           (fun _ _ F => ObjectOf F)
                                           _
@@ -50,9 +50,9 @@ Section Obj.
 
   Section type.
     Variable I : Type.
-    Variable Index2Cat : I -> SpecializedCategory.
+    Variable Index2Cat : I -> Category.
 
-    Definition ObjectFunctor : SpecializedFunctor (ComputableCategory Index2Cat) TypeCat.
+    Definition ObjectFunctor : Functor (ComputableCategory Index2Cat) TypeCat.
       build_ob_functor Index2Cat.
     Defined.
   End type.
@@ -63,8 +63,8 @@ Arguments ObjectFunctor {I Index2Cat}.
 Section Mor.
   Local Ltac build_mor_functor Index2Cat :=
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           (fun C' => { sd : Index2Cat C' * Index2Cat C' & (Index2Cat C').(Morphism) (fst sd) (snd sd) } )
           (fun _ _ F => (fun sdm =>
             existT (fun sd => Morphism _ (fst sd) (snd sd))
@@ -82,9 +82,9 @@ Section Mor.
 
   Section type.
     Variable I : Type.
-    Variable Index2Cat : I -> SpecializedCategory.
+    Variable Index2Cat : I -> Category.
 
-    Definition MorphismFunctor : SpecializedFunctor (ComputableCategory Index2Cat) TypeCat.
+    Definition MorphismFunctor : Functor (ComputableCategory Index2Cat) TypeCat.
       build_mor_functor Index2Cat.
     Defined.
   End type.
@@ -95,8 +95,8 @@ Arguments MorphismFunctor {I Index2Cat}.
 Section dom_cod.
   Local Ltac build_dom_cod fst_snd :=
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun _ => (fun sdf => fst_snd _ _ (projT1 sdf)))
           _
         )
@@ -105,13 +105,13 @@ Section dom_cod.
 
   Section type.
     Variable I : Type.
-    Variable Index2Cat : I -> SpecializedCategory.
+    Variable Index2Cat : I -> Category.
 
-    Definition DomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ Index2Cat) ObjectFunctor.
+    Definition DomainNaturalTransformation : NaturalTransformation (@MorphismFunctor _ Index2Cat) ObjectFunctor.
       build_dom_cod @fst.
     Defined.
 
-    Definition CodomainNaturalTransformation : SpecializedNaturalTransformation (@MorphismFunctor _ Index2Cat) ObjectFunctor.
+    Definition CodomainNaturalTransformation : NaturalTransformation (@MorphismFunctor _ Index2Cat) ObjectFunctor.
       build_dom_cod @snd.
     Defined.
   End type.
@@ -119,13 +119,13 @@ End dom_cod.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : SpecializedCategory).
+  Context `(O' : Category).
   Variable f : O -> O'.
 
-  Definition InducedDiscreteFunctor : SpecializedFunctor (DiscreteCategory O) O'.
+  Definition InducedDiscreteFunctor : Functor (DiscreteCategory O) O'.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           f
           (fun s d_ m => match m return _ with eq_refl => Identity (f s) end)
           _
@@ -147,9 +147,9 @@ Section disc.
       hnf in *; subst;
         auto.
 
-  Definition DiscreteFunctor : SpecializedFunctor TypeCat LocallySmallCat.
-    refine (Build_SpecializedFunctor TypeCat LocallySmallCat
-      (fun O => DiscreteCategory O : LocallySmallSpecializedCategory)
+  Definition DiscreteFunctor : Functor TypeCat Cat.
+    refine (Build_Functor TypeCat Cat
+      (fun O => DiscreteCategory O : Category)
       (fun s d f => InducedDiscreteFunctor (DiscreteCategory d) f)
       _
       _
@@ -157,9 +157,9 @@ Section disc.
     abstract t.
   Defined.
 
-  Definition DiscreteSetFunctor : SpecializedFunctor SetCat SmallCat.
-    refine (Build_SpecializedFunctor SetCat SmallCat
-      (fun O => DiscreteCategory O : SmallSpecializedCategory)
+  Definition DiscreteSetFunctor : Functor SetCat Cat.
+    refine (Build_Functor SetCat Cat
+      (fun O => DiscreteCategory O : Category)
       (fun s d f => InducedDiscreteFunctor (DiscreteCategory d) f)
       _
       _

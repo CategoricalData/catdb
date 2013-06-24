@@ -9,10 +9,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Equalizer.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Variable HasLimits : forall F : SpecializedFunctor EqualizerIndex C, Limit F.
-  Variable HasColimits : forall F : SpecializedFunctor EqualizerIndex C, Colimit F.
+  Variable HasLimits : forall F : Functor EqualizerIndex C, Limit F.
+  Variable HasColimits : forall F : Functor EqualizerIndex C, Colimit F.
 
   Definition EqualizerFunctor := LimitFunctor HasLimits.
   Definition CoequalizerFunctor := ColimitFunctor HasColimits.

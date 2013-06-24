@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -13,8 +13,8 @@ Section IndiscreteCategory.
   (** The indiscrete category has exactly one morphism between any two objects. *)
   Variable O : Type.
 
-  Definition IndiscreteCategory : SpecializedCategory
-    := @Build_SpecializedCategory O
+  Definition IndiscreteCategory : Category
+    := @Build_Category O
                                   (fun _ _ => unit)
                                   (fun _ => tt)
                                   (fun _ _ _ _ _ => tt)
@@ -25,11 +25,11 @@ End IndiscreteCategory.
 
 Section FunctorToIndiscrete.
   Variable O : Type.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Variable objOf : C -> O.
 
-  Definition FunctorToIndiscrete : SpecializedFunctor C (IndiscreteCategory O)
-    := Build_SpecializedFunctor C (IndiscreteCategory O)
+  Definition FunctorToIndiscrete : Functor C (IndiscreteCategory O)
+    := Build_Functor C (IndiscreteCategory O)
                                 objOf
                                 (fun _ _ _ => tt)
                                 (fun _ _ _ _ _ => eq_refl)

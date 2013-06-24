@@ -1,5 +1,5 @@
 Require Import JMeq ProofIrrelevance.
-Require Export SpecializedCategory Functor SigTCategory.
+Require Export Category Functor SigTCategory.
 Require Import Common Notations FEqualDep.
 
 Set Implicit Arguments.
@@ -13,15 +13,15 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section sigT_sig_obj_mor.
-  Context `(A : SpecializedCategory).
+  Context `(A : Category).
   Variable Pobj : A -> Type.
   Variable Pmor : forall s d : sigT Pobj, A.(Morphism) (projT1 s) (projT1 d) -> Prop.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).
   Variable Pcompose : forall s d d', forall m1 m2, @Pmor d d' m1 -> @Pmor s d m2 -> @Pmor s d' (Compose (C := A) m1 m2).
 
-  Definition SpecializedCategory_sigT_sig : SpecializedCategory.
-    refine (@Build_SpecializedCategory
+  Definition Category_sigT_sig : Category.
+    refine (@Build_Category
               (sigT Pobj)
               (fun s d => sig (@Pmor s d))
               (fun x => existT _ (Identity (C := A) (projT1 x)) (Pidentity x))
@@ -33,8 +33,8 @@ Section sigT_sig_obj_mor.
     abstract (intros; simpl_eq; auto with category).
   Defined.
 
-  Let SpecializedCategory_sigT_sig_as_sigT : SpecializedCategory.
-    apply (@SpecializedCategory_sigT A Pobj _ Pidentity Pcompose);
+  Let Category_sigT_sig_as_sigT : Category.
+    apply (@Category_sigT A Pobj _ Pidentity Pcompose);
       abstract (
         simpl; intros;
           match goal with
@@ -47,8 +47,8 @@ Section sigT_sig_obj_mor.
       ).
   Defined.
 
-  Definition sigT_sig_functor_sigT : SpecializedFunctor SpecializedCategory_sigT_sig SpecializedCategory_sigT_sig_as_sigT.
-    refine (Build_SpecializedFunctor SpecializedCategory_sigT_sig SpecializedCategory_sigT_sig_as_sigT
+  Definition sigT_sig_functor_sigT : Functor Category_sigT_sig Category_sigT_sig_as_sigT.
+    refine (Build_Functor Category_sigT_sig Category_sigT_sig_as_sigT
       (fun x => x)
       (fun s d m => m)
       _
@@ -57,8 +57,8 @@ Section sigT_sig_obj_mor.
     abstract (intros; simpl; destruct_sig; reflexivity).
   Defined.
 
-  Definition sigT_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig_as_sigT SpecializedCategory_sigT_sig.
-    refine (Build_SpecializedFunctor SpecializedCategory_sigT_sig_as_sigT SpecializedCategory_sigT_sig
+  Definition sigT_functor_sigT_sig : Functor Category_sigT_sig_as_sigT Category_sigT_sig.
+    refine (Build_Functor Category_sigT_sig_as_sigT Category_sigT_sig
       (fun x => x)
       (fun s d m => m)
       _
@@ -73,6 +73,6 @@ Section sigT_sig_obj_mor.
     split; functor_eq; destruct_sig; reflexivity.
   Qed.
 
-  Definition proj1_functor_sigT_sig : SpecializedFunctor SpecializedCategory_sigT_sig A
+  Definition proj1_functor_sigT_sig : Functor Category_sigT_sig A
     := ComposeFunctors projT1_functor sigT_sig_functor_sigT.
 End sigT_sig_obj_mor.

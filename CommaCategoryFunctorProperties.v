@@ -16,18 +16,18 @@ Local Ltac slice_t :=
   apply Functor_eq; repeat intro;
   simpl in * |- ;
   destruct_head prod;
-  destruct_head CommaSpecializedCategory_Morphism;
-  destruct_head CommaSpecializedCategory_Object;
-  try apply CommaSpecializedCategory_Morphism_JMeq;
-  try apply CommaSpecializedCategory_Object_eq;
+  destruct_head CommaCategory_Morphism;
+  destruct_head CommaCategory_Object;
+  try apply CommaCategory_Morphism_JMeq;
+  try apply CommaCategory_Object_eq;
   simpl;
   autorewrite with morphism;
   trivial.
 
 Section FCompositionOf.
-  Context `(A : SpecializedCategory).
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
+  Context `(A : Category).
+  Context `(B : Category).
+  Context `(C : Category).
 
   Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
         (m1 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)

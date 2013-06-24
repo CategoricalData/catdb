@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Products.
-  Context `{C : SpecializedCategory}.
+  Context `{C : Category}.
   Variable I : Type.
   Variable f : I -> C.
 

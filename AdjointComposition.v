@@ -10,14 +10,14 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section compose.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
 
-  Variable F : SpecializedFunctor C D.
-  Variable F' : SpecializedFunctor D E.
-  Variable G : SpecializedFunctor D C.
-  Variable G' : SpecializedFunctor E D.
+  Variable F : Functor C D.
+  Variable F' : Functor D E.
+  Variable G : Functor D C.
+  Variable G' : Functor E D.
 
   Variable A' : Adjunction F' G'.
   Variable A : Adjunction F G.
@@ -33,8 +33,8 @@ Section compose.
                                                η)));
       nt_solve_associator.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
                                                        (fun _ => Identity _)
                                                        _)
     end.

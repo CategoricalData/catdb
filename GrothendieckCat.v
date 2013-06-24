@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor ComputableCategory.
+Require Export Category Functor ComputableCategory.
 Require Import Common Notations NaturalTransformation.
 
 Set Implicit Arguments.
@@ -10,10 +10,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Grothendieck.
-  Context `(Index2Cat : forall i : Index, SpecializedCategory (Index2Object i)).
+  Context `(Index2Cat : forall i : Index, Category (Index2Object i)).
   Let Cat := @ComputableCategory _ Index2Object Index2Cat.
 
-  Local Coercion Index2Cat : Index >-> SpecializedCategory.
+  Local Coercion Index2Cat : Index >-> Category.
 
   (**
      Quoting Wikipedia:
@@ -29,8 +29,8 @@ Section Grothendieck.
      [Hom (Γ F) (c1, x1) (c2, x2)] is the set of morphisms
      [f : c1 -> c2] in [C] such that [F.(MorphismOf) f x1 = x2].
      *)
-  Context `(C : SpecializedCategory).
-  Variable F : SpecializedFunctor C Cat.
+  Context `(C : Category).
+  Variable F : Functor C Cat.
 
   Record CatGrothendieckPair := {
     CatGrothendieckC' : C;
@@ -70,7 +70,7 @@ Section Grothendieck.
   Local Hint Extern 1 (@eq (sig _) _ _) => simpl_eq : category.
   Local Hint Extern 1 (@eq (sigT _) _ _) => simpl_eq : category.
 
-  Definition CategoryOfCatElements : @SpecializedCategory CatGrothendieckPair.
+  Definition CategoryOfCatElements : @Category CatGrothendieckPair.
     refine {|
         Morphism := (fun s d => _);
         Compose' := (fun _ _ _ m1 m2 => CatGrothendieckCompose m1 m2);
@@ -112,7 +112,7 @@ Section Grothendieck.
       ).
   Defined.
 
-  Definition CatGrothendieckProjectionFunctor1 : SpecializedFunctor CategoryOfCatElements C.
+  Definition CatGrothendieckProjectionFunctor1 : Functor CategoryOfCatElements C.
     refine {|
         ObjectOf := (fun o : CategoryOfCatElements => CatGrothendieckC o);
         MorphismOf := (fun s d (m : CategoryOfCatElements.(Morphism) s d) => proj1_sig m)

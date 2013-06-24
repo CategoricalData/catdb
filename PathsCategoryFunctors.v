@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export PathsCategory Functor SetCategory ComputableCategory SmallCat NaturalTransformation.
+Require Export PathsCategory Functor SetCategory ComputableCategory Cat NaturalTransformation.
 Require Import Common Adjoint.
 
 Set Implicit Arguments.
@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Section FunctorFromPaths.
   Variable V : Type.
   Variable E : V -> V -> Type.
-  Context `(D : SpecializedCategory).
+  Context `(D : Category).
   Variable objOf : V -> D.
   Variable morOf : forall s d, E s d -> Morphism D (objOf s) (objOf d).
 
@@ -29,9 +29,9 @@ Section FunctorFromPaths.
     induction p2; t_with t'; autorewrite with morphism; reflexivity.
   Qed.
 
-  Definition FunctorFromPaths : SpecializedFunctor (PathsCategory E) D.
+  Definition FunctorFromPaths : Functor (PathsCategory E) D.
   Proof.
-    refine (Build_SpecializedFunctor (PathsCategory E) D
+    refine (Build_Functor (PathsCategory E) D
                                      objOf
                                      path_compose
                                      FunctorFromPaths_FCompositionOf
@@ -41,5 +41,5 @@ Section FunctorFromPaths.
 End FunctorFromPaths.
 
 Section Underlying.
-  Definition UnderlyingGraph `(C : SpecializedCategory) := @PathsCategory _ (Morphism C).
+  Definition UnderlyingGraph `(C : Category) := @PathsCategory _ (Morphism C).
 End Underlying.

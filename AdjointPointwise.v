@@ -10,23 +10,23 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section AdjointPointwise.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Context `(C' : SpecializedCategory).
-  Context `(D' : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Context `(C' : Category).
+  Context `(D' : Category).
 
-  Variable F : SpecializedFunctor C D.
-  Variable G : SpecializedFunctor D C.
+  Variable F : Functor C D.
+  Variable G : Functor D C.
 
   Variable A : Adjunction F G.
   Let A' : AdjunctionUnitCounit F G := A.
 
-  Variables F' G' : SpecializedFunctor C' D'.
+  Variables F' G' : Functor C' D'.
 
-(*  Variable T' : SpecializedNaturalTransformation F' G'.*)
+(*  Variable T' : NaturalTransformation F' G'.*)
 
-  Definition AdjointPointwise_NT_Unit : SpecializedNaturalTransformation (IdentityFunctor (C ^ E))
+  Definition AdjointPointwise_NT_Unit : NaturalTransformation (IdentityFunctor (C ^ E))
                                                                     (ComposeFunctors (G ^ IdentityFunctor E) (F ^ IdentityFunctor E)).
     clearbody A'; clear A.
     pose proof (A' : AdjunctionUnit _ _) as A''.
@@ -37,7 +37,7 @@ Section AdjointPointwise.
     exact (LeftIdentityFunctorNaturalTransformation2 _).
   Defined.
 
-  Definition AdjointPointwise_NT_Counit : SpecializedNaturalTransformation (ComposeFunctors (F ^ IdentityFunctor E) (G ^ IdentityFunctor E))
+  Definition AdjointPointwise_NT_Counit : NaturalTransformation (ComposeFunctors (F ^ IdentityFunctor E) (G ^ IdentityFunctor E))
                                                                            (IdentityFunctor (D ^ E)).
     clearbody A'; clear A.
     pose proof (A' : AdjunctionCounit _ _) as A''.

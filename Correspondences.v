@@ -1,5 +1,5 @@
 Require Import ProofIrrelevance FunctionalExtensionality.
-Require Export SpecializedCategory Functor SetCategory ProductCategory Duals BoolCategory.
+Require Export Category Functor SetCategory ProductCategory Duals BoolCategory.
 Require Import Common Notations Subcategory.
 
 Set Implicit Arguments.
@@ -72,12 +72,12 @@ Section CorrespondenceCategory.
      is a functor
      [[M: C^{op} × C' → Set.]]
      *)
-  Context `(C : SpecializedCategory).
-  Context `(C' : SpecializedCategory).
+  Context `(C : Category).
+  Context `(C' : Category).
 
   Let COp := OppositeCategory C.
 
-  Variable M : SpecializedFunctor (COp * C') TypeCat. (* the correspondence *)
+  Variable M : Functor (COp * C') TypeCat. (* the correspondence *)
 
   (*
      If [M] is a correspondence from [C] to [C'], we can define a new
@@ -120,8 +120,8 @@ Section CorrespondenceCategory.
   (* TODO: Figure out how to get Coq to do automatic type inference
      here, and simplify this proof *)
   (* TODO(jgross): Rewrite fg_equal_in using typeclasses? for speed *)
-  Definition CorrespondenceCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory (C + C')%type
+  Definition CorrespondenceCategory : Category.
+    refine (@Build_Category (C + C')%type
                                        CorrespondenceCategory_Morphism
                                        CorrespondenceCategory_Identity
                                        CorrespondenceCategory_Compose
@@ -166,10 +166,10 @@ Section Functor_to_1.
     ).
   Defined.
 
-  Definition CorrespondenceCategoryFunctor : SpecializedFunctor (C ★^{M} C') ([1]).
+  Definition CorrespondenceCategoryFunctor : Functor (C ★^{M} C') ([1]).
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           CorrespondenceCategoryFunctor_ObjectOf
           CorrespondenceCategoryFunctor_MorphismOf
           _
@@ -191,8 +191,8 @@ Section From_Functor_to_1.
      [F : M → [1] ], we can define [C = F⁻¹ {0}], [C' = F⁻¹ {1}], and a
      correspondence [M : C → C'] by the formula
      [M (X, Y) = Hom_{M} (X, Y)]. *)
-  Context `(M : SpecializedCategory).
-  Variable F : SpecializedFunctor M ([1]).
+  Context `(M : Category).
+  Variable F : Functor M ([1]).
 
   (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)
   Definition CorrespondenceCategory0 := FullSubcategory M (fun x => F x = false). (* proj1_sig (F x) = 0).*)
@@ -202,11 +202,11 @@ Section From_Functor_to_1.
   Let C' := CorrespondenceCategory1.
   Let COp := OppositeCategory C.
 
-  Definition Correspondence : SpecializedFunctor (COp * C') TypeCat.
+  Definition Correspondence : Functor (COp * C') TypeCat.
     subst_body.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           (fun cc' => Morphism M (proj1_sig (fst cc')) (proj1_sig (snd cc')))
           (fun s d m => fun m0 => Compose (C := M) (snd m) (Compose m0 (fst m)))
           _

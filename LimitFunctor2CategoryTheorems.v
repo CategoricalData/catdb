@@ -15,24 +15,24 @@ in DataMigrationFunctors.v are adjoint, for
 DataMigrationFunctorsAdjoint.v *)
 
 Section LimReady.
-  (* Variables C D : LocallySmallCategory. *)
+  (* Variables C D : Category. *)
   Variable S : Category.
 
-  Local Notation "A ↓ F" := (CosliceSpecializedCategory A F).
-  (*Local Notation "C / c" := (@SliceSpecializedCategoryOver _ _ C c).*)
+  Local Notation "A ↓ F" := (CosliceCategory A F).
+  (*Local Notation "C / c" := (@SliceCategoryOver _ _ C c).*)
 
   Variable I : Type.
   Variable Index2Object : I -> Type.
-  Variable Index2Cat : forall i : I, SpecializedCategory (Index2Object i).
+  Variable Index2Cat : forall i : I, Category (Index2Object i).
 
-  Local Coercion Index2Cat : I >-> SpecializedCategory.
+  Local Coercion Index2Cat : I >-> Category.
 
-  Local Notation "'CAT' ⇑ D" := (@LaxCosliceSpecializedCategory _ _ Index2Cat _ D).
+  Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ _ Index2Cat _ D).
 
   Variable HasLimits : forall C0 : CAT ⇑ S, Limit (projT2 C0).
 
   Definition CatUpSet2Morphism A B (m1 m2 : Morphism (CAT ⇑ S) A B) : Type
-    := { T : SpecializedNaturalTransformation (snd (projT1 m1)) (snd (projT1 m2)) |
+    := { T : NaturalTransformation (snd (projT1 m1)) (snd (projT1 m2)) |
          NTComposeT (projT2 m2) (NTComposeF (IdentityNaturalTransformation (projT2 A)) T) = projT2 m1 }.
 
   Lemma LimReady A B m1 m2 (LimitF := @InducedLimitFunctor _ _ Index2Cat _ S HasLimits) :
@@ -87,7 +87,7 @@ Section LimReady.
           hnf in T
     end.
     match goal with
-      | [ T : SpecializedNaturalTransformation _ _ |- _ ] =>
+      | [ T : NaturalTransformation _ _ |- _ ] =>
         let H := fresh in
         pose proof (Commutes T) as H;
           simpl in H;

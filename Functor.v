@@ -1,5 +1,5 @@
 Require Import JMeq ProofIrrelevance FunctionalExtensionality.
-Require Export Notations SpecializedCategory Category.
+Require Export Notations Category Category.
 Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
@@ -12,9 +12,9 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
-Section SpecializedFunctor.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+Section Functor.
+  Context `(C : Category).
+  Context `(D : Category).
 
   (**
      Quoting from the lecture notes for 18.705, Commutative Algebra:
@@ -26,7 +26,7 @@ Section SpecializedFunctor.
      (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
      (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
      **)
-  Record SpecializedFunctor :=
+  Record Functor :=
     {
       ObjectOf :> C -> D;
       MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
@@ -34,30 +34,12 @@ Section SpecializedFunctor.
                           MorphismOf _ _ (Compose m2 m1) = Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1);
       FIdentityOf : forall x, MorphismOf _ _ (Identity x) = Identity (ObjectOf x)
     }.
-End SpecializedFunctor.
-
-Section Functor.
-  Variable C : Category.
-  Variable D : Category.
-
-  Definition Functor := SpecializedFunctor C D.
 End Functor.
 
-Bind Scope functor_scope with SpecializedFunctor.
 Bind Scope functor_scope with Functor.
 
 Create HintDb functor discriminated.
 
-Identity Coercion Functor_SpecializedFunctor_Id : Functor >-> SpecializedFunctor.
-Definition GeneralizeFunctor C D (F : SpecializedFunctor C D) : Functor C D := F.
-Coercion GeneralizeFunctor : SpecializedFunctor >-> Functor.
-
-(* try to always unfold [GeneralizeFunctor]; it's in there
-   only for coercions *)
-Arguments GeneralizeFunctor [C D] F /.
-Hint Extern 0 => unfold GeneralizeFunctor : category functor.
-
-Arguments SpecializedFunctor C D.
 Arguments Functor C D.
 Arguments ObjectOf {C%category D%category} F%functor c%object : rename, simpl nomatch.
 Arguments MorphismOf [C%category] [D%category] F%functor [s%object d%object] m%morphism : rename, simpl nomatch.
@@ -72,8 +54,6 @@ Hint Rewrite @FIdentityOf : functor.
 Ltac functor_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               ObjectOf := _;
-                               MorphismOf := _;
                                FCompositionOf := ?pf0;
                                FIdentityOf := ?pf1
                              |}] ] =>
@@ -88,13 +68,13 @@ Ltac functor_tac_abstract_trailing_props F tac :=
     hnf in H;
     revert H; clear; intro H; clear H;
     match F'' with
-      | @Build_SpecializedFunctor ?C
+      | @Build_Functor ?C
                                   ?D
                                   ?OO
                                   ?MO
                                   ?FCO
                                   ?FIO =>
-        refine (@Build_SpecializedFunctor C D
+        refine (@Build_Functor C D
                                           OO
                                           MO
                                           _
@@ -105,7 +85,7 @@ Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F 
 Ltac functor_simpl_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section Functors_Equal.
-  Lemma Functor_contr_eq' C D (F G : SpecializedFunctor C D)
+  Lemma Functor_contr_eq' C D (F G : Functor C D)
         (D_morphism_proof_irrelevance
          : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
              pf1 = pf2)
@@ -122,7 +102,7 @@ Section Functors_Equal.
       trivial.
   Qed.
 
-  Lemma Functor_contr_eq C D (F G : SpecializedFunctor C D)
+  Lemma Functor_contr_eq C D (F G : Functor C D)
         (D_object_proof_irrelevance
          : forall (x : D) (pf : x = x),
              pf = eq_refl)
@@ -149,7 +129,7 @@ Section Functors_Equal.
     reflexivity.
   Qed.
 
-  Lemma Functor_eq' C D : forall (F G : SpecializedFunctor C D),
+  Lemma Functor_eq' C D : forall (F G : Functor C D),
     ObjectOf F = ObjectOf G
     -> MorphismOf F == MorphismOf G
     -> F = G.
@@ -158,7 +138,7 @@ Section Functors_Equal.
   Qed.
 
   Lemma Functor_eq C D :
-    forall (F G : SpecializedFunctor C D),
+    forall (F G : Functor C D),
       (forall x, ObjectOf F x = ObjectOf G x)
       -> (forall s d m, MorphismOf F (s := s) (d := d) m == MorphismOf G (s := s) (d := d) m)
       -> F = G.
@@ -169,7 +149,7 @@ Section Functors_Equal.
   Qed.
 
   Lemma Functor_JMeq C D C' D' :
-    forall (F : SpecializedFunctor C D) (G : SpecializedFunctor C' D'),
+    forall (F : Functor C D) (G : Functor C' D'),
       C = C'
       -> D = D'
       -> ObjectOf F == ObjectOf G
@@ -197,7 +177,7 @@ Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
     hnf in H;
     revert H; clear; intro H; clear H;
     match F'' with
-      | @Build_SpecializedFunctor ?C
+      | @Build_Functor ?C
                                   ?D
                                   ?OO
                                   ?MO
@@ -211,7 +191,7 @@ Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
         let FIOT := (eval simpl in FIOT') in
         assert (FCO' : FCOT) by abstract exact FCO;
           assert (FIO' : FIOT) by (clear FCO'; abstract exact FIO);
-          exists (@Build_SpecializedFunctor C D
+          exists (@Build_Functor C D
                                             OO
                                             MO
                                             FCO'
@@ -222,24 +202,24 @@ Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
 Ltac functor_tac_abstract_trailing_props_with_equality tac :=
   pre_abstract_trailing_props;
   match goal with
-    | [ |- { F0 : SpecializedFunctor _ _ | F0 = ?F } ] =>
+    | [ |- { F0 : Functor _ _ | F0 = ?F } ] =>
       functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_eq'
-    | [ |- { F0 : SpecializedFunctor _ _ | F0 == ?F } ] =>
+    | [ |- { F0 : Functor _ _ | F0 == ?F } ] =>
       functor_tac_abstract_trailing_props_with_equality_do tac F @Functor_JMeq
   end.
 Ltac functor_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => F').
 Ltac functor_simpl_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section FunctorComposition.
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Variable G : SpecializedFunctor D E.
-  Variable F : SpecializedFunctor C D.
+  Context `(B : Category).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Variable G : Functor D E.
+  Variable F : Functor C D.
 
-  Definition ComposeFunctors' : SpecializedFunctor C E
-    := Build_SpecializedFunctor C E
+  Definition ComposeFunctors' : Functor C E
+    := Build_Functor C E
                                 (fun c => G (F c))
                                 (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
                                 (fun _ _ _ m1 m2 =>
@@ -269,8 +249,8 @@ Section FunctorComposition.
 
   Hint Rewrite @FCompositionOf : functor.
 
-  Definition ComposeFunctors : SpecializedFunctor C E.
-    refine (Build_SpecializedFunctor C E
+  Definition ComposeFunctors : Functor C E.
+    refine (Build_Functor C E
                                      (fun c => G (F c))
                                      (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
                                      _
@@ -282,11 +262,11 @@ Section FunctorComposition.
 End FunctorComposition.
 
 Section IdentityFunctor.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
   (** There is an identity functor.  It does the obvious thing. *)
-  Definition IdentityFunctor : SpecializedFunctor C C
-    := Build_SpecializedFunctor C C
+  Definition IdentityFunctor : Functor C C
+    := Build_Functor C C
                                 (fun x => x)
                                 (fun _ _ x => x)
                                 (fun _ _ _ _ _ => eq_refl)
@@ -294,14 +274,14 @@ Section IdentityFunctor.
 End IdentityFunctor.
 
 Section IdentityFunctorLemmas.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
-  Lemma LeftIdentityFunctor (F : SpecializedFunctor D C) : ComposeFunctors (IdentityFunctor _) F = F.
+  Lemma LeftIdentityFunctor (F : Functor D C) : ComposeFunctors (IdentityFunctor _) F = F.
     functor_eq.
   Qed.
 
-  Lemma RightIdentityFunctor (F : SpecializedFunctor C D) : ComposeFunctors F (IdentityFunctor _) = F.
+  Lemma RightIdentityFunctor (F : Functor C D) : ComposeFunctors F (IdentityFunctor _) = F.
     functor_eq.
   Qed.
 End IdentityFunctorLemmas.
@@ -311,12 +291,12 @@ Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
 Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category functor.
 
 Section FunctorCompositionLemmas.
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
+  Context `(B : Category).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
 
-  Lemma ComposeFunctorsAssociativity (F : SpecializedFunctor B C) (G : SpecializedFunctor C D) (H : SpecializedFunctor D E) :
+  Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
     functor_eq.
   Qed.

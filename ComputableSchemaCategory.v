@@ -22,8 +22,8 @@ Section ComputableSchema.
   Hint Rewrite ComposeSmallTranslationsAssociativity.
 
   (* XXX TODO: Automate this better. *)
-  Definition ComputableSchemaCategory : SpecializedCategory (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
-    refine (Build_SpecializedCategory (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d))
+  Definition ComputableSchemaCategory : Category (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d)).
+    refine (Build_Category (fun s d : O => EquivalenceClass (@SmallTranslationsEquivalent s d))
       (fun o => @classOf _ _ (@SmallTranslationsEquivalent_rel _ _)
         (IdentitySmallTranslation o))
       (fun (s d d' : O) F G => @apply2_to_class _ _ _ _ _ _ (@SmallTranslationsEquivalent_rel _ _)

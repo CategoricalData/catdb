@@ -1,4 +1,4 @@
-Require Export SpecializedCategory MonoidalCategory.
+Require Export Category MonoidalCategory.
 Require Import Common Notations DefinitionSimplification.
 
 Set Implicit Arguments.
@@ -15,8 +15,8 @@ Section EnrichedCategory.
      *)
   Context `(M : MonoidalCategory).
 
-  Let src `{C : SpecializedCategory} s d (_ : Morphism C s d) := s.
-  Let dst `{C : SpecializedCategory} s d (_ : Morphism C s d) := d.
+  Let src `{C : Category} s d (_ : Morphism C s d) := s.
+  Let dst `{C : Category} s d (_ : Morphism C s d) := d.
 
   Arguments src [C s d] _.
   Arguments dst [C s d] _.
@@ -273,7 +273,7 @@ Section nCategories.
             )
           ).
 
-    Let TensorProduct : SpecializedFunctor (m2Cat * m2Cat) m2Cat.
+    Let TensorProduct : Functor (m2Cat * m2Cat) m2Cat.
       eexists (fun _ => tt) (fun _ _ _ => _);
         repeat (unfold Morphism, Object; simpl);
           simpl; intros;
@@ -308,7 +308,7 @@ Section nCategories.
       define_unit_nt.
     Defined.
 
-    Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => SpecializedFunctor TerminalCategory TerminalCategory).
+    Definition m2MonoidalCat : @MonoidalCategory unit (fun _ _ => Functor TerminalCategory TerminalCategory).
       refine (@Build_MonoidalCategory _ _
         m2Cat
         TensorProduct tt Associator LeftUnitor RightUnitor

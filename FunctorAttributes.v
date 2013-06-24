@@ -13,12 +13,12 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section FullFaithful.
-  Context `(C : SpecializedCategory).
-  Context `(C' : @LocallySmallSpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(D' : @LocallySmallSpecializedCategory).
-  Variable F : SpecializedFunctor C D.
-  Variable F' : SpecializedFunctor C' D'.
+  Context `(C : Category).
+  Context `(C' : @Category).
+  Context `(D : Category).
+  Context `(D' : @Category).
+  Variable F : Functor C D.
+  Variable F' : Functor C' D'.
   Let COp := OppositeCategory C.
   Let DOp := OppositeCategory D.
   Let FOp := OppositeFunctor F.
@@ -27,8 +27,8 @@ Section FullFaithful.
   Let F'Op := OppositeFunctor F'.
 
   Definition InducedHomNaturalTransformation :
-    SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
-    refine (Build_SpecializedNaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
+    NaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F)).
+    refine (Build_NaturalTransformation (HomFunctor C) (ComposeFunctors (HomFunctor D) (FOp * F))
       (fun sd : (COp * C) =>
         MorphismOf F (s := _) (d := _))
       _

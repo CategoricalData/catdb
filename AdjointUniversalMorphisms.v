@@ -10,10 +10,10 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section AdjunctionUniversal.
-  Context `{C : SpecializedCategory}.
-  Context `{D : SpecializedCategory}.
-  Variable F : SpecializedFunctor C D.
-  Variable G : SpecializedFunctor D C.
+  Context `{C : Category}.
+  Context `{D : Category}.
+  Variable F : Functor C D.
+  Variable G : Functor D C.
 
   Definition InitialMorphismOfAdjunction (A : Adjunction F G) Y : InitialMorphism Y G.
     pose (projT1 (A : AdjunctionCounit F G)) as ε.
@@ -80,8 +80,8 @@ Section AdjunctionUniversal.
 End AdjunctionUniversal.
 
 Section AdjunctionFromUniversal.
-  Context `{C : SpecializedCategory}.
-  Context `{D : SpecializedCategory}.
+  Context `{C : Category}.
+  Context `{D : Category}.
 
   Local Ltac diagonal_transitivity_pre_then tac :=
     repeat rewrite AssociativityNoEvar by noEvar;
@@ -120,11 +120,11 @@ Section AdjunctionFromUniversal.
     diagonal_transitivity_then_solve_rewrite.
 
   Section initial.
-    Variable G : SpecializedFunctor D C.
+    Variable G : Functor D C.
     Variable M : forall Y, InitialMorphism Y G.
 
-    Definition AdjointFunctorOfInitialMorphism : SpecializedFunctor C D.
-      refine (Build_SpecializedFunctor C D
+    Definition AdjointFunctorOfInitialMorphism : Functor C D.
+      refine (Build_Functor C D
                                        (fun Y => let ηY := InitialMorphism_Morphism (M Y) in
                                                  let F0Y := InitialMorphism_Object (M Y) in
                                                  F0Y)
@@ -138,7 +138,7 @@ Section AdjunctionFromUniversal.
 
     Definition AdjunctionOfInitialMorphism : Adjunction AdjointFunctorOfInitialMorphism G.
       refine (_ : AdjunctionUnit AdjointFunctorOfInitialMorphism G).
-      exists (Build_SpecializedNaturalTransformation (IdentityFunctor C)
+      exists (Build_NaturalTransformation (IdentityFunctor C)
                                                      (ComposeFunctors G AdjointFunctorOfInitialMorphism)
                                                      (fun x => InitialMorphism_Morphism (M x))
                                                      (fun s d m => eq_sym (proj1 (InitialProperty (M s) _ _)))).
@@ -148,11 +148,11 @@ Section AdjunctionFromUniversal.
   End initial.
 
   Section terminal.
-    Variable F : SpecializedFunctor C D.
+    Variable F : Functor C D.
     Variable M : forall X, TerminalMorphism F X.
 
-    Definition AdjointFunctorOfTerminalMorphism : SpecializedFunctor D C.
-      refine (Build_SpecializedFunctor D C
+    Definition AdjointFunctorOfTerminalMorphism : Functor D C.
+      refine (Build_Functor D C
                                        (fun X => let εX := TerminalMorphism_Morphism (M X) in
                                                  let G0X := TerminalMorphism_Object (M X) in
                                                  G0X)
@@ -168,7 +168,7 @@ Section AdjunctionFromUniversal.
     Definition AdjunctionOfTerminalMorphism : Adjunction F AdjointFunctorOfTerminalMorphism.
       refine (_ : AdjunctionCounit F AdjointFunctorOfTerminalMorphism).
       hnf.
-      exists (Build_SpecializedNaturalTransformation (ComposeFunctors F AdjointFunctorOfTerminalMorphism)
+      exists (Build_NaturalTransformation (ComposeFunctors F AdjointFunctorOfTerminalMorphism)
                                                      (IdentityFunctor D)
                                                      (fun x => TerminalMorphism_Morphism (M x))
                                                      (fun s d m => proj1 (TerminalProperty (M d) _ _))).

@@ -1,5 +1,5 @@
 Require Export LtacReifiedSimplification.
-Require Import SpecializedCategory Functor NaturalTransformation.
+Require Import Category Functor NaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplifiedMorphism.
   Section single_category.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     Class SimplifiedMorphism {s d} (m : Morphism C s d) :=
       SimplifyMorphism { reified_morphism : ReifiedMorphism C s d;
@@ -43,9 +43,9 @@ Section SimplifiedMorphism.
   End single_category.
 
   Section functor.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
-    Variable F : SpecializedFunctor C D.
+    Context `{C : Category}.
+    Context `{D : Category}.
+    Variable F : Functor C D.
 
     Global Instance functor_morphism `(@SimplifiedMorphism C s d m)
     : SimplifiedMorphism (MorphismOf F m) | 50
@@ -55,10 +55,10 @@ Section SimplifiedMorphism.
   End functor.
 
   Section natural_transformation.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
-    Variables F G : SpecializedFunctor C D.
-    Variable T : SpecializedNaturalTransformation F G.
+    Context `{C : Category}.
+    Context `{D : Category}.
+    Variables F G : Functor C D.
+    Variable T : NaturalTransformation F G.
 
     Global Instance nt_morphism x
     : SimplifiedMorphism (T x) | 50

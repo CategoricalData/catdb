@@ -13,7 +13,7 @@ Section SimplicialSets.
   Definition SimplexCategory := ComputableCategory (fun n : nat => [n])%category.
   Local Notation Δ := SimplexCategory.
 
-  Definition SimplicialCategory `(C : SpecializedCategory) := (C ^ (OppositeCategory Δ))%category.
+  Definition SimplicialCategory `(C : Category) := (C ^ (OppositeCategory Δ))%category.
 
   Definition SimplicialSet := SimplicialCategory SetCat.
   Definition SimplicialType := SimplicialCategory TypeCat.

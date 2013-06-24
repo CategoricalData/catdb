@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor.
+Require Export Category Functor.
 Require Import Common.
 
 Set Implicit Arguments.
@@ -10,8 +10,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section SumCategory.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Definition SumCategory_Morphism (s d : C + D) : Type
     := match (s, d) with
@@ -38,8 +38,8 @@ Section SumCategory.
 
   Global Arguments SumCategory_Compose [_ _ _] _ _ /.
 
-  Definition SumCategory : SpecializedCategory.
-    refine (@Build_SpecializedCategory _
+  Definition SumCategory : Category.
+    refine (@Build_Category _
                                        SumCategory_Morphism
                                        SumCategory_Identity
                                        SumCategory_Compose
@@ -59,18 +59,18 @@ End SumCategory.
 Infix "+" := SumCategory : category_scope.
 
 Section SumCategoryFunctors.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
-  Definition inl_Functor : SpecializedFunctor C (C + D)
-    := Build_SpecializedFunctor C (C + D)
+  Definition inl_Functor : Functor C (C + D)
+    := Build_Functor C (C + D)
                                 (@inl _ _)
                                 (fun _ _ m => m)
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Definition inr_Functor : SpecializedFunctor D (C + D)
-    := Build_SpecializedFunctor D (C + D)
+  Definition inr_Functor : Functor D (C + D)
+    := Build_Functor D (C + D)
                                 (@inr _ _)
                                 (fun _ _ m => m)
                                 (fun _ _ _ _ _ => eq_refl)

@@ -1,4 +1,4 @@
-Require Export SpecializedCategory.
+Require Export Category.
 Require Import Common Notations.
 
 Set Implicit Arguments.
@@ -41,8 +41,8 @@ Section DCategoryDec.
     simpl_eq_dec.
   Defined.
 
-  Definition DiscreteCategoryDec : SpecializedCategory.
-    refine (@Build_SpecializedCategory O
+  Definition DiscreteCategoryDec : Category.
+    refine (@Build_Category O
                                        DiscreteCategoryDec_Morphism
                                        DiscreteCategoryDec_Identity
                                        DiscreteCategoryDec_Compose

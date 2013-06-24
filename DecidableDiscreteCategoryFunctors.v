@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality Eqdep_dec ProofIrrelevance JMeq.
-Require Export DiscreteCategoryFunctors DecidableDiscreteCategory DecidableSetCategory DecidableComputableCategory DecidableSmallCat.
+Require Export DiscreteCategoryFunctors DecidableDiscreteCategory DecidableSetCategory DecidableComputableCategory DecidableCat.
 Require Import Common Adjoint.
 
 Set Implicit Arguments.
@@ -18,9 +18,9 @@ End eq_dec_prop.
 
 Section Obj.
   Local Ltac build_ob_functor Index2Cat :=
-    let C := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(C) end in
-    let D := match goal with | [ |- SpecializedFunctor ?C ?D ] => constr:(D) end in
-    refine (Build_SpecializedFunctor C D
+    let C := match goal with | [ |- Functor ?C ?D ] => constr:(C) end in
+    let D := match goal with | [ |- Functor ?C ?D ] => constr:(D) end in
+    refine (Build_Functor C D
                                      (fun C' => existT _ (Object (Index2Cat (projT1 C'))) (projT2 C'))
                                      (fun _ _ F => ObjectOf F)
                                      _
@@ -30,9 +30,9 @@ Section Obj.
 
   Section type.
     Variable I : Type.
-    Variable Index2Cat : I -> SpecializedCategory.
+    Variable Index2Cat : I -> Category.
 
-    Definition ObjectFunctorDec : SpecializedFunctor (@ComputableCategoryDec _ Index2Cat) TypeCatDec.
+    Definition ObjectFunctorDec : Functor (@ComputableCategoryDec _ Index2Cat) TypeCatDec.
       build_ob_functor Index2Cat.
     Defined.
   End type.
@@ -42,7 +42,7 @@ Arguments ObjectFunctorDec {I Index2Cat}.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : SpecializedCategory).
+  Context `(O' : Category).
   Variable f : O -> O'.
   Variable eq_dec : forall x y : O, {x = y} + {x <> y}.
 
@@ -77,10 +77,10 @@ Section InducedFunctor.
 
   Local Arguments Compose [C s d d'] / _ _ : rename, simpl nomatch.
 
-  Definition InducedDiscreteFunctorDec : SpecializedFunctor (DiscreteCategoryDec eq_dec) O'.
+  Definition InducedDiscreteFunctorDec : Functor (DiscreteCategoryDec eq_dec) O'.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           f
           InducedDiscreteFunctorDec_MorphismOf
           _
@@ -119,11 +119,11 @@ Section disc.
   Hint Unfold DiscreteCategoryDec_Identity.
   Hint Unfold eq_rect_r eq_rect eq_sym.
 
-  Definition DiscreteFunctorDec : SpecializedFunctor TypeCatDec LocallySmallCatDec.
-    refine (Build_SpecializedFunctor TypeCatDec LocallySmallCatDec
+  Definition DiscreteFunctorDec : Functor TypeCatDec CatDec.
+    refine (Build_Functor TypeCatDec CatDec
       (fun O => existT
-        (fun C : LocallySmallCategory => forall x y : C, {x = y} + {x <> y})
-        (DiscreteCategoryDec (projT2 O) : LocallySmallSpecializedCategory)
+        (fun C : Category => forall x y : C, {x = y} + {x <> y})
+        (DiscreteCategoryDec (projT2 O) : Category)
         (fun x y => projT2 O x y))
       (fun s d f => InducedDiscreteFunctorDec (DiscreteCategoryDec (projT2 d)) f (projT2 s))
       _
@@ -203,11 +203,11 @@ Section disc.
     admit.
   Defined.
 
-  Definition DiscreteSetFunctorDec : SpecializedFunctor SetCatDec SmallCatDec.
-    refine (Build_SpecializedFunctor SetCatDec SmallCatDec
+  Definition DiscreteSetFunctorDec : Functor SetCatDec CatDec.
+    refine (Build_Functor SetCatDec CatDec
       (fun O => existT
-        (fun C : SmallCategory => forall x y : C, {x = y} + {x <> y})
-        (DiscreteCategoryDec (projT2 O) : SmallSpecializedCategory)
+        (fun C : Category => forall x y : C, {x = y} + {x <> y})
+        (DiscreteCategoryDec (projT2 O) : Category)
         (fun x y => projT2 O x y))
       (fun s d f => InducedDiscreteFunctorDec (DiscreteCategoryDec (projT2 d)) f (projT2 s))
       _

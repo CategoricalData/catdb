@@ -12,10 +12,10 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
-Section SpecializedNaturalTransformation.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variables F G : SpecializedFunctor C D.
+Section NaturalTransformation.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variables F G : Functor C D.
 
   (**
      Quoting from the lecture notes for 18.705, Commutative Algebra:
@@ -34,23 +34,14 @@ Section SpecializedNaturalTransformation.
       V    G m     V
      G A --------> G B
      **)
-  Record SpecializedNaturalTransformation :=
+  Record NaturalTransformation :=
     {
       ComponentsOf :> forall c, D.(Morphism) (F c) (G c);
       Commutes : forall s d (m : C.(Morphism) s d),
                    Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
     }.
-End SpecializedNaturalTransformation.
-
-Section NaturalTransformation.
-  Variable C : Category.
-  Variable D : Category.
-  Variable F G : Functor C D.
-
-  Definition NaturalTransformation := SpecializedNaturalTransformation F G.
 End NaturalTransformation.
 
-Bind Scope natural_transformation_scope with SpecializedNaturalTransformation.
 Bind Scope natural_transformation_scope with NaturalTransformation.
 
 Create HintDb natural_transformation discriminated.
@@ -58,23 +49,11 @@ Create HintDb natural_transformation discriminated.
 Arguments ComponentsOf {C%category D%category F%functor G%functor} T%natural_transformation c%object : rename, simpl nomatch.
 Arguments Commutes [C D F G] T _ _ _ : rename.
 
-Identity Coercion NaturalTransformation_SpecializedNaturalTransformation_Id : NaturalTransformation >-> SpecializedNaturalTransformation.
-Definition GeneralizeNaturalTransformation `(T : @SpecializedNaturalTransformation C D F G) :
-  NaturalTransformation F G := T.
-Global Coercion GeneralizeNaturalTransformation : SpecializedNaturalTransformation >-> NaturalTransformation.
-
-Arguments GeneralizeNaturalTransformation [C D F G] T /.
-Hint Extern 0 => unfold GeneralizeNaturalTransformation : category natural_transformation.
-Ltac fold_NT :=
-  change @SpecializedNaturalTransformation with
-    (fun (C : SpecializedCategory) (D : SpecializedCategory) => @NaturalTransformation C D) in *; simpl in *.
-
 Hint Resolve @Commutes : category natural_transformation.
 
 Ltac nt_hideProofs :=
   repeat match goal with
              | [ |- context[{|
-                               ComponentsOf := _;
                                Commutes := ?pf
                              |}] ] =>
                hideProofs pf
@@ -88,13 +67,13 @@ Ltac nt_tac_abstract_trailing_props T tac :=
     hnf in H;
     revert H; clear; intro H; clear H;
     match T'' with
-      | @Build_SpecializedNaturalTransformation ?C
+      | @Build_NaturalTransformation ?C
                                                 ?D
                                                 ?F
                                                 ?G
                                                 ?CO
                                                 ?COM =>
-        refine (@Build_SpecializedNaturalTransformation C D F G
+        refine (@Build_NaturalTransformation C D F G
                                                         CO
                                                         _);
           abstract exact COM
@@ -104,7 +83,7 @@ Ltac nt_simpl_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac
 
 Section NaturalTransformations_Equal.
   Lemma NaturalTransformation_contr_eq' C D F G
-        (T U : @SpecializedNaturalTransformation C D F G)
+        (T U : @NaturalTransformation C D F G)
         (D_morphism_proof_irrelevance
          : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
              pf1 = pf2)
@@ -117,7 +96,7 @@ Section NaturalTransformations_Equal.
   Qed.
 
   Lemma NaturalTransformation_contr_eq C D F G
-        (T U : @SpecializedNaturalTransformation C D F G)
+        (T U : @NaturalTransformation C D F G)
         (D_morphism_proof_irrelevance
          : forall s d (m1 m2 : Morphism D s d) (pf1 pf2 : m1 = m2),
              pf1 = pf2)
@@ -130,7 +109,7 @@ Section NaturalTransformations_Equal.
   Qed.
 
   Lemma NaturalTransformation_eq' C D F G :
-    forall (T U : @SpecializedNaturalTransformation C D F G),
+    forall (T U : @NaturalTransformation C D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
     intros T U.
@@ -139,7 +118,7 @@ Section NaturalTransformations_Equal.
   Qed.
 
   Lemma NaturalTransformation_eq C D F G :
-    forall (T U : @SpecializedNaturalTransformation C D F G),
+    forall (T U : @NaturalTransformation C D F G),
     (forall x, ComponentsOf T x = ComponentsOf U x)
     -> T = U.
     intros T U.
@@ -149,7 +128,7 @@ Section NaturalTransformations_Equal.
 
   Lemma NaturalTransformation_JMeq' C D C' D' :
     forall F G F' G'
-      (T : @SpecializedNaturalTransformation C D F G) (U : @SpecializedNaturalTransformation C' D' F' G'),
+      (T : @NaturalTransformation C D F G) (U : @NaturalTransformation C' D' F' G'),
       C = C'
       -> D = D'
       -> F == F'
@@ -162,7 +141,7 @@ Section NaturalTransformations_Equal.
   Qed.
   Lemma NaturalTransformation_JMeq C D C' D' :
     forall F G F' G'
-      (T : @SpecializedNaturalTransformation C D F G) (U : @SpecializedNaturalTransformation C' D' F' G'),
+      (T : @NaturalTransformation C D F G) (U : @NaturalTransformation C' D' F' G'),
       C = C'
       -> D = D'
       -> F == F'
@@ -193,7 +172,7 @@ Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
     hnf in H;
     revert H; clear; intro H; clear H;
     match T'' with
-      | @Build_SpecializedNaturalTransformation ?objC ?C
+      | @Build_NaturalTransformation ?objC ?C
                                                 ?objD ?D
                                                 ?F
                                                 ?G
@@ -203,7 +182,7 @@ Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
         let COMT' := type of COM in
         let COMT := (eval simpl in COMT') in
         assert (COM' : COMT) by abstract exact COM;
-          exists (@Build_SpecializedNaturalTransformation C D F G
+          exists (@Build_NaturalTransformation C D F G
                                                           CO
                                                           COM');
           expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
@@ -211,20 +190,20 @@ Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
 Ltac nt_tac_abstract_trailing_props_with_equality tac :=
   pre_abstract_trailing_props;
   match goal with
-    | [ |- { T0 : SpecializedNaturalTransformation _ _ | T0 = ?T } ] =>
+    | [ |- { T0 : NaturalTransformation _ _ | T0 = ?T } ] =>
       nt_tac_abstract_trailing_props_with_equality_do tac T @NaturalTransformation_eq'
-    | [ |- { T0 : SpecializedNaturalTransformation _ _ | T0 == ?T } ] =>
+    | [ |- { T0 : NaturalTransformation _ _ | T0 == ?T } ] =>
       nt_tac_abstract_trailing_props_with_equality_do tac T @NaturalTransformation_JMeq
   end.
 Ltac nt_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_with_equality ltac:(fun T' => T').
 Ltac nt_simpl_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_with_equality ltac:(fun T' => let T'' := eval simpl in T' in T'').
 
 Section NaturalTransformationComposition.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Variables F F' F'' : SpecializedFunctor C D.
-  Variables G G' : SpecializedFunctor D E.
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Variables F F' F'' : Functor C D.
+  Variables G G' : Functor D E.
 
   Hint Resolve @Commutes f_equal f_equal2 : natural_transformation.
   Hint Rewrite @Associativity : natural_transformation.
@@ -265,8 +244,8 @@ Section NaturalTransformationComposition.
 
   *)
 
-  Definition NTComposeT (T' : SpecializedNaturalTransformation F' F'') (T : SpecializedNaturalTransformation F F') :
-    SpecializedNaturalTransformation F F''.
+  Definition NTComposeT (T' : NaturalTransformation F' F'') (T : NaturalTransformation F F') :
+    NaturalTransformation F F''.
     exists (fun c => Compose (T' c) (T c));
     (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
     abstract (
@@ -305,16 +284,16 @@ Section NaturalTransformationComposition.
   Hint Resolve f_equal2 : natural_transformation.
   Hint Extern 1 (_ = _) => apply @FCompositionOf : natural_transformation.
 
-  Lemma FCompositionOf2 : forall `(C : SpecializedCategory) `(D : SpecializedCategory)
-    (F : SpecializedFunctor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
+  Lemma FCompositionOf2 : forall `(C : Category) `(D : Category)
+    (F : Functor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
     Compose (MorphismOf F m1) (Compose (MorphismOf F m2) m3) = Compose (MorphismOf F (Compose m1 m2)) m3.
     intros; symmetry; try_associativity ltac:(eauto with natural_transformation).
   Qed.
 
   Hint Rewrite @FCompositionOf2 : natural_transformation.
 
-  Definition NTComposeF (U : SpecializedNaturalTransformation G G') (T : SpecializedNaturalTransformation F F'):
-    SpecializedNaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
+  Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F'):
+    NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
     exists (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)));
     abstract (
         simpl; intros; autorewrite with category;
@@ -325,22 +304,22 @@ Section NaturalTransformationComposition.
 End NaturalTransformationComposition.
 
 Section IdentityNaturalTransformation.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor C D.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor C D.
 
   (* There is an identity natrual transformation. *)
-  Definition IdentityNaturalTransformation : SpecializedNaturalTransformation F F.
+  Definition IdentityNaturalTransformation : NaturalTransformation F F.
     exists (fun c => Identity (F c));
     abstract (intros; autorewrite with morphism; reflexivity).
   Defined.
 
-  Lemma LeftIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F' F) :
+  Lemma LeftIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F' F) :
     NTComposeT IdentityNaturalTransformation T = T.
     nt_eq; auto with morphism.
   Qed.
 
-  Lemma RightIdentityNaturalTransformation (F' : SpecializedFunctor C D) (T : SpecializedNaturalTransformation F F') :
+  Lemma RightIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F F') :
     NTComposeT T IdentityNaturalTransformation = T.
     nt_eq; auto with morphism.
   Qed.
@@ -350,11 +329,11 @@ Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformat
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : natural_transformation.
 
 Section IdentityNaturalTransformationF.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Variable G : SpecializedFunctor D E.
-  Variable F : SpecializedFunctor C D.
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Variable G : Functor D E.
+  Variable F : Functor C D.
 
   Lemma NTComposeFIdentityNaturalTransformation :
     NTComposeF (IdentityNaturalTransformation G) (IdentityNaturalTransformation F) = IdentityNaturalTransformation (ComposeFunctors G F).
@@ -367,19 +346,19 @@ Hint Rewrite @NTComposeFIdentityNaturalTransformation : category.
 Hint Rewrite @NTComposeFIdentityNaturalTransformation : natural_transformation.
 
 Section Associativity.
-  Context `(B : SpecializedCategory).
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
-  Variable F : SpecializedFunctor D E.
-  Variable G : SpecializedFunctor C D.
-  Variable H : SpecializedFunctor B C.
+  Context `(B : Category).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
+  Variable F : Functor D E.
+  Variable G : Functor C D.
+  Variable H : Functor B C.
 
   Let F0 := ComposeFunctors (ComposeFunctors F G) H.
   Let F1 := ComposeFunctors F (ComposeFunctors G H).
 
-  Definition ComposeFunctorsAssociator1 : SpecializedNaturalTransformation F0 F1.
-    refine (Build_SpecializedNaturalTransformation F0 F1
+  Definition ComposeFunctorsAssociator1 : NaturalTransformation F0 F1.
+    refine (Build_NaturalTransformation F0 F1
                                                    (fun _ => Identity (C := E) _)
                                                    _
            );
@@ -389,8 +368,8 @@ Section Associativity.
       ).
   Defined.
 
-  Definition ComposeFunctorsAssociator2 : SpecializedNaturalTransformation F1 F0.
-    refine (Build_SpecializedNaturalTransformation F1 F0
+  Definition ComposeFunctorsAssociator2 : NaturalTransformation F1 F0.
+    refine (Build_NaturalTransformation F1 F0
                                                    (fun _ => Identity (C := E) _)
                                                    _
            );
@@ -402,13 +381,13 @@ Section Associativity.
 End Associativity.
 
 Section IdentityFunctor.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Local Ltac t :=
     repeat match goal with
-             | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-               refine (Build_SpecializedNaturalTransformation F G
+             | [ |- NaturalTransformation ?F ?G ] =>
+               refine (Build_NaturalTransformation F G
                                                               (fun _ => Identity _)
                                                               _)
              | _ => abstract (simpl; intros; autorewrite with morphism; reflexivity)
@@ -416,10 +395,10 @@ Section IdentityFunctor.
            end.
 
   Section left.
-    Variable F : SpecializedFunctor D C.
+    Variable F : Functor D C.
 
-    Definition LeftIdentityFunctorNaturalTransformation1 : SpecializedNaturalTransformation (ComposeFunctors (IdentityFunctor _) F) F. t. Defined.
-    Definition LeftIdentityFunctorNaturalTransformation2 : SpecializedNaturalTransformation F (ComposeFunctors (IdentityFunctor _) F). t. Defined.
+    Definition LeftIdentityFunctorNaturalTransformation1 : NaturalTransformation (ComposeFunctors (IdentityFunctor _) F) F. t. Defined.
+    Definition LeftIdentityFunctorNaturalTransformation2 : NaturalTransformation F (ComposeFunctors (IdentityFunctor _) F). t. Defined.
 
     Theorem LeftIdentityFunctorNT_Isomorphism
     : NTComposeT LeftIdentityFunctorNaturalTransformation1 LeftIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
@@ -429,10 +408,10 @@ Section IdentityFunctor.
   End left.
 
   Section right.
-    Variable F : SpecializedFunctor C D.
+    Variable F : Functor C D.
 
-    Definition RightIdentityFunctorNaturalTransformation1 : SpecializedNaturalTransformation (ComposeFunctors F (IdentityFunctor _)) F. t. Defined.
-    Definition RightIdentityFunctorNaturalTransformation2 : SpecializedNaturalTransformation F (ComposeFunctors F (IdentityFunctor _)). t. Defined.
+    Definition RightIdentityFunctorNaturalTransformation1 : NaturalTransformation (ComposeFunctors F (IdentityFunctor _)) F. t. Defined.
+    Definition RightIdentityFunctorNaturalTransformation2 : NaturalTransformation F (ComposeFunctors F (IdentityFunctor _)). t. Defined.
 
     Theorem RightIdentityFunctorNT_Isomorphism
     : NTComposeT RightIdentityFunctorNaturalTransformation1 RightIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
@@ -443,18 +422,18 @@ Section IdentityFunctor.
 End IdentityFunctor.
 
 Section NaturalTransformationExchangeLaw.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(E : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(E : Category).
 
-  Variables F G H : SpecializedFunctor C D.
-  Variables F' G' H' : SpecializedFunctor D E.
+  Variables F G H : Functor C D.
+  Variables F' G' H' : Functor D E.
 
-  Variable T : SpecializedNaturalTransformation F G.
-  Variable U : SpecializedNaturalTransformation G H.
+  Variable T : NaturalTransformation F G.
+  Variable U : NaturalTransformation G H.
 
-  Variable T' : SpecializedNaturalTransformation F' G'.
-  Variable U' : SpecializedNaturalTransformation G' H'.
+  Variable T' : NaturalTransformation F' G'.
+  Variable U' : NaturalTransformation G' H'.
 
   Local Ltac t_progress := progress repeat
     match goal with
@@ -488,9 +467,9 @@ Ltac nt_solve_associator' :=
   repeat match goal with
            | _ => exact (ComposeFunctorsAssociator1 _ _ _)
            | _ => exact (ComposeFunctorsAssociator2 _ _ _)
-           | [ |- SpecializedNaturalTransformation (ComposeFunctors ?F _) (ComposeFunctors ?F _) ] =>
+           | [ |- NaturalTransformation (ComposeFunctors ?F _) (ComposeFunctors ?F _) ] =>
              refine (NTComposeF (IdentityNaturalTransformation F) _)
-           | [ |- SpecializedNaturalTransformation (ComposeFunctors _ ?F) (ComposeFunctors _ ?F) ] =>
+           | [ |- NaturalTransformation (ComposeFunctors _ ?F) (ComposeFunctors _ ?F) ] =>
              refine (NTComposeF _ (IdentityNaturalTransformation F))
          end.
 Ltac nt_solve_associator :=

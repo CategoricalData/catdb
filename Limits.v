@@ -1,4 +1,4 @@
-Require Export SpecializedCategory Functor UniversalProperties.
+Require Export Category Functor UniversalProperties.
 Require Import Common FunctorCategory NaturalTransformation.
 
 Set Implicit Arguments.
@@ -12,8 +12,8 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section DiagonalFunctor.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   (**
      Quoting Dwyer and Spalinski:
@@ -37,8 +37,8 @@ Section DiagonalFunctor.
     simpl; unfold diagonal_functor_object_of; intro m.
     hnf.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun d => m : C.(Morphism) ((diagonal_functor_object_of o1) d) ((diagonal_functor_object_of o2) d))
           _
         )
@@ -46,10 +46,10 @@ Section DiagonalFunctor.
       simpl; abstract (intros; autorewrite with morphism; trivial).
   Defined.
 
-  Definition DiagonalFunctor' : SpecializedFunctor C (C ^ D).
+  Definition DiagonalFunctor' : Functor C (C ^ D).
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor C D
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor C D
           diagonal_functor_object_of
           diagonal_functor_morphism_of
           _
@@ -63,18 +63,18 @@ Section DiagonalFunctor.
 End DiagonalFunctor.
 
 Section DiagonalFunctorLemmas.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Context `(D' : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
+  Context `(D' : Category).
 
-  Lemma Compose_DiagonalFunctor x (F : SpecializedFunctor D' D) :
+  Lemma Compose_DiagonalFunctor x (F : Functor D' D) :
     ComposeFunctors (DiagonalFunctor C D x) F = DiagonalFunctor _ _ x.
     functor_eq.
   Qed.
 
-  Definition Compose_DiagonalFunctor_NT x (F : SpecializedFunctor D' D) :
-    SpecializedNaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F) (DiagonalFunctor _ _ x)
-    := Build_SpecializedNaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F)
+  Definition Compose_DiagonalFunctor_NT x (F : Functor D' D) :
+    NaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F) (DiagonalFunctor _ _ x)
+    := Build_NaturalTransformation (ComposeFunctors (DiagonalFunctor C D x) F)
                                               (DiagonalFunctor _ _ x)
                                               (fun z => Identity x)
                                               (fun _ _ _ => eq_refl).
@@ -83,9 +83,9 @@ End DiagonalFunctorLemmas.
 Hint Rewrite @Compose_DiagonalFunctor.
 
 Section Limit.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor D C.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor D C.
 
   (**
      Quoting Dwyer and Spalinski:
@@ -98,8 +98,8 @@ Section Limit.
   Definition Limit := TerminalMorphism (DiagonalFunctor C D) F.
   Definition IsLimit := IsTerminalMorphism (U := DiagonalFunctor C D) (X := F).
   (*  Definition Limit (L : C) :=
-    { t : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) L) F &
-      forall X : C, forall s : SmallSpecializedNaturalTransformation ((DiagonalFunctor C D) X) F,
+    { t : SmallNaturalTransformation ((DiagonalFunctor C D) L) F &
+      forall X : C, forall s : SmallNaturalTransformation ((DiagonalFunctor C D) X) F,
         { s' : C.(Morphism) X L |
           unique
           (fun s' => SNTComposeT t ((DiagonalFunctor C D).(MorphismOf) s') = s)
@@ -118,8 +118,8 @@ Section Limit.
   Definition Colimit := @InitialMorphism (C ^ D) _ F (DiagonalFunctor C D).
   Definition IsColimit := @IsInitialMorphism (C ^ D) _ F (DiagonalFunctor C D).
   (*  Definition Colimit (c : C) :=
-    { t : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) c) &
-      forall X : C, forall s : SmallSpecializedNaturalTransformation F ((DiagonalFunctor C D) X),
+    { t : SmallNaturalTransformation F ((DiagonalFunctor C D) c) &
+      forall X : C, forall s : SmallNaturalTransformation F ((DiagonalFunctor C D) X),
         { s' : C.(Morphism) c X | is_unique s' /\
           SNTComposeT ((DiagonalFunctor C D).(MorphismOf) s') t = s
         }
@@ -160,9 +160,9 @@ Section Limit.
 End Limit.
 
 Section LimitMorphisms.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor D C.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor D C.
 
   Definition MorphismBetweenLimits (L L' : Limit F) : C.(Morphism) (LimitObject L) (LimitObject L').
     unfold Limit, LimitObject in *.

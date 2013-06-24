@@ -1,5 +1,5 @@
 Require Import FunctionalExtensionality.
-Require Export SpecializedCategory Category Functor NaturalTransformation NaturalEquivalence AdjointUnit.
+Require Export Category Category Functor NaturalTransformation NaturalEquivalence AdjointUnit.
 Require Import Common Hom ProductCategory FunctorProduct Duals.
 
 Set Implicit Arguments.
@@ -11,17 +11,17 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Adjunction.
-  Context `{C : SpecializedCategory}.
-  Context `{D : SpecializedCategory}.
-  Variable F : SpecializedFunctor C D.
-  Variable G : SpecializedFunctor D C.
+  Context `{C : Category}.
+  Context `{D : Category}.
+  Variable F : Functor C D.
+  Variable G : Functor D C.
 
   Let COp := OppositeCategory C.
   Let DOp := OppositeCategory D.
   Let FOp := OppositeFunctor F.
 
-  Let HomCPreFunctor : SpecializedFunctor (COp * D) (COp * C) := ((IdentityFunctor _) * G)%functor.
-  Let HomDPreFunctor : SpecializedFunctor (COp * D) (DOp * D) := (FOp * (IdentityFunctor _))%functor.
+  Let HomCPreFunctor : Functor (COp * D) (COp * C) := ((IdentityFunctor _) * G)%functor.
+  Let HomDPreFunctor : Functor (COp * D) (DOp * D) := (FOp * (IdentityFunctor _))%functor.
 
   Record Adjunction := {
     AMateOf :> NaturalIsomorphism
@@ -120,20 +120,20 @@ Arguments AComponentsOf {C D} [F G] T A A' _ : simpl nomatch.
 Arguments AIsomorphism {C D} [F G] T A A' : simpl nomatch.
 
 Section AdjunctionEquivalences.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variable F : SpecializedFunctor C D.
-  Variable G : SpecializedFunctor D C.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variable F : Functor C D.
+  Variable G : Functor D C.
 
   Definition HomAdjunction2Adjunction_AMateOf (A : HomAdjunction F G) :
-    SpecializedNaturalTransformation
+    NaturalTransformation
     (ComposeFunctors (HomFunctor D)
       (OppositeFunctor F * IdentityFunctor D))
     (ComposeFunctors (HomFunctor C)
       (IdentityFunctor (OppositeCategory C) * G)).
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
           (fun cd : C * D => A.(AComponentsOf) (fst cd) (snd cd))
           _
         )
@@ -209,7 +209,7 @@ Section AdjunctionEquivalences.
      [η c = ϕ(1_{F c})]
      *)
   Definition UnitOf (A : HomAdjunction F G) : AdjunctionUnit F G.
-    eexists (Build_SpecializedNaturalTransformation (IdentityFunctor C) (ComposeFunctors G F)
+    eexists (Build_NaturalTransformation (IdentityFunctor C) (ComposeFunctors G F)
                                                     (fun c => A.(AComponentsOf) c (F c) (Identity _))
                                                     _
             ).
@@ -239,7 +239,7 @@ Section AdjunctionEquivalences.
 
 
   Definition CounitOf (A : HomAdjunction F G) : AdjunctionCounit F G.
-    eexists (Build_SpecializedNaturalTransformation (ComposeFunctors F G) (IdentityFunctor D)
+    eexists (Build_NaturalTransformation (ComposeFunctors F G) (IdentityFunctor D)
       (fun d => proj1_sig (A.(AIsomorphism) (G d) d) (Identity _))
       _
     ).

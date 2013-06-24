@@ -1,5 +1,5 @@
 Require Import Bool Omega Setoid Program.
-Require Export Schema Category SmallSchema SmallCategory.
+Require Export Schema Category SmallSchema Category.
 Require Import Common EquivalenceClass.
 Require Import NaturalEquivalence ComputableCategory SNaturalEquivalence ComputableSchemaCategory SmallFunctor SmallTranslation.
 
@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Schema_Category_Equivalence.
-  Variable C : SmallCategory.
+  Variable C : Category.
   Variable S : SmallSchema.
 
   Hint Rewrite concatenate_noedges_p concatenate_p_noedges concatenate_addedge.
@@ -66,7 +66,7 @@ Section Schema_Category_Equivalence.
                end; clear_paths; repeat rewrite concatenate_associative in *; repeat rewrite sconcatenate_associative in *; try reflexivity || symmetry.
 
   (* TODO: Speed this up, automate this better. *)
-  Definition saturate : SmallCategory.
+  Definition saturate : Category.
     refine {| SObject := S;
       SMorphism := (fun s d => EquivalenceClass (@SPathsEquivalent S s d));
       (* foo := 1; *) (* uncommenting this line gives "Anomaly: uncaught exception Not_found. Please report."  Maybe I should report this?  But I haven't figured out a minimal test case. *)
@@ -108,7 +108,7 @@ Section Schema_Category_Equivalence.
 End Schema_Category_Equivalence.
 
 Section CategorySchemaCategory_RoundTrip.
-  Variable C : SmallCategory.
+  Variable C : Category.
 
   Hint Rewrite sconcatenate_noedges_p sconcatenate_p_noedges sconcatenate_addedge.
   Hint Rewrite <- sconcatenate_prepend_equivalent.

@@ -12,7 +12,7 @@ MODULES    := Notations \
 	EqdepFacts_one_variable \
 	Eqdep_dec_one_variable \
 	\
-	SpecializedCategory \
+	Category \
 	Functor \
 	NaturalTransformation \
 	ProductCategory \
@@ -23,8 +23,6 @@ MODULES    := Notations \
 	TypeclassUnreifiedSimplification \
 	CanonicalStructureSimplification \
 	\
-	Category \
-	CategoryEquality \
 	CategoryIsomorphisms \
 	FunctorIsomorphisms \
 	NaturalEquivalence \
@@ -54,10 +52,9 @@ MODULES    := Notations \
 	SetCategory \
 	SetCategoryProductFunctor \
 	InitialTerminalCategory \
-	SmallCat \
-	SpecializedCommaCategory \
+	Cat \
+	CommaCategory \
 	LaxCommaCategory \
-	SpecializedLaxCommaCategory \
 	CommaCategoryProjection \
 	CommaCategoryInducedFunctors \
 	CommaCategoryProjectionFunctors \
@@ -78,7 +75,7 @@ MODULES    := Notations \
 	Subcategory \
 	DecidableDiscreteCategory \
 	DecidableComputableCategory \
-	DecidableSmallCat \
+	DecidableCat \
 	DecidableSetCategory \
 	SimplicialSets \
 	SemiSimplicialSets \

@@ -1,5 +1,5 @@
 Require Export LtacReifiedSimplification.
-Require Import SpecializedCategory Functor NaturalTransformation.
+Require Import Category Functor NaturalTransformation.
 
 Set Implicit Arguments.
 
@@ -11,7 +11,7 @@ Set Universe Polymorphism.
 
 Section SimplifiedMorphism.
   Section single_category.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     (* structure for packaging a morphism and its reification *)
 
@@ -52,7 +52,7 @@ Section SimplifiedMorphism.
                  reflexivity.
 
   Section more_single_category.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     Lemma reifyIdentity x : Identity x = ReifiedMorphismDenote (ReifiedIdentityMorphism C x). reflexivity. Qed.
     Canonical Structure reify_identity_morphism x := ReifyMorphism (identity_tag _) _ (reifyIdentity x).
@@ -67,9 +67,9 @@ Section SimplifiedMorphism.
   End more_single_category.
 
   Section functor.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
-    Variable F : SpecializedFunctor C D.
+    Context `{C : Category}.
+    Context `{D : Category}.
+    Variable F : Functor C D.
 
     Lemma reifyFunctor `(m' : @SimplifiedMorphism C s d)
     : MorphismOf F (untag (morphism_of m')) = ReifiedMorphismDenote (ReifiedFunctorMorphism F (reified_morphism_of m')).
@@ -79,16 +79,16 @@ Section SimplifiedMorphism.
   End functor.
 
   Section natural_transformation.
-    Context `{C : SpecializedCategory}.
-    Context `{D : SpecializedCategory}.
-    Variables F G : SpecializedFunctor C D.
-    Variable T : SpecializedNaturalTransformation F G.
+    Context `{C : Category}.
+    Context `{D : Category}.
+    Variables F G : Functor C D.
+    Variable T : NaturalTransformation F G.
 
     Lemma reifyNT (x : C) : T x = ReifiedMorphismDenote (ReifiedNaturalTransformationMorphism T x). reflexivity. Qed.
     Canonical Structure reify_nt_morphism x := ReifyMorphism (nt_tag _) _ (@reifyNT x).
   End natural_transformation.
   Section generic.
-    Context `{C : SpecializedCategory}.
+    Context `{C : Category}.
 
     Lemma reifyGeneric s d (m : Morphism C s d) : m = ReifiedMorphismDenote (ReifiedGenericMorphism C s d m). reflexivity. Qed.
     Canonical Structure reify_generic_morphism s d m := ReifyMorphism (generic_tag m) _ (@reifyGeneric s d m).
@@ -113,10 +113,10 @@ Ltac rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : SpecializedCategory).
-    Context `(D : SpecializedCategory).
-    Variables F G : SpecializedFunctor C D.
-    Variable T : SpecializedNaturalTransformation F G.
+    Context `(C : Category).
+    Context `(D : Category).
+    Variables F G : Functor C D.
+    Variable T : NaturalTransformation F G.
 
     Lemma good_example_00001 (x : C) :Compose (Identity x) (Identity x) = Identity (C := C) x.
       rsimplify_morphisms.
@@ -143,14 +143,14 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : SpecializedCategory).
-    Context `(C1 : SpecializedCategory).
-    Context `(D : SpecializedCategory).
+    Context `(C0 : Category).
+    Context `(C1 : Category).
+    Context `(D : Category).
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.
     Variable m2 : Morphism C0 d d'.
-    Variable F : SpecializedFunctor (C0 + C1) D.
+    Variable F : Functor (C0 + C1) D.
 
     Goal MorphismOf F (s := inl _) (d := inl _) (Compose m2 m1) = Compose (MorphismOf F (s := inl _) (d := inl _) m2) (MorphismOf F (s := inl _) (d := inl _) m1).
     simpl in *.

@@ -17,21 +17,21 @@ Local Ltac intro_object_of :=
 
 Section NaturalIsomorphism.
   Section NaturalIsomorphism.
-    Context `(C : SpecializedCategory).
-    Context `(D : SpecializedCategory).
-    Variables F G : SpecializedFunctor C D.
+    Context `(C : Category).
+    Context `(D : Category).
+    Variables F G : Functor C D.
 
     Record NaturalIsomorphism :=
       {
-        NaturalIsomorphism_Transformation :> SpecializedNaturalTransformation F G;
+        NaturalIsomorphism_Transformation :> NaturalTransformation F G;
         NaturalIsomorphism_Isomorphism : forall x : C, IsomorphismOf (NaturalIsomorphism_Transformation x)
       }.
   End NaturalIsomorphism.
 
   Section Inverse.
-    Context `(C : SpecializedCategory).
-    Context `(D : SpecializedCategory).
-    Variables F G : SpecializedFunctor C D.
+    Context `(C : Category).
+    Context `(D : Category).
+    Variables F G : Functor C D.
 
     Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
       exists (fun x => Inverse (NaturalIsomorphism_Isomorphism T x)).
@@ -56,11 +56,11 @@ Section NaturalIsomorphism.
   End Inverse.
 
   Section Composition.
-    Context `(C : SpecializedCategory).
-    Context `(D : SpecializedCategory).
-    Context `(E : SpecializedCategory).
-    Variables F F' F'' : SpecializedFunctor C D.
-    Variables G G' : SpecializedFunctor D E.
+    Context `(C : Category).
+    Context `(D : Category).
+    Context `(E : Category).
+    Variables F F' F'' : Functor C D.
+    Variables G G' : Functor D E.
 
     Local Ltac t :=
       simpl;
@@ -94,22 +94,22 @@ Section NaturalIsomorphism.
 End NaturalIsomorphism.
 
 Section NaturalIsomorphismOfCategories.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C : Category).
+  Context `(D : Category).
 
   Local Reserved Notation "'F'".
   Local Reserved Notation "'G'".
 
   Record NaturalIsomorphismOfCategories := {
-    NaturalIsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := NaturalIsomorphismOfCategories_F;
-    NaturalIsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := NaturalIsomorphismOfCategories_G;
+    NaturalIsomorphismOfCategories_F : Functor C D where "'F'" := NaturalIsomorphismOfCategories_F;
+    NaturalIsomorphismOfCategories_G : Functor D C where "'G'" := NaturalIsomorphismOfCategories_G;
     NaturalIsomorphismOfCategories_Isomorphism_C :> NaturalIsomorphism (IdentityFunctor C) (ComposeFunctors G F);
     NaturalIsomorphismOfCategories_Isomorphism_D : NaturalIsomorphism (IdentityFunctor D) (ComposeFunctors F G)
   }.
 
   Record IsomorphismOfCategories := {
-    IsomorphismOfCategories_F : SpecializedFunctor C D where "'F'" := IsomorphismOfCategories_F;
-    IsomorphismOfCategories_G : SpecializedFunctor D C where "'G'" := IsomorphismOfCategories_G;
+    IsomorphismOfCategories_F : Functor C D where "'F'" := IsomorphismOfCategories_F;
+    IsomorphismOfCategories_G : Functor D C where "'G'" := IsomorphismOfCategories_G;
     IsomorphismOfCategories_Isomorphism_C : ComposeFunctors G F = IdentityFunctor C;
     IsomorphismOfCategories_Isomorphism_D : ComposeFunctors F G = IdentityFunctor D
   }.
@@ -127,17 +127,17 @@ Section NaturalEquivalence.
     exists T : NaturalTransformation F G, exists NE : NaturalEquivalenceOf T, True.
 End NaturalEquivalence.
 
-(* grumble, grumble, grumble, [Functors] take [SpecializedCategories] and so we don't get type inference.
-   Perhaps I should fix this?  But I don't like having to prefix so many things with [Specialized] and
+(* grumble, grumble, grumble, [Functors] take [Categories] and so we don't get type inference.
+   Perhaps I should fix this?  But I don't like having to prefix so many things with [] and
    having duplicated code just so I get type inference.
    *)
 Arguments NaturalEquivalenceOf [C D F G] T.
 Arguments FunctorsNaturallyEquivalent [C D] F G.
 
 Section Coercions.
-  Context `(C : SpecializedCategory).
-  Context `(D : SpecializedCategory).
-  Variables F G : SpecializedFunctor C D.
+  Context `(C : Category).
+  Context `(D : Category).
+  Variables F G : Functor C D.
   Variable C' : Category.
   Variable D' : Category.
   Variables F' G' : Functor C' D'.

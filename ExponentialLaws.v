@@ -19,11 +19,11 @@ Local Hint Resolve Functor_eq Functor_JMeq NaturalTransformation_eq
       NaturalTransformation_JMeq eq_JMeq.
 
 Section Law0.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition ExponentialLaw0Functor : SpecializedFunctor (C ^ 0) 1
+  Definition ExponentialLaw0Functor : Functor (C ^ 0) 1
     := FunctorTo1 _.
-  Definition ExponentialLaw0Functor_Inverse : SpecializedFunctor 1 (C ^ 0)
+  Definition ExponentialLaw0Functor_Inverse : Functor 1 (C ^ 0)
     := FunctorFrom1 (C ^ 0) (FunctorFrom0 _).
 
   Lemma ExponentialLaw0
@@ -40,17 +40,17 @@ Section Law0.
 End Law0.
 
 Section Law0'.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
   Variable c : C.
 
-  Definition ExponentialLaw0'Functor : SpecializedFunctor (0 ^ C) 0
-    := Build_SpecializedFunctor (0 ^ C) 0
+  Definition ExponentialLaw0'Functor : Functor (0 ^ C) 0
+    := Build_Functor (0 ^ C) 0
                                 (fun F => F c)
                                 (fun s d m => match (s c) with end)
                                 (fun x _ _ _ _ => match (x c) with end)
                                 (fun x => match (x c) with end).
 
-  Definition ExponentialLaw0'Functor_Inverse : SpecializedFunctor 0 (0 ^ C)
+  Definition ExponentialLaw0'Functor_Inverse : Functor 0 (0 ^ C)
     := FunctorFrom0 _.
 
   Lemma ExponentialLaw0'
@@ -69,10 +69,10 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition ExponentialLaw1Functor : SpecializedFunctor (C ^ 1) C
-    := Build_SpecializedFunctor (C ^ 1) C
+  Definition ExponentialLaw1Functor : Functor (C ^ 1) C
+    := Build_Functor (C ^ 1) C
                                 (fun F => F tt)
                                 (fun s d m => m tt)
                                 (fun _ _ _ _ _ => eq_refl)
@@ -86,8 +86,8 @@ Section Law1.
   Proof.
     hnf.
     match goal with
-      | [ |- SpecializedNaturalTransformation ?F ?G ] =>
-        refine (Build_SpecializedNaturalTransformation F G
+      | [ |- NaturalTransformation ?F ?G ] =>
+        refine (Build_NaturalTransformation F G
                                                        (fun _ => m)
                                                        _
                )
@@ -101,9 +101,9 @@ Section Law1.
 
   Global Arguments ExponentialLaw1Functor_Inverse_MorphismOf / _ _ _.
 
-  Definition ExponentialLaw1Functor_Inverse : SpecializedFunctor C (C ^ 1).
+  Definition ExponentialLaw1Functor_Inverse : Functor C (C ^ 1).
   Proof.
-    refine (Build_SpecializedFunctor
+    refine (Build_Functor
               C (C ^ 1)
               (@FunctorFrom1 _)
               ExponentialLaw1Functor_Inverse_MorphismOf
@@ -131,17 +131,17 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : SpecializedCategory).
+  Context `(C : Category).
 
-  Definition ExponentialLaw1'Functor : SpecializedFunctor (1 ^ C) 1
+  Definition ExponentialLaw1'Functor : Functor (1 ^ C) 1
     := FunctorTo1 _.
 
-  Definition ExponentialLaw1'Functor_Inverse : SpecializedFunctor 1 (1 ^ C).
+  Definition ExponentialLaw1'Functor_Inverse : Functor 1 (1 ^ C).
   Proof.
-    refine (Build_SpecializedFunctor
+    refine (Build_Functor
               1 (1 ^ C)
               (fun _ => FunctorTo1 _)
-              (fun s d m => Build_SpecializedNaturalTransformation
+              (fun s d m => Build_NaturalTransformation
                               (FunctorTo1 C) (FunctorTo1 C)
                               (fun _ => Identity (C := 1) tt)
                               (fun _ _ _ => eq_refl))
@@ -164,21 +164,21 @@ Section Law1'.
 End Law1'.
 
 Section Law2.
-  Context `(D : SpecializedCategory).
-  Context `(C1 : SpecializedCategory).
-  Context `(C2 : SpecializedCategory).
+  Context `(D : Category).
+  Context `(C1 : Category).
+  Context `(C2 : Category).
 
   Definition ExponentialLaw2Functor
-  : SpecializedFunctor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2))
+  : Functor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2))
     := FunctorProduct (FunctorialComposition C1 (C1 + C2) D ⟨ - , inl_Functor _ _ ⟩)
                       (FunctorialComposition C2 (C1 + C2) D ⟨ - , inr_Functor _ _ ⟩).
 
   Definition ExponentialLaw2Functor_Inverse
-  : SpecializedFunctor ((D ^ C1) * (D ^ C2)) (D ^ (C1 + C2)).
+  : Functor ((D ^ C1) * (D ^ C2)) (D ^ (C1 + C2)).
   Proof.
     match goal with
-      | [ |- SpecializedFunctor ?C ?D ] =>
-        refine (Build_SpecializedFunctor
+      | [ |- Functor ?C ?D ] =>
+        refine (Build_Functor
                   C D
                   (fun FG => sum_Functor (fst FG) (snd FG))
                   (fun _ _ m => sum_Functor_Functorial (fst m) (snd m))
@@ -219,15 +219,15 @@ Section Law2.
 End Law2.
 
 Section Law3.
-  Context `(C1 : SpecializedCategory).
-  Context `(C2 : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C1 : Category).
+  Context `(C2 : Category).
+  Context `(D : Category).
 
   Definition ExponentialLaw3Functor
-  : SpecializedFunctor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
-    let F := match goal with | [ |- SpecializedFunctor ?F ?G ] => constr:(F) end in
-    let G := match goal with | [ |- SpecializedFunctor ?F ?G ] => constr:(G) end in
-    refine (Build_SpecializedFunctor
+  : Functor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
+    let F := match goal with | [ |- Functor ?F ?G ] => constr:(F) end in
+    let G := match goal with | [ |- Functor ?F ?G ] => constr:(G) end in
+    refine (Build_Functor
               F G
               (fun H => (ComposeFunctors fst_Functor H,
                          ComposeFunctors snd_Functor H))
@@ -255,11 +255,11 @@ Section Law3.
   Defined.
 
   Definition ExponentialLaw3Functor_Inverse
-  : SpecializedFunctor (C1 ^ D * C2 ^ D) ((C1 * C2) ^ D).
+  : Functor (C1 ^ D * C2 ^ D) ((C1 * C2) ^ D).
     let FG := (match goal with
-                   [ |- SpecializedFunctor ?F ?G ] => constr:(F, G)
+                   [ |- Functor ?F ?G ] => constr:(F, G)
                end) in
-    refine (Build_SpecializedFunctor
+    refine (Build_Functor
               (fst FG) (snd FG)
               (fun H => FunctorProduct
                           (@fst_Functor (C1 ^ D) (C2 ^ D) H)
@@ -299,9 +299,9 @@ Section Law3.
 End Law3.
 
 Section Law4.
-  Context `(C1 : SpecializedCategory).
-  Context `(C2 : SpecializedCategory).
-  Context `(D : SpecializedCategory).
+  Context `(C1 : Category).
+  Context `(C2 : Category).
+  Context `(D : Category).
 
   Section functor.
     Local Ltac do_exponential4 := intros; simpl;
@@ -321,8 +321,8 @@ Section Law4.
     Proof.
       intro F; hnf in F |- *.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
             (fun c1c2 => F (snd c1c2) (fst c1c2))
             (fun s1s2 d1d2 m1m2 => Compose ((F (snd d1d2)).(MorphismOf) (fst m1m2)) ((F.(MorphismOf) (snd m1m2)) (fst s1s2)))
             _
@@ -349,11 +349,11 @@ Section Law4.
         ).
     Defined.
 
-    Definition ExponentialLaw4Functor : SpecializedFunctor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
+    Definition ExponentialLaw4Functor : Functor ((D ^ C1) ^ C2) (D ^ (C1 * C2)).
     Proof.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
             ExponentialLaw4Functor_ObjectOf
             ExponentialLaw4Functor_MorphismOf
             _
@@ -380,15 +380,15 @@ Section Law4.
 
 
     Section ObjectOf.
-      Variable F : SpecializedFunctor (C1 * C2) D.
+      Variable F : Functor (C1 * C2) D.
 
       Definition ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf : C2 -> (D ^ C1)%category.
       Proof.
         intro c2.
         hnf.
         match goal with
-          | [ |- SpecializedFunctor ?C ?D ] =>
-            refine (Build_SpecializedFunctor C D
+          | [ |- Functor ?C ?D ] =>
+            refine (Build_Functor C D
               (fun c1 => F (c1, c2))
               (fun s1 d1 m1 => F.(MorphismOf) (s := (s1, c2)) (d := (d1, c2)) (m1, Identity c2))
               _
@@ -409,8 +409,8 @@ Section Law4.
       Proof.
         hnf.
         match goal with
-          | [ |- SpecializedFunctor ?C ?D ] =>
-            refine (Build_SpecializedFunctor C D
+          | [ |- Functor ?C ?D ] =>
+            refine (Build_Functor C D
               ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf
               ExponentialLaw4Functor_Inverse_ObjectOf_MorphismOf
               _
@@ -440,11 +440,11 @@ Section Law4.
 
     Arguments ExponentialLaw4Functor_Inverse_MorphismOf_ComponentsOf / _ _ _ _.
 
-    Definition ExponentialLaw4Functor_Inverse : SpecializedFunctor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
+    Definition ExponentialLaw4Functor_Inverse : Functor (D ^ (C1 * C2)) ((D ^ C1) ^ C2).
     Proof.
       match goal with
-        | [ |- SpecializedFunctor ?C ?D ] =>
-          refine (Build_SpecializedFunctor C D
+        | [ |- Functor ?C ?D ] =>
+          refine (Build_Functor C D
             ExponentialLaw4Functor_Inverse_ObjectOf
             ExponentialLaw4Functor_Inverse_MorphismOf
             _
