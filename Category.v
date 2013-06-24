@@ -331,7 +331,7 @@ Section AssociativityComposition.
   Lemma compose4associativity_helper
     (a : Morphism C o3 o4) (b : Morphism C o2 o3)
     (c : Morphism C o1 o2) (d : Morphism C o0 o1)
-  : Compose (a ∘ b) (c ∘ d) = (a ((b ∘ c) ∘ d)).
+  : (a ∘ b) ∘ (c ∘ d) = (a ∘ ((b ∘ c) ∘ d)).
   Proof.
     repeat rewrite Associativity; reflexivity.
   Qed.

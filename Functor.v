@@ -1,5 +1,5 @@
 Require Import JMeq ProofIrrelevance FunctionalExtensionality.
-Require Export Notations Category Category.
+Require Export Notations Category.
 Require Import Common StructureEquality FEqualDep.
 
 Set Implicit Arguments.
@@ -13,25 +13,28 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section Functor.
-  Variable C : Category.
-  Variable D : Category.
+  Variables C D : Category.
 
-  (**
-     Quoting from the lecture notes for 18.705, Commutative Algebra:
+  (** Quoting from the lecture notes for 18.705, Commutative Algebra:
 
-     A map of categories is known as a functor. Namely, given
-     categories [C] and [C'], a (covariant) functor [F : C -> C'] is a rule that assigns to
-     each object [A] of [C] an object [F A] of [C'] and to each map [m : A -> B] of [C] a map
-     [F m : F A -> F B] of [C'] preserving composition and identity; that is,
-     (1) [F (m' ○ m) = (F m') ○ (F m)] for maps [m : A -> B] and [m' : B -> C] of [C], and
-     (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A] is the identity morphism of [A].
-     **)
+      A map of categories is known as a functor. Namely, given
+      categories [C] and [C'], a (covariant) functor [F : C -> C'] is
+      a rule that assigns to each object [A] of [C] an object [F A] of
+      [C'] and to each map [m : A -> B] of [C] a map [F m : F A -> F
+      B] of [C'] preserving composition and identity; that is,
+
+     (1) [F (m' ∘ m) = (F m') ∘ (F m)] for maps [m : A -> B] and [m' :
+         B -> C] of [C], and
+
+     (2) [F (id A) = id (F A)] for any object [A] of [C], where [id A]
+         is the identity morphism of [A]. **)
+
   Record Functor :=
     {
       ObjectOf :> C -> D;
       MorphismOf : forall s d, C.(Morphism) s d -> D.(Morphism) (ObjectOf s) (ObjectOf d);
       FCompositionOf : forall s d d' (m1 : C.(Morphism) s d) (m2: C.(Morphism) d d'),
-                          MorphismOf _ _ (Compose m2 m1) = Compose (MorphismOf _ _ m2) (MorphismOf _ _ m1);
+                          MorphismOf _ _ (m2 ∘ m1) = (MorphismOf _ _ m2) ∘ (MorphismOf _ _ m1);
       FIdentityOf : forall x, MorphismOf _ _ (Identity x) = Identity (ObjectOf x)
     }.
 End Functor.
