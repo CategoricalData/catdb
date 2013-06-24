@@ -113,8 +113,8 @@ Ltac rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
     Variables F G : Functor C D.
     Variable T : NaturalTransformation F G.
 
@@ -143,9 +143,9 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : Category).
-    Context `(C1 : Category).
-    Context `(D : Category).
+    Variable C0 : Category.
+    Variable C1 : Category.
+    Variable D : Category.
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.

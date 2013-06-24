@@ -15,7 +15,7 @@ Section InitialTerminal.
 End InitialTerminal.
 
 Section Functors.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition FunctorTo1 : Functor C 1
     := Build_Functor C 1 (fun _ => tt) (fun _ _ _ => eq_refl) (fun _ _ _ _ _ => eq_refl) (fun _ => eq_refl).
@@ -31,7 +31,7 @@ Section Functors.
 End Functors.
 
 Section FunctorsUnique.
-  Context `(C : Category).
+  Variable C : Category.
 
   Lemma InitialCategoryFunctorUnique
   : forall F F' : Functor InitialCategory C,

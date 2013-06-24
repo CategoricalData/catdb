@@ -22,7 +22,7 @@ Local Ltac apply_commutes_by_transitivity_and_solve_with tac :=
     end.
 
 Section Yoneda.
-  Context `(C : Category).
+  Variable C : Category.
   Let COp := OppositeCategory C.
 
   Section Yoneda.
@@ -77,7 +77,7 @@ Section Yoneda.
 End Yoneda.
 
 Section YonedaLemma.
-  Context `(C : Category).
+  Variable C : Category.
   Let COp := OppositeCategory C.
 
   (* Note: If we use [Yoneda _ c] instead, we get Universe Inconsistencies.  Hmm... *)
@@ -117,7 +117,7 @@ Section YonedaLemma.
 End YonedaLemma.
 
 Section CoYonedaLemma.
-  Context `(C : Category).
+  Variable C : Category.
   Let COp := OppositeCategory C.
 
   Definition CoYonedaLemmaMorphism (c : C) (X : TypeCat ^ COp)
@@ -158,7 +158,7 @@ Section CoYonedaLemma.
 End CoYonedaLemma.
 
 Section FullyFaithful.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition YonedaEmbedding : FunctorFullyFaithful (Yoneda C).
     unfold FunctorFullyFaithful.

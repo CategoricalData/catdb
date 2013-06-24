@@ -48,7 +48,7 @@ Section FunctorIsomorphism.
     Hint Resolve RightInverseFunctor LeftInverseFunctor : category.
     Hint Resolve RightInverseFunctor LeftInverseFunctor : functor.
 
-    Definition FunctorIsomorphismOf_Identity `(C : Category) : FunctorIsomorphismOf (IdentityFunctor C).
+    Definition FunctorIsomorphismOf_Identity (C : Category) : FunctorIsomorphismOf (IdentityFunctor C).
       exists (IdentityFunctor _); eauto with functor.
     Defined.
 
@@ -75,7 +75,7 @@ Section FunctorIsomorphism.
   End FunctorIsomorphismOf.
 
   Section IsomorphismOfCategories.
-    Record IsomorphismOfCategories `(C : Category) `(D : Category) := {
+    Record IsomorphismOfCategories (C : Category) (D : Category) := {
       IsomorphismOfCategories_Functor : Functor C D;
       IsomorphismOfCategories_Of :> FunctorIsomorphismOf IsomorphismOfCategories_Functor
     }.
@@ -108,7 +108,7 @@ Section FunctorIsomorphism.
     Definition CategoriesIsomorphic (C D : Category) : Prop :=
       exists (F : Functor C D) (G : Functor D C), FunctorIsInverseOf F G.
 
-    Lemma IsmorphismOfCategories_CategoriesIsomorphic `(C : Category) `(D : Category) :
+    Lemma IsmorphismOfCategories_CategoriesIsomorphic (C : Category) (D : Category) :
       IsomorphismOfCategories C D -> CategoriesIsomorphic C D.
       intro i; destruct i as [ m i ].
       exists m.
@@ -163,8 +163,8 @@ Section FunctorIsomorphism.
 End FunctorIsomorphism.
 
 Section Functor_preserves_isomorphism.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
 
   Hint Rewrite <- FCompositionOf : functor.

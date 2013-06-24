@@ -31,7 +31,7 @@ Section SemiSimplicialSets.
   Definition SemiSimplexCategoryInclusionFunctor : Functor Γ Δ
     := WideSubcategoryInclusionFunctor _ _ _ _.
 
-  Definition SemiSimplicialCategory `(C : Category) := (C ^ (OppositeCategory Γ))%category.
+  Definition SemiSimplicialCategory (C : Category) := (C ^ (OppositeCategory Γ))%category.
 
   Definition SemiSimplicialSet := SemiSimplicialCategory SetCat.
   Definition SemiSimplicialType := SemiSimplicialCategory TypeCat.

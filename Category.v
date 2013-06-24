@@ -12,27 +12,29 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
+Local Open Scope morphism_scope.
+
 Record Category :=
   Build_Category' {
       Object :> Type;
       Morphism : Object -> Object -> Type;
 
       Identity : forall x, Morphism x x;
-      Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d';
+      Compose : forall s d d', Morphism d d' -> Morphism s d -> Morphism s d' where "f ∘ g" := (Compose f g);
 
       Associativity : forall o1 o2 o3 o4
                              (m1 : Morphism o1 o2)
                              (m2 : Morphism o2 o3)
                              (m3 : Morphism o3 o4),
-                        Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1);
-      (* ask for [eq_sym (Associativity ...)], so that C^{op}^{op} is convertible with C *)
+                        (m3 ∘ m2) ∘ m1 = m3 ∘ (m2 ∘ m1);
+      (* ask for [eq_sym (Associativity ...)], so that C^{op}^{op} is almost convertible with C *)
       Associativity_sym : forall o1 o2 o3 o4
                                  (m1 : Morphism o1 o2)
                                  (m2 : Morphism o2 o3)
                                  (m3 : Morphism o3 o4),
-                            Compose m3 (Compose m2 m1) = Compose (Compose m3 m2) m1;
-      LeftIdentity : forall a b (f : Morphism a b), Compose (Identity b) f = f;
-      RightIdentity : forall a b (f : Morphism a b), Compose f (Identity a) = f
+                            m3 ∘ (m2 ∘ m1) = (m3 ∘ m2) ∘ m1;
+      LeftIdentity : forall a b (f : Morphism a b), (Identity b) ∘ f = f;
+      RightIdentity : forall a b (f : Morphism a b), f ∘ (Identity a) = f
     }.
 
 Bind Scope category_scope with Category.
@@ -43,6 +45,8 @@ Arguments Object C%category : rename.
 Arguments Morphism !C%category s d : rename. (* , simpl nomatch. *)
 Arguments Identity [!C%category] x%object : rename.
 Arguments Compose [!C%category s%object d%object d'%object] m1%morphism m2%morphism : rename.
+
+Infix "∘" := Compose : morphism_scope.
 
 Section CategoryInterface.
   Definition Build_Category (obj : Type)
@@ -55,13 +59,13 @@ Section CategoryInterface.
              (RightIdentity' : forall (a b : obj) (f : Morphism a b), Compose' a a b f (Identity' a) = f)
   : Category
     := @Build_Category' obj
-                                   Morphism
-                                   Identity'
-                                   Compose'
-                                   Associativity'
-                                   (fun _ _ _ _ _ _ _ => eq_sym (Associativity' _ _ _ _ _ _ _))
-                                   LeftIdentity'
-                                   RightIdentity'.
+                        Morphism
+                        Identity'
+                        Compose'
+                        Associativity'
+                        (fun _ _ _ _ _ _ _ => eq_sym (Associativity' _ _ _ _ _ _ _))
+                        LeftIdentity'
+                        RightIdentity'.
 End CategoryInterface.
 
 (* create a hint db for all category theory things *)
@@ -71,7 +75,7 @@ Create HintDb morphism discriminated.
 
 Hint Extern 1 => symmetry : category morphism. (* TODO(jgross): Why do I need this? *)
 
-Ltac spcategory_hideProofs :=
+Ltac category_hideProofs :=
   repeat match goal with
              | [ |- context[{|
                                Associativity := ?pf0;
@@ -190,12 +194,13 @@ Section Categories_Equal.
     End contr_eq.
   End contr_eq.
 
-  Lemma Category_eq `(C : Category) `(D : Category) :
+  Lemma Category_eq (C : Category) (D : Category) :
     @Object C = @Object D
     -> @Morphism C == @Morphism D
     -> @Identity C == @Identity D
     -> @Compose C == @Compose D
     -> C = D.
+  Proof.
     intros.
     destruct_head @Category;
     simpl in *; repeat subst;
@@ -203,13 +208,13 @@ Section Categories_Equal.
   Qed.
 End Categories_Equal.
 
-Ltac spcat_eq_step_with tac :=
+Ltac cat_eq_step_with tac :=
   structures_eq_step_with_tac ltac:(apply Category_eq) tac.
 
-Ltac spcat_eq_with tac := repeat spcat_eq_step_with tac.
+Ltac cat_eq_with tac := repeat cat_eq_step_with tac.
 
-Ltac spcat_eq_step := spcat_eq_step_with idtac.
-Ltac spcat_eq := spcategory_hideProofs; spcat_eq_with idtac.
+Ltac cat_eq_step := cat_eq_step_with idtac.
+Ltac cat_eq := category_hideProofs; cat_eq_with idtac.
 
 Ltac solve_for_identity :=
   match goal with
@@ -225,10 +230,10 @@ Ltac solve_for_identity :=
 
 Definition NoEvar T (_ : T) := True.
 
-Lemma AssociativityNoEvar `(C : Category) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
+Lemma AssociativityNoEvar (C : Category) : forall (o1 o2 o3 o4 : C) (m1 : C.(Morphism) o1 o2)
   (m2 : C.(Morphism) o2 o3) (m3 : C.(Morphism) o3 o4),
   NoEvar (m1, m2) \/ NoEvar (m2, m3) \/ NoEvar (m1, m3)
-  -> Compose (Compose m3 m2) m1 = Compose m3 (Compose m2 m1).
+  -> (m3 ∘ m2) ∘ m1 = m3 ∘ (m2 ∘ m1).
   intros; apply Associativity.
 Qed.
 
@@ -262,14 +267,14 @@ Ltac find_composition_to_identity :=
 (** * Back to the main content.... *)
 
 Section Category.
-  Context `(C : Category).
+  Variable C : Category.
 
   (* Quoting Wikipedia,
     In category theory, an epimorphism (also called an epic
     morphism or, colloquially, an epi) is a morphism [f : X → Y]
     which is right-cancellative in the sense that, for all
     morphisms [g, g' : Y → Z],
-    [g ○ f = g' ○ f -> g = g']
+    [g ∘ f = g' ∘ f -> g = g']
 
     Epimorphisms are analogues of surjective functions, but they
     are not exactly the same. The dual of an epimorphism is a
@@ -277,10 +282,10 @@ Section Category.
     monomorphism in the dual category [OppositeCategory C]).
     *)
   Definition IsEpimorphism x y (m : C.(Morphism) x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) y z), Compose m1 m = Compose m2 m ->
+    forall z (m1 m2 : C.(Morphism) y z), m1 ∘ m = m2 ∘ m ->
       m1 = m2.
   Definition IsMonomorphism x y (m : C.(Morphism) x y) : Prop :=
-    forall z (m1 m2 : C.(Morphism) z x), Compose m m1 = Compose m m2 ->
+    forall z (m1 m2 : C.(Morphism) z x), m ∘ m1 = m ∘ m2 ->
       m1 = m2.
 
   Section properties.
@@ -292,19 +297,21 @@ Section Category.
       repeat intro; autorewrite with category in *; trivial.
     Qed.
 
-    Lemma EpimorphismComposition s d d' m0 m1 :
-      IsEpimorphism _ _ m0
+    Lemma EpimorphismComposition s d d' m0 m1
+    : IsEpimorphism _ _ m0
       -> IsEpimorphism _ _ m1
       -> IsEpimorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
+    Proof.
       repeat intro.
       repeat match goal with | [ H : _ |- _ ] => rewrite <- Associativity in H end.
       intuition.
     Qed.
 
-    Lemma MonomorphismComposition s d d' m0 m1 :
-      IsMonomorphism _ _ m0
+    Lemma MonomorphismComposition s d d' m0 m1
+    : IsMonomorphism _ _ m0
       -> IsMonomorphism _ _ m1
       -> IsMonomorphism _ _ (Compose (C := C) (s := s) (d := d) (d' := d') m0 m1).
+    Proof.
       repeat intro.
       repeat match goal with | [ H : _ |- _ ] => rewrite Associativity in H end.
       intuition.
@@ -318,22 +325,23 @@ Arguments IsEpimorphism [C x y] m.
 Arguments IsMonomorphism [C x y] m.
 
 Section AssociativityComposition.
-  Context `(C : Category).
+  Variable C : Category.
   Variables o0 o1 o2 o3 o4 : C.
 
   Lemma compose4associativity_helper
     (a : Morphism C o3 o4) (b : Morphism C o2 o3)
-    (c : Morphism C o1 o2) (d : Morphism C o0 o1) :
-    Compose (Compose a b) (Compose c d) = (Compose a (Compose (Compose b c) d)).
+    (c : Morphism C o1 o2) (d : Morphism C o0 o1)
+  : Compose (a ∘ b) (c ∘ d) = (a ((b ∘ c) ∘ d)).
+  Proof.
     repeat rewrite Associativity; reflexivity.
   Qed.
 End AssociativityComposition.
 
-Ltac compose4associativity' a b c d := transitivity (Compose a (Compose (Compose b c) d)); try solve [ apply compose4associativity_helper ].
+Ltac compose4associativity' a b c d := transitivity (a ∘ ((b ∘ c) ∘ d)); try solve [ apply compose4associativity_helper ].
 Ltac compose4associativity :=
   match goal with
-    | [ |- Compose (Compose ?a ?b) (Compose ?c ?d) = _ ] => compose4associativity' a b c d
-    | [ |- _ = Compose (Compose ?a ?b) (Compose ?c ?d) ] => compose4associativity' a b c d
+    | [ |- (?a ∘ ?b) ∘ (?c ∘ ?d) = _ ] => compose4associativity' a b c d
+    | [ |- _ = (?a ∘ ?b) ∘ (?c ∘ ?d) ] => compose4associativity' a b c d
   end.
 
 
@@ -352,9 +360,9 @@ Ltac saturate := repeat match goal with
                               end in
                               repeat match goal with
                                        | [ m : Morphism _ _ _ |- _ ] =>
-                                         tryIt (Compose M m = Compose N m)
+                                         tryIt (M ∘ m = N ∘ m)
                                        | [ m : Morphism _ _ _ |- _ ] =>
-                                         tryIt (Compose m M = Compose m N)
+                                         tryIt (m ∘ M = m ∘ N)
                                      end; generalize dependent H
                         end; intros; autorewrite with core in *.
 

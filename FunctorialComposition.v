@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorialComposition.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Definition FunctorialComposition : Functor ((E ^ D) * (D ^ C)) (E ^ C).
   Proof.

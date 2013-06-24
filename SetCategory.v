@@ -31,7 +31,7 @@ Section CSet.
 End CSet.
 
 Section SetCoercionsDefinitions.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition FunctorToProp := Functor C PropCat.
   Definition FunctorToSet := Functor C SetCat.
@@ -50,7 +50,7 @@ Identity Coercion FunctorFromSet_Id : FunctorFromSet >-> Functor.
 Identity Coercion FunctorFromType_Id : FunctorFromType >-> Functor.
 
 Section SetCoercions.
-  Context `(C : Category).
+  Variable C : Category.
 
   Local Notation BuildFunctor C D F :=
     (Build_Functor C D

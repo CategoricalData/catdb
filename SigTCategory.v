@@ -27,7 +27,7 @@ Local Ltac faithful_t :=
           end).
 
 Section sigT_obj_mor.
-  Context `(A : Category).
+  Variable A : Category.
   Variable Pobj : A -> Type.
   Variable Pmor : forall s d : sigT Pobj, A.(Morphism) (projT1 s) (projT1 d) -> Type.
 
@@ -70,7 +70,7 @@ End sigT_obj_mor.
 Arguments projT1_functor {A Pobj Pmor Pidentity Pcompose P_Associativity P_LeftIdentity P_RightIdentity}.
 
 Section sigT_obj.
-  Context `(A : Category).
+  Variable A : Category.
   Variable Pobj : A -> Type.
 
   Definition Category_sigT_obj : Category.
@@ -124,7 +124,7 @@ End sigT_obj.
 Arguments projT1_obj_functor {A Pobj}.
 
 Section sigT_mor.
-  Context `(A : Category).
+  Variable A : Category.
   Variable Pmor : forall s d, A.(Morphism) s d -> Type.
 
   Variable Pidentity : forall x, @Pmor x x (Identity (C := A) _).

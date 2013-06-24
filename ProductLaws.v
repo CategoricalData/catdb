@@ -12,7 +12,7 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section swap.
-  Definition SwapFunctor `(C : Category) `(D : Category)
+  Definition SwapFunctor (C : Category) `(D : Category)
   : Functor (C * D) (D * C)
     := Build_Functor (C * D) (D * C)
                                 (fun cd => (snd cd, fst cd))
@@ -20,14 +20,14 @@ Section swap.
                                 (fun _ _ _ _ _ => eq_refl)
                                 (fun _ => eq_refl).
 
-  Lemma ProductLawSwap `(C : Category) `(D : Category)
+  Lemma ProductLawSwap (C : Category) `(D : Category)
   : ComposeFunctors (SwapFunctor C D) (SwapFunctor D C) = IdentityFunctor _.
     functor_eq; intuition.
   Qed.
 End swap.
 
 Section Law0.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition ProductLaw0Functor : Functor (C * 0) 0.
     refine (Build_Functor (C * 0) 0
@@ -60,7 +60,7 @@ Section Law0.
 End Law0.
 
 Section Law0'.
-  Context `(C : Category).
+  Variable C : Category.
 
   Let ProductLaw0'Functor' : Functor (0 * C) 0.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw0Functor C) (SwapFunctor _ _)).
@@ -82,7 +82,7 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : Category).
+  Variable C : Category.
 
   Let ProductLaw1Functor' : Functor (C * 1) C.
     functor_simpl_abstract_trailing_props (fst_Functor (C := C) (D := 1)).
@@ -113,7 +113,7 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition ProductLaw1'Functor' : Functor (1 * C) C.
     functor_simpl_abstract_trailing_props (ComposeFunctors (ProductLaw1Functor C) (SwapFunctor _ _)).

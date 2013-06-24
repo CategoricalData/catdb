@@ -20,12 +20,17 @@ Reserved Notation "'CAT' ⇓ D" (at level 70, no associativity).
 Reserved Notation "x ⊗ y" (at level 40, left associativity).
 Reserved Notation "x ⊗m y" (at level 40, left associativity).
 
-Reserved Notation "f ○ g" (at level 70, right associativity).
+Reserved Infix "○" (at level 40, left associativity).
+Reserved Infix "∘" (at level 40, left associativity).
+Reserved Infix "∘₀" (at level 40, left associativity).
+Reserved Infix "∘₁" (at level 40, left associativity).
 
 Reserved Notation "x ~> y" (at level 99, right associativity, y at level 200).
 
 Reserved Notation "x ∏ y" (at level 40, left associativity).
 Reserved Notation "x ∐ y" (at level 50, left associativity).
+Reserved Infix "Π" (at level 40, left associativity).
+Reserved Infix "⊔" (at level 50, left associativity).
 
 Reserved Notation "∏_{ x } f" (at level 0, x at level 99).
 Reserved Notation "∏_{ x : A } f" (at level 0, x at level 99).
@@ -42,6 +47,8 @@ Reserved Notation "F ⟨ - , d ⟩" (at level 70, no associativity).
 Reserved Notation "[ x ]" (at level 0, x at level 200).
 
 Reserved Notation "∫ F" (at level 0).
+
+Reserved Infix "\" (at level 40, left associativity).
 
 Delimit Scope object_scope with object.
 Delimit Scope morphism_scope with morphism.

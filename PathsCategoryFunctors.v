@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Section FunctorFromPaths.
   Variable V : Type.
   Variable E : V -> V -> Type.
-  Context `(D : Category).
+  Variable D : Category.
   Variable objOf : V -> D.
   Variable morOf : forall s d, E s d -> Morphism D (objOf s) (objOf d).
 
@@ -41,5 +41,5 @@ Section FunctorFromPaths.
 End FunctorFromPaths.
 
 Section Underlying.
-  Definition UnderlyingGraph `(C : Category) := @PathsCategory _ (Morphism C).
+  Definition UnderlyingGraph (C : Category) := @PathsCategory _ (Morphism C).
 End Underlying.

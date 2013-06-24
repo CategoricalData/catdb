@@ -25,9 +25,9 @@ Local Ltac slice_t :=
   trivial.
 
 Section FCompositionOf.
-  Context `(A : Category).
-  Context `(B : Category).
-  Context `(C : Category).
+  Variable A : Category.
+  Variable B : Category.
+  Variable C : Category.
 
   Lemma CommaCategoryInducedFunctor_FCompositionOf s d d'
         (m1 : Morphism ((OppositeCategory (C ^ A)) * (C ^ B)) s d)

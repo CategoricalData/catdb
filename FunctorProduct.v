@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorProduct.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(D' : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable D' : Category.
 
   Definition FunctorProduct (F : Functor C D) (F' : Functor C D') : Functor C (D * D').
     match goal with
@@ -44,10 +44,10 @@ Section FunctorProduct.
 End FunctorProduct.
 
 Section FunctorProduct'.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(C' : Category).
-  Context `(D' : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable C' : Category.
+  Variable D' : Category.
   Variable F : Functor C D.
   Variable F' : Functor C' D'.
 

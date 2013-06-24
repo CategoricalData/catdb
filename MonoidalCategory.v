@@ -17,7 +17,7 @@ Section PreMonoidalCategory.
   (** Quoting Wikipedia:
      A  monoidal category is a category [C] equipped with
      *)
-  Context `(C : Category).
+  Variable C : Category.
   (**
      - a bifunctor [ ⊗ : C × C -> C] called the tensor product or
          monoidal product,

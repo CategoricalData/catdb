@@ -37,8 +37,8 @@ Section Coend.
      ]]
      where the triangles denote induced colimit morphisms.
      *)
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Let COp := OppositeCategory C.
 

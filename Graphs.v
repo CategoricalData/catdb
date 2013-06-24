@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GraphObj.
-  Context `(C : Category).
+  Variable C : Category.
 
   Inductive GraphIndex := GraphIndexSource | GraphIndexTarget.
 

@@ -17,9 +17,9 @@ Local Open Scope category_scope.
 
 Section covariant_contravariant.
   Local Arguments InducedProductSndFunctor / _ _ _ _ _ _ _ _ _ _ _.
-  Definition CovariantHomFunctor `(C : Category) (A : OppositeCategory C) :=
+  Definition CovariantHomFunctor (C : Category) (A : OppositeCategory C) :=
     Eval simpl in ((HomFunctor C) [ A, - ])%functor.
-  Definition ContravariantHomFunctor `(C : Category) (A : C) := ((HomFunctor C) [ -, A ])%functor.
+  Definition ContravariantHomFunctor (C : Category) (A : C) := ((HomFunctor C) [ -, A ])%functor.
 
   Definition CovariantHomSetFunctor `(C : @Category morC) (A : OppositeCategory C) := ((HomSetFunctor C) [ A, - ])%functor.
   Definition ContravariantHomSetFunctor `(C : @Category morC) (A : C) := ((HomSetFunctor C) [ -, A ])%functor.
@@ -30,7 +30,7 @@ have a bit of trouble with.  *sigh*
 *)
 
 Section HomFunctor.
-  Context `(C : Category).
+  Variable C : Category.
   Let COp := OppositeCategory C.
 
   Section Covariant.
@@ -89,7 +89,7 @@ Section HomFunctor.
 End HomFunctor.
 
 Section SplitHomFunctor.
-  Context `(C : Category).
+  Variable C : Category.
   Let COp := OppositeCategory C.
 
   Lemma SplitHom (X Y : COp * C) : forall gh,

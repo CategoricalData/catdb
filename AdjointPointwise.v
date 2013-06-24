@@ -10,11 +10,11 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section AdjointPointwise.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
-  Context `(C' : Category).
-  Context `(D' : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
+  Variable C' : Category.
+  Variable D' : Category.
 
   Variable F : Functor C D.
   Variable G : Functor D C.

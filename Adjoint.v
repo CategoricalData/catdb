@@ -120,8 +120,8 @@ Arguments AComponentsOf {C D} [F G] T A A' _ : simpl nomatch.
 Arguments AIsomorphism {C D} [F G] T A A' : simpl nomatch.
 
 Section AdjunctionEquivalences.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
   Variable G : Functor D C.
 

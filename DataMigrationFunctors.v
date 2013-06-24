@@ -65,9 +65,9 @@ Local Ltac t :=
          end.
 
 Section DataMigrationFunctors.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(S : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable S : Category.
 
   Section Δ.
     Definition PullbackAlongFunctor : ((S ^ C) ^ (S ^ D)) ^ (D ^ C)

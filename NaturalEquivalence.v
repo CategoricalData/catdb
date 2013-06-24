@@ -17,8 +17,8 @@ Local Ltac intro_object_of :=
 
 Section NaturalIsomorphism.
   Section NaturalIsomorphism.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
     Variables F G : Functor C D.
 
     Record NaturalIsomorphism :=
@@ -29,8 +29,8 @@ Section NaturalIsomorphism.
   End NaturalIsomorphism.
 
   Section Inverse.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
     Variables F G : Functor C D.
 
     Definition InverseNaturalIsomorphism_NT (T : NaturalIsomorphism F G) : NaturalTransformation G F.
@@ -56,9 +56,9 @@ Section NaturalIsomorphism.
   End Inverse.
 
   Section Composition.
-    Context `(C : Category).
-    Context `(D : Category).
-    Context `(E : Category).
+    Variable C : Category.
+    Variable D : Category.
+    Variable E : Category.
     Variables F F' F'' : Functor C D.
     Variables G G' : Functor D E.
 
@@ -94,8 +94,8 @@ Section NaturalIsomorphism.
 End NaturalIsomorphism.
 
 Section NaturalIsomorphismOfCategories.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Local Reserved Notation "'F'".
   Local Reserved Notation "'G'".
@@ -135,8 +135,8 @@ Arguments NaturalEquivalenceOf [C D F G] T.
 Arguments FunctorsNaturallyEquivalent [C D] F G.
 
 Section Coercions.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variables F G : Functor C D.
   Variable C' : Category.
   Variable D' : Category.

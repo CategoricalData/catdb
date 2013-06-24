@@ -12,8 +12,8 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section LimitFunctors.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Definition HasLimits' := forall F : Functor D C, exists _ : Limit F, True.
   Definition HasLimits := forall F : Functor D C, Limit F.

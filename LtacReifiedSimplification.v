@@ -176,7 +176,7 @@ Section SimplifiedMorphism.
       destruct H';
       simpl in H.
 
-  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity `(C : Category) s d
+  Fixpoint ReifiedMorphismSimplifyWithProofNoIdentity (C : Category) s d
            (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (proj1_sig (ReifiedMorphismSimplifyWithProof m)) = false}
     + { exists H : s = d, proj1_sig (ReifiedMorphismSimplifyWithProof m) = match H with eq_refl => ReifiedIdentityMorphism C s end }.
@@ -224,7 +224,7 @@ Section SimplifiedMorphism.
 
   Local Arguments ReifiedMorphismSimplifyWithProofNoIdentity / .
 
-  Definition ReifiedMorphismSimplifyNoIdentity `(C : Category) s d
+  Definition ReifiedMorphismSimplifyNoIdentity (C : Category) s d
              (m : ReifiedMorphism C s d)
   : {ReifiedHasIdentities (ReifiedMorphismSimplify m) = false}
     + { exists H : s = d, ReifiedMorphismSimplify m = match H with eq_refl => ReifiedIdentityMorphism C s end }
@@ -249,8 +249,8 @@ Ltac Ltac_rsimplify_morphisms :=
 (*******************************************************************************)
 Section good_examples.
   Section id.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
     Variables F G : Functor C D.
     Variable T : NaturalTransformation F G.
 
@@ -321,9 +321,9 @@ End good_examples.
 Section bad_examples.
   Require Import SumCategory.
   Section bad_example_0001.
-    Context `(C0 : Category).
-    Context `(C1 : Category).
-    Context `(D : Category).
+    Variable C0 : Category.
+    Variable C1 : Category.
+    Variable D : Category.
 
     Variables s d d' : C0.
     Variable m1 : Morphism C0 s d.

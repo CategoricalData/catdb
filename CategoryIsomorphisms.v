@@ -229,7 +229,7 @@ Ltac pre_compose_to_identity :=
   [ solve_isomorphism | ].
 
 Section CategoryObjects1.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition UniqueUpToUniqueIsomorphism' (P : C.(Object) -> Prop) : Prop :=
     forall o, P o -> forall o', P o' -> exists m : C.(Morphism) o o', IsIsomorphism m /\ is_unique m.
@@ -303,7 +303,7 @@ Arguments IsTerminalObject' {C} o.
 Arguments IsTerminalObject {C} o.
 
 Section CategoryObjects2.
-  Context `(C : Category).
+  Variable C : Category.
 
   Ltac unique := hnf; intros; specialize_all_ways; destruct_sig;
     unfold is_unique, unique, uniqueness in *;

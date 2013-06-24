@@ -90,7 +90,7 @@ Section preobject.
           [NaturalNumbersPreObject], to make the distinction slightly
           more obvious. *)
 
-  Context `(E : Category).
+  Variable E : Category.
 
   Local Reserved Notation "'ℕ'".
   Local Reserved Notation "'S'".

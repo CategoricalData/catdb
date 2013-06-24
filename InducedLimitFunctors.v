@@ -21,7 +21,7 @@ Section InducedFunctor.
   Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ Index2Cat D).
   Local Notation "'CAT' ⇓ D" := (@LaxSliceCategory _ Index2Cat D).
 
-  Context `(D : Category).
+  Variable D : Category.
   Let DOp := OppositeCategory D.
 
   Section Limit.

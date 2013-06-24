@@ -22,7 +22,7 @@ Section LaxSliceCategory.
 
   Let Cat := ComputableCategory Index2Cat.
 
-  Context `(C : Category).
+  Variable C : Category.
 
   (** Quoting David Spivak:
      David: ok
@@ -219,7 +219,7 @@ Section LaxCosliceCategory.
 
   Let Cat := ComputableCategory Index2Cat.
 
-  Context `(C : Category).
+  Variable C : Category.
 
   Record LaxCosliceCategory_Object := { LaxCosliceCategory_Object_Member :> { X : unit * I & Functor (snd X) C } }.
 

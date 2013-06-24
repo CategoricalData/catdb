@@ -13,8 +13,8 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section NaturalTransformation.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variables F G : Functor C D.
 
   (**
@@ -199,9 +199,9 @@ Ltac nt_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_
 Ltac nt_simpl_abstract_trailing_props_with_equality := nt_tac_abstract_trailing_props_with_equality ltac:(fun T' => let T'' := eval simpl in T' in T'').
 
 Section NaturalTransformationComposition.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
   Variables F F' F'' : Functor C D.
   Variables G G' : Functor D E.
 
@@ -284,7 +284,7 @@ Section NaturalTransformationComposition.
   Hint Resolve f_equal2 : natural_transformation.
   Hint Extern 1 (_ = _) => apply @FCompositionOf : natural_transformation.
 
-  Lemma FCompositionOf2 : forall `(C : Category) `(D : Category)
+  Lemma FCompositionOf2 : forall (C : Category) `(D : Category)
     (F : Functor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
     Compose (MorphismOf F m1) (Compose (MorphismOf F m2) m3) = Compose (MorphismOf F (Compose m1 m2)) m3.
     intros; symmetry; try_associativity ltac:(eauto with natural_transformation).
@@ -304,8 +304,8 @@ Section NaturalTransformationComposition.
 End NaturalTransformationComposition.
 
 Section IdentityNaturalTransformation.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
 
   (* There is an identity natrual transformation. *)
@@ -329,9 +329,9 @@ Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformat
 Hint Rewrite @LeftIdentityNaturalTransformation @RightIdentityNaturalTransformation : natural_transformation.
 
 Section IdentityNaturalTransformationF.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
   Variable G : Functor D E.
   Variable F : Functor C D.
 
@@ -346,10 +346,10 @@ Hint Rewrite @NTComposeFIdentityNaturalTransformation : category.
 Hint Rewrite @NTComposeFIdentityNaturalTransformation : natural_transformation.
 
 Section Associativity.
-  Context `(B : Category).
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable B : Category.
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
   Variable F : Functor D E.
   Variable G : Functor C D.
   Variable H : Functor B C.
@@ -381,8 +381,8 @@ Section Associativity.
 End Associativity.
 
 Section IdentityFunctor.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Local Ltac t :=
     repeat match goal with
@@ -422,9 +422,9 @@ Section IdentityFunctor.
 End IdentityFunctor.
 
 Section NaturalTransformationExchangeLaw.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Variables F G H : Functor C D.
   Variables F' G' H' : Functor D E.

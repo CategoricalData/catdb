@@ -25,7 +25,7 @@ End IndiscreteCategory.
 
 Section FunctorToIndiscrete.
   Variable O : Type.
-  Context `(C : Category).
+  Variable C : Category.
   Variable objOf : C -> O.
 
   Definition FunctorToIndiscrete : Functor C (IndiscreteCategory O)

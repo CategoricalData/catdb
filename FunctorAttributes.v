@@ -13,9 +13,9 @@ Set Universe Polymorphism.
 Local Open Scope category_scope.
 
 Section FullFaithful.
-  Context `(C : Category).
+  Variable C : Category.
   Context `(C' : @Category).
-  Context `(D : Category).
+  Variable D : Category.
   Context `(D' : @Category).
   Variable F : Functor C D.
   Variable F' : Functor C' D'.

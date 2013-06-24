@@ -43,9 +43,9 @@ Local Ltac anihilate :=
   trivial.
 
 Section CommaCategoryProjectionFunctor.
-  Context `(A : Category).
-  Context `(B : Category).
-  Context `(C : Category).
+  Variable A : Category.
+  Variable B : Category.
+  Variable C : Category.
 
   Definition CommaCategoryProjectionFunctor_ObjectOf (ST : (OppositeCategory (C ^ A)) * (C ^ B)) :
     Cat / (A * B : Category)
@@ -97,8 +97,8 @@ Section CommaCategoryProjectionFunctor.
 End CommaCategoryProjectionFunctor.
 
 Section SliceCategoryProjectionFunctor.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Local Arguments ExponentialLaw4Functor_Inverse_ObjectOf_ObjectOf / .
   Local Arguments ComposeFunctors / .

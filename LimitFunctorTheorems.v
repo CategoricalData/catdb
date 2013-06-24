@@ -34,9 +34,9 @@ Section InducedMaps.
      injects one set into its union with another and [lim G] projects a
      product of two sets onto one factor.
      *)
-  Context `(C1 : Category).
-  Context `(C2 : Category).
-  Context `(D : Category).
+  Variable C1 : Category.
+  Variable C2 : Category.
+  Variable D : Category.
   Variable F1 : Functor C1 D.
   Variable F2 : Functor C2 D.
   Variable G : Functor C1 C2.

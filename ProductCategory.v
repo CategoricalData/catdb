@@ -10,8 +10,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section ProductCategory.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Definition ProductCategory : Category.
     refine (@Build_Category (C * D)%type

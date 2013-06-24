@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section sig_sigT_obj_mor.
-  Context `(A : Category).
+  Variable A : Category.
   Variable Pobj : A -> Prop.
   Variable Pmor : forall s d : sig Pobj, A.(Morphism) (proj1_sig s) (proj1_sig d) -> Type.
 

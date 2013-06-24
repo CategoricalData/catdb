@@ -10,8 +10,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section FunctorCategory.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   (*
      There is a category Fun(C, D) of functors from [C] to [D].

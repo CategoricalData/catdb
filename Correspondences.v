@@ -72,8 +72,8 @@ Section CorrespondenceCategory.
      is a functor
      [[M: C^{op} × C' → Set.]]
      *)
-  Context `(C : Category).
-  Context `(C' : Category).
+  Variable C : Category.
+  Variable C' : Category.
 
   Let COp := OppositeCategory C.
 
@@ -191,7 +191,7 @@ Section From_Functor_to_1.
      [F : M → [1] ], we can define [C = F⁻¹ {0}], [C' = F⁻¹ {1}], and a
      correspondence [M : C → C'] by the formula
      [M (X, Y) = Hom_{M} (X, Y)]. *)
-  Context `(M : Category).
+  Variable M : Category.
   Variable F : Functor M ([1]).
 
   (* Comments after these two are for if we want to use [ChainCategory] instead of [BoolCat]. *)

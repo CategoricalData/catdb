@@ -13,8 +13,8 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Section Functor.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   (**
      Quoting from the lecture notes for 18.705, Commutative Algebra:
@@ -211,10 +211,10 @@ Ltac functor_abstract_trailing_props_with_equality := functor_tac_abstract_trail
 Ltac functor_simpl_abstract_trailing_props_with_equality := functor_tac_abstract_trailing_props_with_equality ltac:(fun F' => let F'' := eval simpl in F' in F'').
 
 Section FunctorComposition.
-  Context `(B : Category).
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable B : Category.
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
   Variable G : Functor D E.
   Variable F : Functor C D.
 
@@ -262,7 +262,7 @@ Section FunctorComposition.
 End FunctorComposition.
 
 Section IdentityFunctor.
-  Context `(C : Category).
+  Variable C : Category.
 
   (** There is an identity functor.  It does the obvious thing. *)
   Definition IdentityFunctor : Functor C C
@@ -274,8 +274,8 @@ Section IdentityFunctor.
 End IdentityFunctor.
 
 Section IdentityFunctorLemmas.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Lemma LeftIdentityFunctor (F : Functor D C) : ComposeFunctors (IdentityFunctor _) F = F.
     functor_eq.
@@ -291,10 +291,10 @@ Hint Rewrite @LeftIdentityFunctor @RightIdentityFunctor : functor.
 Hint Immediate @LeftIdentityFunctor @RightIdentityFunctor : category functor.
 
 Section FunctorCompositionLemmas.
-  Context `(B : Category).
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable B : Category.
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
     ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).

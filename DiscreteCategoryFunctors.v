@@ -12,7 +12,7 @@ Set Universe Polymorphism.
 
 Section FunctorFromDiscrete.
   Variable O : Type.
-  Context `(D : Category).
+  Variable D : Category.
   Variable objOf : O -> D.
 
   Let FunctorFromDiscrete_MorphismOf s d (m : Morphism (DiscreteCategory O) s d) : Morphism D (objOf s) (objOf d)
@@ -119,7 +119,7 @@ End dom_cod.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : Category).
+  Variable O' : Category.
   Variable f : O -> O'.
 
   Definition InducedDiscreteFunctor : Functor (DiscreteCategory O) O'.

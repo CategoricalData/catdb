@@ -42,7 +42,7 @@ Arguments ObjectFunctorDec {I Index2Cat}.
 
 Section InducedFunctor.
   Variable O : Type.
-  Context `(O' : Category).
+  Variable O' : Category.
   Variable f : O -> O'.
   Variable eq_dec : forall x y : O, {x = y} + {x <> y}.
 

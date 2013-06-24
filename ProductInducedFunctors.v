@@ -15,9 +15,9 @@ Local Ltac t :=
   reflexivity.
 
 Section ProductInducedFunctors.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Variable F : Functor (C * D) E.
 
@@ -40,9 +40,9 @@ Notation "F ⟨ c , - ⟩" := (InducedProductSndFunctor F c) : functor_scope.
 Notation "F ⟨ - , d ⟩" := (InducedProductFstFunctor F d) : functor_scope.
 
 Section ProductInducedNaturalTransformations.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Variable F : Functor (C * D) E.
 

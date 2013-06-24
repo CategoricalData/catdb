@@ -13,10 +13,10 @@ Local Open Scope category_scope.
 
 Section FunctorCategoryParts.
   Section MorphismOf.
-    Context `(C : Category).
-    Context `(D : Category).
-    Context `(C' : Category).
-    Context `(D' : Category).
+    Variable C : Category.
+    Variable D : Category.
+    Variable C' : Category.
+    Variable D' : Category.
 
     Variable F : Functor C C'.
     Variable G : Functor D' D.
@@ -49,8 +49,8 @@ Section FunctorCategoryParts.
   End MorphismOf.
 
   Section FIdentityOf.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
 
     Lemma FunctorCategoryFunctor_FIdentityOf : FunctorCategoryFunctor_MorphismOf (IdentityFunctor C) (IdentityFunctor D) = IdentityFunctor _.
       repeat (intro || apply Functor_eq || nt_eq); simpl; subst; JMeq_eq; rsimplify_morphisms; reflexivity.
@@ -58,12 +58,12 @@ Section FunctorCategoryParts.
   End FIdentityOf.
 
   Section FCompositionOf.
-    Context `(C : Category).
-    Context `(D : Category).
-    Context `(C' : Category).
-    Context `(D' : Category).
-    Context `(C'' : Category).
-    Context `(D'' : Category).
+    Variable C : Category.
+    Variable D : Category.
+    Variable C' : Category.
+    Variable D' : Category.
+    Variable C'' : Category.
+    Variable D'' : Category.
 
     Variable F' : Functor C' C''.
     Variable G : Functor D D'.
@@ -95,10 +95,10 @@ End FunctorCategoryFunctor.
 Notation "F ^ G" := (FunctorCategoryFunctor_MorphismOf F G) : functor_scope.
 
 Section NaturalTransformation.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(C' : Category).
-  Context `(D' : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable C' : Category.
+  Variable D' : Category.
 
   Variables F G : Functor C D.
   Variables F' G' : Functor C' D'.
@@ -134,8 +134,8 @@ Notation "T ^ U" := (LiftNaturalTransformationPointwise T U) : natural_transform
 
 Section NaturalTransformation_Properties.
   Section identity.
-    Context `(C : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable D : Category.
 
     Local Ltac t := intros; simpl; nt_eq; rsimplify_morphisms; try reflexivity.
 
@@ -201,12 +201,12 @@ Section NaturalTransformation_Properties.
   End identity.
 
   Section compose.
-    Context `(C : Category).
-    Context `(D : Category).
-    Context `(E : Category).
-    Context `(C' : Category).
-    Context `(D' : Category).
-    Context `(E' : Category).
+    Variable C : Category.
+    Variable D : Category.
+    Variable E : Category.
+    Variable C' : Category.
+    Variable D' : Category.
+    Variable E' : Category.
 
     Variable G : Functor D E.
     Variable F : Functor C D.

@@ -38,7 +38,7 @@ Section Pullback.
     autorewrite with morphism in *;
     trivial.
 
-  Context `(C : Category).
+  Variable C : Category.
   Section pullback.
     Variables a b c : C.
     Variable f : C.(Morphism) a c.

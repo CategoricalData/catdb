@@ -13,7 +13,7 @@ Set Universe Polymorphism.
 Local Open Scope type_scope.
 
 Section Coend.
-  Context `(C : Category).
+  Variable C : Category.
 
   Let COp := OppositeCategory C.
 
@@ -133,8 +133,8 @@ Section Coend.
 End Coend.
 
 Section CoendFunctor.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Let COp := OppositeCategory C.
 

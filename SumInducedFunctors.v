@@ -11,9 +11,9 @@ Set Universe Polymorphism.
 
 Section SumCategoryFunctors.
   Section sum_functor.
-    Context `(C : Category).
-    Context `(C' : Category).
-    Context `(D : Category).
+    Variable C : Category.
+    Variable C' : Category.
+    Variable D : Category.
 
     Definition sum_Functor (F : Functor C D) (F' : Functor C' D)
     : Functor (C + C') D.

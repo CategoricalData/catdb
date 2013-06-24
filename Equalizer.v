@@ -10,7 +10,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section Equalizer.
-  Context `(C : Category).
+  Variable C : Category.
   Variables A B : C.
   Variables f g : C.(Morphism) A B.
 

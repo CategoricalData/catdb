@@ -15,7 +15,7 @@ Local Infix "==" := JMeq.
 Local Open Scope category_scope.
 
 Section OppositeCategory.
-  Definition OppositeCategory `(C : Category) : Category
+  Definition OppositeCategory (C : Category) : Category
     := @Build_Category' C
                                 (fun s d => Morphism C d s)
                                 (Identity (C := C))
@@ -29,8 +29,8 @@ End OppositeCategory.
 (*Notation "C ᵒᵖ" := (OppositeCategory C) : category_scope.*)
 
 Section DualCategories.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Lemma op_op_id : OppositeCategory (OppositeCategory C) = C.
     clear D.
@@ -40,14 +40,14 @@ Section DualCategories.
   Qed.
 
   Lemma op_distribute_prod : OppositeCategory (C * D) = (OppositeCategory C) * (OppositeCategory D).
-    spcat_eq.
+    cat_eq.
   Qed.
 End DualCategories.
 
 Hint Rewrite @op_op_id @op_distribute_prod : category.
 
 Section DualObjects.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition terminal_opposite_initial (o : C) : IsTerminalObject o -> IsInitialObject (C := OppositeCategory C) o
     := fun H o' => H o'.
@@ -65,8 +65,8 @@ Section DualObjects.
 End DualObjects.
 
 Section OppositeFunctor.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
   Let COp := OppositeCategory C.
   Let DOp := OppositeCategory D.
@@ -84,8 +84,8 @@ End OppositeFunctor.
 (*Notation "C ᵒᵖ" := (OppositeFunctor C) : functor_scope.*)
 
 Section OppositeFunctor_Id.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
 
   Lemma op_op_functor_id : OppositeFunctor (OppositeFunctor F) == F.
@@ -97,8 +97,8 @@ End OppositeFunctor_Id.
 (*Hint Rewrite op_op_functor_id.*)
 
 Section OppositeNaturalTransformation.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variables F G : Functor C D.
   Variable T : NaturalTransformation F G.
   Let COp := OppositeCategory C.
@@ -117,8 +117,8 @@ End OppositeNaturalTransformation.
 (*Notation "C ᵒᵖ" := (OppositeNaturalTransformation C) : natural_transformation_scope.*)
 
 Section OppositeNaturalTransformation_Id.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variables F G : Functor C D.
   Variable T : NaturalTransformation F G.
 

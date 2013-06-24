@@ -190,9 +190,9 @@ Ltac rsimplify_morphisms :=
 (**                Goals which aren't yet solved by [rsimplify_morphisms]     **)
 (*******************************************************************************)
 Section bad1.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
   Variable s : Functor D E.
   Variable s8 : Functor C D.
   Variable s6 : Functor D E.
@@ -221,8 +221,8 @@ End bad1.
 
 
 Section bad2.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
   Variable F : Functor C D.
   Variable o1 : C.
   Variable o2 : C.

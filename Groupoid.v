@@ -11,7 +11,7 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section GroupoidOf.
-  Context `(C : Category).
+  Variable C : Category.
 
   Inductive GroupoidOf_Morphism (s d : C) :=
   | hasMorphism : C.(Morphism) s d -> GroupoidOf_Morphism s d
@@ -46,7 +46,7 @@ End GroupoidOf.
 Hint Constructors GroupoidOf_Morphism : category.
 
 Section Groupoid.
-  Context `(C : Category).
+  Variable C : Category.
 
   Lemma GroupoidOf_Groupoid : CategoryIsGroupoid (GroupoidOf C).
     hnf; intros s d m; hnf; destruct m as [ m ]; induction m;

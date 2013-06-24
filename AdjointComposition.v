@@ -10,9 +10,9 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section compose.
-  Context `(C : Category).
-  Context `(D : Category).
-  Context `(E : Category).
+  Variable C : Category.
+  Variable D : Category.
+  Variable E : Category.
 
   Variable F : Functor C D.
   Variable F' : Functor D E.

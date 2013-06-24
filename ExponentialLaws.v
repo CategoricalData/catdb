@@ -19,7 +19,7 @@ Local Hint Resolve Functor_eq Functor_JMeq NaturalTransformation_eq
       NaturalTransformation_JMeq eq_JMeq.
 
 Section Law0.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition ExponentialLaw0Functor : Functor (C ^ 0) 1
     := FunctorTo1 _.
@@ -40,7 +40,7 @@ Section Law0.
 End Law0.
 
 Section Law0'.
-  Context `(C : Category).
+  Variable C : Category.
   Variable c : C.
 
   Definition ExponentialLaw0'Functor : Functor (0 ^ C) 0
@@ -69,7 +69,7 @@ Section Law0'.
 End Law0'.
 
 Section Law1.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition ExponentialLaw1Functor : Functor (C ^ 1) C
     := Build_Functor (C ^ 1) C
@@ -131,7 +131,7 @@ Section Law1.
 End Law1.
 
 Section Law1'.
-  Context `(C : Category).
+  Variable C : Category.
 
   Definition ExponentialLaw1'Functor : Functor (1 ^ C) 1
     := FunctorTo1 _.
@@ -164,9 +164,9 @@ Section Law1'.
 End Law1'.
 
 Section Law2.
-  Context `(D : Category).
-  Context `(C1 : Category).
-  Context `(C2 : Category).
+  Variable D : Category.
+  Variable C1 : Category.
+  Variable C2 : Category.
 
   Definition ExponentialLaw2Functor
   : Functor (D ^ (C1 + C2)) ((D ^ C1) * (D ^ C2))
@@ -219,9 +219,9 @@ Section Law2.
 End Law2.
 
 Section Law3.
-  Context `(C1 : Category).
-  Context `(C2 : Category).
-  Context `(D : Category).
+  Variable C1 : Category.
+  Variable C2 : Category.
+  Variable D : Category.
 
   Definition ExponentialLaw3Functor
   : Functor ((C1 * C2) ^ D) (C1 ^ D * C2 ^ D).
@@ -299,9 +299,9 @@ Section Law3.
 End Law3.
 
 Section Law4.
-  Context `(C1 : Category).
-  Context `(C2 : Category).
-  Context `(D : Category).
+  Variable C1 : Category.
+  Variable C2 : Category.
+  Variable D : Category.
 
   Section functor.
     Local Ltac do_exponential4 := intros; simpl;

@@ -10,8 +10,8 @@ Set Asymmetric Patterns.
 Set Universe Polymorphism.
 
 Section SumCategory.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Definition SumCategory_Morphism (s d : C + D) : Type
     := match (s, d) with
@@ -59,8 +59,8 @@ End SumCategory.
 Infix "+" := SumCategory : category_scope.
 
 Section SumCategoryFunctors.
-  Context `(C : Category).
-  Context `(D : Category).
+  Variable C : Category.
+  Variable D : Category.
 
   Definition inl_Functor : Functor C (C + D)
     := Build_Functor C (C + D)
