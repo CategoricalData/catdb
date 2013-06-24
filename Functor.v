@@ -12,6 +12,8 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
+Local Open Scope morphism_scope.
+
 Section Functor.
   Variables C D : Category.
 
