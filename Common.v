@@ -338,6 +338,12 @@ Ltac subst_eq_refl_dec_in_match :=
                progress subst_eq_refl_dec; simpl in *
          end.
 
+Ltac destruct_eq_refl_in_match :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with eq_refl => _ end] ]
+             => progress destruct E
+         end.
+
 Ltac subst_eq_refl_in_match :=
   repeat match goal with
            | [ |- appcontext[match ?E with _ => _ end] ] =>

@@ -442,6 +442,25 @@ Section IdentityFunctor.
   End right.
 End IdentityFunctor.
 
+Section Equality.
+  Variables C D : SpecializedCategory.
+  Variables F G : SpecializedFunctor C D.
+
+  Hypothesis H : F = G.
+
+  Definition GeneralizedIdentityNaturalTransformation : SpecializedNaturalTransformation F G.
+    refine (Build_SpecializedNaturalTransformation F G
+                                                   (fun x => match H with | eq_refl => Identity _ end)
+                                                   _).
+    abstract (
+        case H; intros;
+        etransitivity;
+        [ apply LeftIdentity
+        | symmetry; apply RightIdentity ]
+      ).
+  Defined.
+End Equality.
+
 Section NaturalTransformationExchangeLaw.
   Context `(C : SpecializedCategory).
   Context `(D : SpecializedCategory).

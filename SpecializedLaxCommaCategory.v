@@ -1,6 +1,7 @@
-Require Import ProofIrrelevance.
-Require Export Category Functor ProductCategory NaturalTransformation.
-Require Import Common DecidableDiscreteCategory ComputableCategory DefinitionSimplification FEqualDep.
+Require Import ProofIrrelevance JMeq.
+Require Export Category Functor ProductCategory NaturalTransformation SpecializedCommaCategory.
+Require Import Common ComputableCategory FEqualDep CanonicalStructureSimplification DefinitionSimplification.
+Require Import TypeclassSimplification. (* This must come after canonical structure simplification for things to work. *)
 
 Set Implicit Arguments.
 
@@ -10,19 +11,16 @@ Set Asymmetric Patterns.
 
 Set Universe Polymorphism.
 
+Local Infix "==" := JMeq.
+
 Local Open Scope category_scope.
 
 Section LaxSliceSpecializedCategory.
-  (* [Definition]s are not sort-polymorphic. *)
-
-  Variable I : Type.
-  Variable Index2Cat : I -> SpecializedCategory.
-
-  Local Coercion Index2Cat : I >-> SpecializedCategory.
-
-  Let Cat := ComputableCategory Index2Cat.
-
-  Context `(C : SpecializedCategory).
+  Let Cat := ComputableCategory (fun x => x).
+  Variables A B : SpecializedCategory.
+  Let C := Cat.
+  Variable S : SpecializedFunctor A C.
+  Variable T : SpecializedFunctor B C.
 
   (** Quoting David Spivak:
      David: ok
@@ -47,36 +45,290 @@ Section LaxSliceSpecializedCategory.
        the [α]-part is identity.
        and you've worked both of those cases out already.
        *)
-  (* use a pair, so that it's easily interchangable with [SliceSpecializedCategory] *)
-  Record LaxSliceSpecializedCategory_Object := { LaxSliceSpecializedCategory_Object_Member :> { X : I * unit & SpecializedFunctor (fst X) C } }.
+  Local Notation LaxCommaSpecializedCategory_Object :=
+    (CommaSpecializedCategory_Object S T).
+  Local Notation LaxCommaSpecializedCategory_ObjectT :=
+    (CommaSpecializedCategory_ObjectT S T).
 
-  Let SortPolymorphic_Helper (A T : Type) (Build_T : A -> T) := A.
+  Record LaxCommaSpecializedCategory_Morphism (αβf α'β'f' : LaxCommaSpecializedCategory_Object) :=
+    {
+      LCCM_g : Morphism A (CCO_α αβf) (CCO_α α'β'f');
+      LCCM_h : Morphism B (CCO_β αβf) (CCO_β α'β'f');
+      LCCM_φ : SpecializedNaturalTransformation (Compose (MorphismOf T LCCM_h) (CCO_f αβf))
+                                                (Compose (CCO_f α'β'f') (MorphismOf S LCCM_g))
+    }.
 
-  Definition LaxSliceSpecializedCategory_ObjectT := Eval hnf in SortPolymorphic_Helper Build_LaxSliceSpecializedCategory_Object.
-  Global Identity Coercion LaxSliceSpecializedCategory_Object_Id : LaxSliceSpecializedCategory_ObjectT >-> sigT.
-  Definition Build_LaxSliceSpecializedCategory_Object' (mem : LaxSliceSpecializedCategory_ObjectT) := Build_LaxSliceSpecializedCategory_Object mem.
-  Global Coercion Build_LaxSliceSpecializedCategory_Object' : LaxSliceSpecializedCategory_ObjectT >-> LaxSliceSpecializedCategory_Object.
+  Definition LaxCommaSpecializedCategory_MorphismT (αβf α'β'f' : LaxCommaSpecializedCategory_ObjectT)
+    := { gh : ((A.(Morphism) (fst (projT1 αβf)) (fst (projT1 α'β'f'))) * (B.(Morphism) (snd (projT1 αβf)) (snd (projT1 α'β'f'))))
+                & (SpecializedNaturalTransformation (Compose (T.(MorphismOf) (snd gh)) (projT2 αβf))
+                                                    (Compose (projT2 α'β'f') (S.(MorphismOf) (fst gh))))
+       }.
 
-  Record LaxSliceSpecializedCategory_Morphism (XG X'G' : LaxSliceSpecializedCategory_ObjectT) := { LaxSliceSpecializedCategory_Morphism_Member :>
-    { F : SpecializedFunctor (fst (projT1 XG)) (fst (projT1 X'G')) * unit &
-      SpecializedNaturalTransformation (projT2 XG) (ComposeFunctors (projT2 X'G') (fst F))
-    }
-  }.
+  Global Identity Coercion LaxCommaSpecializedCategory_Morphism_Id : LaxCommaSpecializedCategory_MorphismT >-> sigT.
+  Global Coercion sigT_of_LCCM αβf α'β'f' (gh : LaxCommaSpecializedCategory_Morphism αβf α'β'f')
+  : LaxCommaSpecializedCategory_MorphismT αβf α'β'f'
+    := existT (fun gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f')
+               => SpecializedNaturalTransformation (Compose (MorphismOf T (snd gh)) (projT2 αβf))
+                                                   (Compose (projT2 α'β'f') (MorphismOf S (fst gh))))
+              (LCCM_g gh, LCCM_h gh)
+              (LCCM_φ gh).
+  Global Coercion LCCM_of_sigT αβf α'β'f' (gh : LaxCommaSpecializedCategory_MorphismT αβf α'β'f')
+  : LaxCommaSpecializedCategory_Morphism αβf α'β'f'
+    := Build_LaxCommaSpecializedCategory_Morphism
+         αβf
+         α'β'f'
+         _
+         _
+         (projT2 gh).
 
-  Definition LaxSliceSpecializedCategory_MorphismT (XG X'G' : LaxSliceSpecializedCategory_ObjectT) :=
-    Eval hnf in SortPolymorphic_Helper (@Build_LaxSliceSpecializedCategory_Morphism XG X'G').
-  Global Identity Coercion LaxSliceSpecializedCategory_Morphism_Id : LaxSliceSpecializedCategory_MorphismT >-> sigT.
-  Definition Build_LaxSliceSpecializedCategory_Morphism' XG X'G' (mem : @LaxSliceSpecializedCategory_MorphismT XG X'G') :=
-    @Build_LaxSliceSpecializedCategory_Morphism _ _ mem.
-  Global Coercion Build_LaxSliceSpecializedCategory_Morphism' : LaxSliceSpecializedCategory_MorphismT >-> LaxSliceSpecializedCategory_Morphism.
+  Global Arguments LCCM_of_sigT _ _ _ / .
+  Global Arguments sigT_of_LCCM _ _ _ / .
 
-  Global Arguments LaxSliceSpecializedCategory_Object_Member _ : simpl nomatch.
-  Global Arguments LaxSliceSpecializedCategory_Morphism_Member _ _ _ : simpl nomatch.
-  Global Arguments LaxSliceSpecializedCategory_ObjectT /.
-  Global Arguments LaxSliceSpecializedCategory_MorphismT _ _ /.
+  Lemma LaxCommaSpecializedCategory_Morphism_eq' αβf α'β'f'
+        (gh g'h' : LaxCommaSpecializedCategory_Morphism αβf α'β'f')
+  : forall (Hg : LCCM_g gh = LCCM_g g'h')
+           (Hh : LCCM_h gh = LCCM_h g'h'),
+      match Hg in (_ = g), Hh in (_ = h)
+            return SpecializedNaturalTransformation (Compose (MorphismOf T h) _)
+                                                    (Compose _ (MorphismOf S g))
+      with
+        | eq_refl, eq_refl => LCCM_φ gh
+      end = LCCM_φ g'h'
+      -> gh = g'h'.
+  Proof.
+    destruct gh, g'h'; simpl.
+    repeat (let H := fresh in intro H; destruct H).
+    reflexivity.
+  Defined.
 
-  Definition LaxSliceSpecializedCategory_Compose' s d d' (Fα : LaxSliceSpecializedCategory_MorphismT d d') (F'α' : LaxSliceSpecializedCategory_MorphismT s d) :
-    LaxSliceSpecializedCategory_MorphismT s d'.
+  Lemma LaxCommaSpecializedCategory_Morphism_eq αβf α'β'f'
+        (gh g'h' : LaxCommaSpecializedCategory_Morphism αβf α'β'f')
+  : LCCM_g gh = LCCM_g g'h'
+    -> LCCM_h gh = LCCM_h g'h'
+    -> LCCM_φ gh == LCCM_φ g'h'
+    -> gh = g'h'.
+  Proof.
+    destruct gh, g'h'; simpl.
+    intros; repeat subst.
+    reflexivity.
+  Qed.
+
+  Lemma LaxCommaSpecializedCategory_Morphism_JMeq αβf0 α'β'f'0 αβf1 α'β'f'1
+        (gh : LaxCommaSpecializedCategory_Morphism αβf0 αβf1)
+        (g'h' : LaxCommaSpecializedCategory_Morphism α'β'f'0 α'β'f'1)
+  : αβf0 = α'β'f'0
+    -> αβf1 = α'β'f'1
+    -> LCCM_g gh == LCCM_g g'h'
+    -> LCCM_h gh == LCCM_h g'h'
+    -> LCCM_φ gh == LCCM_φ g'h'
+    -> gh == g'h'.
+  Proof.
+    destruct gh, g'h'; simpl.
+    intros; repeat subst.
+    reflexivity.
+  Qed.
+
+  Definition LaxCommaSpecializedCategory_Compose s d d'
+             (gh : LaxCommaSpecializedCategory_Morphism d d') (g'h' : LaxCommaSpecializedCategory_Morphism s d)
+  : LaxCommaSpecializedCategory_Morphism s d'.
+  Proof.
+    exists (Compose (LCCM_g gh) (LCCM_g g'h')) (Compose (LCCM_h gh) (LCCM_h g'h')).
+    let F := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(F) end in
+    let G := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(G) end in
+    let FC := match F with
+                | appcontext[MorphismOf ?T (Compose (s := ?s) (d := ?d) (d' := ?d') ?m1 ?m2)]
+                  => constr:(FCompositionOf T s d d' m2 m1)
+              end in
+    let GC := match G with
+                | appcontext[MorphismOf ?T (Compose (s := ?s) (d := ?d) (d' := ?d') ?m1 ?m2)]
+                  => constr:(FCompositionOf T s d d' m2 m1)
+              end in
+    refine (NTComposeT _ (NTComposeF (GeneralizedIdentityNaturalTransformation FC) (IdentityNaturalTransformation _)));
+      refine (NTComposeT (NTComposeF (IdentityNaturalTransformation _) (GeneralizedIdentityNaturalTransformation (eq_sym GC))) _).
+    change ComposeFunctors with (Compose (C := Cat)).
+    unfold id in *.
+    refine (NTComposeT _ (ComposeFunctorsAssociator1 _ _ _)).
+    refine (NTComposeT (ComposeFunctorsAssociator1 _ _ _) _).
+    change ComposeFunctors with (Compose (C := Cat)).
+    refine (NTComposeT (NTComposeF (LCCM_φ gh) (IdentityNaturalTransformation _)) _).
+    change ComposeFunctors with (Compose (C := Cat)).
+    refine (NTComposeT (ComposeFunctorsAssociator2 _ _ _) _).
+    change ComposeFunctors with (Compose (C := Cat)).
+    refine (NTComposeF (IdentityNaturalTransformation _) (LCCM_φ g'h')).
+  Defined.
+
+  (*
+  Let LaxCommaSpecializedCategory_pre_Compose' s d d'
+             (gh : LaxCommaSpecializedCategory_Morphism d d') (g'h' : LaxCommaSpecializedCategory_Morphism s d)
+  : LaxCommaSpecializedCategory_Morphism s d'.
+  Proof.
+    pose (LaxCommaSpecializedCategory_pre_Compose gh g'h') as m.
+    exists (LCCM_g m) (LCCM_h m).
+    assert (Hf : focus (LCCM_φ m)) by constructor;
+      hnf in m; subst m; simpl in *.
+    revert Hf; clear; intro Hf.
+    unfold NTComposeT in Hf; simpl in *.
+    let F := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(F) end in
+    let G := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(G) end in
+    let f := match type of Hf with | focus {| ComponentsOf := ?f ; Commutes := ?H |} => constr:(f) end in
+    let H := match type of Hf with | focus {| ComponentsOf := ?f ; Commutes := ?H |} => constr:(H) end in
+    refine (Build_SpecializedNaturalTransformation
+              F G
+              (fun x => ReifiedMorphismDenote
+                          (ReifiedMorphismSimplify
+                             (reified_morphism
+                                (m := f x))))
+              _);
+      clear Hf;
+      let s0 := fresh in
+      let d0 := fresh in
+      let m0 := fresh in
+      intros s0 d0 m0;
+        etransitivity; [ | etransitivity ];
+        [ | revert s0 d0 m0; exact H | ];
+        instantiate;
+        simpl;
+        rsimplify_morphisms;
+        f_equal.
+    Defined. *)
+
+  (*Global Arguments LaxCommaSpecializedCategory_Compose _ _ _ _ _ / .*)
+
+  Definition LaxCommaSpecializedCategory_Identity o : LaxCommaSpecializedCategory_Morphism o o.
+    exists (Identity (CCO_α o)) (Identity (CCO_β o)).
+
+    let F := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(F) end in
+    let G := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(G) end in
+    let FI := match F with
+                | appcontext[MorphismOf ?T (Identity ?x)]
+                  => constr:(FIdentityOf T x)
+              end in
+    let GI := match G with
+                | appcontext[MorphismOf ?T (Identity ?x)]
+                  => constr:(FIdentityOf T x)
+              end in
+    refine (NTComposeT _ (NTComposeF (GeneralizedIdentityNaturalTransformation FI) (IdentityNaturalTransformation _)));
+      refine (NTComposeT (NTComposeF (IdentityNaturalTransformation _) (GeneralizedIdentityNaturalTransformation (eq_sym GI))) _).
+    change ComposeFunctors with (Compose (C := Cat)).
+    let F := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(F) end in
+    let G := match goal with |- SpecializedNaturalTransformation ?F ?G => constr:(G) end in
+    refine (Build_SpecializedNaturalTransformation F G
+                                                   (fun c => Identity (F c))
+                                                   _).
+    clear; intros; unfold id in *; simpl in *.
+    abstract (autorewrite with morphism; reflexivity).
+  Defined.
+
+  Global Arguments LaxCommaSpecializedCategory_Identity _ / .
+
+  Local Ltac lax_comma_t :=
+    intros;
+    destruct_head LaxCommaSpecializedCategory_Morphism;
+    simpl in *;
+    simpl_eq;
+    autorewrite with category;
+    f_equal;
+    try reflexivity.
+
+  Local Ltac destruct_eq_refl_in_match :=
+    repeat match goal with
+             | [ |- appcontext[match ?E with eq_refl => _ end] ] => destruct E
+           end.
+
+  Local Ltac lax_comma_eq_t :=
+    intros;
+    destruct_head LaxCommaSpecializedCategory_Morphism;
+    apply LaxCommaSpecializedCategory_Morphism_eq;
+    simpl in *;
+    [ rsimplify_morphisms; reflexivity
+    | rsimplify_morphisms; reflexivity
+    | ];
+    repeat (nt_eq || functor_eq);
+    simpl in *;
+    subst;
+    destruct_eq_refl_in_match;
+    simpl in *;
+    trivial.
+
+
+  Lemma LaxCommaSpecializedCategory_Associativity o1 o2 o3 o4
+        (m1 : LaxCommaSpecializedCategory_Morphism o1 o2)
+        (m2 : LaxCommaSpecializedCategory_Morphism o2 o3)
+        (m3 : LaxCommaSpecializedCategory_Morphism o3 o4)
+  : LaxCommaSpecializedCategory_Compose (LaxCommaSpecializedCategory_Compose m3 m2) m1
+    = LaxCommaSpecializedCategory_Compose m3 (LaxCommaSpecializedCategory_Compose m2 m1).
+  Proof.
+    intros;
+    destruct_head LaxCommaSpecializedCategory_Morphism;
+    apply LaxCommaSpecializedCategory_Morphism_eq;
+    [ simpl; rsimplify_morphisms; reflexivity
+    | simpl; rsimplify_morphisms; reflexivity
+    | ];
+    intros; try apply eq_JMeq;
+    apply NaturalTransformation_JMeq; trivial;
+    intros; subst; try apply eq_JMeq;
+    try (simpl; apply Functor_eq; trivial; intros; subst; try apply eq_JMeq; simpl);
+    autorewrite with morphism; try reflexivity.
+    unfold LaxCommaSpecializedCategory_Compose.
+    simpl.
+
+    repeat rewrite Associativity.
+    f_equal.
+    progress f_equal.
+    destruct_eq_refl_in_match.
+
+    match goal with
+    autorewrite with morphism.
+
+    autorewrite with morphism; reflexivity.
+    simpl.
+    intros; try apply eq_JMeq;
+    try (simpl; intros; apply Functor_eq; trivial);
+    try apply eq_JMeq;
+    try (simpl; intros; apply Functor_eq; trivial);
+    try apply eq_JMeq;
+    try (simpl; intros; apply Functor_eq; trivial);
+    try apply eq_JMeq.
+    simpl; intros; autorewrite with morphism; reflexivity.
+    simpll.
+    JMeq_eq.
+    nt_eq.
+    Time lax_comma_eq_t.
+    r
+    apply NaturalTransformation_eq.
+    simpl in *.
+
+    destruct_eq_refl_in_match.
+    nt_eq.
+    nt_eq.
+    functor_eq.
+    functor_eq.
+    subst.
+    JMeq_eq.
+    Require Import CanonicalStructureSimplification.
+    rsimplify_morphisms.
+    trivial.
+  Qed.
+
+  Lemma LaxCommaSpecializedCategory_LeftIdentity : forall a b (f : LaxCommaSpecializedCategory_Morphism a b),
+    LaxCommaSpecializedCategory_Compose (CommaSpecializedCategory_Identity b) f = f.
+  Proof.
+    abstract comma_eq_t.
+  Qed.
+
+  Lemma LaxCommaSpecializedCategory_RightIdentity : forall a b (f : LaxCommaSpecializedCategory_Morphism a b),
+    LaxCommaSpecializedCategory_Compose f (CommaSpecializedCategory_Identity a) = f.
+  Proof.
+    abstract comma_eq_t.
+  Qed.
+
+
+
+  Definition LaxSliceSpecializedCategory_Compose
+             s d d'
+             (Fα : LaxSliceSpecializedCategory_Morphism d d')
+             (F'α' : LaxSliceSpecializedCategory_Morphism s d)
+  : LaxSliceSpecializedCategory_Morphism s d'.
     exists (ComposeFunctors (fst (projT1 Fα)) (fst (projT1 F'α')), tt).
     repeat match goal with
              | [ H : _ |- _ ] => unique_pose_with_body (fst (projT1 H))

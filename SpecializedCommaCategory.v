@@ -114,11 +114,11 @@ Section CommaSpecializedCategory.
   Global Identity Coercion CommaSpecializedCategory_Morphism_Id : CommaSpecializedCategory_MorphismT >-> sig.
   Global Coercion sig_of_CCM αβf α'β'f' (gh : CommaSpecializedCategory_Morphism αβf α'β'f')
   : CommaSpecializedCategory_MorphismT αβf α'β'f'
-    := existT (fun gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f')
-               => Compose (MorphismOf T (snd gh)) (projT2 αβf)
-                  = Compose (projT2 α'β'f') (MorphismOf S (fst gh)))
-              (CCM_g gh, CCM_h gh)
-              (CCM_φ gh).
+    := exist (fun gh : Morphism (A * B) (projT1 αβf) (projT1 α'β'f')
+              => Compose (MorphismOf T (snd gh)) (projT2 αβf)
+                 = Compose (projT2 α'β'f') (MorphismOf S (fst gh)))
+             (CCM_g gh, CCM_h gh)
+             (CCM_φ gh).
   Global Coercion CCM_of_sig αβf α'β'f' (gh : CommaSpecializedCategory_MorphismT αβf α'β'f')
   : CommaSpecializedCategory_Morphism αβf α'β'f'
     := Build_CommaSpecializedCategory_Morphism
