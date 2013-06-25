@@ -13,6 +13,7 @@ Set Universe Polymorphism.
 Local Infix "==" := JMeq.
 
 Local Open Scope morphism_scope.
+Local Open Scope natural_transformation_scope.
 
 Section NaturalTransformation.
   Variable C : Category.
@@ -302,6 +303,13 @@ Section NaturalTransformationComposition.
   Defined.
 End NaturalTransformationComposition.
 
+(** As per Wikipedia (http://en.wikipedia.org/wiki/2-category), we use
+    [∘₀] to denote composition along 0-cells (functors), and [∘₁] to
+    denote composition along 1-cells (natural transformations). *)
+
+Infix "∘₀" := NTComposeF : natural_transformation_scope.
+Infix "∘₁" := NTComposeT : natural_transformation_scope.
+
 Section IdentityNaturalTransformation.
   Variable C : Category.
   Variable D : Category.
@@ -356,12 +364,12 @@ Section IdentityNaturalTransformation.
     := Eval simpl in @GeneralizedIdentityNaturalTransformation' F F eq_refl eq_refl.
 
   Lemma LeftIdentityNaturalTransformation (F F' : Functor C D) (T : NaturalTransformation F' F)
-  : NTComposeT (IdentityNaturalTransformation F) T = T.
+  : IdentityNaturalTransformation F ∘₁ T = T.
     nt_eq; auto with morphism.
   Qed.
 
   Lemma RightIdentityNaturalTransformation (F F' : Functor C D) (T : NaturalTransformation F F')
-  : NTComposeT T (IdentityNaturalTransformation F) = T.
+  : T ∘₁ IdentityNaturalTransformation F = T.
     nt_eq; auto with morphism.
   Qed.
 End IdentityNaturalTransformation.
@@ -377,7 +385,7 @@ Section IdentityNaturalTransformationF.
   Variable F : Functor C D.
 
   Lemma NTComposeFIdentityNaturalTransformation :
-    NTComposeF (IdentityNaturalTransformation G) (IdentityNaturalTransformation F) = IdentityNaturalTransformation (G ∘ F).
+    IdentityNaturalTransformation G ∘₀ IdentityNaturalTransformation F = IdentityNaturalTransformation (G ∘ F).
   Proof.
     nt_eq; repeat rewrite FIdentityOf; auto with morphism.
   Qed.
@@ -429,8 +437,9 @@ Section IdentityFunctor.
       := Eval simpl in GeneralizedIdentityNaturalTransformation F (IdentityFunctor _ ∘ F) eq_refl eq_refl.
 
     Theorem LeftIdentityFunctorNT_Isomorphism
-    : NTComposeT LeftIdentityFunctorNaturalTransformation1 LeftIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
-      /\ NTComposeT LeftIdentityFunctorNaturalTransformation2 LeftIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+    : LeftIdentityFunctorNaturalTransformation1 ∘₁ LeftIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
+      /\ LeftIdentityFunctorNaturalTransformation2 ∘₁ LeftIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+    Proof.
       nt_id_t.
     Qed.
   End left.
@@ -444,8 +453,9 @@ Section IdentityFunctor.
       := Eval simpl in GeneralizedIdentityNaturalTransformation F (F ∘ IdentityFunctor _) eq_refl eq_refl.
 
     Theorem RightIdentityFunctorNT_Isomorphism
-    : NTComposeT RightIdentityFunctorNaturalTransformation1 RightIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
-      /\ NTComposeT RightIdentityFunctorNaturalTransformation2 RightIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+    : RightIdentityFunctorNaturalTransformation1 ∘₁ RightIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
+      /\ RightIdentityFunctorNaturalTransformation2 ∘₁ RightIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
+    Proof.
       nt_id_t.
     Qed.
   End right.
@@ -481,9 +491,9 @@ Section NaturalTransformationExchangeLaw.
         t_progress
     end.
 
-  Theorem NaturalTransformationExchangeLaw :
-    NTComposeF (NTComposeT U' T') (NTComposeT U T) =
-    NTComposeT (NTComposeF U' U) (NTComposeF T' T).
+  Theorem NaturalTransformationExchangeLaw
+  : (U' ∘₁ T') ∘₀ (U ∘₁ T)
+    = (U' ∘₀ U) ∘₁ (T' ∘₀ T).
   Proof.
     abstract (nt_eq; t_exch).
   Qed.
