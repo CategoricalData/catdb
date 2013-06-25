@@ -15,7 +15,8 @@ Local Infix "==" := JMeq.
 Local Open Scope morphism_scope.
 
 Section Functor.
-  Variables C D : Category.
+  Variable C : Category.
+  Variable D : Category.
 
   (** Quoting from the lecture notes for 18.705, Commutative Algebra:
 
