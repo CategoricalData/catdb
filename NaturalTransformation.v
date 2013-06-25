@@ -12,6 +12,8 @@ Set Universe Polymorphism.
 
 Local Infix "==" := JMeq.
 
+Local Open Scope morphism_scope.
+
 Section NaturalTransformation.
   Variable C : Category.
   Variable D : Category.
@@ -38,7 +40,7 @@ Section NaturalTransformation.
     {
       ComponentsOf :> forall c, D.(Morphism) (F c) (G c);
       Commutes : forall s d (m : C.(Morphism) s d),
-                   Compose (ComponentsOf d) (F.(MorphismOf) m) = Compose (G.(MorphismOf) m) (ComponentsOf s)
+                   ComponentsOf d ∘ F.(MorphismOf) m = G.(MorphismOf) m ∘ ComponentsOf s
     }.
 End NaturalTransformation.
 
@@ -68,14 +70,14 @@ Ltac nt_tac_abstract_trailing_props T tac :=
     revert H; clear; intro H; clear H;
     match T'' with
       | @Build_NaturalTransformation ?C
-                                                ?D
-                                                ?F
-                                                ?G
-                                                ?CO
-                                                ?COM =>
+                                     ?D
+                                     ?F
+                                     ?G
+                                     ?CO
+                                     ?COM =>
         refine (@Build_NaturalTransformation C D F G
-                                                        CO
-                                                        _);
+                                             CO
+                                             _);
           abstract exact COM
     end.
 Ltac nt_abstract_trailing_props T := nt_tac_abstract_trailing_props T ltac:(fun T' => T').
@@ -89,6 +91,7 @@ Section NaturalTransformations_Equal.
              pf1 = pf2)
   : ComponentsOf T = ComponentsOf U
     -> T = U.
+  Proof.
     destruct T, U; simpl; intros; repeat subst;
     f_equal;
     repeat (apply functional_extensionality_dep; intro).
@@ -102,6 +105,7 @@ Section NaturalTransformations_Equal.
              pf1 = pf2)
   : (forall x, ComponentsOf T x = ComponentsOf U x)
     -> T = U.
+  Proof.
     intros; apply NaturalTransformation_contr_eq'; try assumption.
     destruct T, U; simpl in *;
     repeat (apply functional_extensionality_dep; intro);
@@ -112,6 +116,7 @@ Section NaturalTransformations_Equal.
     forall (T U : @NaturalTransformation C D F G),
     ComponentsOf T = ComponentsOf U
     -> T = U.
+  Proof.
     intros T U.
     apply NaturalTransformation_contr_eq'.
     intros; apply proof_irrelevance.
@@ -121,6 +126,7 @@ Section NaturalTransformations_Equal.
     forall (T U : @NaturalTransformation C D F G),
     (forall x, ComponentsOf T x = ComponentsOf U x)
     -> T = U.
+  Proof.
     intros T U.
     apply NaturalTransformation_contr_eq.
     intros; apply proof_irrelevance.
@@ -135,6 +141,7 @@ Section NaturalTransformations_Equal.
       -> G == G'
       -> ComponentsOf T == ComponentsOf U
       -> T == U.
+  Proof.
     simpl; intros; intuition; destruct T, U; simpl in *; repeat subst;
       JMeq_eq.
     f_equal; apply proof_irrelevance.
@@ -148,6 +155,7 @@ Section NaturalTransformations_Equal.
       -> G == G'
       -> (forall x x', x == x' -> ComponentsOf T x == ComponentsOf U x')
       -> T == U.
+  Proof.
     intros; apply NaturalTransformation_JMeq'; trivial;
     destruct T, U; simpl in *; repeat subst.
     apply functional_extensionality_dep_JMeq; trivial.
@@ -173,18 +181,18 @@ Ltac nt_tac_abstract_trailing_props_with_equality_do tac T thm :=
     revert H; clear; intro H; clear H;
     match T'' with
       | @Build_NaturalTransformation ?objC ?C
-                                                ?objD ?D
-                                                ?F
-                                                ?G
-                                                ?CO
-                                                ?COM =>
+                                     ?objD ?D
+                                     ?F
+                                     ?G
+                                     ?CO
+                                     ?COM =>
         let COM' := fresh in
         let COMT' := type of COM in
         let COMT := (eval simpl in COMT') in
         assert (COM' : COMT) by abstract exact COM;
           exists (@Build_NaturalTransformation C D F G
-                                                          CO
-                                                          COM');
+                                               CO
+                                               COM');
           expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
     end.
 Ltac nt_tac_abstract_trailing_props_with_equality tac :=
@@ -210,6 +218,7 @@ Section NaturalTransformationComposition.
 
   (*
      We have the diagram
+<<
           F
      C -------> D
           |
@@ -225,8 +234,10 @@ Section NaturalTransformationComposition.
           V
      C ------> D
           F''
+>>
 
      And we want the commutative diagram
+<<
            F m
      F A -------> F B
       |            |
@@ -241,16 +252,16 @@ Section NaturalTransformationComposition.
       |            |
       V    F'' m   V
      F'' A ------> F'' B
-
+>>
   *)
 
-  Definition NTComposeT (T' : NaturalTransformation F' F'') (T : NaturalTransformation F F') :
-    NaturalTransformation F F''.
-    exists (fun c => Compose (T' c) (T c));
+  Definition NTComposeT (T' : NaturalTransformation F' F'') (T : NaturalTransformation F F')
+  : NaturalTransformation F F''.
+    exists (fun c => T' c ∘ T c).
     (* XXX TODO: Find a way to get rid of [m] in the transitivity call *)
     abstract (
         intros;
-        transitivity (Compose (T' _) (Compose (MorphismOf F' m) (T _)));
+        transitivity (T' _ ∘ (MorphismOf F' m ∘ T _));
         try_associativity ltac:(eauto with natural_transformation)
       ).
   Defined.
@@ -280,21 +291,9 @@ Section NaturalTransformationComposition.
   *)
   (* XXX TODO: Automate this better *)
 
-  Hint Rewrite @Commutes : natural_transformation.
-  Hint Resolve f_equal2 : natural_transformation.
-  Hint Extern 1 (_ = _) => apply @FCompositionOf : natural_transformation.
-
-  Lemma FCompositionOf2 : forall (C : Category) `(D : Category)
-    (F : Functor C D) x y z u (m1 : C.(Morphism) x z) (m2 : C.(Morphism) y x) (m3 : D.(Morphism) u _),
-    Compose (MorphismOf F m1) (Compose (MorphismOf F m2) m3) = Compose (MorphismOf F (Compose m1 m2)) m3.
-    intros; symmetry; try_associativity ltac:(eauto with natural_transformation).
-  Qed.
-
-  Hint Rewrite @FCompositionOf2 : natural_transformation.
-
-  Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F'):
-    NaturalTransformation (ComposeFunctors G F) (ComposeFunctors G' F').
-    exists (fun c => Compose (G'.(MorphismOf) (T c)) (U (F c)));
+  Definition NTComposeF (U : NaturalTransformation G G') (T : NaturalTransformation F F')
+  : NaturalTransformation (G ∘ F) (G' ∘ F').
+    exists (fun c => G'.(MorphismOf) (T c) ∘ U (F c));
     abstract (
         simpl; intros; autorewrite with category;
         repeat try_associativity ltac:(repeat rewrite <- @Commutes; repeat rewrite <- @FCompositionOf);
@@ -306,21 +305,63 @@ End NaturalTransformationComposition.
 Section IdentityNaturalTransformation.
   Variable C : Category.
   Variable D : Category.
-  Variable F : Functor C D.
 
-  (* There is an identity natrual transformation. *)
-  Definition IdentityNaturalTransformation : NaturalTransformation F F.
-    exists (fun c => Identity (F c));
-    abstract (intros; autorewrite with morphism; reflexivity).
-  Defined.
+  Local Ltac id_fin_t :=
+    intros;
+    etransitivity;
+    [ apply LeftIdentity
+    | symmetry; apply RightIdentity ].
 
-  Lemma LeftIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F' F) :
-    NTComposeT IdentityNaturalTransformation T = T.
+  (** There is an identity natrual transformation.  We create a number
+      of variants, for various uses. *)
+  Section Generalized.
+    Variables F G : Functor C D.
+    Hypothesis HO : ObjectOf F = ObjectOf G.
+    Hypothesis HM : match HO in _ = GO return forall s d, Morphism C s d -> Morphism D (GO s) (GO d) with
+                      | eq_refl => MorphismOf F
+                    end = MorphismOf G.
+
+    Definition GeneralizedIdentityNaturalTransformation : NaturalTransformation F G.
+      refine (Build_NaturalTransformation F G
+                                          (fun c => match HO in _ = GO return Morphism D (F c) (GO c) with
+                                                      | eq_refl => Identity (F c)
+                                                    end)
+                                          _).
+      abstract (
+          intros;
+          case HM; case HO;
+          id_fin_t
+        ).
+    Defined.
+
+    Definition GeneralizedIdentityNaturalTransformation' : NaturalTransformation F G.
+      refine (Build_NaturalTransformation F G
+                                          (fun c => match HO in _ = GO return Morphism D (F c) (GO c) with
+                                                      | eq_refl => Identity (F c)
+                                                    end)
+                                          _).
+      intros;
+        case HM; case HO;
+        id_fin_t.
+    Defined.
+  End Generalized.
+
+  Local Arguments GeneralizedIdentityNaturalTransformation / .
+  Local Arguments GeneralizedIdentityNaturalTransformation' / .
+
+  Definition IdentityNaturalTransformation (F : Functor C D) : NaturalTransformation F F
+    := Eval simpl in @GeneralizedIdentityNaturalTransformation F F eq_refl eq_refl.
+
+  Definition IdentityNaturalTransformation' (F : Functor C D) : NaturalTransformation F F
+    := Eval simpl in @GeneralizedIdentityNaturalTransformation' F F eq_refl eq_refl.
+
+  Lemma LeftIdentityNaturalTransformation (F F' : Functor C D) (T : NaturalTransformation F' F)
+  : NTComposeT (IdentityNaturalTransformation F) T = T.
     nt_eq; auto with morphism.
   Qed.
 
-  Lemma RightIdentityNaturalTransformation (F' : Functor C D) (T : NaturalTransformation F F') :
-    NTComposeT T IdentityNaturalTransformation = T.
+  Lemma RightIdentityNaturalTransformation (F F' : Functor C D) (T : NaturalTransformation F F')
+  : NTComposeT T (IdentityNaturalTransformation F) = T.
     nt_eq; auto with morphism.
   Qed.
 End IdentityNaturalTransformation.
@@ -336,7 +377,7 @@ Section IdentityNaturalTransformationF.
   Variable F : Functor C D.
 
   Lemma NTComposeFIdentityNaturalTransformation :
-    NTComposeF (IdentityNaturalTransformation G) (IdentityNaturalTransformation F) = IdentityNaturalTransformation (ComposeFunctors G F).
+    NTComposeF (IdentityNaturalTransformation G) (IdentityNaturalTransformation F) = IdentityNaturalTransformation (G ∘ F).
   Proof.
     nt_eq; repeat rewrite FIdentityOf; auto with morphism.
   Qed.
@@ -344,6 +385,9 @@ End IdentityNaturalTransformationF.
 
 Hint Rewrite @NTComposeFIdentityNaturalTransformation : category.
 Hint Rewrite @NTComposeFIdentityNaturalTransformation : natural_transformation.
+
+Local Arguments GeneralizedIdentityNaturalTransformation / .
+Local Arguments GeneralizedIdentityNaturalTransformation' / .
 
 Section Associativity.
   Variable B : Category.
@@ -354,69 +398,55 @@ Section Associativity.
   Variable G : Functor C D.
   Variable H : Functor B C.
 
-  Let F0 := ComposeFunctors (ComposeFunctors F G) H.
-  Let F1 := ComposeFunctors F (ComposeFunctors G H).
+  Let F0 : Functor B E := (F ∘ G) ∘ H.
+  Let F1 : Functor B E := F ∘ (G ∘ H).
 
-  Definition ComposeFunctorsAssociator1 : NaturalTransformation F0 F1.
-    refine (Build_NaturalTransformation F0 F1
-                                                   (fun _ => Identity (C := E) _)
-                                                   _
-           );
-    abstract (
-        simpl; intros;
-        autorewrite with morphism; reflexivity
-      ).
-  Defined.
+  Definition ComposeFunctorsAssociator1 : NaturalTransformation F0 F1
+    := Eval simpl in GeneralizedIdentityNaturalTransformation F0 F1 eq_refl eq_refl.
 
-  Definition ComposeFunctorsAssociator2 : NaturalTransformation F1 F0.
-    refine (Build_NaturalTransformation F1 F0
-                                                   (fun _ => Identity (C := E) _)
-                                                   _
-           );
-    abstract (
-        simpl; intros;
-        autorewrite with morphism; reflexivity
-      ).
-  Defined.
+  Definition ComposeFunctorsAssociator1' : NaturalTransformation F0 F1
+    := Eval simpl in GeneralizedIdentityNaturalTransformation' F0 F1 eq_refl eq_refl.
+
+  Definition ComposeFunctorsAssociator2 : NaturalTransformation F1 F0
+    := Eval simpl in GeneralizedIdentityNaturalTransformation F1 F0 eq_refl eq_refl.
+
+  Definition ComposeFunctorsAssociator2' : NaturalTransformation F1 F0
+    := Eval simpl in GeneralizedIdentityNaturalTransformation' F1 F0 eq_refl eq_refl.
 End Associativity.
 
 Section IdentityFunctor.
   Variable C : Category.
   Variable D : Category.
 
-  Local Ltac t :=
-    repeat match goal with
-             | [ |- NaturalTransformation ?F ?G ] =>
-               refine (Build_NaturalTransformation F G
-                                                              (fun _ => Identity _)
-                                                              _)
-             | _ => abstract (simpl; intros; autorewrite with morphism; reflexivity)
-             | _ => split; nt_eq
-           end.
+  Local Ltac nt_id_t := split; nt_eq; autorewrite with morphism; reflexivity.
 
   Section left.
     Variable F : Functor D C.
 
-    Definition LeftIdentityFunctorNaturalTransformation1 : NaturalTransformation (ComposeFunctors (IdentityFunctor _) F) F. t. Defined.
-    Definition LeftIdentityFunctorNaturalTransformation2 : NaturalTransformation F (ComposeFunctors (IdentityFunctor _) F). t. Defined.
+    Definition LeftIdentityFunctorNaturalTransformation1 : NaturalTransformation (IdentityFunctor _ ∘ F) F
+      := Eval simpl in GeneralizedIdentityNaturalTransformation (IdentityFunctor _ ∘ F) F eq_refl eq_refl.
+    Definition LeftIdentityFunctorNaturalTransformation2 : NaturalTransformation F (IdentityFunctor _ ∘ F)
+      := Eval simpl in GeneralizedIdentityNaturalTransformation F (IdentityFunctor _ ∘ F) eq_refl eq_refl.
 
     Theorem LeftIdentityFunctorNT_Isomorphism
     : NTComposeT LeftIdentityFunctorNaturalTransformation1 LeftIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
       /\ NTComposeT LeftIdentityFunctorNaturalTransformation2 LeftIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
-      t.
+      nt_id_t.
     Qed.
   End left.
 
   Section right.
     Variable F : Functor C D.
 
-    Definition RightIdentityFunctorNaturalTransformation1 : NaturalTransformation (ComposeFunctors F (IdentityFunctor _)) F. t. Defined.
-    Definition RightIdentityFunctorNaturalTransformation2 : NaturalTransformation F (ComposeFunctors F (IdentityFunctor _)). t. Defined.
+    Definition RightIdentityFunctorNaturalTransformation1 : NaturalTransformation (F ∘ IdentityFunctor _) F
+      := Eval simpl in GeneralizedIdentityNaturalTransformation (F ∘ IdentityFunctor _) F eq_refl eq_refl.
+    Definition RightIdentityFunctorNaturalTransformation2 : NaturalTransformation F (F ∘ IdentityFunctor _)
+      := Eval simpl in GeneralizedIdentityNaturalTransformation F (F ∘ IdentityFunctor _) eq_refl eq_refl.
 
     Theorem RightIdentityFunctorNT_Isomorphism
     : NTComposeT RightIdentityFunctorNaturalTransformation1 RightIdentityFunctorNaturalTransformation2 = IdentityNaturalTransformation _
       /\ NTComposeT RightIdentityFunctorNaturalTransformation2 RightIdentityFunctorNaturalTransformation1 = IdentityNaturalTransformation _.
-      t.
+      nt_id_t.
     Qed.
   End right.
 End IdentityFunctor.
@@ -455,8 +485,7 @@ Section NaturalTransformationExchangeLaw.
     NTComposeF (NTComposeT U' T') (NTComposeT U T) =
     NTComposeT (NTComposeF U' U) (NTComposeF T' T).
   Proof.
-    nt_eq;
-    t_exch.
+    abstract (nt_eq; t_exch).
   Qed.
 End NaturalTransformationExchangeLaw.
 
