@@ -993,7 +993,7 @@ Ltac destruct_Trues := destruct_singleton_constructor I.
 Section True.
   Lemma True_singleton (u : True) : u = I.
     case u; reflexivity.
-  Qed.
+  Defined.
 
   Lemma True_eq (u u' : True) : u = u'.
     case u; case u'; reflexivity.
@@ -1014,19 +1014,19 @@ Section True.
 
   Lemma True_eqT_eq (u u' v v' : True) : @eq Type (u = u') (v = v').
     destruct_head True; reflexivity.
-  Qed.
+  Defined.
 
   Lemma True_eqS_eq (u u' v v' : True) : @eq Set (u = u') (v = v').
     destruct_head True; reflexivity.
-  Qed.
+  Defined.
 
   Lemma True_eqP_eq (u u' v v' : True) : @eq Prop (u = u') (v = v').
     destruct_head True; reflexivity.
-  Qed.
+  Defined.
 
   Lemma True_eq_JMeq (u u' v v' : True) (H : u = u') (H' : v = v') : H == H'.
-    subst; destruct_head True; reflexivity.
-  Qed.
+    destruct_head @eq; destruct_head True; reflexivity.
+  Defined.
 
   Lemma False_eq (a b : False) : a = b.
     destruct a.
@@ -1044,7 +1044,7 @@ End True.
 Section unit.
   Lemma unit_singleton (u : unit) : u = tt.
     case u; reflexivity.
-  Qed.
+  Defined.
 
   Lemma unit_eq (u u' : unit) : u = u'.
     case u; case u'; reflexivity.
@@ -1065,19 +1065,19 @@ Section unit.
 
   Lemma unit_eqT_eq (u u' v v' : unit) : @eq Type (u = u') (v = v').
     destruct_head unit; reflexivity.
-  Qed.
+  Defined.
 
   Lemma unit_eqS_eq (u u' v v' : unit) : @eq Set (u = u') (v = v').
     destruct_head unit; reflexivity.
-  Qed.
+  Defined.
 
   Lemma unit_eqP_eq (u u' v v' : unit) : @eq Prop (u = u') (v = v').
     destruct_head unit; reflexivity.
-  Qed.
+  Defined.
 
   Lemma unit_eq_JMeq (u u' v v' : unit) (H : u = u') (H' : v = v') : H == H'.
-    subst; destruct_head unit; reflexivity.
-  Qed.
+    destruct_head @eq; destruct_head unit; reflexivity.
+  Defined.
 
   Lemma Empty_set_eq (a b : Empty_set) : a = b.
     destruct a.
