@@ -42,6 +42,8 @@ Reserved Notation "∐_{ x : A } f" (at level 0, x at level 99).
    and '['s interfere with list notation in Program. *)
 Reserved Notation "F ⟨ c , - ⟩" (at level 70, no associativity).
 Reserved Notation "F ⟨ - , d ⟩" (at level 70, no associativity).
+Reserved Notation "F ₀" (at level 10, no associativity).
+Reserved Notation "F ₁" (at level 10, no associativity).
 
 (* Forced by the notation in Program *)
 Reserved Notation "[ x ]" (at level 0, x at level 200).

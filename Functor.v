@@ -42,8 +42,8 @@ Section Functor.
     }.
 End Functor.
 
-Local Notation "F ₀" := (ObjectOf F) (at level 0) : object_scope.
-Local Notation "F ₁" := (MorphismOf F) (at level 0) : morphism_scope.
+Notation "F ₀" := (ObjectOf F) : object_scope.
+Notation "F ₁" := (MorphismOf F) : morphism_scope.
 
 Bind Scope functor_scope with Functor.
 
