@@ -275,6 +275,8 @@ Section FunctorComposition.
   Defined.
 End FunctorComposition.
 
+Infix "∘" := ComposeFunctors : functor_scope.
+
 Section IdentityFunctor.
   (** There is an identity functor.  It does the obvious thing. *)
   Definition IdentityFunctor C : Functor C C
@@ -318,11 +320,13 @@ Section IdentityFunctorLemmas.
   Variable C : Category.
   Variable D : Category.
 
-  Lemma LeftIdentityFunctor (F : Functor D C) : ComposeFunctors (IdentityFunctor _) F = F.
+  Local Open Scope functor_scope.
+
+  Lemma LeftIdentityFunctor (F : Functor D C) : IdentityFunctor _ ∘ F = F.
     functor_eq.
   Qed.
 
-  Lemma RightIdentityFunctor (F : Functor C D) : ComposeFunctors F (IdentityFunctor _) = F.
+  Lemma RightIdentityFunctor (F : Functor C D) : F ∘ IdentityFunctor _ = F.
     functor_eq.
   Qed.
 End IdentityFunctorLemmas.
@@ -337,8 +341,10 @@ Section FunctorCompositionLemmas.
   Variable D : Category.
   Variable E : Category.
 
+  Local Open Scope functor_scope.
+
   Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E)
-  : ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
+  : (H ∘ G) ∘ F = H ∘ (G ∘ F).
   Proof.
     functor_eq.
   Qed.
