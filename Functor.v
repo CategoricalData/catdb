@@ -42,6 +42,9 @@ Section Functor.
     }.
 End Functor.
 
+Local Notation "F ₀" := (ObjectOf F) (at level 0) : object_scope.
+Local Notation "F ₁" := (MorphismOf F) (at level 0) : morphism_scope.
+
 Bind Scope functor_scope with Functor.
 
 Create HintDb functor discriminated.
@@ -75,16 +78,16 @@ Ltac functor_tac_abstract_trailing_props F tac :=
     revert H; clear; intro H; clear H;
     match F'' with
       | @Build_Functor ?C
-                                  ?D
-                                  ?OO
-                                  ?MO
-                                  ?FCO
-                                  ?FIO =>
+                       ?D
+                       ?OO
+                       ?MO
+                       ?FCO
+                       ?FIO =>
         refine (@Build_Functor C D
-                                          OO
-                                          MO
-                                          _
-                                          _);
+                               OO
+                               MO
+                               _
+                               _);
           [ abstract exact FCO | abstract exact FIO ]
     end.
 Ltac functor_abstract_trailing_props F := functor_tac_abstract_trailing_props F ltac:(fun F' => F').
@@ -100,6 +103,7 @@ Section Functors_Equal.
         | eq_refl => MorphismOf F
       end = MorphismOf G
       -> F = G.
+  Proof.
     intros.
     destruct F, G; simpl in *.
     subst.
@@ -124,6 +128,7 @@ Section Functors_Equal.
              end
          end = MorphismOf G m)
       -> F = G.
+  Proof.
     intros HO HM.
     apply Functor_contr_eq' with (HO := (functional_extensionality_dep F G HO));
       try assumption.
@@ -139,30 +144,33 @@ Section Functors_Equal.
     ObjectOf F = ObjectOf G
     -> MorphismOf F == MorphismOf G
     -> F = G.
+  Proof.
     destruct F, G; simpl; intros; specialize_all_ways; repeat subst;
       f_equal; apply proof_irrelevance.
   Qed.
 
-  Lemma Functor_eq C D :
-    forall (F G : Functor C D),
+  Lemma Functor_eq C D
+  : forall (F G : Functor C D),
       (forall x, ObjectOf F x = ObjectOf G x)
       -> (forall s d m, MorphismOf F (s := s) (d := d) m == MorphismOf G (s := s) (d := d) m)
       -> F = G.
+  Proof.
     intros; cut (ObjectOf F = ObjectOf G); intros; try apply Functor_eq'; destruct F, G; simpl in *; repeat subst;
     try apply eq_JMeq;
     repeat (apply functional_extensionality_dep; intro); trivial;
     try apply JMeq_eq; trivial.
   Qed.
 
-  Lemma Functor_JMeq C D C' D' :
-    forall (F : Functor C D) (G : Functor C' D'),
+  Lemma Functor_JMeq C D C' D'
+  : forall (F : Functor C D) (G : Functor C' D'),
       C = C'
       -> D = D'
       -> ObjectOf F == ObjectOf G
       -> MorphismOf F == MorphismOf G
       -> F == G.
-    simpl; intros; intuition; repeat subst; destruct F, G; simpl in *;
-      repeat subst; JMeq_eq.
+  Proof.
+    intros; destruct F, G; simpl in *; repeat subst.
+    apply eq_JMeq.
     f_equal; apply proof_irrelevance.
   Qed.
 End Functors_Equal.
@@ -184,11 +192,11 @@ Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
     revert H; clear; intro H; clear H;
     match F'' with
       | @Build_Functor ?C
-                                  ?D
-                                  ?OO
-                                  ?MO
-                                  ?FCO
-                                  ?FIO =>
+                       ?D
+                       ?OO
+                       ?MO
+                       ?FCO
+                       ?FIO =>
         let FCO' := fresh in
         let FIO' := fresh in
         let FCOT' := type of FCO in
@@ -198,10 +206,10 @@ Ltac functor_tac_abstract_trailing_props_with_equality_do tac F thm :=
         assert (FCO' : FCOT) by abstract exact FCO;
           assert (FIO' : FIOT) by (clear FCO'; abstract exact FIO);
           exists (@Build_Functor C D
-                                            OO
-                                            MO
-                                            FCO'
-                                            FIO');
+                                 OO
+                                 MO
+                                 FCO'
+                                 FIO');
           expand; abstract (apply thm; reflexivity) || (apply thm; try reflexivity)
     end.
 
@@ -226,41 +234,41 @@ Section FunctorComposition.
 
   Definition ComposeFunctors' : Functor C E
     := Build_Functor C E
-                                (fun c => G (F c))
-                                (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-                                (fun _ _ _ m1 m2 =>
-                                   match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
-                                     | eq_refl =>
-                                       match
-                                         FCompositionOf F _ _ _ m1 m2 in (_ = y)
-                                         return
-                                         (MorphismOf G (MorphismOf F (Compose m2 m1)) =
-                                          MorphismOf G y)
-                                       with
-                                         | eq_refl => eq_refl
-                                       end
-                                   end)
-                                (fun x =>
-                                   match FIdentityOf G (F x) with
-                                     | eq_refl =>
-                                       match
-                                         FIdentityOf F x in (_ = y)
-                                         return
-                                         (MorphismOf G (MorphismOf F (Identity x)) =
-                                          MorphismOf G y)
-                                       with
-                                         | eq_refl => eq_refl
-                                       end
-                                   end).
+                     (fun c => G (F c))
+                     (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                     (fun _ _ _ m1 m2 =>
+                        match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
+                          | eq_refl =>
+                            match
+                              FCompositionOf F _ _ _ m1 m2 in (_ = y)
+                              return
+                              (MorphismOf G (MorphismOf F (Compose m2 m1)) =
+                               MorphismOf G y)
+                            with
+                              | eq_refl => eq_refl
+                            end
+                        end)
+                     (fun x =>
+                        match FIdentityOf G (F x) with
+                          | eq_refl =>
+                            match
+                              FIdentityOf F x in (_ = y)
+                              return
+                              (MorphismOf G (MorphismOf F (Identity x)) =
+                               MorphismOf G y)
+                            with
+                              | eq_refl => eq_refl
+                            end
+                        end).
 
   Hint Rewrite @FCompositionOf : functor.
 
   Definition ComposeFunctors : Functor C E.
     refine (Build_Functor C E
-                                     (fun c => G (F c))
-                                     (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-                                     _
-                                     _);
+                          (fun c => G (F c))
+                          (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                          _
+                          _);
     abstract (
         intros; autorewrite with functor; reflexivity
       ).
@@ -268,15 +276,42 @@ Section FunctorComposition.
 End FunctorComposition.
 
 Section IdentityFunctor.
-  Variable C : Category.
-
   (** There is an identity functor.  It does the obvious thing. *)
-  Definition IdentityFunctor : Functor C C
+  Definition IdentityFunctor C : Functor C C
     := Build_Functor C C
-                                (fun x => x)
-                                (fun _ _ x => x)
-                                (fun _ _ _ _ _ => eq_refl)
-                                (fun _ => eq_refl).
+                     (fun x => x)
+                     (fun _ _ x => x)
+                     (fun _ _ _ _ _ => eq_refl)
+                     (fun _ => eq_refl).
+
+  Definition IdentityFunctor'
+             objC
+             morC
+             idC
+             compC
+             assocC assocC'
+             leftIdC leftIdC'
+             rightIdC rightIdC'
+  : Functor _ _
+    := Build_Functor (@Build_Category objC morC idC compC assocC leftIdC rightIdC)
+                     (@Build_Category objC morC idC compC assocC' leftIdC' rightIdC')
+                     (fun x => x)
+                     (fun _ _ x => x)
+                     (fun _ _ _ _ _ => eq_refl)
+                     (fun _ => eq_refl).
+
+  Definition GeneralizedIdentityFunctor (C D : Category) (H : C = D) : Functor C D.
+    refine (Build_Functor C D
+                          (fun x => match H with eq_refl => x end)
+                          (fun s d m => match H as H in (_ = C) return
+                                              Morphism C (match H with eq_refl => s end) (match H with eq_refl => d end)
+                                        with
+                                          | eq_refl => m
+                                        end)
+                          _
+                          _);
+    destruct H; reflexivity.
+  Defined.
 End IdentityFunctor.
 
 Section IdentityFunctorLemmas.
@@ -302,8 +337,9 @@ Section FunctorCompositionLemmas.
   Variable D : Category.
   Variable E : Category.
 
-  Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E) :
-    ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
+  Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E)
+  : ComposeFunctors (ComposeFunctors H G) F = ComposeFunctors H (ComposeFunctors G F).
+  Proof.
     functor_eq.
   Qed.
 End FunctorCompositionLemmas.
