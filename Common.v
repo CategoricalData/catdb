@@ -1,6 +1,8 @@
-Require Import JMeq ProofIrrelevance Eqdep_dec.
+Require Import JMeq ProofIrrelevance FunctionalExtensionality Eqdep_dec.
 
 Set Implicit Arguments.
+
+Generalizable All Variables.
 
 Set Asymmetric Patterns.
 
@@ -360,6 +362,15 @@ Ltac generalize_eq_match :=
              let H := fresh in
              progress set (H := f x);
                clearbody H
+         end.
+
+(** [destruct] any matches on variables of type [_ = _] *)
+Ltac destruct_eq_in_match :=
+  repeat match goal with
+           | [ |- appcontext[match ?E with _ => _ end] ] => let t := type of E in
+                                                            match eval hnf in t with
+                                                              | @eq _ _ _ => destruct E
+                                                            end
          end.
 
 (* Coq's build in tactics don't work so well with things like [iff]
@@ -990,47 +1001,137 @@ Ltac destruct_singleton_constructor c :=
 Ltac destruct_units := destruct_singleton_constructor tt.
 Ltac destruct_Trues := destruct_singleton_constructor I.
 
+Section contr.
+  (** Contr taken from HoTT *)
+  Class Contr (A : Type) :=
+    {
+      center : A ;
+      contr : (forall y : A, center = y)
+    }.
+
+  Global Arguments center A {_}.
+
+  Notation IsHProp A := (forall x y : A, Contr (x = y)).
+
+  Global Instance ContrIsHProp `{Contr A} : IsHProp A.
+  Proof.
+    repeat intro.
+    exists (match contr x, contr y with eq_refl, eq_refl => eq_refl end).
+    intro H0.
+    destruct H0.
+    destruct (contr x).
+    reflexivity.
+  Defined.
+
+  Global Instance ContrIsHProp' `{Contr A} (x y : A) : Contr (x = y).
+  Proof (ContrIsHProp x y).
+
+  Lemma contr_eq A : forall x y : Contr A, x = y.
+  Proof.
+    repeat intro.
+    pose x as x'; destruct x as [ centerx contrx ].
+    pose y as y'; destruct y as [ centery contry ].
+    destruct (contry centerx).
+    apply f_equal.
+    apply functional_extensionality_dep.
+    intros.
+    apply center.
+    eauto with typeclass_instances.
+  Defined.
+
+  Global Instance PiContr `(H : forall x : A, Contr (T x)) : Contr (forall x, T x).
+  Proof.
+    exists (fun _ => center _).
+    intros; apply functional_extensionality_dep.
+    intros; apply contr.
+  Defined.
+
+  Global Instance SigmaContr `{Contr A} `{forall x : A, Contr (P x)} : Contr (sigT P).
+  Proof.
+    exists (existT P (center _) (center _)).
+    intros [x ?].
+    cut (center _ = x); [ intro; subst | apply contr ].
+    apply f_equal.
+    apply contr.
+  Defined.
+
+  Global Instance SigContr `{Contr A} (P : A -> Prop) `{forall x : A, Contr (P x)} : Contr (sig P).
+  Proof.
+    exists (exist P (center _) (center _)).
+    intros [x ?].
+    cut (center _ = x); [ intro; subst | apply contr ].
+    apply f_equal.
+    apply contr.
+  Defined.
+
+  Global Instance Sigma2Contr `{Contr A} `{forall x : A, Contr (P x)} `{forall x : A, Contr (Q x)} : Contr (sigT2 P Q).
+  Proof.
+    exists (existT2 P Q (center _) (center _) (center _)).
+    intros [x ? ?].
+    cut (center _ = x); [ intro; subst | apply contr ].
+    apply f_equal2;
+      apply contr.
+  Defined.
+
+
+  Global Instance Sig2Contr `{Contr A} (P Q : A -> Prop) `{forall x : A, Contr (P x)} `{forall x : A, Contr (Q x)} : Contr (sig2 P Q).
+  Proof.
+    exists (exist2 P Q (center _) (center _) (center _)).
+    intros [x ? ?].
+    cut (center _ = x); [ intro; subst | apply contr ].
+    apply f_equal2;
+      apply contr.
+  Defined.
+
+  Local Ltac contr_eq_t :=
+    intros;
+    repeat match goal with
+             | [ x : _ |- _ ] => progress destruct (contr x)
+           end;
+    reflexivity.
+
+  Lemma contr_eqT `{Contr A} : forall x x' y y' : A, @eq Type (x = x') (y = y').
+    contr_eq_t.
+  Defined.
+
+  Lemma contr_eqS `{Contr A} : forall x x' y y' : A, @eq Set (x = x') (y = y').
+    contr_eq_t.
+  Defined.
+
+  Lemma contr_eqP `{Contr A} : forall x x' y y' : A, @eq Prop (x = x') (y = y').
+    contr_eq_t.
+  Defined.
+End contr.
+
+Notation IsHProp A := (forall x y : A, Contr (x = y)).
+
 Section True.
-  Lemma True_singleton (u : True) : u = I.
-    case u; reflexivity.
-  Defined.
+  Global Instance True_contr : Contr True
+    := @Build_Contr True I (fun x => match x with I => eq_refl end).
 
-  Lemma True_eq (u u' : True) : u = u'.
-    case u; case u'; reflexivity.
-  Defined.
-
-  Lemma True_eq_singleton (u u' : True) (H : u = u') : H = True_eq _ _.
-    destruct u; destruct H; reflexivity.
-  Defined.
-
-  Lemma True_eq_eq (u u' : True) (H H' : u = u') : H = H'.
-    transitivity (@True_eq u u');
-    destruct_head @eq; subst_body; destruct_head True; reflexivity.
-  Defined.
+  Definition True_singleton u : u = I := eq_sym (contr u).
+  Definition True_eq (u u' : True) : u = u' := center _.
+  Definition True_eq_singleton (u u' : True) (H : u = u') : H = True_eq _ _ := center _.
+  Definition True_eq_eq (u u' : True) (H H' : u = u') : H = H' := center _.
 
   Lemma True_JMeq (u u' : True) : u == u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma True_eqT_eq (u u' v v' : True) : @eq Type (u = u') (v = v').
-    destruct_head True; reflexivity.
-  Defined.
-
-  Lemma True_eqS_eq (u u' v v' : True) : @eq Set (u = u') (v = v').
-    destruct_head True; reflexivity.
-  Defined.
-
-  Lemma True_eqP_eq (u u' v v' : True) : @eq Prop (u = u') (v = v').
-    destruct_head True; reflexivity.
-  Defined.
+  Definition True_eqT_eq (u u' v v' : True) : @eq Type (u = u') (v = v') := contr_eqT _ _ _ _.
+  Definition True_eqS_eq (u u' v v' : True) : @eq Set (u = u') (v = v') := contr_eqS _ _ _ _.
+  Definition True_eqP_eq (u u' v v' : True) : @eq Prop (u = u') (v = v') := contr_eqP _ _ _ _.
 
   Lemma True_eq_JMeq (u u' v v' : True) (H : u = u') (H' : v = v') : H == H'.
     destruct_head @eq; destruct_head True; reflexivity.
   Defined.
 
-  Lemma False_eq (a b : False) : a = b.
-    destruct a.
+  Global Instance FalseIsHProp : IsHProp False.
+  Proof.
+    intros [].
   Defined.
+
+  Definition False_eq (a b : False) : a = b := center _.
 
   Lemma False_JMeql (a : False) T (b : T) : a == b.
     destruct a.
@@ -1042,46 +1143,32 @@ Section True.
 End True.
 
 Section unit.
-  Lemma unit_singleton (u : unit) : u = tt.
-    case u; reflexivity.
-  Defined.
+  Global Instance unit_contr : Contr unit
+    := @Build_Contr unit tt (fun x => match x with tt => eq_refl end).
 
-  Lemma unit_eq (u u' : unit) : u = u'.
-    case u; case u'; reflexivity.
-  Defined.
-
-  Lemma unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _.
-    destruct u; destruct H; reflexivity.
-  Defined.
-
-  Lemma unit_eq_eq (u u' : unit) (H H' : u = u') : H = H'.
-    transitivity (@unit_eq u u');
-    destruct_head @eq; subst_body; destruct_head unit; reflexivity.
-  Defined.
+  Definition unit_singleton u : u = tt := eq_sym (contr u).
+  Definition unit_eq (u u' : unit) : u = u' := center _.
+  Definition unit_eq_singleton (u u' : unit) (H : u = u') : H = unit_eq _ _ := center _.
+  Definition unit_eq_eq (u u' : unit) (H H' : u = u') : H = H' := center _.
 
   Lemma unit_JMeq (u u' : unit) : u == u'.
     case u; case u'; reflexivity.
   Defined.
 
-  Lemma unit_eqT_eq (u u' v v' : unit) : @eq Type (u = u') (v = v').
-    destruct_head unit; reflexivity.
-  Defined.
-
-  Lemma unit_eqS_eq (u u' v v' : unit) : @eq Set (u = u') (v = v').
-    destruct_head unit; reflexivity.
-  Defined.
-
-  Lemma unit_eqP_eq (u u' v v' : unit) : @eq Prop (u = u') (v = v').
-    destruct_head unit; reflexivity.
-  Defined.
+  Definition unit_eqT_eq (u u' v v' : unit) : @eq Type (u = u') (v = v') := contr_eqT _ _ _ _.
+  Definition unit_eqS_eq (u u' v v' : unit) : @eq Set (u = u') (v = v') := contr_eqS _ _ _ _.
+  Definition unit_eqP_eq (u u' v v' : unit) : @eq Prop (u = u') (v = v') := contr_eqP _ _ _ _.
 
   Lemma unit_eq_JMeq (u u' v v' : unit) (H : u = u') (H' : v = v') : H == H'.
     destruct_head @eq; destruct_head unit; reflexivity.
   Defined.
 
-  Lemma Empty_set_eq (a b : Empty_set) : a = b.
-    destruct a.
+  Global Instance Empty_setIsHProp : IsHProp Empty_set.
+  Proof.
+    intros [].
   Defined.
+
+  Definition Empty_set_eq (a b : Empty_set) : a = b := center _.
 
   Lemma Empty_set_JMeql (a : Empty_set) T (b : T) : a == b.
     destruct a.
@@ -1117,3 +1204,6 @@ Hint Extern 0 unit => constructor.
 Hint Extern 0 (@eq Empty_set _ _) => apply Empty_set_eq.
 Hint Extern 0 (@JMeq Empty_set _ _ _) => apply Empty_set_JMeql.
 Hint Extern 0 (@JMeq _ _ Empty_set _) => apply Empty_set_JMeqr.
+
+(* The following makes Examples.v slower by about a minute *)
+(* Hint Extern 0 (@eq _ _ _) => try solve [ refine (center _) ]. *)

@@ -24,6 +24,9 @@ Reserved Infix "○" (at level 40, left associativity).
 Reserved Infix "∘" (at level 40, left associativity).
 Reserved Infix "∘₀" (at level 40, left associativity).
 Reserved Infix "∘₁" (at level 40, left associativity).
+Reserved Infix "∘'" (at level 40, left associativity).
+Reserved Infix "∘₀'" (at level 40, left associativity).
+Reserved Infix "∘₁'" (at level 40, left associativity).
 
 Reserved Notation "x ~> y" (at level 99, right associativity, y at level 200).
 
@@ -44,6 +47,8 @@ Reserved Notation "F ⟨ c , - ⟩" (at level 70, no associativity).
 Reserved Notation "F ⟨ - , d ⟩" (at level 70, no associativity).
 Reserved Notation "F ₀" (at level 10, no associativity).
 Reserved Notation "F ₁" (at level 10, no associativity).
+Reserved Notation "F ₀ x" (at level 10, no associativity).
+Reserved Notation "F ₁ m" (at level 10, no associativity).
 
 (* Forced by the notation in Program *)
 Reserved Notation "[ x ]" (at level 0, x at level 200).
