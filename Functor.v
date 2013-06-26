@@ -42,9 +42,6 @@ Section Functor.
     }.
 End Functor.
 
-Notation "F ₀" := (ObjectOf F) : object_scope.
-Notation "F ₁" := (MorphismOf F) : morphism_scope.
-
 Bind Scope functor_scope with Functor.
 
 Create HintDb functor discriminated.
@@ -55,6 +52,9 @@ Arguments MorphismOf [C%category] [D%category] F%functor [s%object d%object] m%m
 
 Arguments FCompositionOf [C D] F _ _ _ _ _ : rename.
 Arguments FIdentityOf [C D] F _ : rename.
+
+Notation "F ₀ x" := (ObjectOf F x) : object_scope.
+Notation "F ₁ m" := (MorphismOf F m) : morphism_scope.
 
 Hint Resolve @FCompositionOf @FIdentityOf : category functor.
 Hint Rewrite @FIdentityOf : category.
