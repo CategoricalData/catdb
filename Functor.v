@@ -232,33 +232,31 @@ Section FunctorComposition.
   Variable G : Functor D E.
   Variable F : Functor C D.
 
-  Let CObjectOf := fun c => G (F c).
-  Let CMorphismOf s d (m : Morphism C s d) := MorphismOf G (MorphismOf F m).
+  Local Notation CObjectOf c := (G (F c)).
+  Local Notation CMorphismOf s d m := (MorphismOf G (MorphismOf F (s := s) (d := d) m)).
   Definition ComposeFunctors_FCompositionOf s d d' (m1 : Morphism C s d) (m2 : Morphism C d d')
-  : CMorphismOf _ _ (m2 ∘ m1) = CMorphismOf _ _ m2 ∘ CMorphismOf _ _ m1
-    := match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
-         | eq_refl =>
-           match FCompositionOf F _ _ _ m1 m2 in (_ = y)
-                 return (CMorphismOf _ _ (m2 ∘ m1) = MorphismOf G y)
-           with
-             | eq_refl => eq_refl
-           end
-       end.
-  Global Arguments ComposeFunctors_FCompositionOf / .
-  Global Opaque ComposeFunctors_FCompositionOf.
+  : CMorphismOf _ _ (m2 ∘ m1) = CMorphismOf _ _ m2 ∘ CMorphismOf _ _ m1.
+    exact match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
+            | eq_refl =>
+              match FCompositionOf F _ _ _ m1 m2 in (_ = y)
+                    return (CMorphismOf _ _ (m2 ∘ m1) = MorphismOf G y)
+              with
+                | eq_refl => eq_refl
+              end
+          end.
+  Qed.
 
   Definition ComposeFunctors_FIdentityOf x
-  : CMorphismOf _ _ (Identity x) = Identity (CObjectOf x)
-    := match FIdentityOf G (F x) with
-         | eq_refl =>
-           match FIdentityOf F x in (_ = y)
-                 return (CMorphismOf _ _ (Identity x) = MorphismOf G y)
-           with
-             | eq_refl => eq_refl
-           end
+  : CMorphismOf _ _ (Identity x) = Identity (CObjectOf x).
+    exact match FIdentityOf G (F x) with
+            | eq_refl =>
+              match FIdentityOf F x in (_ = y)
+                    return (CMorphismOf _ _ (Identity x) = MorphismOf G y)
+              with
+                | eq_refl => eq_refl
+              end
        end.
-  Global Arguments ComposeFunctors_FIdentityOf / .
-  Global Opaque ComposeFunctors_FIdentityOf.
+  Qed.
 
   Definition ComposeFunctors' : Functor C E
     := Build_Functor C E
@@ -289,18 +287,12 @@ Section FunctorComposition.
                             end
                         end).
 
-  Hint Rewrite @FCompositionOf : functor.
-
-  Definition ComposeFunctors : Functor C E.
-    refine (Build_Functor C E
-                          (fun c => G (F c))
-                          (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-                          _
-                          _);
-    abstract (
-        intros; autorewrite with functor; reflexivity
-      ).
-  Defined.
+  Definition ComposeFunctors : Functor C E
+    := Build_Functor C E
+                     (fun c => G (F c))
+                     (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
+                     ComposeFunctors_FCompositionOf
+                     ComposeFunctors_FIdentityOf.
 End FunctorComposition.
 
 Infix "∘" := ComposeFunctors : functor_scope.
