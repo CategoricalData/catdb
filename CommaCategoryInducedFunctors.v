@@ -173,73 +173,9 @@ Section SliceCategoryInducedFunctor.
 End SliceCategoryInducedFunctor.
 
 Section CatOverInducedFunctor.
-  (* Let's do this from scratch so we get better polymorphism *)
-  Let C := Cat.
-  (*Local Opaque Cat.*)
+  Definition CatOverInducedFunctor a a' (m : Morphism Cat a a') : Functor (Cat / a) (Cat / a')
+    := SliceCategoryOverInducedFunctor Cat a a' m.
 
-  Let CatOverInducedFunctor_ObjectOf a a' (m : Morphism C a a') : C / a -> C / a'.
-    refine (fun x => existT (fun αβ : _ * unit => Morphism C (fst αβ) a')
-                            (projT1 x)
-                            _ :
-                       CommaCategory_ObjectT (IdentityFunctor C) (FunctorFromTerminal C a')).
-    functor_simpl_abstract_trailing_props (Compose m (projT2 x)).
-  Defined.
-  Let OverCatInducedFunctor_ObjectOf a a' (m : Morphism C a' a) : a \ C -> a' \ C.
-    refine (fun x => existT (fun αβ : unit * _ => Morphism C a' (snd αβ))
-                            (projT1 x)
-                            _ :
-                       CommaCategory_ObjectT (FunctorFromTerminal C a') (IdentityFunctor C)).
-    functor_simpl_abstract_trailing_props (Compose (projT2 x) m).
-  Defined.
-
-  Let CatOverInducedFunctor_MorphismOf a a' (m : Morphism C a a') s d (m0 : Morphism (C / a) s d) :
-    Morphism (C / a') (@CatOverInducedFunctor_ObjectOf _ _ m s) (@CatOverInducedFunctor_ObjectOf _ _ m d).
-    refine (_ : CommaCategory_MorphismT _ _).
-    exists (projT1 m0).
-      subst_body; simpl in *; clear.
-    abstract anihilate.
-  Defined.
-  Let OverCatInducedFunctor_MorphismOf a a' (m : Morphism C a' a) s d (m0 : Morphism (a \ C) s d) :
-    Morphism (a' \ C) (@OverCatInducedFunctor_ObjectOf _ _ m s) (@OverCatInducedFunctor_ObjectOf _ _ m d).
-    refine (_ : CommaCategory_MorphismT _ _).
-    exists (projT1 m0);
-      subst_body; simpl in *; clear.
-    abstract anihilate.
-  Defined.
-
-  Local Opaque Cat.
-  Let CatOverInducedFunctor'' a a' (m : Morphism C a a') : Functor (C / a) (C / a').
-    refine (Build_Functor (C / a) (C / a')
-                                     (@CatOverInducedFunctor_ObjectOf _ _ m)
-                                     (@CatOverInducedFunctor_MorphismOf _ _ m)
-                                     _
-                                     _
-           );
-    subst_body; simpl; clear;
-    (* admit. *)
-    abstract anihilate.
-  Defined.
-  Let OverCatInducedFunctor'' a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C).
-    refine (Build_Functor (a \ C) (a' \ C)
-                                     (@OverCatInducedFunctor_ObjectOf _ _ m)
-                                     (@OverCatInducedFunctor_MorphismOf _ _ m)
-                                     _
-                                     _
-           );
-    subst_body; simpl; clear;
-    (* admit. *) abstract anihilate.
-  Defined.
-
-  Let CatOverInducedFunctor''' a a' (m : Morphism C a a') : Functor (C / a) (C / a').
-    simpl_definition_by_tac_and_exact (@CatOverInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
-  Defined.
-  Let OverCatInducedFunctor''' a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C).
-    simpl_definition_by_tac_and_exact (@OverCatInducedFunctor'' _ _ m) ltac:(subst_body; eta_red).
-  Defined.
-
-  Definition CatOverInducedFunctor a a' (m : Morphism C a a') : Functor (C / a) (C / a')
-    := Eval cbv beta iota zeta delta [CatOverInducedFunctor'''] in @CatOverInducedFunctor''' _ _ m.
-  Definition OverCatInducedFunctor a a' (m : Morphism C a' a) : Functor (a \ C) (a' \ C)
-    := Eval cbv beta iota zeta delta [OverCatInducedFunctor'''] in @OverCatInducedFunctor''' _ _ m.
-  Local Transparent Cat.
+  Definition OverCatInducedFunctor a a' (m : Morphism Cat a' a) : Functor (a \ Cat) (a' \ Cat)
+    := CosliceCategoryOverInducedFunctor Cat a a' m.
 End CatOverInducedFunctor.

@@ -129,7 +129,8 @@ Section disc.
       _
       _
     );
-    t_dec.
+    admit.
+    (* t_dec.
     match goal with
       | [ H : if ?eq_dec ?a ?b then unit else Empty_set |- _ ] => cut (JMeq H tt); [ intro | destruct_eq_dec eq_dec a b ]
     end.
@@ -200,7 +201,7 @@ Section disc.
           match m return (if s x x0 then unit else Empty_set) with
           end
        end x1)). *)
-    admit.
+    admit. *)
   Defined.
 
   Definition DiscreteSetFunctorDec : Functor SetCatDec CatDec.
@@ -246,7 +247,24 @@ Section Adjoints.
     try abstract trivial;
       simpl; intros.
     exists (fun f => (InducedDiscreteFunctorDec _ f (projT2 A)));
-      t.
+      (*t.
+      unfold InducedDiscreteFunctorDec_MorphismOf.
+      destruct A; simpl in *.
+      unfold eq_rect_r.
+      unfold eq_rect.
+      unfold eq_sym.
+      apply JMeq_eq.
+      revert m.
+      destruct A'; simpl in *.
+      clear.
+      destruct x.
+      simpl in *.
+      clear.
+      destruct x1; simpl in *; clear.
+generalize dependent (s0 s d).
+      match goal with
+        | [ H : if ?x then _ else _ |- _ ] => destruct x
+      end. *)
     admit.
   Defined.
 End Adjoints.

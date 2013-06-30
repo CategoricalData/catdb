@@ -88,9 +88,8 @@ Section Law1.
     match goal with
       | [ |- NaturalTransformation ?F ?G ] =>
         refine (Build_NaturalTransformation F G
-                                                       (fun _ => m)
-                                                       _
-               )
+                                            (fun _ => m)
+                                            _)
     end;
       simpl;
       abstract (
@@ -308,13 +307,13 @@ Section Law4.
       repeat (simpl;
         match goal with
           | _ => reflexivity
-          | _ => rewrite FCompositionOf
-          | _ => rewrite FIdentityOf
-          | _ => rewrite LeftIdentity
-          | _ => rewrite RightIdentity
-          | _ => try_associativity ltac:(rewrite Commutes)
-          | _ => repeat rewrite Associativity; apply f_equal
-          | _ => repeat rewrite <- Associativity; apply f_equal2; try reflexivity; []
+          | _ => rewrite !FCompositionOf
+          | _ => rewrite !FIdentityOf
+          | _ => rewrite !LeftIdentity
+          | _ => rewrite !RightIdentity
+          | _ => try_associativity ltac:(rewrite !Commutes)
+          | _ => rewrite ?Associativity; apply f_equal
+          | _ => rewrite <- ?Associativity; apply f_equal2; try reflexivity; []
         end).
 
     Definition ExponentialLaw4Functor_ObjectOf : ((D ^ C1) ^ C2)%category -> (D ^ (C1 * C2))%category.
@@ -369,13 +368,13 @@ Section Law4.
       repeat (simpl;
         match goal with
           | _ => reflexivity
-          | _ => rewrite <- FCompositionOf
-          | _ => rewrite FIdentityOf
-          | _ => rewrite LeftIdentity
-          | _ => rewrite RightIdentity
-          | _ => try_associativity ltac:(rewrite Commutes)
-          | _ => repeat rewrite Associativity; apply f_equal
-          | _ => repeat rewrite <- Associativity; apply f_equal2; try reflexivity; []
+          | _ => rewrite <- !FCompositionOf
+          | _ => rewrite !FIdentityOf
+          | _ => rewrite !LeftIdentity
+          | _ => rewrite !RightIdentity
+          | _ => try_associativity ltac:(rewrite !Commutes)
+          | _ => rewrite ?Associativity; apply f_equal
+          | _ => rewrite <- ?Associativity; apply f_equal2; try reflexivity; []
         end).
 
 
@@ -464,17 +463,18 @@ Section Law4.
     abstract (repeat match goal with
                        | _ => reflexivity
                        | _ => split
-                       | _ => progress (simpl; intros; trivial)
-                       | _ => progress repeat subst
-                       | _ => progress destruct_head_hnf @prod
-                       | _ => progress JMeq_eq
-                       | _ => progress simpl_eq
-                       | _ => progress apply Functor_eq
-                       | _ => progress apply NaturalTransformation_JMeq
-                       | _ => progress apply f_equal
-                       | _ => rewrite <- FCompositionOf
-                       | _ => rewrite FIdentityOf
-                       | _ => rsimplify_morphisms
+                       | _ => intro
+                       | _ => progress (simpl in *; intros; subst; trivial)
+                       | _ => apply eq_JMeq
+                       | _ => apply Functor_eq
+                       | _ => apply NaturalTransformation_eq
+                       | _ => apply NaturalTransformation_JMeq
+                       | _ => progress destruct_head prod
+
+                       | _ => rewrite <- !FCompositionOf
+                       | _ => rewrite !FIdentityOf
+                       | _ => rewrite !LeftIdentity
+                       | _ => rewrite !RightIdentity
                      end).
   Qed.
 End Law4.
