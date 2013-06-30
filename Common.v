@@ -502,9 +502,14 @@ Ltac curry H := let HT := type of H in
     | ?H' => H
   end.
 
-Lemma fg_equal A B (f g : A -> B) : f = g -> forall x, f x = g x.
-  intros; repeat subst; reflexivity.
-Qed.
+Monomorphic Definition equal_f_dep
+: forall A B (f g : forall a : A, B a), f = g -> forall x : A, f x = g x
+  := fun A B f g H x => eq_ind_r (fun f0 => f0 x = g x) eq_refl H.
+Monomorphic Definition equal_f
+: forall A B (f g : A -> B), f = g -> forall x : A, f x = g x
+  := fun A B => @equal_f_dep _ _.
+
+Notation fg_equal := equal_f.
 
 Section telescope.
   Inductive telescope :=
