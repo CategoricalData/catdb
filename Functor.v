@@ -244,7 +244,7 @@ Section FunctorComposition.
                 | eq_refl => eq_refl
               end
           end.
-  Qed.
+  Defined.
 
   Definition ComposeFunctors_FIdentityOf x
   : CMorphismOf _ _ (Identity x) = Identity (CObjectOf x).
@@ -256,7 +256,9 @@ Section FunctorComposition.
                 | eq_refl => eq_refl
               end
        end.
-  Qed.
+  Defined.
+
+  Global Opaque ComposeFunctors_FCompositionOf ComposeFunctors_FIdentityOf.
 
   Definition ComposeFunctors' : Functor C E
     := Build_Functor C E
