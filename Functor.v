@@ -233,61 +233,29 @@ Section FunctorComposition.
   Variable F : Functor C D.
 
   Local Notation CObjectOf c := (G (F c)).
-  Local Notation CMorphismOf s d m := (MorphismOf G (MorphismOf F (s := s) (d := d) m)).
-  Definition ComposeFunctors_FCompositionOf s d d' (m1 : Morphism C s d) (m2 : Morphism C d d')
-  : CMorphismOf _ _ (m2 ∘ m1) = CMorphismOf _ _ m2 ∘ CMorphismOf _ _ m1.
-    exact match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
-            | eq_refl =>
-              match FCompositionOf F _ _ _ m1 m2 in (_ = y)
-                    return (CMorphismOf _ _ (m2 ∘ m1) = MorphismOf G y)
-              with
-                | eq_refl => eq_refl
-              end
-          end.
+  Local Notation CMorphismOf m := (MorphismOf G (MorphismOf F m)).
+  (* We use [rewrite <-] because the resulting [match]es look better. *)
+  Let ComposeFunctors_FCompositionOf' s d d' (m1 : Morphism C s d) (m2 : Morphism C d d')
+  : CMorphismOf (m2 ∘ m1) = CMorphismOf m2 ∘ CMorphismOf m1.
+  Proof.
+    rewrite <- !FCompositionOf.
+    reflexivity.
   Defined.
+  Definition ComposeFunctors_FCompositionOf s d d' m1 m2
+    := Eval cbv beta iota zeta delta [ComposeFunctors_FCompositionOf' eq_rect eq_ind] in
+        @ComposeFunctors_FCompositionOf' s d d' m1 m2.
 
-  Definition ComposeFunctors_FIdentityOf x
-  : CMorphismOf _ _ (Identity x) = Identity (CObjectOf x).
-    exact match FIdentityOf G (F x) with
-            | eq_refl =>
-              match FIdentityOf F x in (_ = y)
-                    return (CMorphismOf _ _ (Identity x) = MorphismOf G y)
-              with
-                | eq_refl => eq_refl
-              end
-       end.
+  Let ComposeFunctors_FIdentityOf' x
+  : CMorphismOf (Identity x) = Identity (CObjectOf x).
+  Proof.
+    rewrite <- !FIdentityOf.
+    reflexivity.
   Defined.
+  Definition ComposeFunctors_FIdentityOf x
+    := Eval cbv beta iota zeta delta [ComposeFunctors_FIdentityOf' eq_rect eq_ind] in
+        @ComposeFunctors_FIdentityOf' x.
 
   Global Opaque ComposeFunctors_FCompositionOf ComposeFunctors_FIdentityOf.
-
-  Definition ComposeFunctors' : Functor C E
-    := Build_Functor C E
-                     (fun c => G (F c))
-                     (fun _ _ m => G.(MorphismOf) (F.(MorphismOf) m))
-                     (fun _ _ _ m1 m2 =>
-                        match FCompositionOf G _ _ _ (MorphismOf F m1) (MorphismOf F m2) with
-                          | eq_refl =>
-                            match
-                              FCompositionOf F _ _ _ m1 m2 in (_ = y)
-                              return
-                              (MorphismOf G (MorphismOf F (Compose m2 m1)) =
-                               MorphismOf G y)
-                            with
-                              | eq_refl => eq_refl
-                            end
-                        end)
-                     (fun x =>
-                        match FIdentityOf G (F x) with
-                          | eq_refl =>
-                            match
-                              FIdentityOf F x in (_ = y)
-                              return
-                              (MorphismOf G (MorphismOf F (Identity x)) =
-                               MorphismOf G y)
-                            with
-                              | eq_refl => eq_refl
-                            end
-                        end).
 
   Definition ComposeFunctors : Functor C E
     := Build_Functor C E
@@ -308,6 +276,7 @@ Section IdentityFunctor.
                      (fun _ _ _ _ _ => eq_refl)
                      (fun _ => eq_refl).
 
+  (** We define some useful generalizations of the identity functor. *)
   Definition IdentityFunctor'
              objC
              morC
@@ -338,18 +307,34 @@ Section IdentityFunctor.
   Defined.
 End IdentityFunctor.
 
+Global Arguments ComposeFunctors_FCompositionOf / .
+Global Arguments ComposeFunctors_FIdentityOf / .
+
+Local Ltac functor_t :=
+  destruct_head Functor;
+  expand; simpl;
+  f_equal;
+  repeat (apply functional_extensionality_dep; intro);
+  destruct_eq_in_match;
+  try reflexivity.
+
 Section IdentityFunctorLemmas.
   Variable C : Category.
   Variable D : Category.
 
   Local Open Scope functor_scope.
 
+  Local Transparent ComposeFunctors_FIdentityOf.
+  Local Transparent ComposeFunctors_FCompositionOf.
+  Local Arguments ComposeFunctors_FCompositionOf / .
+  Local Arguments ComposeFunctors_FIdentityOf / .
+
   Lemma LeftIdentityFunctor (F : Functor D C) : IdentityFunctor _ ∘ F = F.
-    functor_eq.
+    functor_t.
   Qed.
 
   Lemma RightIdentityFunctor (F : Functor C D) : F ∘ IdentityFunctor _ = F.
-    functor_eq.
+    functor_t.
   Qed.
 End IdentityFunctorLemmas.
 
@@ -365,10 +350,15 @@ Section FunctorCompositionLemmas.
 
   Local Open Scope functor_scope.
 
+  Local Transparent ComposeFunctors_FCompositionOf.
+  Local Transparent ComposeFunctors_FIdentityOf.
+  Local Arguments ComposeFunctors_FCompositionOf / .
+  Local Arguments ComposeFunctors_FIdentityOf / .
+
   Lemma ComposeFunctorsAssociativity (F : Functor B C) (G : Functor C D) (H : Functor D E)
   : (H ∘ G) ∘ F = H ∘ (G ∘ F).
   Proof.
-    functor_eq.
+    functor_t.
   Qed.
 End FunctorCompositionLemmas.
 

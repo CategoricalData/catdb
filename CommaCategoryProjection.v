@@ -9,6 +9,7 @@ Set Asymmetric Patterns.
 
 Set Universe Polymorphism.
 
+Local Open Scope functor_scope.
 Local Open Scope category_scope.
 
 Section CommaCategory.
@@ -29,32 +30,30 @@ End CommaCategory.
 Section SliceCategory.
   Variable A : Category.
 
-  Local Arguments ComposeFunctors' / .
+  Local Arguments ComposeFunctors / .
+  Local Arguments ComposeFunctors_FCompositionOf / .
+  Local Arguments ComposeFunctors_FIdentityOf / .
+  Local Transparent ComposeFunctors_FCompositionOf.
+  Local Transparent ComposeFunctors_FIdentityOf.
 
   Definition ArrowCategoryProjection : Functor (ArrowCategory A) A
-    := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
+    := Eval simpl in fst_Functor ∘ CommaCategoryProjection _ (IdentityFunctor A).
 
   Definition SliceCategoryOverProjection (a : A) : Functor (A / a) A
-    := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection (IdentityFunctor A) _).
+    := Eval simpl in fst_Functor ∘ CommaCategoryProjection (IdentityFunctor A) _.
 
   Definition CosliceCategoryOverProjection (a : A) : Functor (a \ A) A
-    := ComposeFunctors' snd_Functor (CommaCategoryProjection _ (IdentityFunctor A)).
+    := Eval simpl in snd_Functor ∘ CommaCategoryProjection _ (IdentityFunctor A).
 
   Section Slice_Coslice.
     Variable C : Category.
     Variable a : C.
     Variable S : Functor A C.
 
-    Section Slice.
-      Definition SliceCategoryProjection : Functor (S ↓ a) A
-        := Eval simpl in ComposeFunctors' fst_Functor (CommaCategoryProjection S (FunctorFromTerminal C a)).
-    End Slice.
+    Definition SliceCategoryProjection : Functor (S ↓ a) A
+      := Eval simpl in fst_Functor ∘ CommaCategoryProjection S (FunctorFromTerminal C a).
 
-    Section Coslice.
-      Definition CosliceCategoryProjection : Functor (a ↓ S) A
-        := Eval simpl in ComposeFunctors' snd_Functor (CommaCategoryProjection (FunctorFromTerminal C a) S).
-      Check CosliceCategoryProjection.
-      Eval simpl in Functor (a ↓ S) A.
-    End Coslice.
+    Definition CosliceCategoryProjection : Functor (a ↓ S) A
+      := Eval simpl in snd_Functor ∘ CommaCategoryProjection (FunctorFromTerminal C a) S.
   End Slice_Coslice.
 End SliceCategory.
