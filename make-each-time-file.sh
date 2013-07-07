@@ -1,7 +1,8 @@
 #!/bin/bash
 
-NEW_FILE="$1"
-OLD_FILE="$2"
+MAKE="$1"
+NEW_FILE="$2"
+OLD_FILE="$3"
 
 SHELF_NAME="compare-times-shelf"
 
@@ -12,7 +13,7 @@ if [ ! -z "$OLD_FILE" ]; then
     #hg shelve --all --name $SHELF_NAME
     hg diff > $SHELF_NAME && hg revert -a
     make clean
-    make timed 2>&1 | tee "$OLD_FILE"
+    $MAKE TIMED=1 -k 2>&1 | tee "$OLD_FILE"
 
 
     # make the current version
@@ -25,9 +26,9 @@ if [ ! -z "$OLD_FILE" ]; then
 	fi
 	hg import --no-commit $SHELF_NAME && mv $SHELF_NAME "$SHELF_NAME-$(date | base64).bak"
 	make clean
-	make timed 2>&1 | tee "$NEW_FILE"
+	$MAKE TIMED=1 -k 2>&1 | tee "$NEW_FILE"
     fi
 else
     make clean
-    make timed 2>&1 | tee "$NEW_FILE"
+    $MAKE TIMED=1 -k 2>&1 | tee "$NEW_FILE"
 fi
