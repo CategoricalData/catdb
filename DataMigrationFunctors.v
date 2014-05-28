@@ -245,7 +245,7 @@ Section DataMigrationFunctors.
   Local Arguments PullbackAlongFunctor / .
   Eval simpl in PullbackAlongFunctor.
 
-  Section Π.
+  Section PΠ.
     Local Notation "A ↓ F" := (CosliceCategory A F).
     (*Local Notation "C / c" := (@SliceCategoryOver _ _ C c).*)
 
@@ -281,7 +281,7 @@ Section DataMigrationFunctors.
       (* Define [ɣ ○ (π^F d)] *)
       Definition RightPushforwardAlong_pre_pre_Functor (g : S ^ C) (d : D) : Functor (d ↓ F) S.
         refine (ComposeFunctors (ComposeFunctors g (projT2 (CosliceCategoryProjectionFunctor C D F d))) _).
-        unfold CosliceCategory, SliceCategory_Functor, Object; simpl.
+        unfold CosliceCategory, CosliceCategoryProjectionFunctor, Object; simpl.
         refine (CommaCategoryInducedFunctor (s := (_, F)) (d := (_, F)) (_, IdentityNaturalTransformation F)).
         simpl.
         match goal with
@@ -298,7 +298,7 @@ Section DataMigrationFunctors.
 
       Let Index2Cat d := d ↓ F.
 
-      Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ _ Index2Cat _ D).
+      Local Notation "'CAT' ⇑ D" := (@LaxCosliceCategory _ Index2Cat D).
 
       (*Let HasLimits' (C0 : CAT ⇑ S) : Limit (projT2 C0)
         := HasLimits (projT2 C0). *)
@@ -311,12 +311,11 @@ Section DataMigrationFunctors.
 
       Let RightPushforwardAlong_pre_curried_MorphismOf_pre g d g' d' (m : Morphism (S ^ C) g g') (m' : Morphism D d d') :
         Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf_pre g d) (RightPushforwardAlong_pre_curried_ObjectOf_pre g' d').
-        constructor.
-        exists (tt, CosliceCategoryMorphismInducedFunctor F _ _ m').
+        exists (CosliceCategoryMorphismInducedFunctor F _ _ m').
         subst_body; simpl in *;
         unfold RightPushforwardAlong_pre_pre_Functor;
         simpl;
-        unfold Object, Morphism, GeneralizeFunctor.
+        unfold Object, Morphism.
         match goal with
           | [ |- NaturalTransformation ?F ?G ] =>
             let F' := eval hnf in F in let G' := eval hnf in G in change (NaturalTransformation F' G')
@@ -332,7 +331,7 @@ Section DataMigrationFunctors.
         Morphism (CAT ⇑ S) (RightPushforwardAlong_pre_curried_ObjectOf gd) (RightPushforwardAlong_pre_curried_ObjectOf g'd')
         := @RightPushforwardAlong_pre_curried_MorphismOf_pre (fst gd) (snd gd) (fst g'd') (snd g'd') (fst m) (snd m).
 
-      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : Functor C S * LSObject D)
+      Lemma RightPushforwardAlong_pre_curried_FCompositionOf (s d d' : Functor C S * Object D)
             (m1 : Morphism ((S ^ C)%functor * D) s d)
             (m2 : Morphism ((S ^ C)%functor * D) d d') :
         RightPushforwardAlong_pre_curried_MorphismOf (Compose m2 m1) =
@@ -343,6 +342,12 @@ Section DataMigrationFunctors.
       (*(* for speed *)
       Admitted. *)
         Time pre_anihilate.
+        (*Time match goal with
+          | [ |- {| LCCM_T := {| Commutes := ?pf1 |} |} = {| LCCM_T := {| Commutes := ?pf2 |} |} ] => generalize pf1; intro; generalize pf2; intro
+        end.
+        Set Printing All.
+
+        Time nt_hideProofs.*)
         Time anihilate.
       Qed.
 
