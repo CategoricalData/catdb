@@ -18,9 +18,9 @@ Local Ltac pre_anihilate :=
   simpl;
   subst_body;
   clear;
-  nt_hideProofs;
+  (*nt_hideProofs;*)
   unfold NTComposeF, NTComposeT; simpl;
-  nt_hideProofs;
+  (*nt_hideProofs;*)
   clear; simpl in *.
 
 (* TODO(jgross): Check if [simpl in *] would make this faster. *)
